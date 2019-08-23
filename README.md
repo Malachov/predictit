@@ -1,5 +1,5 @@
 # predictit
-Library/framework for making predictions. Choose best of 20 models (ARIMA, regressions, LSTM...). Preprocess data and chose optimal parameters of predictions.
+Library/framework for making predictions. Choose best of 20 models (ARIMA, regressions, LSTM...) from libraries like statsmodels, sci-kit, tensorflow and some own models. Library also automaticcaly preprocess data and chose optimal parameters of predictions.
 
 ## Output
 Output is plotly interactive graph or deploying to database.
