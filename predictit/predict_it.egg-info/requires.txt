@@ -1,0 +1,15 @@
+SQLAlchemy
+pandas
+pyodbc
+Keras
+sklearn_extensions
+tensorflow
+prettytable
+matplotlib
+plotly
+cufflinks
+numpy
+scipy
+seaborn
+statsmodels
+scikit_learn

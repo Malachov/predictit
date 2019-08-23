@@ -1,0 +1,20 @@
+Metadata-Version: 1.1
+Name: predict-it
+Version: 0.1
+Summary: Library/framework for making predictions.
+Home-page: https://github.com/Malachov/predict-it
+Author: Daniel Malachov
+Author-email: malachovd@seznam.cz
+License: mit
+Download-URL: https://github.com/Malachov/predict-it/archive/0.1.tar.gz
+Description:  Automatically choose best of 20 models (ARIMA, regressions, LSTM...). Preprocess data and chose optimal parameters of predictions.
+Platform: any
+Classifier: Programming Language :: Python
+Classifier: Development Status :: 2 - Pre-Alpha
+Classifier: Natural Language :: English
+Classifier: Environment :: Other Environment
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Classifier: Topic :: Software Development :: Libraries :: Application Frameworks
