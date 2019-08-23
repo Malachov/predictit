@@ -24,7 +24,7 @@ predictit.main.predict()  # Make prediction od test data
 ```Python
 import predictit
 
-predictit.config.predicts = 30  # Create 30 predictions
+predictit.config.predicts = 12  # Create 30 predictions
 predictit.config.data_source = 'csv'  # Define that we load data from CSV
 predictit.config.csv_adress = r'E:\VSCODE\Diplomka\test_data\daily-minimum-temperatures.csv'  # Load CSV file with data
 predictit.config.datalength = 1000  # Consider only last 1000 data points  
@@ -36,25 +36,27 @@ predictit.config.other_columns = 0  # Whether use other columns or not
 
 # Chose models that will be computed
 used_models = {
-            "AR (Autoregression)": models.ar,
+            "AR (Autoregression)": predictit.models.ar,
 
-            "ARIMA (Autoregression integrated moving average)": models.arima,
+            "ARIMA (Autoregression integrated moving average)": predictit.models.arima,
 
-            "Autoregressive Linear neural unit": models.autoreg_LNU,
-            "Conjugate gradient": models.cg,
+            "Autoregressive Linear neural unit": predictit.models.autoreg_LNU,
+            "Conjugate gradient": predictit.models.cg,
 
-            "Extreme learning machine": models.elm,
+            "Extreme learning machine": predictit.models.elm,
 
-            "LSTM": models.lstm,
+            "Sklearn universal": predictit.models.sklearn_universal,
 
-            "Sklearn universal": models.sklearn_universal,
-
-            "Bayes Ridge Regression": models.regression_bayes_ridge,
-            "Hubber regression": models.regression_hubber,
-            "Lasso Regression": models.regression_lasso,
+            "Bayes Ridge Regression": predictit.models.regression_bayes_ridge,
+            "Hubber regression": predictit.models.regression_hubber,
+            "Lasso Regression": predictit.models.regression_lasso,
            }
            
 # Define parameters of models
+
+n_steps_in = 50  # How many lagged values in models
+output_shape = 'batch'  # Whether batch or one-step models
+
 models_parameters = {
 
 
@@ -67,10 +69,7 @@ models_parameters = {
 
         "Extreme learning machine": {"n_steps_in": 20, "output_shape": 'one_step', "other_columns_lenght": None, "constant": None, "n_hidden": 20, "alpha": 0.3, "rbf_width": 0, "activation_func": 'selu'},
 
-
-        "LSTM": {"n_steps_in": 50, "save": saveit, "already_trained": 0, "epochs": 70, "units":50, "optimizer":'adam', "loss":'mse', "verbose": 1, "activation": 'relu', "timedistributed": 0, "metrics": ['mape']},
-
-        "Sklearn universal": {"n_steps_in": n_steps_in, "output_shape": "one_step", "model": models.default_regressor, "constant": None},
+        "Sklearn universal": {"n_steps_in": n_steps_in, "output_shape": "one_step", "model": predictit.models.default_regressor, "constant": None},
 
         "Bayes Ridge Regression": {"n_steps_in": n_steps_in, "output_shape": output_shape, "other_columns_lenght": None, "constant": None, "alpha_1": 1.e-6, "alpha_2": 1.e-6, "lambda_1": 1.e-6, "lambda_2": 1.e-6},
         "Hubber regression": {"n_steps_in": n_steps_in, "output_shape": output_shape, "other_columns_lenght": None, "constant": None, "epsilon": 1.35, "alpha": 0.0001},
