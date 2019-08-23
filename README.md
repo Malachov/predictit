@@ -18,7 +18,7 @@ pip install predictit
 ```Python
 import predictit
 
-predictit.main.predict()  # Make prediction od test data
+predictions = predictit.main.predict()  # Make prediction on test data
 ```
 ### Example with config
 ```Python
@@ -77,5 +77,5 @@ models_parameters = {
         
         }
         
-predictit.main.predict()
+predictions = predictit.main.predict()
 ```
