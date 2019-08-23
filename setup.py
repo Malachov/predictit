@@ -23,6 +23,7 @@ setup(
     name='predict-it',
     version=predict-it.__version__,
     url='https://github.com/Malachov/predict-it',
+    download_url='https://github.com/Malachov/predict-it/archive/0.1.tar.gz',
     license='mit',
     author='Daniel Malachov',
     install_requires=[],
