@@ -20,7 +20,7 @@ import predictit
 
 predictions = predictit.main.predict()  # Make prediction on test data
 ```
-### Example with config
+### Example with own data from CSV and config
 ```Python
 import predictit
 
