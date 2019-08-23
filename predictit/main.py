@@ -608,3 +608,5 @@ def predict():
                     name='{}. {}'.format(i + 2, next_models_names[i])))
 
         py.plot(fig, filename='predictions.html')
+    
+    return best_model_predicts
