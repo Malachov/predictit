@@ -15,13 +15,13 @@ pip install predictit
 ```
 
 ### Simple example with Pypi
-
+```Python
 import predictit
 
 predictit.main.predict()  # Make prediction od test data
-
+```
 ### Example with config
-
+```Python
 predictit.config.predicts = 30  # Create 30 predictions
 predictit.config.csv_adress = r'E:\VSCODE\Diplomka\test_data\daily-minimum-temperatures.csv'  # Load CSV file with data
 predictit.config.datalength = 1000  # Consider only last 1000 data points  
@@ -76,3 +76,4 @@ models_parameters = {
         }
         
 predictit.main.predict()
+```
