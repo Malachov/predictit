@@ -22,7 +22,10 @@ predictit.main.predict()  # Make prediction od test data
 ```
 ### Example with config
 ```Python
+import predictit
+
 predictit.config.predicts = 30  # Create 30 predictions
+predictit.config.data_source = 'csv'  # Define that we load data from CSV
 predictit.config.csv_adress = r'E:\VSCODE\Diplomka\test_data\daily-minimum-temperatures.csv'  # Load CSV file with data
 predictit.config.datalength = 1000  # Consider only last 1000 data points  
 predictit.config.predicted_columns_names = 'Temp'  # Column name that we want to predict
