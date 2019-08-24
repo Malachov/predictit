@@ -24,7 +24,7 @@ import predictit
 predictit.config.predicts = 12  # Create 12 predictions
 predictit.config.data_source = 'csv'  # Define that we load data from CSV
 predictit.config.csv_adress = r'E:\VSCODE\Diplomka\test_data\daily-minimum-temperatures.csv'  # Load CSV file with data
-predictit.config.save_plot_adress = r'C:\Users\TruTonton\Documents\GitHub''
+predictit.config.save_plot_adress = r'C:\Users\TruTonton\Documents\GitHub'  # Where to save HTML plot
 predictit.config.datalength = 1000  # Consider only last 1000 data points  
 predictit.config.predicted_columns_names = 'Temp'  # Column name that we want to predict
 predictit.config.optimizeit = 0  # Find or not best parameters for models
