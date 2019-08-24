@@ -1,15 +1,11 @@
 # predictit
 Library/framework for making predictions. Choose best of 20 models (ARIMA, regressions, LSTM...) from libraries like statsmodels, sci-kit, tensorflow and some own models. Library also automaticcaly preprocess data and chose optimal parameters of predictions.
-
 ## Output
-Output is plotly interactive graph or deploying to database.
-![Printscreen of output HTML graph](/output_example.png)
+Most common output is plotly interactive graph, deploying to database and list of results.
+Printscreen of graph
+![Printscreen of output HTML graph](https://raw.githubusercontent.com/Malachov/predictit/master/output_example.png)
 
 ## How to use
-Download it. Open config.py. Two possible inputs. CSV or Database. Config is quite clear. Setup usually 1 or 0. Finally run main.py. With config.optimize_it it's pretty time consuming. So firs turn optimize_it off. Find best three models and then optimize. Do not try to optimize LSTM...
-
-You can also download it from Pypi with
-
 ```Python 
 pip install predictit
 ```
@@ -20,13 +16,15 @@ import predictit
 
 predictions = predictit.main.predict()  # Make prediction on test data
 ```
+
 ### Example with own data from CSV and config
 ```Python
 import predictit
 
-predictit.config.predicts = 12  # Create 30 predictions
+predictit.config.predicts = 12  # Create 12 predictions
 predictit.config.data_source = 'csv'  # Define that we load data from CSV
 predictit.config.csv_adress = r'E:\VSCODE\Diplomka\test_data\daily-minimum-temperatures.csv'  # Load CSV file with data
+predictit.config.save_plot_adress = r'C:\Users\TruTonton\Documents\GitHub''
 predictit.config.datalength = 1000  # Consider only last 1000 data points  
 predictit.config.predicted_columns_names = 'Temp'  # Column name that we want to predict
 predictit.config.optimizeit = 0  # Find or not best parameters for models

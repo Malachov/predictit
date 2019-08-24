@@ -607,6 +607,6 @@ def predict():
                     mode='lines',
                     name='{}. {}'.format(i + 2, next_models_names[i])))
 
-        py.plot(fig, filename='predictions.html')
-    
+        py.plot(fig, filename=config.save_plot_adress)
+
     return best_model_predicts
