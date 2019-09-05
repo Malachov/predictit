@@ -550,7 +550,7 @@ def predict():
 
             try:
                 complete_dataframe.index = pd.to_datetime(complete_dataframe.index)
-            except:
+            except Exception as e:
                 complete_dataframe.reset_index(drop=True, inplace=True)
                 pass
 
