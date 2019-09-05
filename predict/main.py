@@ -206,7 +206,7 @@ def predict():
 
     params_everywhere = {"predicts": config.predicts}
 
-    if len(data_shape) > 1: 
+    if len(data_shape) > 1:
         if predicted_column_index or predicted_column_index == 0:
             params_everywhere["predicted_column_index"] = predicted_column_index
 
@@ -300,7 +300,7 @@ def predict():
                     data_all[s] = t[:-config.predicts]
                 else:
                     data_all[s] = t[:, :-config.predicts]
-        else: 
+        else:
             if len(data_shape) == 1:
                 data_for_trimming = data_for_trimming[:-config.predicts]
             else:
@@ -420,7 +420,6 @@ def predict():
                     next_model_predicts_normalized = final_scaler.inverse_transform(next_model_predicts_unnormalized)
 
                     next_models_predicts[i] = next_model_predicts_normalized
-                    
                     next_models_predicts[i] = next_models_predicts[i].reshape(-1)
 
                 if config.data_transform == 'difference':
@@ -499,7 +498,7 @@ def predict():
 
             if config.optimizeit:
                 print("\t Time to optimize {} \n".format(models_optimizations_time[j]))
-                    
+
             if config.optimizeit:
                 print("Best models parameters", best_model_parameters[j])
 
@@ -604,8 +603,8 @@ def predict():
             fig.add_trace(go.Scatter(
                     x = complete_dataframe.index,
                     y = complete_dataframe[next_models_names[i]],
-                    mode='lines',
-                    name='{}. {}'.format(i + 2, next_models_names[i])))
+                    mode = 'lines',
+                    name = '{}. {}'.format(i + 2, next_models_names[i])))
 
         py.plot(fig, filename=config.save_plot_adress)
 

@@ -10,6 +10,11 @@ from predictit.data_prep import make_sequences
 
 def lstm(data, n_steps, n_features=1, predicts=7, epochs=200, units=50, save=1, already_trained=0, optimizer='adam', loss='mse', verbose=0, activation='relu', metrics='mape', timedistributed=0):
 
+    # TODO batch and one-step in one model as parameter
+    # TODO batch lstm.predict_sequencies_multiple(model, x_test, 50, 50)
+    # TODO tf batch, in fit batch_size=predicts test
+    # TODO tf performance difference input_shape=(x, ) and input_dim=x
+
     script_dir = os.path.dirname(__file__)
     folder = Path('stored_models')
     modelname = 'lstmvanilla.h5'
