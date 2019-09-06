@@ -1,4 +1,7 @@
 #%%
-import predict
+from predictit import predictit
 
-predict.main.predict()
+try:
+    predictit.main.predict()
+except Exception as e:
+    print(f'Found error: {e}')

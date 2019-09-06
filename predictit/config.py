@@ -15,7 +15,7 @@ freqs = 'D'
 
 # Adresa CSV pro predikci pokud nebudou použita testovací data - První řádek obsahuje názvy sloupců, první sloupec datum
 csv_adress = r'E:\VSCODE\Diplomka\test_data\daily-minimum-temperatures.csv'  # Adresa csv včetně názvu a přípony
-save_plot_adress = r'C:\Users\TruTonton\Documents\GitHub'  # Where to save the plot
+save_plot_adress = r'C:\Users\TruTonton\Documents\GitHub.html'  # Where to save the plot
 predicted_columns_names = 'Temp'  #['SumNumber', 'SumDuration']  # Název sloupce jehož hodnota má být predikována
 
 
@@ -25,7 +25,6 @@ predicts = 7  # Počet predikovaných hodnot - defaultně 7
 datalength = 1000  # Posledních N prvků, které budou použity
 
 data_transform = None  #'difference'  # 'difference' or None - Transformuje data na rozdíl mezi dvěma hodnotami
-data_smooth = 0  # Uhladí data, čímž odstraní 'bílý šum' a lépe tak odolává overfittingu hodnota udáva míru uhlazení
 
 # Výpočet je opakován několikrát na zkrácených datech, aby se vyloučila náhoda úspěchu modelu
 repeatit = 2  # repeatit je počet opakování
