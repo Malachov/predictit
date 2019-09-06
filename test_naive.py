@@ -1,5 +1,5 @@
 #%%
-from predictit import predictit
+from predict import predictit
 
 try:
     predictit.main.predict()
