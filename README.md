@@ -5,10 +5,8 @@ Most common output is plotly interactive graph, deploying to database and list o
 Printscreen of graph
 ![Printscreen of output HTML graph](https://raw.githubusercontent.com/Malachov/predictit/master/output_example.png)
 
-## How to use
-```Python 
-pip install predictit
-```
+## How to
+    pip install predictit
 
 ### Simple example with Pypi
 ```Python
