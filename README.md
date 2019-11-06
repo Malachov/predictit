@@ -9,6 +9,11 @@ Printscreen of graph
 ## How to
     pip install predictit
 
+Sometime you can have issues with installing some libraries.
+For error: command 'gcc' failed with exit status 1
+
+    sudo apt-get install python-dev
+
 ### Simple example with Pypi
 ```Python
 import predictit
