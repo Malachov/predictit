@@ -5,7 +5,7 @@ python:
   - "3.7"
 
 before_install:
-  - sudo apt-get install python-dev
+  - sudo apt-get install unixodbc-dev
 
 install:
   - pip install pip --upgrade
