@@ -9,8 +9,6 @@ before_install:
   - sudo apt-get upgrade
   - sudo apt-get install python-dev
 
-cache: pip
-
 install:
   - pip install -r requirements.txt
 

@@ -1,6 +1,9 @@
 """Library/framework for making predictions. Choose best of 20 models 
 (ARIMA, regressions, LSTM...). Preprocess data and chose optimal parameters 
-of predictions. Output is plotly HTML interactive graph or database deploying"""
+of predictions. Output is plotly HTML interactive graph or database deploying
+
+To be cont...
+"""
 
 from . import data_prep
 from . import models
