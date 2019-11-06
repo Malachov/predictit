@@ -19,7 +19,7 @@ branches:
 deploy:
   provider: pages
   skip_cleanup: true
-  github_token: bde661edb37ddb2dae94c3465df7c477f407c879
+  github_token: $GITHUB_TOKEN
   keep_history: true
   on:
     branch: master
