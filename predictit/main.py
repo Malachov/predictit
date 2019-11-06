@@ -1,5 +1,10 @@
 #%%
 # jen pro jupyter - smazat
+try:
+    __IPYTHON__
+    print('Jupyter')
+except NameError:
+    print('No Jupyter')
 
 # Dodelat / testpre jenom jedene return
 def predict():

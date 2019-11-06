@@ -27,21 +27,19 @@ setup(
     license='mit',
     author='Daniel Malachov',
     install_requires=[
-            'SQLAlchemy',
+            'numpy',
             'pandas',
+            'scipy',
+            'scikit_learn'
+            'SQLAlchemy',
+            'statsmodels',
             'pyodbc',
-            'Keras',
             'sklearn_extensions',
-            'tensorflow',
             'prettytable',
             'matplotlib',
             'plotly',
             'cufflinks',
-            'numpy',
-            'scipy',
-            'seaborn',
-            'statsmodels',
-            'scikit_learn'
+            'seaborn'
       ],
     author_email='malachovd@seznam.cz',
     description='Library/framework for making predictions.',
