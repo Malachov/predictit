@@ -19,6 +19,10 @@ script: python -m pytest -v tests/test_all.py
 deploy:
   provider: releases
   api_key: $GITHUB_TOKEN
+  name: "Release test"
+  body: "test \n test \r\n + /r/n *"
+  overwrite: true
   skip_cleanup: true
+  file: "dist/predictit-0.23.tar.gz"
   on:
     tags: true
