@@ -1,9 +1,9 @@
 language: python
 python:
 
-  - "3.6"
+
   - "3.7"
-  - "3.8"
+  
 
 before_install:
   - sudo apt-get install unixodbc-dev
@@ -23,8 +23,5 @@ deploy:
   provider: releases
   token: $GITHUB_TOKEN
   skip_cleanup: true
-  skip_existing: true
   on:
-    branch: master
-    repo: Malachov/predictit
     tags: true
