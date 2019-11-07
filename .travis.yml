@@ -4,9 +4,6 @@ python:
 
   - "3.7"
 
-
-
-
 before_install:
   - sudo apt-get install unixodbc-dev
   - sudo apt-get install libblas-dev liblapack-dev libatlas-base-dev gfortran
@@ -21,7 +18,7 @@ script: python -m pytest -v tests/test_all.py
 
 deploy:
   provider: releases
-  token: $GITHUB_TOKEN
+  api_key: $GITHUB_TOKEN
   skip_cleanup: true
   on:
     tags: true
