@@ -4,7 +4,7 @@ import io
 import os
 import sys
 
-import predict-it
+import predictit
 
 here = os.path.abspath(os.path.dirname(__file__))
 
@@ -19,7 +19,6 @@ def read(*filenames, **kwargs):
 
 with open('README.md') as readme_file:
     readme = readme_file.read()
-long_description = read('README.md')
 
 setup(
     name='predictit',
@@ -45,7 +44,7 @@ setup(
       ],
     author_email='malachovd@seznam.cz',
     description='Library/framework for making predictions.',
-    long_description=' Automatically choose best of 20 models (ARIMA, regressions, LSTM...). Preprocess data and chose optimal parameters of predictions.',
+    long_description=readme,
     packages=['predict-it'],
     include_package_data=True,
     platforms='any',
