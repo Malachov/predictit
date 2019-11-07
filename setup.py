@@ -31,7 +31,7 @@ setup(
             'numpy',
             'pandas',
             'scipy',
-            'scikit_learn'
+            'scikit_learn',
             'SQLAlchemy',
             'statsmodels',
             'pyodbc',
