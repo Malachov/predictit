@@ -16,6 +16,7 @@ install:
 
 script: python -m pytest -v tests/test_all.py
 
+
 deploy:
   provider: releases
   api_key: $GITHUB_TOKEN

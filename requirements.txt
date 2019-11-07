@@ -5,14 +5,10 @@ SQLAlchemy
 sklearn_extensions
 cufflinks
 plotly
-arch
 pyodbc
 prettytable
 scipy
 seaborn
 statsmodels
 lightgbm
-pmdarima
 scikit_learn
-tpot
-xgboost
