@@ -23,8 +23,8 @@ with open('README.md') as readme_file:
 setup(
     name='predictit',
     version=0.1,
-    url='https://github.com/Malachov/predict-it',
-    download_url='https://github.com/Malachov/predict-it/archive/0.1.tar.gz',
+    url='https://github.com/Malachov/predictit',
+    download_url='https://github.com/Malachov/predictit/archive/0.11.tar.gz',
     license='mit',
     author='Daniel Malachov',
     install_requires=[
@@ -45,7 +45,7 @@ setup(
     author_email='malachovd@seznam.cz',
     description='Library/framework for making predictions.',
     long_description=readme,
-    packages=['predict-it'],
+    packages=['predictit'],
     include_package_data=True,
     platforms='any',
     classifiers = [
