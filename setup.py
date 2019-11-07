@@ -17,6 +17,8 @@ def read(*filenames, **kwargs):
             buf.append(f.read())
     return sep.join(buf)
 
+with open('README.md') as readme_file:
+    readme = readme_file.read()
 long_description = read('README.md')
 
 setup(

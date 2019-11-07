@@ -3,6 +3,7 @@ python:
 
   - "3.6"
   - "3.7"
+  - "3.8"
 
 before_install:
   - sudo apt-get install unixodbc-dev
@@ -15,17 +16,12 @@ install:
 script: python -m pytest -v tests/test_all.py
 branches:
   only:
-    - master
+    - master 
 
 deploy:
-  provider: pages
+  provider: releases
+  api_key: $GITHUB_TOKEN
   skip_cleanup: true
-  github_token: $GITHUB_TOKEN
-  keep_history: true
+  skip_existing: true
   on:
-    branch: master
-
-
-# If not working
-
-  sudo: required
+    tags: true

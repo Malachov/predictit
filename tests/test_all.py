@@ -1,5 +1,8 @@
-def secti(a, b):
-    return a + b
+import predictit
 
-def test_secti():
-    assert secti(1, 5) == 3
+def inc(x):
+    return x + 1
+
+
+def test_answer():
+    assert inc(3) == 5

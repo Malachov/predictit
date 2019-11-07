@@ -16,3 +16,9 @@ from . import test_pre
 from . import main
 from . import main_function
 from . import data_test
+
+__version__ = "3.6.5"
+__author__ = "Rob Knight, Gavin Huttley, and Peter Maxwell"
+__license__ = "GPL"
+__version__ = "1.0.1"
+__email__ = "malachovd@seznam.cz"
