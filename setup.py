@@ -4,10 +4,6 @@ import io
 import os
 import sys
 
-import predictit
-
-here = os.path.abspath(os.path.dirname(__file__))
-
 def read(*filenames, **kwargs):
     encoding = kwargs.get('encoding', 'utf-8')
     sep = kwargs.get('sep', '\n')
@@ -20,9 +16,13 @@ def read(*filenames, **kwargs):
 with open('README.md') as readme_file:
     readme = readme_file.read()
 
+# TODO - txt to list
+with open('requirements.txt') as reqs_file:
+    reqs = reqs_file.read()
+
 setup(
     name='predictit',
-    version=0.1,
+    version=0.23,
     url='https://github.com/Malachov/predictit',
     download_url='https://github.com/Malachov/predictit/archive/0.11.tar.gz',
     license='mit',
