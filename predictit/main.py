@@ -1,10 +1,5 @@
 #%%
-# -*- coding: utf-8 -*- 
 import sys
-
-sys.path.insert(0, r"/home/dan/ownCloud/Github/predictit_library")
-sys.path.insert(1, r"/home/dan/ownCloud/Github/predictit_library/models")
-
 import numpy as np
 import matplotlib.pyplot as plt
 from prettytable import PrettyTable
@@ -13,13 +8,13 @@ import pickle
 from pathlib import Path
 import os
 import plotly.offline as py
-#import plotly.offline.graph_objs as go
 import plotly.graph_objs as go
 import cufflinks as cf
 import sklearn
 import pandas as pd
 import warnings
 from sklearn import preprocessing
+
 from predictit.database import database_load
 from predictit import config
 from predictit import models
@@ -30,21 +25,13 @@ from predictit.best_params import optimize
 from predictit.confidence_interval import bounds
 from predictit.data_test import data1
 
-# Just for developing with jupyter magic
-try:
-    __IPYTHON__
-    print('Jupyter')
-except NameError:
-    print('No Jupyter')
+# All the config is in config.py - rest only for people that know what are they doing
 
 def predict():
 
     predicted_column_name = config.predicted_columns_names
 
     freq = config.freqs
-
-    # Veškerá nastavitelná data v config.py - ostatní jen pro zasvěcené
-    # Pokud nemáte pracovní složku nastavenou do modulu, načte jeho absolutní adresu a nastaví ji jako cwd
 
     if config.debug:
         warnings.filterwarnings('once')
@@ -87,7 +74,7 @@ def predict():
     if config.evaluate_test_data == 0:
 
         if config.data_source == 'csv':
-        ############# Načtení dat z CSV #############
+        ############# Load CSV data #############
             try:
                 data_for_predictions_full = pd.read_csv(config.csv_adress, header=0, index_col=0)
             except Exception as exc:
@@ -95,7 +82,7 @@ def predict():
 
         if config.data_source == 'sql':
 
-        ############# Načtení dat z SQL #############
+        ############# Load SQL data #############
             try:
                 data_for_predictions_full = database_load(server=config.server, database=config.database, freq=freq, index_col=config.index_col, data_limit=config.datalength, last=config.last_row)
             except Exception as exc:
@@ -143,7 +130,7 @@ def predict():
                     for i in range(len(cleaned_data)):
                         cleaned_data[i] = do_difference(cleaned_data[i])
 
-                # Matice korelací
+                # Correlation matrix
                 cleaned_data = pd.DataFrame(cleaned_data, columns = data_for_predictions_full.columns)
                 corr = cleaned_data.corr()
                 names_to_keep = corr[corr[predicted_column_name] > abs(config.correlation_threshold)].index
@@ -241,8 +228,8 @@ def predict():
                 models_optimizations_time[i] = (stop_optimization - start_optimization)
 
 
-    # Definice prázdných schránek pro data
-    # Matice pro výsledky má následující rozměr - [počet opakování, model, data, výsledky]
+    # Empty boxes for results definition
+    # The final result is - [repeated, model, data, results]
     results_matrix = np.zeros((config.repeatit, models_number, data_number, config.predicts))
     test_matrix = np.zeros((config.repeatit, models_number, data_number, config.predicts))
     evaluated_matrix = np.zeros((config.repeatit, models_number, data_number))
@@ -254,7 +241,7 @@ def predict():
 
     models_time = {}
 
-    # Opakuje výpočet nad několikrát zkrácenými daty, aby nejlépe hodnocený model neměl pouze štěstí
+    # Repeat evaluation on shifted data to eliminate randomness
     for r in range(config.repeatit):
 
         if config.evaluate_test_data == 0:
@@ -327,8 +314,8 @@ def predict():
                 if config.criterion == 'rmse':
                     evaluated_matrix[i, j, k] = test_pre(results_matrix[i, j, k, :], test_matrix[i, j, k, :], criterion='rmse')
 
-    # Pro testovací data je mape hodnota modelu průměrem dat z průměru úseků
-    # Pro reálná data je mape hodnota modelu tou nejlepší hodnotou dat z průměru úseků
+    # For test data, mape is average from average from repetitions
+    # For real data, mape is the best of average from repetitions
     repeated_average = np.nanmean(evaluated_matrix, axis=0)
 
 
@@ -338,13 +325,13 @@ def predict():
     else:
         model_results = np.nanmin(repeated_average, axis=1)
 
-    # Index nejlepšího modelu ve tvaru [model]
+    # Index of the best model
     best_model_index = np.unravel_index(np.nanargmin(model_results), shape=model_results.shape)[0]
 
     best_model_matrix = repeated_average[best_model_index]
     best_data_index = np.unravel_index(np.nanargmin(best_model_matrix), shape=best_model_matrix.shape)[0]
 
-    # Vyhodnocení nejlepšího modelu
+    # Evaluation of the best model
     best_model_name, best_model = list(config.used_models.items())[best_model_index]
     best_data_name, best_data = list(data_all.items())[best_data_index]
 
@@ -387,7 +374,7 @@ def predict():
             del rest_models[next_best_model_name]
             del rest_params[next_best_model_name]
 
-            # Index nejlepšího modelu ve tvaru [model]
+            # Index of the best model
             next_model_index = np.unravel_index(np.nanargmin(results_copy), shape=results_copy.shape)[0]
 
             next_model_matrix = results_copy[next_model_index]
@@ -435,7 +422,7 @@ def predict():
             except Exception as err:
                 warnings.warn("\n \t Error in compute {} model on data {}: {}".format(n, p, err))
 
-    # Dooptimalizování nejlepšího modelu
+    # Final optimalisation of the best model
     if config.optimizeit_final:
         help_var = config.models_parameters[best_model_name].copy()
         kwargs = {key: value for (key, value) in help_var.items() if key in config.models_parameters_limits[best_model_name]}
@@ -481,11 +468,11 @@ def predict():
     ############# Results ############# ANCHOR Results
     ##########################################
 
-    # Definice tabulky pro výsledky
+    # Definition of the table for results
     models_table = PrettyTable()
     models_table.field_names = ["Model", "Average {} error".format(config.criterion), "Time"]
 
-    # Vyplnění tabulky
+    # Fill the table
     for i, j in enumerate(models_names):
         models_table.add_row([models_names[i], model_results[i], models_time[models_names[i]]])
 
@@ -513,7 +500,7 @@ def predict():
 
     print("\n Best model is {} \n\t with result MAPE {} \n\t with data {} \n\t with paramters {} \n".format(best_model_name, best_mape, best_data_name, best_model_param))
 
-    ######### Graph #########
+    ######### Plot #########
     if config.plot:
 
         lower_bound, upper_bound = bounds(column_for_prediction, predicts=config.predicts, confidence=config.confidence)
