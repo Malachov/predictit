@@ -1,0 +1,344 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>padasip.misc.error_evaluation &#8212; predictit 0.22 documentation</title>
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for padasip.misc.error_evaluation</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">.. versionadded:: 0.7</span>
+
+<span class="sd">Implemented functions:</span>
+
+<span class="sd">* **Mean absolute error** (MAE, also  known as MAD - mean absolute deviation)</span>
+
+<span class="sd">  :math:`\\textrm{MAE}=\\frac{1}{n} \sum _{i=1}^{n}(e_{i})`.</span>
+
+<span class="sd">* **Mean squared error** (MSE, also known as MSD)</span>
+
+<span class="sd">  :math:`\\textrm{MSE}=\\frac{1}{n} \sum _{i=1}^{n}(e_{i})^{2}`.</span>
+
+<span class="sd">* **Root-mean-square error** (RMSE, also known as RMSD)</span>
+
+<span class="sd">  :math:`\\textrm{RMSE} = \\sqrt{\\textrm{MSE}}`.</span>
+
+<span class="sd">* **Logarithmic squared error** (returns a vector of values in dB!)</span>
+
+<span class="sd">  :math:`\\textbf{logSE} = 10 \log_{10} (\\textbf{e}^{2})`</span>
+
+<span class="sd">all functions are often used for evaluation of an error rather than just</span>
+<span class="sd">the error itself or its mean value.</span>
+
+<span class="sd">Usage instructions</span>
+<span class="sd">====================</span>
+
+<span class="sd">For MAE evaluation from two time series use</span>
+
+<span class="sd">.. code-block:: python</span>
+<span class="sd">    </span>
+<span class="sd">    mse = pa.misc.MAE(x1, x2)</span>
+
+<span class="sd">If you have the error already calculated, then just</span>
+
+<span class="sd">.. code-block:: python</span>
+
+<span class="sd">    mse = pa.misc.MAE(e)</span>
+
+<span class="sd">The same instructions apply for the MSE, RMSE a logarithmic squared error</span>
+
+<span class="sd">.. code-block:: python</span>
+<span class="sd">    </span>
+<span class="sd">    mse = pa.misc.MSE(x1, x2)</span>
+<span class="sd">    rmse = pa.misc.RMSE(x1, x2)</span>
+<span class="sd">    logse = pa.misc.logSE(x1, x2)</span>
+
+<span class="sd">and from error</span>
+
+<span class="sd">.. code-block:: python</span>
+
+<span class="sd">    mse = pa.misc.MSE(e)</span>
+<span class="sd">    rmse = pa.misc.RMSE(e)</span>
+<span class="sd">    logse = pa.misc.logSE(e)</span>
+
+
+<span class="sd">Minimal working examples</span>
+<span class="sd">==========================</span>
+
+<span class="sd">In the following example is estimated MSE for two series</span>
+<span class="sd">(:code:`x1` and :code:`x1`):</span>
+
+<span class="sd">.. code-block:: python</span>
+
+<span class="sd">    import numpy as np</span>
+<span class="sd">    import padasip as pa </span>
+
+<span class="sd">    x1 = np.array([1, 2, 3, 4, 5])</span>
+<span class="sd">    x2 = np.array([5, 4, 3, 2, 1])</span>
+<span class="sd">    mse = pa.misc.MSE(x1, x2)</span>
+<span class="sd">    print(mse)</span>
+
+<span class="sd">You can easily check that the printed result :code:`8.0` is correct MSE for</span>
+<span class="sd">given series.</span>
+
+<span class="sd">The following example displays, that you can use directly the error series</span>
+<span class="sd">:code:`e` if you already have it.</span>
+
+<span class="sd">.. code-block:: python</span>
+
+<span class="sd">    import numpy as np</span>
+<span class="sd">    import padasip as pa </span>
+
+<span class="sd">    # somewhere else in your project</span>
+<span class="sd">    x1 = np.array([1, 2, 3, 4, 5])</span>
+<span class="sd">    x2 = np.array([5, 4, 3, 2, 1])</span>
+<span class="sd">    e = x1 - x2</span>
+<span class="sd">    # you have just the error - e</span>
+<span class="sd">    mse = pa.misc.MSE(e)</span>
+<span class="sd">    print(mse)</span>
+
+<span class="sd">Again, you can check the correctness of the answer easily.</span>
+
+<span class="sd">Code Explanation</span>
+<span class="sd">====================</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<div class="viewcode-block" id="get_valid_error"><a class="viewcode-back" href="../../../padasip.misc.html#padasip.misc.error_evaluation.get_valid_error">[docs]</a><span class="k">def</span> <span class="nf">get_valid_error</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Function that validates:</span>
+
+<span class="sd">    * x1 is possible to convert to numpy array</span>
+
+<span class="sd">    * x2 is possible to convert to numpy array (if exists)</span>
+
+<span class="sd">    * x1 and x2 have the same length (if both exist)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># just error</span>
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">x2</span><span class="p">)</span> <span class="o">==</span> <span class="nb">int</span> <span class="ow">and</span> <span class="n">x2</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>    
+            <span class="n">e</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">x1</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Impossible to convert series to a numpy array&#39;</span><span class="p">)</span>        
+    <span class="c1"># two series</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">x1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">x1</span><span class="p">)</span>
+            <span class="n">x2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">x2</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Impossible to convert one of series to a numpy array&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">x1</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">x2</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;The length of both series must agree.&#39;</span><span class="p">)</span>
+        <span class="n">e</span> <span class="o">=</span> <span class="n">x1</span> <span class="o">-</span> <span class="n">x2</span>
+    <span class="k">return</span> <span class="n">e</span></div>
+
+<div class="viewcode-block" id="logSE"><a class="viewcode-back" href="../../../padasip.misc.html#padasip.misc.error_evaluation.logSE">[docs]</a><span class="k">def</span> <span class="nf">logSE</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    10 * log10(e**2)    </span>
+<span class="sd">    This function accepts two series of data or directly</span>
+<span class="sd">    one series with error.</span>
+
+<span class="sd">    **Args:**</span>
+
+<span class="sd">    * `x1` - first data series or error (1d array)</span>
+
+<span class="sd">    **Kwargs:**</span>
+
+<span class="sd">    * `x2` - second series (1d array) if first series was not error directly,\\</span>
+<span class="sd">        then this should be the second series</span>
+
+<span class="sd">    **Returns:**</span>
+
+<span class="sd">    * `e` - logSE of error (1d array) obtained directly from `x1`, \\</span>
+<span class="sd">        or as a difference of `x1` and `x2`. The values are in dB!</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">e</span> <span class="o">=</span> <span class="n">get_valid_error</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">)</span>
+    <span class="k">return</span> <span class="mi">10</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">e</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span></div>
+    
+
+<div class="viewcode-block" id="MAE"><a class="viewcode-back" href="../../../padasip.misc.html#padasip.misc.error_evaluation.MAE">[docs]</a><span class="k">def</span> <span class="nf">MAE</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Mean absolute error - this function accepts two series of data or directly</span>
+<span class="sd">    one series with error.</span>
+
+<span class="sd">    **Args:**</span>
+
+<span class="sd">    * `x1` - first data series or error (1d array)</span>
+
+<span class="sd">    **Kwargs:**</span>
+
+<span class="sd">    * `x2` - second series (1d array) if first series was not error directly,\\</span>
+<span class="sd">        then this should be the second series</span>
+
+<span class="sd">    **Returns:**</span>
+
+<span class="sd">    * `e` - MAE of error (float) obtained directly from `x1`, \\</span>
+<span class="sd">        or as a difference of `x1` and `x2`</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">e</span> <span class="o">=</span> <span class="n">get_valid_error</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">e</span><span class="p">))</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">e</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="MSE"><a class="viewcode-back" href="../../../padasip.misc.html#padasip.misc.error_evaluation.MSE">[docs]</a><span class="k">def</span> <span class="nf">MSE</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Mean squared error - this function accepts two series of data or directly</span>
+<span class="sd">    one series with error.</span>
+
+<span class="sd">    **Args:**</span>
+
+<span class="sd">    * `x1` - first data series or error (1d array)</span>
+
+<span class="sd">    **Kwargs:**</span>
+
+<span class="sd">    * `x2` - second series (1d array) if first series was not error directly,\\</span>
+<span class="sd">        then this should be the second series</span>
+
+<span class="sd">    **Returns:**</span>
+
+<span class="sd">    * `e` - MSE of error (float) obtained directly from `x1`, \\</span>
+<span class="sd">        or as a difference of `x1` and `x2`</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">e</span> <span class="o">=</span> <span class="n">get_valid_error</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">e</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="RMSE"><a class="viewcode-back" href="../../../padasip.misc.html#padasip.misc.error_evaluation.RMSE">[docs]</a><span class="k">def</span> <span class="nf">RMSE</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Root-mean-square error - this function accepts two series of data</span>
+<span class="sd">    or directly one series with error.</span>
+
+<span class="sd">    **Args:**</span>
+
+<span class="sd">    * `x1` - first data series or error (1d array)</span>
+
+<span class="sd">    **Kwargs:**</span>
+
+<span class="sd">    * `x2` - second series (1d array) if first series was not error directly,\\</span>
+<span class="sd">        then this should be the second series</span>
+
+<span class="sd">    **Returns:**</span>
+
+<span class="sd">    * `e` - RMSE of error (float) obtained directly from `x1`, \\</span>
+<span class="sd">        or as a difference of `x1` and `x2`</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">e</span> <span class="o">=</span> <span class="n">get_valid_error</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">e</span><span class="p">)))</span></div>
+
+<div class="viewcode-block" id="get_mean_error"><a class="viewcode-back" href="../../../padasip.misc.html#padasip.misc.error_evaluation.get_mean_error">[docs]</a><span class="k">def</span> <span class="nf">get_mean_error</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">function</span><span class="o">=</span><span class="s2">&quot;MSE&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function returns desired mean error. Options are: MSE, MAE, RMSE</span>
+<span class="sd">    </span>
+<span class="sd">    **Args:**</span>
+
+<span class="sd">    * `x1` - first data series or error (1d array)</span>
+
+<span class="sd">    **Kwargs:**</span>
+
+<span class="sd">    * `x2` - second series (1d array) if first series was not error directly,\\</span>
+<span class="sd">        then this should be the second series</span>
+
+<span class="sd">    **Returns:**</span>
+
+<span class="sd">    * `e` - mean error value (float) obtained directly from `x1`, \\</span>
+<span class="sd">        or as a difference of `x1` and `x2`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">function</span> <span class="o">==</span> <span class="s2">&quot;MSE&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">MSE</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">function</span> <span class="o">==</span> <span class="s2">&quot;MAE&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">MAE</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">function</span> <span class="o">==</span> <span class="s2">&quot;RMSE&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">RMSE</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;The provided error function is not known&#39;</span><span class="p">)</span></div>
+
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">predictit</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Daniel Malachov.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.2.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

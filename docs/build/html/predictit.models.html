@@ -1,0 +1,333 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>predictit.models package &#8212; predictit 0.22 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="predictit-models-package">
+<h1>predictit.models package<a class="headerlink" href="#predictit-models-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-predictit.models.autoreg_LNU">
+<span id="predictit-models-autoreg-lnu-module"></span><h2>predictit.models.autoreg_LNU module<a class="headerlink" href="#module-predictit.models.autoreg_LNU" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="predictit.models.autoreg_LNU.autoreg_LNU">
+<code class="sig-prename descclassname">predictit.models.autoreg_LNU.</code><code class="sig-name descname">autoreg_LNU</code><span class="sig-paren">(</span><em class="sig-param">data</em>, <em class="sig-param">predicts=7</em>, <em class="sig-param">lags=100</em>, <em class="sig-param">mi=0.1</em>, <em class="sig-param">minormit=1</em>, <em class="sig-param">predicted_column_index=0</em>, <em class="sig-param">tlumenimi=1</em>, <em class="sig-param">plot=0</em>, <em class="sig-param">random=0</em>, <em class="sig-param">seed=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/predictit/models/autoreg_LNU.html#autoreg_LNU"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#predictit.models.autoreg_LNU.autoreg_LNU" title="Permalink to this definition">¶</a></dt>
+<dd><p>Autoregressive linear neural unit.
+Inputs</p>
+<blockquote>
+<div><p>mii = learning step of Grad descent
+predicts = number of predicted values, lags = number of history values used in calculation
+plot = if 1, plot
+random = if 1, neural weights are intitialised randomly with</p>
+<blockquote>
+<div><p>scope = max - min random weights
+shift = shift of random weights
+seed = if random values needs to be repeated</p>
+</div></blockquote>
+</div></blockquote>
+<dl class="simple">
+<dt>Output</dt><dd><p>Predictions</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-predictit.models.autoreg_LNU_withwpred">
+<span id="predictit-models-autoreg-lnu-withwpred-module"></span><h2>predictit.models.autoreg_LNU_withwpred module<a class="headerlink" href="#module-predictit.models.autoreg_LNU_withwpred" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="predictit.models.autoreg_LNU_withwpred.autoreg_LNU_withwpred">
+<code class="sig-prename descclassname">predictit.models.autoreg_LNU_withwpred.</code><code class="sig-name descname">autoreg_LNU_withwpred</code><span class="sig-paren">(</span><em class="sig-param">data</em>, <em class="sig-param">predicts=7</em>, <em class="sig-param">lags=100</em>, <em class="sig-param">predicted_column_index=0</em>, <em class="sig-param">mi=0.1</em>, <em class="sig-param">minormit=0</em>, <em class="sig-param">tlumenimi=1</em>, <em class="sig-param">plot=0</em>, <em class="sig-param">random=0</em>, <em class="sig-param">seed=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/predictit/models/autoreg_LNU_withwpred.html#autoreg_LNU_withwpred"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#predictit.models.autoreg_LNU_withwpred.autoreg_LNU_withwpred" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-predictit.models.cg">
+<span id="predictit-models-cg-module"></span><h2>predictit.models.cg module<a class="headerlink" href="#module-predictit.models.cg" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="predictit.models.cg.cg">
+<code class="sig-prename descclassname">predictit.models.cg.</code><code class="sig-name descname">cg</code><span class="sig-paren">(</span><em class="sig-param">data</em>, <em class="sig-param">n_steps_in=50</em>, <em class="sig-param">predicts=7</em>, <em class="sig-param">predicted_column_index=0</em>, <em class="sig-param">epochs=100</em>, <em class="sig-param">constant=1</em>, <em class="sig-param">other_columns_lenght=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/predictit/models/cg.html#cg"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#predictit.models.cg.cg" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-predictit.models.compare_with_average">
+<span id="predictit-models-compare-with-average-module"></span><h2>predictit.models.compare_with_average module<a class="headerlink" href="#module-predictit.models.compare_with_average" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="predictit.models.compare_with_average.compare_with_average">
+<code class="sig-prename descclassname">predictit.models.compare_with_average.</code><code class="sig-name descname">compare_with_average</code><span class="sig-paren">(</span><em class="sig-param">data</em>, <em class="sig-param">predicts=7</em>, <em class="sig-param">predicted_column_index=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/predictit/models/compare_with_average.html#compare_with_average"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#predictit.models.compare_with_average.compare_with_average" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-predictit.models.elm">
+<span id="predictit-models-elm-module"></span><h2>predictit.models.elm module<a class="headerlink" href="#module-predictit.models.elm" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="predictit.models.elm.elm">
+<code class="sig-prename descclassname">predictit.models.elm.</code><code class="sig-name descname">elm</code><span class="sig-paren">(</span><em class="sig-param">data</em>, <em class="sig-param">n_steps_in=50</em>, <em class="sig-param">predicts=7</em>, <em class="sig-param">predicted_column_index=0</em>, <em class="sig-param">output_shape='one_step'</em>, <em class="sig-param">other_columns_lenght=None</em>, <em class="sig-param">constant=None</em>, <em class="sig-param">n_hidden=20</em>, <em class="sig-param">alpha=0.5</em>, <em class="sig-param">rbf_width=1.0</em>, <em class="sig-param">activation_func='tanh'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/predictit/models/elm.html#elm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#predictit.models.elm.elm" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-predictit.models.elm_gen">
+<span id="predictit-models-elm-gen-module"></span><h2>predictit.models.elm_gen module<a class="headerlink" href="#module-predictit.models.elm_gen" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="predictit.models.elm_gen.elm_gen">
+<code class="sig-prename descclassname">predictit.models.elm_gen.</code><code class="sig-name descname">elm_gen</code><span class="sig-paren">(</span><em class="sig-param">data</em>, <em class="sig-param">n_steps_in=50</em>, <em class="sig-param">predicts=7</em>, <em class="sig-param">predicted_column_index=0</em>, <em class="sig-param">output_shape='one_step'</em>, <em class="sig-param">other_columns_lenght=None</em>, <em class="sig-param">constant=None</em>, <em class="sig-param">alpha=0.5</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/predictit/models/elm_gen.html#elm_gen"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#predictit.models.elm_gen.elm_gen" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-predictit.models.regression_bayes_ridge">
+<span id="predictit-models-regression-bayes-ridge-module"></span><h2>predictit.models.regression_bayes_ridge module<a class="headerlink" href="#module-predictit.models.regression_bayes_ridge" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="predictit.models.regression_bayes_ridge.regression_bayes_ridge">
+<code class="sig-prename descclassname">predictit.models.regression_bayes_ridge.</code><code class="sig-name descname">regression_bayes_ridge</code><span class="sig-paren">(</span><em class="sig-param">data</em>, <em class="sig-param">n_steps_in=50</em>, <em class="sig-param">predicts=7</em>, <em class="sig-param">predicted_column_index=0</em>, <em class="sig-param">output_shape='one_step'</em>, <em class="sig-param">other_columns_lenght=None</em>, <em class="sig-param">constant=None</em>, <em class="sig-param">n_iter=100</em>, <em class="sig-param">alpha_1=1e-06</em>, <em class="sig-param">alpha_2=1e-06</em>, <em class="sig-param">lambda_1=1e-06</em>, <em class="sig-param">lambda_2=1e-06</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/predictit/models/regression_bayes_ridge.html#regression_bayes_ridge"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#predictit.models.regression_bayes_ridge.regression_bayes_ridge" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-predictit.models.regression_hubber">
+<span id="predictit-models-regression-hubber-module"></span><h2>predictit.models.regression_hubber module<a class="headerlink" href="#module-predictit.models.regression_hubber" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="predictit.models.regression_hubber.regression_hubber">
+<code class="sig-prename descclassname">predictit.models.regression_hubber.</code><code class="sig-name descname">regression_hubber</code><span class="sig-paren">(</span><em class="sig-param">data</em>, <em class="sig-param">n_steps_in=50</em>, <em class="sig-param">predicts=7</em>, <em class="sig-param">predicted_column_index=0</em>, <em class="sig-param">output_shape='one_step'</em>, <em class="sig-param">other_columns_lenght=None</em>, <em class="sig-param">constant=None</em>, <em class="sig-param">epsilon=1.35</em>, <em class="sig-param">alpha=0.0001</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/predictit/models/regression_hubber.html#regression_hubber"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#predictit.models.regression_hubber.regression_hubber" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-predictit.models.regression_lasso">
+<span id="predictit-models-regression-lasso-module"></span><h2>predictit.models.regression_lasso module<a class="headerlink" href="#module-predictit.models.regression_lasso" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="predictit.models.regression_lasso.regression_lasso">
+<code class="sig-prename descclassname">predictit.models.regression_lasso.</code><code class="sig-name descname">regression_lasso</code><span class="sig-paren">(</span><em class="sig-param">data</em>, <em class="sig-param">n_steps_in=50</em>, <em class="sig-param">predicts=7</em>, <em class="sig-param">predicted_column_index=0</em>, <em class="sig-param">output_shape='one_step'</em>, <em class="sig-param">other_columns_lenght=None</em>, <em class="sig-param">constant=None</em>, <em class="sig-param">alpha=0.1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/predictit/models/regression_lasso.html#regression_lasso"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#predictit.models.regression_lasso.regression_lasso" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-predictit.models.regression_linear">
+<span id="predictit-models-regression-linear-module"></span><h2>predictit.models.regression_linear module<a class="headerlink" href="#module-predictit.models.regression_linear" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="predictit.models.regression_linear.regression_linear">
+<code class="sig-prename descclassname">predictit.models.regression_linear.</code><code class="sig-name descname">regression_linear</code><span class="sig-paren">(</span><em class="sig-param">data</em>, <em class="sig-param">n_steps_in=50</em>, <em class="sig-param">predicts=7</em>, <em class="sig-param">predicted_column_index=0</em>, <em class="sig-param">output_shape='one_step'</em>, <em class="sig-param">other_columns_lenght=None</em>, <em class="sig-param">constant=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/predictit/models/regression_linear.html#regression_linear"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#predictit.models.regression_linear.regression_linear" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-predictit.models.regression_ridge">
+<span id="predictit-models-regression-ridge-module"></span><h2>predictit.models.regression_ridge module<a class="headerlink" href="#module-predictit.models.regression_ridge" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="predictit.models.regression_ridge.regression_ridge">
+<code class="sig-prename descclassname">predictit.models.regression_ridge.</code><code class="sig-name descname">regression_ridge</code><span class="sig-paren">(</span><em class="sig-param">data</em>, <em class="sig-param">n_steps_in=50</em>, <em class="sig-param">predicts=7</em>, <em class="sig-param">predicted_column_index=0</em>, <em class="sig-param">output_shape='one_step'</em>, <em class="sig-param">other_columns_lenght=None</em>, <em class="sig-param">constant=None</em>, <em class="sig-param">alpha=0.5</em>, <em class="sig-param">solver='auto'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/predictit/models/regression_ridge.html#regression_ridge"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#predictit.models.regression_ridge.regression_ridge" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-predictit.models.regression_ridge_CV">
+<span id="predictit-models-regression-ridge-cv-module"></span><h2>predictit.models.regression_ridge_CV module<a class="headerlink" href="#module-predictit.models.regression_ridge_CV" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="predictit.models.regression_ridge_CV.regression_ridge_CV">
+<code class="sig-prename descclassname">predictit.models.regression_ridge_CV.</code><code class="sig-name descname">regression_ridge_CV</code><span class="sig-paren">(</span><em class="sig-param">data, n_steps_in=50, predicts=7, predicted_column_index=0, output_shape='one_step', other_columns_lenght=None, constant=None, alphas=[0.1, 0.5, 1], gcv_mode='auto'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/predictit/models/regression_ridge_CV.html#regression_ridge_CV"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#predictit.models.regression_ridge_CV.regression_ridge_CV" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-predictit.models.sklearn_universal">
+<span id="predictit-models-sklearn-universal-module"></span><h2>predictit.models.sklearn_universal module<a class="headerlink" href="#module-predictit.models.sklearn_universal" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="predictit.models.sklearn_universal.sklearn_universal">
+<code class="sig-prename descclassname">predictit.models.sklearn_universal.</code><code class="sig-name descname">sklearn_universal</code><span class="sig-paren">(</span><em class="sig-param">data</em>, <em class="sig-param">n_steps_in=5</em>, <em class="sig-param">predicts=7</em>, <em class="sig-param">model=&lt;class 'sklearn.linear_model.bayes.BayesianRidge'&gt;</em>, <em class="sig-param">predicted_column_index=0</em>, <em class="sig-param">output_shape='one_step'</em>, <em class="sig-param">other_columns_lenght=None</em>, <em class="sig-param">constant=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/predictit/models/sklearn_universal.html#sklearn_universal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#predictit.models.sklearn_universal.sklearn_universal" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-predictit.models.sm_ar">
+<span id="predictit-models-sm-ar-module"></span><h2>predictit.models.sm_ar module<a class="headerlink" href="#module-predictit.models.sm_ar" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="predictit.models.sm_ar.ar">
+<code class="sig-prename descclassname">predictit.models.sm_ar.</code><code class="sig-name descname">ar</code><span class="sig-paren">(</span><em class="sig-param">data</em>, <em class="sig-param">predicts=7</em>, <em class="sig-param">plot=0</em>, <em class="sig-param">predicted_column_index=0</em>, <em class="sig-param">method='cmle'</em>, <em class="sig-param">ic='aic'</em>, <em class="sig-param">trend='nc'</em>, <em class="sig-param">solver='lbfgs'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/predictit/models/sm_ar.html#ar"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#predictit.models.sm_ar.ar" title="Permalink to this definition">¶</a></dt>
+<dd><p>Autoregressive function
+Return [predictions]
+Inputs</p>
+<blockquote>
+<div><p>data - Dataframe, CSV, array or list
+predicts - Number of predicted values
+plot - If 1, plot</p>
+</div></blockquote>
+</dd></dl>
+
+</div>
+<div class="section" id="module-predictit.models.sm_arima">
+<span id="predictit-models-sm-arima-module"></span><h2>predictit.models.sm_arima module<a class="headerlink" href="#module-predictit.models.sm_arima" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="predictit.models.sm_arima.arima">
+<code class="sig-prename descclassname">predictit.models.sm_arima.</code><code class="sig-name descname">arima</code><span class="sig-paren">(</span><em class="sig-param">data</em>, <em class="sig-param">predicts=7</em>, <em class="sig-param">plot=0</em>, <em class="sig-param">p=3</em>, <em class="sig-param">d=1</em>, <em class="sig-param">q=0</em>, <em class="sig-param">predicted_column_index=0</em>, <em class="sig-param">method='mle'</em>, <em class="sig-param">ic='aic'</em>, <em class="sig-param">trend='nc'</em>, <em class="sig-param">solver='lbfgs'</em>, <em class="sig-param">forecast_type='out_of_sample'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/predictit/models/sm_arima.html#arima"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#predictit.models.sm_arima.arima" title="Permalink to this definition">¶</a></dt>
+<dd><p>Autoregressive integrated moving average model</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-predictit.models.sm_arma">
+<span id="predictit-models-sm-arma-module"></span><h2>predictit.models.sm_arma module<a class="headerlink" href="#module-predictit.models.sm_arma" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="predictit.models.sm_arma.arma">
+<code class="sig-prename descclassname">predictit.models.sm_arma.</code><code class="sig-name descname">arma</code><span class="sig-paren">(</span><em class="sig-param">data</em>, <em class="sig-param">predicts=7</em>, <em class="sig-param">plot=0</em>, <em class="sig-param">p=3</em>, <em class="sig-param">q=1</em>, <em class="sig-param">predicted_column_index=0</em>, <em class="sig-param">method='mle'</em>, <em class="sig-param">ic='aic'</em>, <em class="sig-param">trend='nc'</em>, <em class="sig-param">solver='lbfgs'</em>, <em class="sig-param">forecast_type='out_of_sample'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/predictit/models/sm_arma.html#arma"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#predictit.models.sm_arma.arma" title="Permalink to this definition">¶</a></dt>
+<dd><p>Autoregressive integrated moving average model</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-predictit.models.sm_sarima">
+<span id="predictit-models-sm-sarima-module"></span><h2>predictit.models.sm_sarima module<a class="headerlink" href="#module-predictit.models.sm_sarima" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="predictit.models.sm_sarima.sarima">
+<code class="sig-prename descclassname">predictit.models.sm_sarima.</code><code class="sig-name descname">sarima</code><span class="sig-paren">(</span><em class="sig-param">data</em>, <em class="sig-param">predicts=7</em>, <em class="sig-param">plot=0</em>, <em class="sig-param">p=1</em>, <em class="sig-param">d=1</em>, <em class="sig-param">q=1</em>, <em class="sig-param">pp=1</em>, <em class="sig-param">dd=1</em>, <em class="sig-param">qq=1</em>, <em class="sig-param">predicted_column_index=0</em>, <em class="sig-param">season=12</em>, <em class="sig-param">method='lbfgs'</em>, <em class="sig-param">trend='n'</em>, <em class="sig-param">enforce_invertibility=False</em>, <em class="sig-param">enforce_stationarity=False</em>, <em class="sig-param">forecast_type='out_of_sample'</em>, <em class="sig-param">verbose=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/predictit/models/sm_sarima.html#sarima"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#predictit.models.sm_sarima.sarima" title="Permalink to this definition">¶</a></dt>
+<dd><p>Seasonal ARIMAS</p>
+</dd></dl>
+
+</div>
+<div class="section" id="predictit-models-tf-lstm-module">
+<h2>predictit.models.tf_lstm module<a class="headerlink" href="#predictit-models-tf-lstm-module" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="predictit-models-tf-lstm-batch-module">
+<h2>predictit.models.tf_lstm_batch module<a class="headerlink" href="#predictit-models-tf-lstm-batch-module" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="predictit-models-tf-lstm-bidirectional-module">
+<h2>predictit.models.tf_lstm_bidirectional module<a class="headerlink" href="#predictit-models-tf-lstm-bidirectional-module" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="predictit-models-tf-lstm-stacked-module">
+<h2>predictit.models.tf_lstm_stacked module<a class="headerlink" href="#predictit-models-tf-lstm-stacked-module" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="predictit-models-tf-lstm-stacked-batch-module">
+<h2>predictit.models.tf_lstm_stacked_batch module<a class="headerlink" href="#predictit-models-tf-lstm-stacked-batch-module" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="predictit-models-tf-mlp-module">
+<h2>predictit.models.tf_mlp module<a class="headerlink" href="#predictit-models-tf-mlp-module" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="predictit-models-tf-mlp-batch-module">
+<h2>predictit.models.tf_mlp_batch module<a class="headerlink" href="#predictit-models-tf-mlp-batch-module" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-predictit.models">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-predictit.models" title="Permalink to this headline">¶</a></h2>
+<p>Všechny modely se všemi jejich parametry</p>
+<div class="section" id="ar-autoregression-ar">
+<h3>‘AR (Autoregression)’: ar<a class="headerlink" href="#ar-autoregression-ar" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl class="simple">
+<dt>Parametry (defaultně v závorce):</dt><dd><p>predicts - počet predikovaných hodnot
+plot - pokud 1, tak vykreslí grafy</p>
+</dd>
+</dl>
+</div></blockquote>
+</div>
+<div class="section" id="linear-neural-unit-autoreglnu">
+<h3>‘Linear neural unit’: autoregLNU<a class="headerlink" href="#linear-neural-unit-autoreglnu" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl class="simple">
+<dt>Parametry (defaultně v závorce):</dt><dd><p>data - data která vstupují do modelu - list, array, nebo dataframe
+predicts(7) - počet predikovaných hodnot
+lags(100) - počet předchozích kroků, podle kterých bude model počítat
+plot(0) - pokud 1, tak vykreslí grafy
+mi(0.1) - Učící krok - bude vybrán nejlepší z desetinásobků, takže ladit od 0 do 1
+random(0) - pokud 1, váhy budou inicializovány náhodně (pro linear zbytečné)
+seed(0) - Seed náhodných inicializací - náhodná čísla pro konkrétní seed budou vždy stejná</p>
+</dd>
+</dl>
+</div></blockquote>
+</div>
+<div class="section" id="linear-neural-unit-with-weigt-predictions-autoreglnuwithwpred">
+<h3>‘Linear neural unit with weigt predictions’: autoregLNUwithwpred<a class="headerlink" href="#linear-neural-unit-with-weigt-predictions-autoreglnuwithwpred" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><p>Narozdíl od LNU, zde jsou predikovány i hodnoty jednotlivých vah
+Parametry (defaultně v závorce):</p>
+<blockquote>
+<div><p>data - data která vstupují do modelu - list, array, nebo dataframe
+predicts(7) - počet predikovaných hodnot
+lags(100) - počet předchozích kroků, podle kterých bude model počítat
+plot(0) - pokud 1, tak vykreslí grafy
+mi(0.1) - Učící krok - bude vybrán nejlepší z desetinásobků, takže ladit od 0 do 1
+random(0) - pokud 1, váhy budou inicializovány náhodně (pro linear zbytečné)
+seed(0) - Seed náhodných inicializací - náhodná čísla pro konkrétní seed budou vždy stejná</p>
+</div></blockquote>
+</div></blockquote>
+</div>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">predictit</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Daniel Malachov.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.2.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/predictit.models.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

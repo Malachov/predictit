@@ -35,44 +35,44 @@
 """
 
 # Moje
-from .autoreg_LNU_withwpred import autoreg_LNU_withwpred
-from .autoreg_LNU import autoreg_LNU
-from .cg import cg
+from predictit.models.autoreg_LNU_withwpred import autoreg_LNU_withwpred
+from predictit.models.autoreg_LNU import autoreg_LNU
+from predictit.models.cg import cg
 
 # Statsmodels
-from .sm_ar import ar
-from .sm_arma import arma
-from .sm_arima import arima
-from .sm_sarima import sarima
+from predictit.models.sm_ar import ar
+from predictit.models.sm_arma import arma
+from predictit.models.sm_arima import arima
+from predictit.models.sm_sarima import sarima
 
 # Tensorflow, Keras
 tensorflowit = 0
 
 if tensorflowit:
-    from .tf_lstm_batch import lstm_batch
-    from .tf_lstm_bidirectional import lstm_bidirectional
-    from .tf_lstm_stacked_batch import lstm_stacked_batch
-    from .tf_lstm_stacked import lstm_stacked
-    from .tf_lstm import lstm
-    from .tf_mlp_batch import mlp_batch
-    from .tf_mlp import mlp
+    from predictit.models.tf_lstm_batch import lstm_batch
+    from predictit.models.tf_lstm_bidirectional import lstm_bidirectional
+    from predictit.models.tf_lstm_stacked_batch import lstm_stacked_batch
+    from predictit.models.tf_lstm_stacked import lstm_stacked
+    from predictit.models.tf_lstm import lstm
+    from predictit.models.tf_mlp_batch import mlp_batch
+    from predictit.models.tf_mlp import mlp
 
 # Scikit
-from .sklearn_universal import sklearn_universal
+from predictit.models.sklearn_universal import sklearn_universal
 
 # Scikit
-from .regression_bayes_ridge import regression_bayes_ridge
-from .regression_hubber import regression_hubber
-from .regression_lasso import regression_lasso
-from .regression_linear import regression_linear
-from .regression_ridge import regression_ridge
-from .regression_ridge_CV import regression_ridge_CV
+from predictit.models.regression_bayes_ridge import regression_bayes_ridge
+from predictit.models.regression_hubber import regression_hubber
+from predictit.models.regression_lasso import regression_lasso
+from predictit.models.regression_linear import regression_linear
+from predictit.models.regression_ridge import regression_ridge
+from predictit.models.regression_ridge_CV import regression_ridge_CV
 
-from .elm import elm
-from .elm_gen import elm_gen
+from predictit.models.elm import elm
+from predictit.models.elm_gen import elm_gen
 
 # Slouží pro porovnání výsledků predikcí s pouhým průměrem
-from .compare_with_average import compare_with_average
+from predictit.models.compare_with_average import compare_with_average
 
 
 import sklearn

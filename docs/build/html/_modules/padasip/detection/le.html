@@ -1,0 +1,302 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>padasip.detection.le &#8212; predictit 0.22 documentation</title>
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for padasip.detection.le</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">.. versionadded:: 1.0.0</span>
+
+<span class="sd">The Learning Entropy (LE) is non-Shannon entropy based on conformity</span>
+<span class="sd">of individual data samples to the contemporary learned governing law</span>
+<span class="sd">of a leraning system :cite:`bukovsky2013learning`. More information about</span>
+<span class="sd">application can be found also in other studies :cite:`bukovsky2016study`</span>
+<span class="sd">:cite:`bukovsky2015case` :cite:`bukovsky2014learning`.</span>
+
+<span class="sd">Content of this page:</span>
+
+<span class="sd">.. contents::</span>
+<span class="sd">   :local:</span>
+<span class="sd">   :depth: 1</span>
+
+<span class="sd">Algorithm Explanation</span>
+<span class="sd">==========================</span>
+
+<span class="sd">Two options how to estimate the LE are implemented - direct approach and</span>
+<span class="sd">multiscale approach.</span>
+
+<span class="sd">.. rubric:: Direct approach</span>
+
+<span class="sd">With direct approach the LE is evaluated for every sample as follows</span>
+
+<span class="sd">:math:`\\textrm{LE}_d(k) = \\frac{ (\\Delta \\textbf{w}(k) - \\overline{| \\Delta \\textbf{w}_M(k) |}) }</span>
+<span class="sd">{ (\\sigma({| \\Delta \\textbf{w}_M(k) |})+\\epsilon) }`</span>
+
+<span class="sd">where</span>
+
+<span class="sd">* :math:`|\\Delta \\textbf{w}(k)|` are the absolute values of current weights</span>
+<span class="sd">  increment.</span>
+
+<span class="sd">* :math:`\overline{| \\Delta \\textbf{w}_M(k) |}` are averages of absolute</span>
+<span class="sd">  values of window used for LE evaluation.</span>
+<span class="sd">  </span>
+<span class="sd">* :math:`\\sigma (| \\Delta \\textbf{w}_M(k) |)` are standard deviatons of</span>
+<span class="sd">  absolute values of window used for LE evaluation.</span>
+
+<span class="sd">* :math:`\\epsilon` is regularization term to preserve stability for small</span>
+<span class="sd">  values of standard deviation.</span>
+
+
+<span class="sd">.. rubric:: Multiscale approach</span>
+
+<span class="sd">Value for every sample is defined as follows</span>
+
+<span class="sd">:math:`\\textrm{LE}(k) = \\frac{1}{n \cdot n_\\alpha}</span>
+<span class="sd">\sum f(\Delta w_{i}(k), \\alpha ),`</span>
+
+<span class="sd">where :math:`\Delta w_i(k)` stands for one weight from vector</span>
+<span class="sd">:math:`\Delta \\textbf{w}(k)`, the :math:`n` is number of weights,</span>
+<span class="sd">the :math:`n_\\alpha` is number of used detection sensitivities</span>
+
+<span class="sd">:math:`\\alpha=[\\alpha_{1}, \\alpha_{2}, \ldots, \\alpha_{n_{\\alpha}}].`</span>
+
+<span class="sd">The function :math:`f(\Delta w_{i}(k), \\alpha)` is defined as follows</span>
+
+<span class="sd">:math:`f(\Delta w_{i}(k),\\alpha)=</span>
+<span class="sd">\{{\\rm if}\,\left(\left\\vert \Delta w_{i}(k)\\right\\vert &gt;</span>
+<span class="sd">\\alpha\cdot \overline{\left\\vert \Delta w_{Mi}(k)\\right\\vert }\\right)\,</span>
+<span class="sd">\\rm{then} \, 1, \\rm{else  }\,0 \}.`</span>
+
+
+
+
+<span class="sd">Usage Instructions and Optimal Performance</span>
+<span class="sd">==============================================</span>
+
+<span class="sd">The LE algorithm can be used as follows</span>
+
+<span class="sd">.. code-block:: python</span>
+
+<span class="sd">    le = pa.detection.learning_entropy(w, m=30, order=1)</span>
+<span class="sd">    </span>
+<span class="sd">in case of direct approach. For multiscale approach an example follows</span>
+
+<span class="sd">.. code-block:: python</span>
+
+<span class="sd">    le = pa.detection.learning_entropy(w, m=30, order=1, alpha=[8., 9., 10., 11., 12., 13.])</span>
+
+<span class="sd">where `w` is matrix of the adaptive parameters (changing in time, every row</span>
+<span class="sd">should represent one time index), `m` is window size, `order` is LE order  and</span>
+<span class="sd">`alpha` is vector of sensitivities.</span>
+
+<span class="sd">.. rubric:: Used adaptive models</span>
+
+<span class="sd">In general it is possible to use any adaptive model. The input of the LE</span>
+<span class="sd">algorithm is matrix of an adaptive parameters history, where every row</span>
+<span class="sd">represents the parameters used in a particular time and every column represents</span>
+<span class="sd">one parameter in whole adaptation history.</span>
+
+<span class="sd">.. rubric:: Selection of sensitivities</span>
+
+<span class="sd">The optimal number of detection sensitivities and their values depends on task and data. The sensitivities should be chosen in range where the function :math:`LE(k)` returns a value lower than 1 for at least one sample in data, and for at maximally one sample returns value of 0.</span>
+
+<span class="sd">Minimal Working Example</span>
+<span class="sd">============================</span>
+
+<span class="sd">In this example is demonstrated how can the multiscale approach LE highligh</span>
+<span class="sd">the position of a perturbation inserted in a data. As the adaptive model is used </span>
+<span class="sd">:ref:`filter-nlms` adaptive filter. The perturbation is manually inserted</span>
+<span class="sd">in sample with index :math:`k=1000` (the length of data is 2000).</span>
+
+<span class="sd">.. code-block:: python</span>
+
+<span class="sd">    import numpy as np</span>
+<span class="sd">    import matplotlib.pylab as plt</span>
+<span class="sd">    import padasip as pa </span>
+
+<span class="sd">    # data creation</span>
+<span class="sd">    n = 5</span>
+<span class="sd">    N = 2000</span>
+<span class="sd">    x = np.random.normal(0, 1, (N, n))</span>
+<span class="sd">    d = np.sum(x, axis=1) + np.random.normal(0, 0.1, N)</span>
+
+<span class="sd">    # perturbation insertion</span>
+<span class="sd">    d[1000] += 2.</span>
+
+<span class="sd">    # creation of learning model (adaptive filter)</span>
+<span class="sd">    f = pa.filters.FilterNLMS(n, mu=1., w=np.ones(n))</span>
+<span class="sd">    y, e, w = f.run(d, x)</span>
+
+<span class="sd">    # estimation of LE with weights from learning model</span>
+<span class="sd">    le = pa.detection.learning_entropy(w, m=30, order=2, alpha=[8., 9., 10., 11., 12., 13.])</span>
+
+<span class="sd">    # LE plot</span>
+<span class="sd">    plt.plot(le)</span>
+<span class="sd">    plt.show()</span>
+
+
+<span class="sd">References</span>
+<span class="sd">============</span>
+
+<span class="sd">.. bibliography:: le.bib</span>
+<span class="sd">    :style: plain</span>
+
+<span class="sd">Code Explanation</span>
+<span class="sd">====================</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+
+<div class="viewcode-block" id="learning_entropy"><a class="viewcode-back" href="../../../padasip.detection.html#padasip.detection.le.learning_entropy">[docs]</a><span class="k">def</span> <span class="nf">learning_entropy</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">m</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function estimates Learning Entropy.</span>
+
+<span class="sd">    **Args:**</span>
+
+<span class="sd">    * `w` : history of adaptive parameters of an adaptive model (2d array),</span>
+<span class="sd">      every row represents parameters in given time index.</span>
+
+<span class="sd">    **Kwargs:**</span>
+
+<span class="sd">    * `m` : window size (1d array) - how many last samples are used for</span>
+<span class="sd">      evaluation of every sample.   </span>
+<span class="sd">      </span>
+<span class="sd">    * `order` : order of the LE (int) - order of weights differention</span>
+
+<span class="sd">    * `alpha` : list of senstitivites (1d array). If not provided, the LE </span>
+<span class="sd">      direct approach is used.</span>
+
+<span class="sd">    **Returns:**</span>
+
+<span class="sd">    * Learning Entropy of data (1 d array) - one value for every sample</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">w</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">w</span><span class="p">)</span>
+    <span class="c1"># get length of data and number of parameters</span>
+    <span class="n">N</span> <span class="o">=</span> <span class="n">w</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="n">w</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="c1"># get abs dw from w</span>
+    <span class="n">dw</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">w</span><span class="p">)</span>
+    <span class="n">dw</span><span class="p">[</span><span class="n">order</span><span class="p">:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">dw</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="n">order</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+    <span class="c1"># average floting window - window is k-m ... k-1</span>
+    <span class="n">awd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">w</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">alpha</span><span class="p">:</span>
+        <span class="c1"># estimate the ALPHA with multiscale approach</span>
+        <span class="n">swd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">w</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">N</span><span class="p">):</span>
+            <span class="n">awd</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">dw</span><span class="p">[</span><span class="n">k</span><span class="o">-</span><span class="n">m</span><span class="p">:</span><span class="n">k</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">swd</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">dw</span><span class="p">[</span><span class="n">k</span><span class="o">-</span><span class="n">m</span><span class="p">:</span><span class="n">k</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="c1"># estimate the points of entropy</span>
+        <span class="n">eps</span> <span class="o">=</span> <span class="mf">1e-10</span> <span class="c1"># regularization term</span>
+        <span class="n">le</span>  <span class="o">=</span> <span class="p">(</span><span class="n">dw</span> <span class="o">-</span> <span class="n">awd</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">swd</span><span class="o">+</span><span class="n">eps</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># estimate the ALPHA with direct approach</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">N</span><span class="p">):</span>
+            <span class="n">awd</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">dw</span><span class="p">[</span><span class="n">k</span><span class="o">-</span><span class="n">m</span><span class="p">:</span><span class="n">k</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="c1"># estimate the points of entropy</span>
+        <span class="n">alphas</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">alpha</span><span class="p">)</span>
+        <span class="n">fh</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">alpha</span> <span class="ow">in</span> <span class="n">alphas</span><span class="p">:</span>
+            <span class="n">fh</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">awd</span><span class="o">*</span><span class="n">alpha</span> <span class="o">&lt;</span> <span class="n">dw</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">le</span> <span class="o">=</span> <span class="n">fh</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">n</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">alphas</span><span class="p">))</span>
+    <span class="c1"># clear unknown zone on begining</span>
+    <span class="n">le</span><span class="p">[:</span><span class="n">m</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="c1"># return output</span>
+    <span class="k">return</span> <span class="n">le</span></div>
+
+
+
+
+
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">predictit</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Daniel Malachov.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.2.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -2,7 +2,7 @@ from keras.models import Sequential
 from keras.layers import LSTM
 from keras.layers import Dense
 
-from ..data_prep import make_sequences
+from predictit.data_prep import make_sequences
 
 def lstm_stacked_batch(data, n_steps_in=50, n_features=1, predicts=7, layers=2, epochs=100, units=32, optimizer='adam', loss='mse', verbose=0, activation='relu', activation_out='relu', stateful=False, metrics='acc', timedistributed=0):
     

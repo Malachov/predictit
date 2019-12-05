@@ -3,7 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import statsmodels.api as sm
 import numpy as np
-from .data_prep import do_difference, inverse_difference
+from predictit.data_prep import do_difference, inverse_difference
 
 def bounds(data, predicts=7, confidence=0.1, p=1, d=0, q=0):
 

@@ -1,0 +1,338 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>predictit.data_prep &#8212; predictit 0.22 documentation</title>
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for predictit.data_prep</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">statistics</span> <span class="k">import</span> <span class="n">stdev</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pickle</span>
+
+<div class="viewcode-block" id="remove_outliers"><a class="viewcode-back" href="../../predictit.html#predictit.data_prep.remove_outliers">[docs]</a><span class="k">def</span> <span class="nf">remove_outliers</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">predicted_column_index</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Remove values far from mean - probably errors</span>
+<span class="sd">    ======</span>
+
+<span class="sd">    Output:</span>
+<span class="sd">    -------</span>
+<span class="sd">    Cleaned data{arr, list}</span>
+
+<span class="sd">    Arguments:</span>
+<span class="sd">    -------</span>
+<span class="sd">        data {arr, list} -- Data to be cleaned</span>
+<span class="sd">        predicted_column_index {int} -- Number of predicted column (default: {0})</span>
+<span class="sd">        threshold {f} -- Threshold that limit values defined by multiplier of standard deviation (default: {3})</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="n">data_shape</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">data</span> <span class="o">&gt;</span> <span class="n">data</span><span class="o">.</span><span class="n">std</span><span class="p">()]</span>
+
+        <span class="k">return</span> <span class="n">data</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">data_mean</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">predicted_column_index</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+        <span class="n">data_std</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">predicted_column_index</span><span class="p">]</span><span class="o">.</span><span class="n">std</span><span class="p">()</span>
+
+        <span class="n">counter</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">predicted_column_index</span><span class="p">])):</span>
+
+            <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">predicted_column_index</span><span class="p">,</span> <span class="n">counter</span><span class="p">]</span> <span class="o">-</span> <span class="n">data_mean</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">threshold</span> <span class="o">*</span> <span class="n">data_std</span><span class="p">:</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">counter</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+                <span class="n">counter</span> <span class="o">-=</span> <span class="mi">1</span>
+            <span class="n">counter</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="k">return</span> <span class="n">data</span></div>
+
+<div class="viewcode-block" id="do_difference"><a class="viewcode-back" href="../../predictit.html#predictit.data_prep.do_difference">[docs]</a><span class="k">def</span> <span class="nf">do_difference</span><span class="p">(</span><span class="n">dataset</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Transform data into neighbor difference. For example from [1, 2, 4] into [1, 2]</span>
+<span class="sd">    </span>
+<span class="sd">    Arguments:</span>
+<span class="sd">        dataset {arr, list}</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">diff</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">dataset</span><span class="p">)):</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">dataset</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="n">diff</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">diff</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="inverse_difference"><a class="viewcode-back" href="../../predictit.html#predictit.data_prep.inverse_difference">[docs]</a><span class="k">def</span> <span class="nf">inverse_difference</span><span class="p">(</span><span class="n">differenced_predictions</span><span class="p">,</span> <span class="n">last_undiff_value</span><span class="p">):</span>
+    <span class="s2">&quot;Transform do_difference transform back&quot;</span>
+    <span class="n">first</span> <span class="o">=</span> <span class="n">last_undiff_value</span> <span class="o">+</span> <span class="n">differenced_predictions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">diff</span> <span class="o">=</span> <span class="p">[</span><span class="n">first</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">differenced_predictions</span><span class="p">)):</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">differenced_predictions</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">diff</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="n">diff</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">diff</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="split"><a class="viewcode-back" href="../../predictit.html#predictit.data_prep.split">[docs]</a><span class="k">def</span> <span class="nf">split</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">predicts</span> <span class="o">=</span> <span class="mi">7</span><span class="p">,</span> <span class="n">predicted_column_index</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Divide data set on train and test set</span>
+<span class="sd">    Inputs</span>
+<span class="sd">        data - dataframe, array, CSV or list</span>
+<span class="sd">    Output</span>
+<span class="sd">        train</span>
+<span class="sd">        test</span>
+<span class="sd">    example:</span>
+<span class="sd">    train, test = split(data)</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">values</span>
+
+    <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="n">data_shape</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span> 
+        <span class="n">train</span> <span class="o">=</span> <span class="n">data</span><span class="p">[:(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="o">-</span><span class="n">predicts</span><span class="p">)]</span>
+        <span class="n">test</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="o">-</span><span class="n">predicts</span><span class="p">:]</span>
+
+        <span class="k">if</span> <span class="n">predicts</span> <span class="o">&gt;</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;To few data, train/test not returned&#39;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">],</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">]</span> <span class="o">*</span> <span class="n">predicts</span><span class="p">)</span>
+            
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">predicts</span> <span class="o">&gt;</span> <span class="p">(</span><span class="n">data_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;To few data, train/test not returned&#39;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">]</span> <span class="o">*</span> <span class="n">predicts</span><span class="p">))</span>
+
+        <span class="n">train</span> <span class="o">=</span> <span class="n">data</span><span class="p">[:,</span> <span class="p">:</span><span class="o">-</span><span class="n">predicts</span><span class="p">]</span>
+
+        <span class="n">test</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">predicted_column_index</span><span class="p">,</span> <span class="o">-</span><span class="n">predicts</span><span class="p">:]</span>
+
+    <span class="k">return</span> <span class="p">(</span><span class="n">train</span><span class="p">,</span> <span class="n">test</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="data_clean"><a class="viewcode-back" href="../../predictit.html#predictit.data_prep.data_clean">[docs]</a><span class="k">def</span> <span class="nf">data_clean</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+    <span class="s2">&quot;Remove non-number columns&quot;</span>
+    <span class="n">remember</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="nb">int</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">5</span><span class="p">][</span><span class="n">remember</span><span class="p">])</span> 
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+            <span class="n">data</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="n">remember</span><span class="p">]</span>    <span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">remember</span> <span class="o">-=</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="n">data</span></div>
+
+<div class="viewcode-block" id="make_sequences"><a class="viewcode-back" href="../../predictit.html#predictit.data_prep.make_sequences">[docs]</a><span class="k">def</span> <span class="nf">make_sequences</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">n_steps_in</span><span class="p">,</span> <span class="n">n_steps_out</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">predicted_column_index</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">other_columns_lenght</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; From [1, 2, 3, 4, 5, 6, 7, 8] </span>
+
+<span class="sd">        Creates [1, 2, 3]  [4]</span>
+<span class="sd">                [5, 6, 7]  [8]</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">def</span> <span class="nf">make_seq</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">n_steps_in</span><span class="p">,</span> <span class="n">n_steps_out</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(),</span> <span class="nb">list</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)):</span>
+            <span class="c1"># find the end of this pattern</span>
+            <span class="n">end_ix</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="n">n_steps_in</span>
+            <span class="n">out_end_ix</span> <span class="o">=</span> <span class="n">end_ix</span> <span class="o">+</span> <span class="n">n_steps_out</span>
+            <span class="c1"># check if we are beyond the data</span>
+            <span class="k">if</span> <span class="n">out_end_ix</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+                <span class="k">break</span>
+            <span class="c1"># gather input and output parts of the pattern</span>
+            <span class="n">seq_x</span><span class="p">,</span> <span class="n">seq_y</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">end_ix</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="n">end_ix</span><span class="p">:</span><span class="n">out_end_ix</span><span class="p">]</span>
+            <span class="n">X</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">seq_x</span><span class="p">)</span>
+            <span class="n">y</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">seq_y</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span>
+
+    <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="n">data_shape</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">X_list</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">make_seq</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">n_steps_in</span><span class="o">=</span><span class="n">n_steps_in</span><span class="p">,</span> <span class="n">n_steps_out</span><span class="o">=</span><span class="n">n_steps_out</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="n">constant</span><span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span> 
+
+        <span class="n">for_prediction</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">predicted_column_index</span><span class="p">,</span> <span class="p">:]</span> 
+        <span class="n">other_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">predicted_column_index</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="n">X_only</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">make_seq</span><span class="p">(</span><span class="n">for_prediction</span><span class="p">,</span> <span class="n">n_steps_in</span><span class="o">=</span><span class="n">n_steps_in</span><span class="p">,</span> <span class="n">n_steps_out</span><span class="o">=</span><span class="n">n_steps_out</span><span class="p">)</span>
+
+        <span class="n">other_columns</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">X_list</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">other_data</span><span class="p">)):</span>
+            <span class="n">other_columns_sequentions</span><span class="p">,</span> <span class="n">e</span> <span class="o">=</span> <span class="n">make_seq</span><span class="p">(</span><span class="n">other_data</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">n_steps_in</span><span class="o">=</span><span class="n">n_steps_in</span><span class="p">,</span> <span class="n">n_steps_out</span><span class="o">=</span><span class="n">n_steps_out</span><span class="p">)</span>
+            <span class="n">other_columns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">other_columns_sequentions</span><span class="p">)</span>
+
+        <span class="n">other_columns_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">other_columns</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">other_columns_lenght</span><span class="p">:</span>
+            <span class="n">other_columns_array</span> <span class="o">=</span> <span class="n">other_columns_array</span><span class="p">[:,</span> <span class="p">:,</span> <span class="o">-</span><span class="n">other_columns_lenght</span><span class="p">:]</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">X_only</span><span class="p">)):</span>
+
+            <span class="n">other_columns_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">other_columns_array</span><span class="p">[:,</span> <span class="n">i</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+            <span class="n">X_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">other_columns_list</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">X_only</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
+
+    <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">X_list</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">constant</span><span class="p">:</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">constant</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">X</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">y</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="make_x_input"><a class="viewcode-back" href="../../predictit.html#predictit.data_prep.make_x_input">[docs]</a><span class="k">def</span> <span class="nf">make_x_input</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">n_steps_in</span><span class="p">,</span> <span class="n">predicted_column_index</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">other_columns_lenght</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Make input into model</span>
+<span class="sd">    </span>
+<span class="sd">    Arguments:</span>
+<span class="sd">        data {arr, list}</span>
+<span class="sd">        n_steps_in {int} -- Lags going into model</span>
+<span class="sd">    </span>
+<span class="sd">    Keyword Arguments:</span>
+<span class="sd">        predicted_column_index {int} -- Index of predicted column (default: {0})</span>
+<span class="sd">        other_columns_lenght {int} -- Lags of other columns (default: {None})</span>
+<span class="sd">        constant {int} -- Can be 1 - constant added into every input (default: {None})</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="n">data_shape</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+
+        <span class="n">x_input</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="o">-</span><span class="n">n_steps_in</span><span class="p">:]</span>
+        <span class="k">if</span> <span class="n">constant</span><span class="p">:</span>
+            <span class="n">x_input</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">x_input</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">constant</span><span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">for_prediction</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">predicted_column_index</span><span class="p">,</span> <span class="o">-</span><span class="n">n_steps_in</span><span class="p">:]</span> 
+        <span class="n">other_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">predicted_column_index</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">other_columns_lenght</span><span class="p">:</span>
+            <span class="n">other_cols</span> <span class="o">=</span> <span class="n">other_data</span><span class="p">[:,</span> <span class="o">-</span><span class="n">other_columns_lenght</span><span class="p">:]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">other_cols</span> <span class="o">=</span> <span class="n">other_data</span><span class="p">[:,</span> <span class="o">-</span><span class="n">n_steps_in</span><span class="p">:]</span>
+
+        <span class="n">x_input</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">other_cols</span><span class="p">,</span> <span class="n">for_prediction</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">constant</span><span class="p">:</span>
+            <span class="n">x_input</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">x_input</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">constant</span><span class="p">)</span>
+
+    <span class="n">x_input</span> <span class="o">=</span> <span class="n">x_input</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">x_input</span></div>
+
+<div class="viewcode-block" id="smooth"><a class="viewcode-back" href="../../predictit.html#predictit.data_prep.smooth">[docs]</a><span class="k">def</span> <span class="nf">smooth</span><span class="p">():</span>
+    <span class="c1"># TODO</span>
+    <span class="k">pass</span></div>
+
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">def normalize01(data):</span>
+<span class="sd">    data = np.array(data)</span>
+<span class="sd">    data = data.reshape(-1, 1)</span>
+<span class="sd">    scaler = preprocessing.MinMaxScaler(feature_range=(0, 1))</span>
+<span class="sd">    scaled = scaler.fit_transform(data) </span>
+<span class="sd">    return scaled</span>
+
+<span class="sd">def denormalize01(scaled):</span>
+<span class="sd">    scaler = preprocessing.MinMaxScaler(feature_range=(0, 1))</span>
+<span class="sd">    denormalized = scaler.inverse_transform(scaled)</span>
+<span class="sd">    data = data.reshape(-1)</span>
+<span class="sd">    return denormalized</span>
+
+<span class="sd">def standardize(data):</span>
+<span class="sd">    dataT = data.reshape(-1, 1)</span>
+<span class="sd">    scaler = preprocessing.StandardScaler()</span>
+<span class="sd">    scaled = scaler.fit_transform(dataT)</span>
+<span class="sd">    return scaled</span>
+
+<span class="sd">def destandardize(scaled):</span>
+<span class="sd">    scaler = preprocessing.StandardScaler()</span>
+<span class="sd">    destandardized = scaler.inverse_transform(scaled)</span>
+<span class="sd">    return destandardized</span>
+<span class="sd">&#39;&#39;&#39;</span>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">predictit</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Daniel Malachov.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.2.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

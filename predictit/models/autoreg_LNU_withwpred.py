@@ -1,7 +1,7 @@
 #%%
 import matplotlib.pyplot as plt
 import numpy as np
-from .sm_ar import ar
+from predictit.models.sm_ar import ar
 
 def autoreg_LNU_withwpred(data, predicts=7, lags=100, predicted_column_index=0, mi = 0.1, minormit=0, tlumenimi = 1, plot=0, random=0, seed = 0):
 

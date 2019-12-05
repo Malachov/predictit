@@ -1,8 +1,11 @@
-from __future__ import print_function
 from setuptools import setup, find_packages
 import io
 import os
 import sys
+
+import predictit
+
+version = predictit.__version__
 
 def read(*filenames, **kwargs):
     encoding = kwargs.get('encoding', 'utf-8')
@@ -16,32 +19,17 @@ def read(*filenames, **kwargs):
 with open('README.md') as readme_file:
     readme = readme_file.read()
 
-# TODO - txt to list
-with open('requirements.txt') as reqs_file:
-    reqs = reqs_file.read()
+with open('requirements.txt', 'r') as f:
+    myreqs = [line.strip() for line in f]
 
 setup(
     name='predictit',
-    version=0.23,
+    version=version,
     url='https://github.com/Malachov/predictit',
     download_url='https://github.com/Malachov/predictit/archive/0.11.tar.gz',
     license='mit',
     author='Daniel Malachov',
-    install_requires=[
-            'numpy',
-            'pandas',
-            'scipy',
-            'scikit_learn',
-            'SQLAlchemy',
-            'statsmodels',
-            'pyodbc',
-            'sklearn_extensions',
-            'prettytable',
-            'matplotlib',
-            'plotly',
-            'cufflinks',
-            'seaborn'
-      ],
+    install_requires=myreqs,
     author_email='malachovd@seznam.cz',
     description='Library/framework for making predictions.',
     long_description=readme,

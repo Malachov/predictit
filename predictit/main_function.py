@@ -34,12 +34,6 @@ if __name__ == "__main__":
     from confidence_interval import bounds
     from database import database_load, database_deploy
 
-    '''
-    %load_ext autoreload
-    %autoreload 2
-    %aimport config, models, database
-    '''
-
     # Veškerá nastavitelná data v config.py - ostatní jen pro zasvěcené
     # Pokud nemáte pracovní složku nastavenou do modulu, načte jeho absolutní adresu a nastaví ji jako cwd
     my_file = Path("main_function.py")
@@ -54,9 +48,6 @@ if __name__ == "__main__":
         warnings.filterwarnings('ignore')
 
     def make_predictions(predicted_column_name, freq='D'):
-
-
-
 
         ##########################################
         ################## DATA ########### ANCHOR Data

@@ -1,0 +1,239 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>padasip.detection.elbnd &#8212; predictit 0.22 documentation</title>
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for padasip.detection.elbnd</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">.. versionadded:: 1.0.0</span>
+
+<span class="sd">The Error and Learning Based Novelty Detection (ELBND)is based on the</span>
+<span class="sd">evaluation of an adaptive model error and the change of its parameters</span>
+<span class="sd">:cite:`cejnek2015adaptive`, :cite:`cejnek2014another`.</span>
+
+<span class="sd">Content of this page:</span>
+
+<span class="sd">.. contents::</span>
+<span class="sd">   :local:</span>
+<span class="sd">   :depth: 1</span>
+
+<span class="sd">Algorithm Explanation</span>
+<span class="sd">==========================</span>
+
+<span class="sd">The ELBND can describe every sample with vector of values estimated from</span>
+<span class="sd">the adaptive increments of any adaptive model and the error of that model</span>
+<span class="sd">as follows</span>
+
+<span class="sd">:math:`\\textrm{ELBND}(k) = \Delta \\textbf{w}(k) e(k).`</span>
+
+<span class="sd">The output is a vector of values describing novelty in given sample.</span>
+<span class="sd">To obtain single value of novelty ammount for every sample is possible to use</span>
+<span class="sd">various functions, for example maximum of absolute values.</span>
+
+<span class="sd">:math:`\\textrm{elbnd}(k) = \max |\\textrm{ELBND}(k)|.`</span>
+
+<span class="sd">Other popular option is to make a sum of absolute values.</span>
+
+
+<span class="sd">Usage Instructions</span>
+<span class="sd">========================</span>
+
+<span class="sd">The ELBND algorithm can be used as follows</span>
+
+<span class="sd">.. code-block:: python</span>
+
+<span class="sd">    elbnd = pa.detection.ELBND(w, e, function=&quot;max&quot;)</span>
+
+<span class="sd">where `w` is matrix of the adaptive parameters (changing in time, every row</span>
+<span class="sd">should represent one time index), `e` is error of adaptive model and</span>
+<span class="sd">`function` is input function, in this case maximum. </span>
+
+
+<span class="sd">Minimal Working Example</span>
+<span class="sd">============================</span>
+
+<span class="sd">In this example is demonstrated how can the LE highligh the position of</span>
+<span class="sd">a perturbation inserted in a data. As the adaptive model is used </span>
+<span class="sd">:ref:`filter-nlms` adaptive filter. The perturbation is manually inserted</span>
+<span class="sd">in sample with index :math:`k=1000` (the length of data is 2000).</span>
+
+<span class="sd">.. code-block:: python</span>
+
+<span class="sd">    import numpy as np</span>
+<span class="sd">    import matplotlib.pylab as plt</span>
+<span class="sd">    import padasip as pa </span>
+
+<span class="sd">    # data creation</span>
+<span class="sd">    n = 5</span>
+<span class="sd">    N = 2000</span>
+<span class="sd">    x = np.random.normal(0, 1, (N, n))</span>
+<span class="sd">    d = np.sum(x, axis=1) + np.random.normal(0, 0.1, N)</span>
+
+<span class="sd">    # perturbation insertion</span>
+<span class="sd">    d[1000] += 2.</span>
+
+<span class="sd">    # creation of learning model (adaptive filter)</span>
+<span class="sd">    f = pa.filters.FilterNLMS(n, mu=1., w=np.ones(n))</span>
+<span class="sd">    y, e, w = f.run(d, x)</span>
+
+<span class="sd">    # estimation of LE with weights from learning model</span>
+<span class="sd">    elbnd = pa.detection.ELBND(w, e, function=&quot;max&quot;)</span>
+
+<span class="sd">    # LE plot</span>
+<span class="sd">    plt.plot(elbnd)</span>
+<span class="sd">    plt.show()</span>
+
+
+<span class="sd">References</span>
+<span class="sd">============</span>
+
+<span class="sd">.. bibliography:: elbnd.bib</span>
+<span class="sd">    :style: plain</span>
+
+<span class="sd">Code Explanation</span>
+<span class="sd">====================</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<div class="viewcode-block" id="ELBND"><a class="viewcode-back" href="../../../padasip.detection.html#padasip.detection.elbnd.ELBND">[docs]</a><span class="k">def</span> <span class="nf">ELBND</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">function</span><span class="o">=</span><span class="s2">&quot;max&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function estimates Error and Learning Based Novelty Detection measure</span>
+<span class="sd">    from given data.</span>
+
+<span class="sd">    **Args:**</span>
+
+<span class="sd">    * `w` : history of adaptive parameters of an adaptive model (2d array),</span>
+<span class="sd">      every row represents parameters in given time index.</span>
+
+<span class="sd">    * `e` : error of adaptive model (1d array)</span>
+
+<span class="sd">    **Kwargs:**</span>
+
+<span class="sd">    * `functions` : output function (str). The way how to produce single</span>
+<span class="sd">      value for every sample (from all parameters)</span>
+<span class="sd">      </span>
+<span class="sd">        * `max` - maximal value</span>
+<span class="sd">      </span>
+<span class="sd">        * `sum` - sum of values</span>
+
+<span class="sd">    **Returns:**</span>
+
+<span class="sd">    * ELBND values (1d array). This vector has same lenght as `w`.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># check if the function is known</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">function</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;max&quot;</span><span class="p">,</span> <span class="s2">&quot;sum&quot;</span><span class="p">]:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Unknown output function&#39;</span><span class="p">)</span>
+    <span class="c1"># get length of data and number of parameters</span>
+    <span class="n">N</span> <span class="o">=</span> <span class="n">w</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="n">w</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="c1"># get abs dw from w</span>
+    <span class="n">dw</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">w</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+    <span class="n">dw</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+    <span class="c1"># absolute values of product of increments and error</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">((</span><span class="mi">5</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span>
+    <span class="n">b</span> <span class="o">=</span> <span class="n">a</span><span class="o">.</span><span class="n">T</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">])</span>
+    <span class="n">elbnd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">((</span><span class="n">dw</span><span class="o">.</span><span class="n">T</span><span class="o">*</span><span class="n">e</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+    <span class="c1"># apply output function</span>
+    <span class="k">if</span> <span class="n">function</span> <span class="o">==</span> <span class="s2">&quot;max&quot;</span><span class="p">:</span>
+        <span class="n">elbnd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">elbnd</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">function</span> <span class="o">==</span> <span class="s2">&quot;sum&quot;</span><span class="p">:</span>
+        <span class="n">elbnd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">elbnd</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> 
+    <span class="c1"># return output</span>
+    <span class="k">return</span> <span class="n">elbnd</span></div>
+
+
+
+
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">predictit</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Daniel Malachov.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.2.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

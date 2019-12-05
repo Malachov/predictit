@@ -3,7 +3,7 @@ import numpy as np
 from sklearn.multioutput import MultiOutputRegressor
 import warnings
 
-from ..data_prep import make_sequences, make_x_input
+from predictit.data_prep import make_sequences, make_x_input
 
 def regression_bayes_ridge(data, n_steps_in=50, predicts=7, predicted_column_index=0, output_shape='one_step', other_columns_lenght=None, constant=None, n_iter=100, alpha_1=1.e-6, alpha_2=1.e-6, lambda_1=1.e-6, lambda_2=1.e-6):
 

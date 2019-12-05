@@ -2,7 +2,7 @@ from sklearn import linear_model
 import numpy as np
 from sklearn.multioutput import MultiOutputRegressor
 
-from ..data_prep import make_sequences, make_x_input
+from predictit.data_prep import make_sequences, make_x_input
 
 def regression_hubber(data, n_steps_in=50, predicts=7, predicted_column_index=0, output_shape='one_step', other_columns_lenght=None, constant=None, epsilon=1.35, alpha=0.0001):
 

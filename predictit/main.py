@@ -1,42 +1,43 @@
 #%%
-# jen pro jupyter - smazat
+# -*- coding: utf-8 -*- 
+import sys
+
+sys.path.insert(0, r"/home/dan/ownCloud/Github/predictit_library")
+sys.path.insert(1, r"/home/dan/ownCloud/Github/predictit_library/models")
+
+import numpy as np
+import matplotlib.pyplot as plt
+from prettytable import PrettyTable
+import time
+import pickle
+from pathlib import Path
+import os
+import plotly.offline as py
+#import plotly.offline.graph_objs as go
+import plotly.graph_objs as go
+import cufflinks as cf
+import sklearn
+import pandas as pd
+import warnings
+from sklearn import preprocessing
+from predictit.database import database_load
+from predictit import config
+from predictit import models
+from predictit.data_prep import split, data_clean, remove_outliers, do_difference, inverse_difference
+from predictit.test_pre import test_pre
+from predictit.analyze import analyze_data, decompose
+from predictit.best_params import optimize
+from predictit.confidence_interval import bounds
+from predictit.data_test import data1
+
+# Just for developing with jupyter magic
 try:
     __IPYTHON__
     print('Jupyter')
 except NameError:
     print('No Jupyter')
 
-# Dodelat / testpre jenom jedene return
 def predict():
-
-    import sys
-    sys.path.insert(0, r'C:\Users\daniel.malachov\Desktop\Diplomka')
-    sys.path.insert(0, r'C:\Users\daniel.malachov\Desktop\Diplomka\models')
-
-    import numpy as np
-    import matplotlib.pyplot as plt
-    from prettytable import PrettyTable
-    import time
-    import pickle
-    from pathlib import Path
-    import os
-    import plotly.offline as py
-    #import plotly.offline.graph_objs as go
-    import plotly.graph_objs as go
-    import cufflinks as cf
-    import sklearn
-    import pandas as pd
-    import warnings
-    from sklearn import preprocessing
-    from .database import database_load
-    from . import config
-    from . import models
-    from .data_prep import split, data_clean, remove_outliers, do_difference, inverse_difference
-    from .test_pre import test_pre
-    from .analyze import analyze_data, decompose
-    from .best_params import optimize
-    from .confidence_interval import bounds
-    from .data_test import data1
 
     predicted_column_name = config.predicted_columns_names
 
@@ -204,6 +205,7 @@ def predict():
 
     models_number = len(config.used_models)
     models_names = list(config.used_models.keys())
+
 
     ##########################################
     ################ Optimize ################ ANCHOR Optimize

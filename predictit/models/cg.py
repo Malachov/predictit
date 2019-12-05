@@ -1,5 +1,5 @@
 import numpy as np
-from ..data_prep import make_sequences, make_x_input
+from predictit.data_prep import make_sequences, make_x_input
 
 def cg(data, n_steps_in=50, predicts=7, predicted_column_index=0, epochs=100, constant=1, other_columns_lenght=None):
 

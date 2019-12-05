@@ -6,7 +6,7 @@ import numpy as np
 from pathlib import Path
 import os
 
-from ..data_prep import make_sequences
+from predictit.data_prep import make_sequences
 
 def mlp(data, n_steps, n_features=1, predicts=7, layers=3, epochs=100, units=32, save=1, already_trained=0, optimizer='adam', loss='mse', verbose=0, activation='relu', dropout=0.5, metrics='acc', timedistributed=0):
 

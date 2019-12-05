@@ -78,6 +78,3 @@ def test_pre(predicted, test, train=None, criterion='mape', plot=0, modelname = 
 
         if criterion == 'rmse':
             return rmse
-
-
-

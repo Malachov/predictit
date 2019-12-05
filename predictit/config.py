@@ -1,8 +1,7 @@
 
 # CWD - absolutní adresa modulu predikcí - není nutné pokud máte otevřenou celou složku v IDE
-from . import models
-
-cwd = r'C:\Users\daniel.malachov\Desktop\Diplomka'
+from predictit import models
+import os
 
 # Zdroj dat v případě, že se nepoužívají data testovací
 # Buď 'sql', nebo 'csv'
@@ -15,9 +14,8 @@ freqs = 'D'
 
 # Adresa CSV pro predikci pokud nebudou použita testovací data - První řádek obsahuje názvy sloupců, první sloupec datum
 csv_adress = r'E:\VSCODE\Diplomka\test_data\daily-minimum-temperatures.csv'  # Adresa csv včetně názvu a přípony
-save_plot_adress = r''  # Where to save the plot
+save_plot_adress = os.path.normpath(os.path.expanduser("~/Desktop")) + '/plot.html'  # Path where to save the plot (String)
 predicted_columns_names = 'Temp'  #['SumNumber', 'SumDuration']  # Název sloupce jehož hodnota má být predikována
-
 
 date_index = 0
 predicts = 7  # Počet predikovaných hodnot - defaultně 7

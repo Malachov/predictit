@@ -2,7 +2,7 @@ import pandas as pd
 import pyodbc
 from sqlalchemy import create_engine
 import urllib
-from . import config
+from predictit import config
 
 def database_load(server=config.server, database=config.database, freq='D', index_col = 'DateBK', data_limit=2000, last=1):
     """Load database into dataframe and create datetime index
