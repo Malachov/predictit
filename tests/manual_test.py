@@ -16,4 +16,5 @@ import predictit
 results = predictit.main.predict()
 #desktop = os.path.normpath(os.path.expanduser("~/Desktop")) + '/plot.html'
 
-#print(desktop)https://stackoverflow.com/questions/5606719/share-my-git-repository
+
+# print(desktop)https://stackoverflow.com/questions/5606719/share-my-git-repository
