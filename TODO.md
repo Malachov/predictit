@@ -1,14 +1,12 @@
 # TODO list and what could be done
 
-- [ ] [Data as function input - not only CSV and database
+- [ ] Data as function input - not only CSV and database
 
-Remove main_function.py - main.py for multiple output
+- [ ] Remove main_function.py - main.py for multiple output
 
-numba optimization
-
-New criterion model - with lagged values / autocorrelation for anomaly prediction
-
-Nem models - HONU, LebenvergMarquardt
+- [ ] numba optimization
+- [ ] New criterion model - with lagged values / autocorrelation for anomaly prediction
+- [ ] Nem models - HONU, LebenvergMarquardt
 
 Data smoothing as a parametr
 
