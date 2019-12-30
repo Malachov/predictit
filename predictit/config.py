@@ -187,7 +187,7 @@ models_parameters_limits = {
         "Extreme learning machine": {"n_steps_in": steps, "n_hidden": [2, 300], "output_shape": ['batch', 'one_step'], "constant": [None, 1], "other_columns_lenght": [None, steps[1]], "alpha": alpha, "rbf_width": [0.0, 10.0], "activation_func": models.activations},
         "Gen Extreme learning machine": {"n_steps_in": steps, "alpha": alpha, "output_shape": ['batch', 'one_step'], "constant": [None, 1], "other_columns_lenght": [None, steps[1]]},
 
-        "Sklearn regression": {"n_steps_in": steps, "regressor": ['lasso', 'linear', 'ridgecv', 'ridge'], "output_shape": ['batch', 'one_step'], "other_columns_lenght": [None, steps[1]], "constant": [None, 1], "alpha": alpha, "n_iter": [100, 500], "epsilon": [1.01, 5.0], "alphas": [[0.1, 0.1, 0.1], [0.5, 0.5, 0.5], [0.9, 0.9, 0.9]], "gcv_mode": ['auto', 'svd', 'eigen'], "solver": ['auto', 'svd', 'eigen']},
+        "Sklearn regression": {"n_steps_in": steps, "regressor": get_regressors, "output_shape": ['batch', 'one_step'], "other_columns_lenght": [None, steps[1]], "constant": [None, 1], "alpha": alpha, "n_iter": [100, 500], "epsilon": [1.01, 5.0], "alphas": [[0.1, 0.1, 0.1], [0.5, 0.5, 0.5], [0.9, 0.9, 0.9]], "gcv_mode": ['auto', 'svd', 'eigen'], "solver": ['auto', 'svd', 'eigen']},
         "Bayes Ridge Regression": {"n_steps_in": steps, "output_shape": ['batch', 'one_step'], "constant": [None, 1], "other_columns_lenght": [None, steps[1]], "alpha_1": [0.1e-6, 3e-6], "alpha_2": [0.1e-6, 3e-6], "lambda_1": [0.1e-6, 3e-6], "lambda_2": [0.1e-7, 3e-6]},
         "Hubber regression": {"n_steps_in": steps, "output_shape": ['batch', 'one_step'], "constant": [None, 1], "other_columns_lenght": [None, steps[1]], "epsilon": [1.01, 5.0], "alpha": alpha}
 
