@@ -1,19 +1,21 @@
 # -*- coding: utf-8 -*-
-"""Všechny modely se všemi jejich parametry
+"""All the models with all the parameters
+
+Parameters in common in models (default in brackets):
+----------------------- 
+
+        data - Data input to model - list, array, or dataframe
+        predicts - Number of predicted values
+        plot - If 1, plot results
 
 'AR (Autoregression)': ar
 -------------------
 
-    Parametry (defaultně v závorce):
-        predicts - počet predikovaných hodnot
-        plot - pokud 1, tak vykreslí grafy
+
 
 'Linear neural unit': autoregLNU
 -----------------
 
-    Parametry (defaultně v závorce):
-        data - data která vstupují do modelu - list, array, nebo dataframe
-        predicts(7) - počet predikovaných hodnot
         lags(100) - počet předchozích kroků, podle kterých bude model počítat
         plot(0) - pokud 1, tak vykreslí grafy
         mi(0.1) - Učící krok - bude vybrán nejlepší z desetinásobků, takže ladit od 0 do 1
@@ -35,58 +37,37 @@
 """
 
 # Moje
-from predictit.models.autoreg_LNU_withwpred import autoreg_LNU_withwpred
-from predictit.models.autoreg_LNU import autoreg_LNU
-from predictit.models.cg import cg
+from .autoreg_LNU_withwpred import autoreg_LNU_withwpred
+from .autoreg_LNU import autoreg_LNU
+from .cg import cg
 
 # Statsmodels
-from predictit.models.sm_ar import ar
-from predictit.models.sm_arma import arma
-from predictit.models.sm_arima import arima
-from predictit.models.sm_sarima import sarima
+from .sm_ar import ar
+from .sm_arma import arma
+from .sm_arima import arima
+from .sm_sarima import sarima
 
 # Tensorflow, Keras
 tensorflowit = 0
 
 if tensorflowit:
-    from predictit.models.tf_lstm_batch import lstm_batch
-    from predictit.models.tf_lstm_bidirectional import lstm_bidirectional
-    from predictit.models.tf_lstm_stacked_batch import lstm_stacked_batch
-    from predictit.models.tf_lstm_stacked import lstm_stacked
-    from predictit.models.tf_lstm import lstm
-    from predictit.models.tf_mlp_batch import mlp_batch
-    from predictit.models.tf_mlp import mlp
+    from .tf_lstm_batch import lstm_batch
+    from .tf_lstm_bidirectional import lstm_bidirectional
+    from .tf_lstm_stacked_batch import lstm_stacked_batch
+    from .tf_lstm_stacked import lstm_stacked
+    from .tf_lstm import lstm
+    from .tf_mlp_batch import mlp_batch
+    from .tf_mlp import mlp
 
 # Scikit
-from predictit.models.sklearn_universal import sklearn_universal
+from .sklearn_regression import regression
 
-# Scikit
-from predictit.models.regression_bayes_ridge import regression_bayes_ridge
-from predictit.models.regression_hubber import regression_hubber
-from predictit.models.regression_lasso import regression_lasso
-from predictit.models.regression_linear import regression_linear
-from predictit.models.regression_ridge import regression_ridge
-from predictit.models.regression_ridge_CV import regression_ridge_CV
+# Extreme machine learning
+from .elm import elm
+from .elm_gen import elm_gen
 
-from predictit.models.elm import elm
-from predictit.models.elm_gen import elm_gen
-
-# Slouží pro porovnání výsledků predikcí s pouhým průměrem
-from predictit.models.compare_with_average import compare_with_average
-
-
-import sklearn
-from importlib import import_module
-
-regressors=[]
-for module in sklearn.__all__:
-    try:
-        module = import_module(f'sklearn.{module}')
-        regressors.extend([getattr(module,cls) for cls in module.__all__  if 'Regress' in cls ])
-    except:
-        pass
-regressors.append(sklearn.svm.SVR)
-default_regressor = sklearn.linear_model.BayesianRidge
+# For comparing results with just an average values
+from .compare_with_average import compare_with_average
 
 if tensorflowit:
     from keras import optimizers

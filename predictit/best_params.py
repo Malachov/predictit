@@ -4,9 +4,13 @@ import warnings
 import time
 import sys
 
-def optimize(model, kwargs, kwargs_limits, data, criterion='mape', fragments=10, iterations=3, predicts=7, details=0, time_limit = 5, predicted_column_index=0, name='your model'):
+from . import data_prep, evaluate_predictions
+
+
+def optimize(model, kwargs, kwargs_limits, data, criterion='mape', fragments=10, iterations=3, predicts=7, details=0, time_limit=5, predicted_column_index=0, name='your model'):
 
     """Function to find optimal parameters of function
+
     ======
     Output:
     ------
@@ -25,12 +29,12 @@ def optimize(model, kwargs, kwargs_limits, data, criterion='mape', fragments=10,
     kwargs_fragments = {}
     constant_kwargs = {key: value for (key, value) in kwargs.items() if key not in kwargs_limits}
     kwargs = {key: value for (key, value) in kwargs.items() if key not in constant_kwargs}
-    train, test = split(data, predicts=predicts, predicted_column_index=predicted_column_index)
+    train, test = data_prep.split(data, predicts=predicts, predicted_column_index=predicted_column_index)
 
 
     def evaluatemodel(kwargs):
         predictions = model(train, **constant_kwargs, **kwargs)
-        modeleval = test_pre(predictions, test, criterion='mape', predicts=predicts, plot=0)
+        modeleval = evaluate_predictions.compare_predicted_to_test(predictions, test, criterion='mape', plot=0)
         return modeleval
 
     def watchdog(timeout, code, *args, **kwargs):
@@ -55,15 +59,14 @@ def optimize(model, kwargs, kwargs_limits, data, criterion='mape', fragments=10,
         finally:
             sys.settrace(old_tracer)
 
-    # Testuje, jestli defaultní parametry nejsou nejlepší
+    # Test default parameters (can be the best)
     best_result = evaluatemodel(kwargs)
-    best_result_memory = best_result
     best_params = kwargs
-    
-    # Pokud se během iterace výsledek nezlepší, vrátí výsledky
+
+    # If result isn't better during iteration, return results
     memory_result = 0
 
-    # Dojde-li k následujícímu warningu, výpočet kroku přerušen
+    # If such a warning occur, parameters combination skipped
     if details == 2:
         warnings.filterwarnings('once')
 
@@ -80,7 +83,7 @@ def optimize(model, kwargs, kwargs_limits, data, criterion='mape', fragments=10,
         if not isinstance(j[0], (int, float, np.ndarray, np.generic)):
             kwargs_fragments[i] = j
         elif isinstance(j[0], int):
-            pomoc = np.linspace(j[0], j[1], fragments, dtype = int)
+            pomoc = np.linspace(j[0], j[1], fragments, dtype=int)
             kwargs_fragments[i] = list(set([int(round(j)) for j in pomoc]))
         else:
             kwargs_fragments[i] = np.unique(np.linspace(j[0], j[1], fragments))
@@ -102,7 +105,7 @@ def optimize(model, kwargs, kwargs_limits, data, criterion='mape', fragments=10,
             counter +=1
 
             try:
-                res = watchdog(time_limit, evaluatemodel, kombi[k])# za 0.1 doplnit *args **kwargs
+                res = watchdog(time_limit, evaluatemodel, kombi[k])  # za 0.1 doplnit *args **kwargs
 
                 if res < best_result:
                     best_result = res
@@ -121,9 +124,9 @@ def optimize(model, kwargs, kwargs_limits, data, criterion='mape', fragments=10,
                     return best_params
 
                 if details > 0 and counter % 10 == 1:
-                    print("Optization is in {} %".format(counter / percent))
+                    print("Optimization is in {} %".format(counter / percent))
 
-        # Pokud se výsledek během iterace nezlepšil, nemá cenu pokračovat
+        # If result not getting better through iteration, not worth of continuing
 
         if round(memory_result, 4) == round(best_result, 4):
             return best_params

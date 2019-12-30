@@ -1,9 +1,7 @@
-from pandas import Series
 import pandas as pd
-import matplotlib.pyplot as plt
 import statsmodels.api as sm
 import numpy as np
-from predictit.data_prep import do_difference, inverse_difference
+
 
 def bounds(data, predicts=7, confidence=0.1, p=1, d=0, q=0):
 
@@ -25,20 +23,30 @@ def bounds(data, predicts=7, confidence=0.1, p=1, d=0, q=0):
     if len(data) <= 10:
         return
 
-    last_value = data[-1]
-    #data = do_difference(data)
     order = (p, d, q)
 
-    model = sm.tsa.ARIMA(data, order=order)
+    try:
 
-    model_fit = model.fit(disp=0)
-    predictions = model_fit.forecast(steps=predicts, alpha=confidence)
+        model = sm.tsa.ARIMA(data, order=order)
+        model_fit = model.fit(disp=0)
+        predictions = model_fit.forecast(steps=predicts, alpha=confidence)
 
-    bounds = predictions[2].T
-    lower_bound = bounds[0]
-    upper_bound = bounds[1]
-    #lower_bound = inverse_difference(bounds[0], last_value)
-    #upper_bound = inverse_difference(bounds[1], last_value)
+        bounds = predictions[2].T
+        lower_bound = bounds[0]
+        upper_bound = bounds[1]
+
+    except Exception:
+
+        import predictit
+
+        last_value = data[-1]
+        data = predictit.data_prep.do_difference(data)
+
+        model = sm.tsa.ARIMA(data, order=order)
+        model_fit = model.fit(disp=0)
+        predictions = model_fit.forecast(steps=predicts, alpha=confidence)
+
+        lower_bound = predictit.data_prep.inverse_difference(bounds[0], last_value)
+        upper_bound = predictit.data_prep.inverse_difference(bounds[1], last_value)
 
     return lower_bound, upper_bound
-

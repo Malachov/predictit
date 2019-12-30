@@ -2,7 +2,7 @@ from sklearn_extensions.extreme_learning_machines.elm import ELMRegressor
 import numpy as np
 from sklearn.multioutput import MultiOutputRegressor
 
-from predictit.data_prep import make_sequences, make_x_input
+from ..data_prep import make_sequences, make_x_input
 
 def elm(data, n_steps_in=50, predicts=7, predicted_column_index=0, output_shape='one_step', other_columns_lenght=None, constant=None, n_hidden=20, alpha=0.5, rbf_width=1.0, activation_func='tanh'):
 
@@ -31,7 +31,7 @@ def elm(data, n_steps_in=50, predicts=7, predicted_column_index=0, output_shape=
                 yhat = multi_regressor.predict(x_input)
 
                 x_input = np.insert(x_input, n_steps_in, yhat[0], axis=1)
-                x_input = np.delete(x_input, 0, axis=1 )
+                x_input = np.delete(x_input, 0, axis=1)
                 predictions.append(yhat[0])
 
         if output_shape == 'batch':
@@ -43,14 +43,13 @@ def elm(data, n_steps_in=50, predicts=7, predicted_column_index=0, output_shape=
 
     else:
 
-    ## Data ve více sloupcích
         if not other_columns_lenght:
             other_columns_lenght = n_steps_in
 
         if output_shape == 'one_step':
 
-            from models import ar
-            
+            from . import ar
+
             predictions = []
             nu_data_shape = data.shape
 
@@ -64,7 +63,7 @@ def elm(data, n_steps_in=50, predicts=7, predicted_column_index=0, output_shape=
                 yhat = multi_regressor.predict(x_input)
                 yhat_flat = yhat[0]
                 predictions.append(yhat_flat)
-                
+
                 for_prediction = np.append(for_prediction, yhat)
 
                 for j in data:

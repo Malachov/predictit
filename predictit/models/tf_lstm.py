@@ -6,7 +6,7 @@ import numpy as np
 from pathlib import Path
 import os
 
-from predictit.data_prep import make_sequences
+from ..data_prep import make_sequences
 
 def lstm(data, n_steps, n_features=1, predicts=7, epochs=200, units=50, save=1, already_trained=0, optimizer='adam', loss='mse', verbose=0, activation='relu', metrics='mape', timedistributed=0):
 

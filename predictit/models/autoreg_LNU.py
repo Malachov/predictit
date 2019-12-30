@@ -1,8 +1,8 @@
-#%%
 import matplotlib.pyplot as plt
 import numpy as np
 
-def autoreg_LNU(data, predicts=7, lags=100, mi=0.1, minormit=1, predicted_column_index=0, tlumenimi=1, plot=0, random=0, seed = 0):
+
+def autoreg_LNU(data, predicts=7, lags=100, mi=0.1, minormit=1, predicted_column_index=0, tlumenimi=1, plot=0, random=0, seed=0):
     """Autoregressive linear neural unit.
     Inputs
         mii = learning step of Grad descent
@@ -22,7 +22,7 @@ def autoreg_LNU(data, predicts=7, lags=100, mi=0.1, minormit=1, predicted_column
     if len(data_shape) > 1:
         data = data[predicted_column_index]
 
-    miwide = np.array([mi * 10, mi, mi / 10, mi / 100, mi/1000, mi/100000, mi/1000000, mi/100000000, mi/100000000000])
+    miwide = np.array([mi * 10, mi, mi / 10, mi / 100, mi / 1000, mi / 100000, mi / 1000000, mi / 100000000, mi / 100000000000])
     miwidelen = len(miwide)
     leng = len(data)
     y = np.zeros((miwidelen, leng))
@@ -35,16 +35,16 @@ def autoreg_LNU(data, predicts=7, lags=100, mi=0.1, minormit=1, predicted_column
     if plot == 1:
         wall = np.zeros((miwidelen, leng, lags + 1))
 
-    if seed is not 0:
+    if seed != 0:
         random.seed(seed)
 
     for i in range(miwidelen):
         if random == 1:
             w[i] = np.random.rand(lags + 1)
         x[i][0] = 1
-        for j in range(leng): # NOTE nároky na paměť i čas?? možná neponechávat index i ale pouze konečné sumy a hodnoty přepisovat - nebo ponechat pro predikci w??
+        for j in range(leng):
             y[i][j] = np.dot(w[i], x[i])
-            if y[i][j] > 1000 * max(data): # Ochrana proti nekonvergujícím hodnotám učícího kroku
+            if y[i][j] > 1000 * max(data):
                 e[i][-1] = 1000000
                 break
             e[i][j] = data[j] - y[i][j]
@@ -74,22 +74,22 @@ def autoreg_LNU(data, predicts=7, lags=100, mi=0.1, minormit=1, predicted_column
             x[bestmiindex][1] = predictions[-1]
     
     if plot == 1:
-        plt.figure(figsize=(12,7))
+        plt.figure(figsize=(12, 7))
 
         plt.subplot(3, 1, 1)
-        plt.plot(y[bestmiindex], label='Predikce'); plt.xlabel('t')
-        plt.plot(data, label='Skutečnost'); plt.xlabel('t')
-        plt.legend(loc="upper right")
-        plt.ylabel("y")
+        plt.plot(y[bestmiindex], label='Predikce')
+        plt.xlabel('t'); plt.ylabel("y"); plt.legend(loc="upper right")
+
+        plt.plot(data, label='Skutečnost')
+        plt.xlabel('t')
 
         plt.subplot(3, 1, 2)
-        plt.plot(e[bestmiindex], label='Chyba při tvorbě modelu'); plt.grid(); plt.xlabel('t')
-        plt.legend(loc="upper right")
-        plt.ylabel("Chyba")
+        plt.plot(e[bestmiindex], label='Chyba při tvorbě modelu')
+        plt.grid(); plt.xlabel('t'); plt.ylabel("Chyba"); plt.legend(loc="upper right")
 
         plt.subplot(3, 1, 3)
-        plt.plot(wall[bestmiindex]); plt.grid(); plt.xlabel('t')
-        plt.ylabel("Hodnoty vah")
+        plt.plot(wall[bestmiindex])
+        plt.grid(); plt.xlabel('t'); plt.ylabel("Hodnoty vah")
 
         plt.suptitle("Predikovaná vs. skutečná hodnota, chyba a váhy", fontsize=20)
         plt.subplots_adjust(top=0.88)
@@ -100,3 +100,4 @@ def autoreg_LNU(data, predicts=7, lags=100, mi=0.1, minormit=1, predicted_column
         return None
 
     return (predictions)
+    

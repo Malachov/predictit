@@ -4,7 +4,7 @@ from keras.layers import Dense
 from keras.layers import Bidirectional
 import numpy as np
 
-from predictit.data_prep import make_sequences
+from ..data_prep import make_sequences
 
 def lstm_bidirectional(data, n_steps_in= 50, n_features = 1, predicts = 7, epochs = 100, units=50, optimizer = 'adam', loss='mse', verbose=0, activation='relu', dropout=0, metrics='acc', timedistributed=0):
     """

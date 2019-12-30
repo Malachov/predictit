@@ -47,11 +47,8 @@ used_models = {
 
             "Extreme learning machine": predictit.models.elm,
 
-            "Sklearn universal": predictit.models.sklearn_universal,
+            "Regression": models.regression
 
-            "Bayes Ridge Regression": predictit.models.regression_bayes_ridge,
-            "Hubber regression": predictit.models.regression_hubber,
-            "Lasso Regression": predictit.models.regression_lasso,
            }
            
 # Define parameters of models
@@ -60,7 +57,6 @@ n_steps_in = 50  # How many lagged values in models
 output_shape = 'batch'  # Whether batch or one-step models
 
 models_parameters = {
-
 
         "AR (Autoregression)": {"plot": 0, 'method': 'cmle', 'ic': 'aic', 'trend': 'nc', 'solver': 'lbfgs'},
         "ARMA": {"plot": 0, "p": 3, "q": 0, 'method': 'mle', 'ic': 'aic', 'trend': 'nc', 'solver': 'lbfgs', 'forecast_type': 'in_sample'},
@@ -73,11 +69,10 @@ models_parameters = {
 
         "Sklearn universal": {"n_steps_in": n_steps_in, "output_shape": "one_step", "model": predictit.models.default_regressor, "constant": None},
 
-        "Bayes Ridge Regression": {"n_steps_in": n_steps_in, "output_shape": output_shape, "other_columns_lenght": None, "constant": None, "alpha_1": 1.e-6, "alpha_2": 1.e-6, "lambda_1": 1.e-6, "lambda_2": 1.e-6},
-        "Hubber regression": {"n_steps_in": n_steps_in, "output_shape": output_shape, "other_columns_lenght": None, "constant": None, "epsilon": 1.35, "alpha": 0.0001},
-        "Lasso Regression": {"n_steps_in": n_steps_in, "output_shape": output_shape, "other_columns_lenght": None, "constant": None, "alpha": 0.6}
-        
+        "Sklearn regression": {"regressor": 'linear', "n_steps_in": n_steps_in, "output_shape": output_shape, "other_columns_lenght": None, "constant": None, "alpha": 0.0001, "n_iter": 100, "epsilon": 1.35, "alphas": [0.1, 0.5, 1], "gcv_mode": 'auto', "solver": 'auto'}
+
+
         }
-        
+
 predictions = predictit.main.predict()
 ```

@@ -1,9 +1,11 @@
 #%%
 import matplotlib.pyplot as plt
 import numpy as np
-from predictit.models.sm_ar import ar
+from .sm_ar import ar
 
-def autoreg_LNU_withwpred(data, predicts=7, lags=100, predicted_column_index=0, mi = 0.1, minormit=0, tlumenimi = 1, plot=0, random=0, seed = 0):
+
+# TODO for for epochs
+def autoreg_LNU_withwpred(data, predicts=7, lags=100, predicted_column_index=0, mi=0.1, minormit=0, tlumenimi=1, scope=1, shift=0, plot=0, random=0, seed=0):
 
     data = np.array(data)
     data_shape = data.shape
@@ -11,7 +13,7 @@ def autoreg_LNU_withwpred(data, predicts=7, lags=100, predicted_column_index=0, 
     if len(data_shape) > 1:
         data = data[predicted_column_index]
 
-    miwide = np.array([mi * 100, mi * 10, mi, mi / 10, mi / 100, mi/1000, mi/10000, mi/100000, mi/10000000, mi/100000000, mi/100000000000])
+    miwide = np.array([mi * 100, mi * 10, mi, mi / 10, mi / 100, mi / 1000, mi / 10000, mi / 100000, mi / 10000000, mi / 100000000, mi / 100000000000])
     miwidelen = len(miwide)
     leng = len(data)
     y = np.zeros((miwidelen, leng))
@@ -23,14 +25,14 @@ def autoreg_LNU_withwpred(data, predicts=7, lags=100, predicted_column_index=0, 
     wall = np.zeros((miwidelen, leng, lags + 1))
 
 
-    if seed is not 0:
+    if seed != 0:
         random.seed(seed)
 
     for i in range(miwidelen):
         if random == 1:
-            w[i] = np.random.rand(lags + 1) * scope + shift # TODO rozsah a posunuti jen u slozitejsich modelu
+            w[i] = np.random.rand(lags + 1) * scope + shift
         x[i][0] = 1
-        for j in range(leng): # NOTE nároky na paměť i čas?? možná neponechávat index i ale pouze konečné sumy a hodnoty přepisovat - nebo ponechat pro predikci w??
+        for j in range(leng):
             y[i][j] = np.dot(w[i], x[i])
             if y[i][j] > 100 * max(data):
                 e[i][-1] = 1000000
@@ -55,12 +57,12 @@ def autoreg_LNU_withwpred(data, predicts=7, lags=100, predicted_column_index=0, 
     bestmiindex = [i for i, j in enumerate(bestmi) if j == bestmivalue][0]
 
     wwlenght = lags + 1
-    wwhist = np.zeros((lags + 1, leng ))
-    wwt = np.zeros((lags + 1, predicts))
+    wwhist = np.zeros((wwlenght, leng))
+    wwt = np.zeros((wwlenght, predicts))
     wwhist = wall[bestmiindex].T
 
     for i in range(lags + 1):
-        wwt[i] = ar(wwhist[i], predicts = predicts)
+        wwt[i] = ar(wwhist[i], predicts=predicts)
 
     ww = wwt.T
 
@@ -71,22 +73,21 @@ def autoreg_LNU_withwpred(data, predicts=7, lags=100, predicted_column_index=0, 
             x[bestmiindex][1] = y[bestmiindex][-1]
 
     if plot == 1:
-        plt.figure(figsize=(12,7))
+        plt.figure(figsize=(12, 7))
 
         plt.subplot(3, 1, 1)
-        plt.plot(y[bestmiindex], label='Predikce'); plt.xlabel('t')
-        plt.plot(data, label='Skutečnost'); plt.xlabel('t')
-        plt.legend(loc="upper right")
-        plt.ylabel("y")
+        plt.plot(y[bestmiindex], label='Predikce')
+        plt.xlabel('t')
+        plt.plot(data, label='Skutečnost')
+        plt.xlabel('t'); plt.ylabel("y"); plt.legend(loc="upper right")
 
         plt.subplot(3, 1, 2)
         plt.plot(e[bestmiindex], label='Chyba při tvorbě modelu'); plt.grid(); plt.xlabel('t')
-        plt.legend(loc="upper right")
-        plt.ylabel("Chyba")
+        plt.legend(loc="upper right"); plt.ylabel("Chyba")
 
         plt.subplot(3, 1, 3)
-        plt.plot(wall[bestmiindex]); plt.grid(); plt.xlabel('t')
-        plt.ylabel("Hodnoty vah")
+        plt.plot(wall[bestmiindex])
+        plt.grid(); plt.xlabel('t'); plt.ylabel("Hodnoty vah")
 
         plt.suptitle("Predikovaná vs. skutečná hodnota, chyba a váhy", fontsize=20)
         plt.subplots_adjust(top=0.88)

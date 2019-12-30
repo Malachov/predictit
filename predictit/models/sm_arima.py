@@ -15,7 +15,7 @@ def arima(data, predicts=7, plot=0, p=3, d=1, q=0, predicted_column_index=0, met
     order = (p, d, q)
 
     model = sm.tsa.ARIMA(data, order=order)
-    model_fit = model.fit(method=method, ic=ic, trend=trend, solver=solver, disp=1)
+    model_fit = model.fit(method=method, ic=ic, trend=trend, solver=solver, disp=0)
 
     if forecast_type == 'in_sample':
         predictions = model_fit.forecast(steps=predicts)[0]

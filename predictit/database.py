@@ -2,11 +2,12 @@ import pandas as pd
 import pyodbc
 from sqlalchemy import create_engine
 import urllib
-from predictit import config
+from . import config
 
-def database_load(server=config.server, database=config.database, freq='D', index_col = 'DateBK', data_limit=2000, last=1):
+
+def database_load(server=config.server, database=config.database, freq='D', index_col='DateBK', data_limit=2000, last=1):
     """Load database into dataframe and create datetime index
-    
+
     Keyword Arguments:
         server {string} -- Name of server (default: {config.server})
         database {string} -- Name of database (default: {config.database})
@@ -75,8 +76,7 @@ def database_load(server=config.server, database=config.database, freq='D', inde
             {col}
 
         ORDER BY
-            {col_desc}'''.format(data_limit,
-             col=columns, col_desc=columns_desc)
+            {col_desc}'''.format(data_limit, col=columns, col_desc=columns_desc)
 
     df = pd.read_sql(query, sql_conn)
     if freq == 'H':
@@ -85,7 +85,7 @@ def database_load(server=config.server, database=config.database, freq='D', inde
         df.set_index('datetime', drop=True, inplace=True)
     else:
         df.set_index('DateBK', drop=True, inplace=True)
-        
+
     print(query)
 
     dates = ['IsoWeekYear', 'MonthNumberOfYear', 'DayNumberOfMonth', 'HourOfDay']
@@ -105,7 +105,7 @@ def database_load(server=config.server, database=config.database, freq='D', inde
 
 def database_deploy(last_date, sum_number, sum_duration, freq='D'):
     """Deploy dataframe to SQL server. Differ on concrete database - necessary to setup
-    
+
     Arguments:
         last_date {date} -- Last date of data
         sum_number {Values to deploy} -- One of predicted columns
@@ -116,7 +116,7 @@ def database_deploy(last_date, sum_number, sum_duration, freq='D'):
     lenght = len(sum_number)
 
     dataframe_to_sql = pd.DataFrame([])
-    dataframe_to_sql['EventStart'] = pd.date_range(start=last_date, periods=lenght+1, freq=freq)
+    dataframe_to_sql['EventStart'] = pd.date_range(start=last_date, periods=lenght + 1, freq=freq)
     dataframe_to_sql = dataframe_to_sql.iloc[1:]
 
     dataframe_to_sql['DimDateId'] = dataframe_to_sql['EventStart'].dt.date
@@ -142,4 +142,4 @@ def database_deploy(last_date, sum_number, sum_duration, freq='D'):
     conn_str = 'mssql+pyodbc:///?odbc_connect={}'.format(params)
 
     engine = create_engine(conn_str)
-    dataframe_to_sql.to_sql(name='FactProduction',con=engine, schema='Stage', if_exists='append', index=False)
+    dataframe_to_sql.to_sql(name='FactProduction', con=engine, schema='Stage', if_exists='append', index=False)

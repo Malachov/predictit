@@ -1,117 +1,116 @@
+from . import models
+from .test_data import data_test
+from .models.sklearn_regression import get_regressors
 
-# CWD - absolutní adresa modulu predikcí - není nutné pokud máte otevřenou celou složku v IDE
-from predictit import models
-import os
+# Data source type
+data_source = 'csv'  # 'csv' or 'sql' or 'test'
 
-# Zdroj dat v případě, že se nepoužívají data testovací
-# Buď 'sql', nebo 'csv'
-data_source = 'csv'
+# CSV adress (first row is column names - first column is date column)
 
+# CSV in test_data are gitignored
+csv_from_test_data_name = '5000 Sales Records.csv'  # '5000 Sales Records.csv'  # Csv located in module folder. Override next full adress if not 0 or empty string
+csv_adress = r'test_data\daily-minimum-temperatures.csv'  # Full CSV adress with suffix
+
+# If SQL, sql credentials
 server = '.'
-database = 'FK'  # Název databáze
-index_col = 'DateBK'  # Název sloupce s datumem
-freqs = 'D'
+database = 'FK'  # Database name
 
-# Adresa CSV pro predikci pokud nebudou použita testovací data - První řádek obsahuje názvy sloupců, první sloupec datum
-csv_adress = r'E:\VSCODE\Diplomka\test_data\daily-minimum-temperatures.csv'  # Adresa csv včetně názvu a přípony
-save_plot_adress = os.path.normpath(os.path.expanduser("~/Desktop")) + '/plot.html'  # Path where to save the plot (String)
-predicted_columns_names = 'Temp'  #['SumNumber', 'SumDuration']  # Název sloupce jehož hodnota má být predikována
+freqs = ['D', 'M']  # Interval for predictions 'M' - months, 'D' - Days, 'H' - Hours
 
-date_index = 0
-predicts = 7  # Počet predikovaných hodnot - defaultně 7
+plot = 1  # If 1, plot interactive graph
+save_plot = 0
+save_plot_adress = ''  # Path where to save the plot (String), if empty string or 0 - saved to desktop
 
-datalength = 1000  # Posledních N prvků, které budou použity
+# TODO if empty, then 0
+predicted_columns = ['Units Sold', 'Total Profit']  # Name of predicted column or it's index - string or int or list of columns
 
-data_transform = None  #'difference'  # 'difference' or None - Transformuje data na rozdíl mezi dvěma hodnotami
+date_index = 5  # Index of dataframe or it's name. Can be empty, then index 0 or new if no date column.
+predicts = 7  # Number of predicted values - 7 by default
+result_type = 'best'  # If 'all', return all results not only the best one
+return_all = 0  # If 1, return more models (config.compareit) results sorted by how efficient they are. If 0, return only the best one
+datalength = 100  # The length of the data used for prediction
 
-# Výpočet je opakován několikrát na zkrácených datech, aby se vyloučila náhoda úspěchu modelu
-repeatit = 2  # repeatit je počet opakování
-other_columns = 0  # Pokud nula, tak k výpočtubude použit pouze predikovaný sloupec
-lengths = 0  # Data rozdělí na různě dlouhé úseky a vybere ten nejlepší
-confidence = 0.8  # Oblast nejistoty ve finálním grafu - vyšší hodnota znamená užší oblast - maximum 1
-remove_outliers = 0  # Odstraní hodnoty odlehlé od průměru. Hodnota uvádí limit, nad který budou data smazána - jde o násobek standardní směrodatné odchylky
+data_transform = None  # 'difference' or None - Transform the data on differences between two neighbor values
+
+# Evaulation is repeated couple of times on shifted data for ensuring results (remove accidentaly good results)
+repeatit = 2  # How many times is computation repeated
+other_columns = 0  # If 0, only predicted column will be used for making predictions.
+lengths = 3  # Compute on various length of data. Automatically choose the best length
+confidence = 0.8  # Area of confidence in result plot (grey area where we suppose values) - Bigger value, narrower area - maximum 1
+remove_outliers = 0  # Remove extraordinary values. Value is threshold for ignored values. Value means how many times standard deviation from the average threshold is far
+standardize = 'standardize'  # one from 'standardize', '-11', '01', 'robust'
 criterion = 'mape'  # 'mape' or 'rmse'
-optimizeit = 0  # Najde optimální parametry modelů
-compareit = 10  # S kolika modely bude výsledek srovnáván
-debug = 1  # Debug - vypíše podrobné výsledky všech predikcí
-last_row = 0  # Pokud 0, vymaže poslední nekompletní řádek
-analyzeit = 0  # Analyzuje vstupní data - vypočíta autokorelaci
-evaluate_test_data = 1  # Jestli bude model hodnocen podle testovacích dat a nebo pouze predikovaných dat
-correlation_threshold = 0.2
-optimizeit_details = 2  # 1 vypíše nejlepší parametry modelu, 2 vypíše každé zlepšení a parametry
-optimizeit_limit = 5 # Jak dlouho může trvat výpočet jednoho parametru v sekundách
-optimizeit_final = 0  # Znovu optimalizuje nejlepší model
-plot = 1  # Pokud 1, vykreslí grafy výsledků nejlepší predikce
-plotallmodels = 0  # Vykreslí všechny predikce všech modelů
-piclkeit = 0  # Uloží testovací data na disk v serializované formě, čímž zrychlí načítání - nutno vypnout na nulu, aby se data nenačítala pokaždé
-already_trained = 0  # Výpočetně náročné modely jako LSTM načíst z disku
-saveit = 0
-standardizeit = 0  # Standardizuje data od -1 do 1
-normalizeit = 0  # Normalizuje data na směrodatnou odchylku 1 a průměr 0
-compare = 1  # Zda budou data výsledků porovnávána s ostatními modely
+compareit = 10  # How many models will evaluated (and returned in 'result_type' = 'all') and also compared in final plot. 0 if only the best one.
+debug = 0  # Debug - print all results and all the errors on the way
+last_row = 0  # If 0, erase last non-empty row
+analyzeit = 0  # Analyze input data - Statistical distribution, autocorrelation, seasonal decomposition etc.
+correlation_threshold = 0.5  # If evaluating from more collumns, use only collumns that are correlated. From 0 (All columns included) to 1 (only column itself)
+optimizeit = 0  # Find optimal parameters of models
+optimizeit_details = 2  # 1 print best parameters of models, 2 print every new best parameters achieved
+optimizeit_limit = 0.01  # How many seconds can take one model optimization
+optimizeit_final = 0  # If optimize paratmeters of the best model
+optimizeit_final_limit = 0.1  # If optimize paratmeters of the best model
+plotallmodels = 0  # Plot all models (recommended only in interactive jupyter window)
+piclkeit = 0  # Wheter save serialized !test! data on disk, that can speed up loading
+from_pickled = 1
+already_trained = 0  # Computationaly hard models (LSTM) load from disk
+tensorflowit = 0  # Whether use computationally hard models (slow even just on library load)
 
-# Data ned kterými bude testována predikce
-data_all_pickle = {
-#                    "Daily minimum temperatures": 'data0',
-                    "Sin": 'data1'
-#                    "Sign": 'data2',
-#                    "Dynamic system": 'data3',
-#                    "Reálná data klapky": 'data4'
-                }
+database_deploy = 0  # Whether save the predictions to database
+# TODO
+#standardizeit = 0  # Standardize data from -1 to 1
+#normalizeit = 0  # Normalizuje data to standard deviation 1 and average 0
 
-# Data pro finální predikci testovacích dat
-data_name_for_predicts = "Sin"
+#################################
+### Models, that will be used ###
+#################################
+# Verbose documentation is in models module (__init__.py) and it's files
+# Ctrl and Click on import name in main, or right click and go to definition
 
-## Modely, které budou použity k testování
-# Podrobná dokumentace k modulu je přímo v models (__init__)
-# Stačí Go to definition u models v prvním řádku from models import
 
+# If editting or adding new models, name of the models have to be the same as in models module
 used_models = {
 
-            "AR (Autoregression)": models.ar,
+             "AR (Autoregression)": models.ar,
             "ARMA": models.arma,
             "ARIMA (Autoregression integrated moving average)": models.arima,
-#            "SARIMAX (Seasonal ARIMA)": models.sarima,
+            "SARIMAX (Seasonal ARIMA)": models.sarima,
 
             "Autoregressive Linear neural unit": models.autoreg_LNU,
-#            "Linear neural unit with weigths predict": models.autoreg_LNU_withwpred,
+            "Linear neural unit with weigths predict": models.autoreg_LNU_withwpred,
             "Conjugate gradient": models.cg,
 
-#            "Extreme learning machine": models.elm,
-#            "Gen Extreme learning machine": models.elm_gen,
+            "Extreme learning machine": models.elm,
+            "Gen Extreme learning machine": models.elm_gen,
 
 #            "LSTM": models.lstm,
 #            "Bidirectional LSTM": models.lstm_bidirectional,
 #            "LSTM batch": models.lstm_batch,
 
-            "Sklearn universal": models.sklearn_universal,
 
-            "Bayes Ridge Regression": models.regression_bayes_ridge,
-            "Hubber regression": models.regression_hubber,
-            "Lasso Regression": models.regression_lasso,
-            "Linear regression": models.regression_linear,
-            "Ridge regression": models.regression_ridge,
-            "Ridge regressionCV": models.regression_ridge_CV,
+            "Sklearn regression": models.regression,
+            "Bayes ridge regression": models.regression,
+            "Hubber regression": models.regression,
 
-#            "Compare with average": models.compare_with_average
-           }
+            "Compare with average": models.compare_with_average
 
+}
 
-'''
-# For testing
+"""
+# If you want to test one module and don't want to comment and uncomment one after one
 used_models = {
 #    "AR (Autoregression)": models.ar,
 #    "ARMA": models.arma,
-    "ARIMA (Autoregression integrated moving average)": models.arima
-#    "SARIMAX (Seasonal ARIMA)": models.sarima,    
+        "Compare with average": predictit.models.compare_with_average
+#    "SARIMAX (Seasonal ARIMA)": models.sarima,
 }
-'''
+"""
 
-# Pozor, jména modelů musí být identická s názvy v modelech
-# Kolik regresivních členů - lagů, bude uvažováno
-constant = None
-n_steps_in = 100
-output_shape = 'batch'
+# How many lags will be used (It is order of arima and also  number of neurons in some neural nets)
+n_steps_in = 10
+output_shape = 'batch'  # 'batch' or 'one_step'
+saveit = 0  # Save computationaly hard models (LSTM) on disk
+
 models_parameters = {
 
         #TODO
@@ -127,34 +126,42 @@ models_parameters = {
        # "ARIMA (Autoregression integrated moving average)": {"p": [1, maxorder], "d": [0,1], "q": order, 'method': ['css-mle', 'mle', 'css'], 'trend': ['c', 'nc'], 'solver': ['lbfgs', 'bfgs', 'newton', 'nm', 'cg'], 'forecast_type': ['in_sample', 'out_of_sample']},
 
 
-
-
         "Autoregressive Linear neural unit": {"plot": 0, "lags": n_steps_in, "mi": 1, "minormit": 0, "tlumenimi": 1},
         "Linear neural unit with weigths predict": {"plot": 0, "lags": n_steps_in, "mi": 1, "minormit": 0, "tlumenimi": 1},
-        "Conjugate gradient": {"n_steps_in": 30, "epochs": 5, "constant": 1, "other_columns_lenght": None, "constant": None},
+        "Conjugate gradient": {"n_steps_in": 30, "epochs": 5, "constant": 1, "other_columns_lenght": None},
 
         "Extreme learning machine": {"n_steps_in": 20, "output_shape": 'one_step', "other_columns_lenght": None, "constant": None, "n_hidden": 20, "alpha": 0.3, "rbf_width": 0, "activation_func": 'selu'},
         "Gen Extreme learning machine": {"n_steps_in": 20, "output_shape": 'one_step', "other_columns_lenght": None, "constant": None, "alpha": 0.5},
 
-        #dodelat lstm
-        "LSTM": {"n_steps_in": 50, "save": saveit, "already_trained": 0, "epochs": 70, "units":50, "optimizer":'adam', "loss":'mse', "verbose": 1, "activation": 'relu', "timedistributed": 0, "metrics": ['mape']},
-        "LSTM batch": {"n_steps_in": n_steps_in, "n_features": 1, "epochs": 70, "units": 50, "optimizer":'adam', "loss":'mse', "verbose": 1, 'dropout': 0, "activation":'relu'},
-        "Bidirectional LSTM": {"n_steps_in": n_steps_in, "epochs": 70, "units": 50, "optimizer":'adam', "loss":'mse', "verbose": 0},
+        # TODO finish lstm
+        "LSTM": {"n_steps_in": 50, "save": saveit, "already_trained": 0, "epochs": 70, "units": 50, "optimizer": 'adam', "loss": 'mse', "verbose": 1, "activation": 'relu', "timedistributed": 0, "metrics": ['mape']},
+        "LSTM batch": {"n_steps_in": n_steps_in, "n_features": 1, "epochs": 70, "units": 50, "optimizer": 'adam', "loss": 'mse', "verbose": 1, 'dropout': 0, "activation": 'relu'},
+        "Bidirectional LSTM": {"n_steps_in": n_steps_in, "epochs": 70, "units": 50, "optimizer": 'adam', "loss": 'mse', "verbose": 0},
 
-        "Sklearn universal": {"n_steps_in": n_steps_in, "output_shape": "one_step", "model": models.default_regressor, "constant": None},
+        "Sklearn regression": {"regressor": 'linear', "n_steps_in": n_steps_in, "output_shape": output_shape, "other_columns_lenght": None, "constant": None, "alpha": 0.0001, "n_iter": 100, "epsilon": 1.35, "alphas": [0.1, 0.5, 1], "gcv_mode": 'auto', "solver": 'auto'},
+        "Bayes ridge regression": {"n_steps_in": n_steps_in, "regressor": 'bayesianridge', "output_shape": output_shape, "other_columns_lenght": None, "constant": None, "n_iter": 300, "alpha_1": 1.e-6, "alpha_2": 1.e-6, "lambda_1": 1.e-6, "lambda_2": 1.e-6},
+        "Hubber regression": {"regressor": 'huber', "n_steps_in": n_steps_in, "output_shape": output_shape, "other_columns_lenght": None, "constant": None, "epsilon": 1.35, "alpha": 0.0001}
+}
 
-        "Bayes Ridge Regression": {"n_steps_in": n_steps_in, "output_shape": output_shape, "other_columns_lenght": None, "constant": None, "alpha_1": 1.e-6, "alpha_2": 1.e-6, "lambda_1": 1.e-6, "lambda_2": 1.e-6},
-        "Hubber regression": {"n_steps_in": n_steps_in, "output_shape": output_shape, "other_columns_lenght": None, "constant": None, "epsilon": 1.35, "alpha": 0.0001},
-        "Lasso Regression": {"n_steps_in": n_steps_in, "output_shape": output_shape, "other_columns_lenght": None, "constant": None, "alpha": 0.6},
-        "Linear regression": {"n_steps_in": n_steps_in, "output_shape": output_shape, "other_columns_lenght": None, "constant": None, },
-        "Ridge regression": {"n_steps_in": n_steps_in, "output_shape": output_shape, "other_columns_lenght": None, "constant": None, "alpha": 1, "solver": 'auto'},
-        "Ridge regressionCV": {"n_steps_in": n_steps_in, "output_shape": output_shape, "other_columns_lenght": None, "constant": None, "alphas": [1e-3, 1e-2, 1e-1, 1], "gcv_mode": 'auto'},
+########################################
+### Models parameters optimalisation ###
+########################################
+# Find best parameters for prediction
+# Example how it works. Function predict_with_my_model(param1, param2)
+# If param1 limits are [0, 10], and fragments = 5, it will be evaluated for [0, 2, 4, 6, 8, 10]
+# Then it finds best value and make new interval that is again divided in 5 parts...
+# This is done as many times as iteration value is
+fragments = 4
+iterations = 2
 
-        }
+# This is for final optimalisation of the best model, not for all models
+fragments_final = 2 * fragments
+iterations_final = 2 * iterations
 
-# Hraniční hodnoty pro optimalizaci
-# Pokud jsou povinná celá čísla, použijte například 2, pokud jsou možná desetinna, pište 2.0
+# Threshold values
+# If you need integers, type just number, if you need float, type dot (e.g. 2.0)
 
+# This boundaries repeat across models
 steps = [2, 200]
 alpha = [0.0, 1.0]
 epochs = [2, 100]
@@ -163,22 +170,15 @@ order = [0, 5]
 
 maxorder = 6
 
-fragments = 4
-iterations = 2
-
-fragments_final = 2 * fragments
-iterations_final = 2 * iterations
-
-
-# !! Vše co je zde musí být i v inicializačních parametrech výše, jinak error
-# LSTM modely při tunování parametrů nenačítat z PC !!
-models_parameters_limits = { 
+# !! Every parameters here have to be in models_parameters, or error
+# Some models can be very computationaly hard - use optimizeit_limit or already_trained!
+models_parameters_limits = {
         "AR (Autoregression)": {"ic": ['aic', 'bic', 'hqic', 't-stat'], "trend": ['c', 'nc'], "solver": ['bfgs', 'newton', 'nm', 'cg']},
 
-        "ARMA": {"p": [1, maxorder], "q": order, 'method': ['css-mle', 'mle','css'], 'trend': ['c', 'nc'], 'solver': ['lbfgs', 'bfgs', 'newton', 'nm', 'cg', 'ncg', 'powell'], 'forecast_type': ['in_sample', 'out_of_sample']},
-       # "ARIMA (Autoregression integrated moving average)": {"p": [1, maxorder], "d": [0,1], "q": order, 'method': ['css-mle', 'mle', 'css'], 'trend': ['c', 'nc'], 'solver': ['lbfgs', 'bfgs', 'newton', 'nm', 'cg'], 'forecast_type': ['in_sample', 'out_of_sample']},
-        "ARIMA (Autoregression integrated moving average)": {"p": [1, maxorder], "d": [0,1], "q": order, 'method': ['css'], 'trend': ['c', 'nc'], 'solver': ['lbfgs', 'bfgs', 'newton', 'nm', 'cg'], 'forecast_type': ['in_sample', 'out_of_sample']},
-        "SARIMAX (Seasonal ARIMA)": {"p": [1, maxorder], "d": order, "q": order, "pp": order, "dd": order, "qq": order, "season": order, "method": ['lbfgs', 'bfgs', 'newton', 'nm', 'cg', 'ncg', 'powell'], "trend" : ['n', 'c', 't', 'ct'], "enforce_invertibility": [True, False], "enforce_stationarity": [True, False], 'forecast_type': ['in_sample', 'out_of_sample']},
+        "ARMA": {"p": [1, maxorder], "q": order, 'method': ['css-mle', 'mle', 'css'], 'trend': ['c', 'nc'], 'solver': ['lbfgs', 'bfgs', 'newton', 'nm', 'cg', 'ncg', 'powell'], 'forecast_type': ['in_sample', 'out_of_sample']},
+        #"ARIMA (Autoregression integrated moving average)": {"p": [1, maxorder], "d": [0,1], "q": order, 'method': ['css-mle', 'mle', 'css'], 'trend': ['c', 'nc'], 'solver': ['lbfgs', 'bfgs', 'newton', 'nm', 'cg'], 'forecast_type': ['in_sample', 'out_of_sample']},
+        "ARIMA (Autoregression integrated moving average)": {"p": [1, maxorder], "d": [0, 1], "q": order, 'method': ['css'], 'trend': ['c', 'nc'], 'solver': ['lbfgs', 'bfgs', 'newton', 'nm', 'cg'], 'forecast_type': ['in_sample', 'out_of_sample']},
+        "SARIMAX (Seasonal ARIMA)": {"p": [1, maxorder], "d": order, "q": order, "pp": order, "dd": order, "qq": order, "season": order, "method": ['lbfgs', 'bfgs', 'newton', 'nm', 'cg', 'ncg', 'powell'], "trend": ['n', 'c', 't', 'ct'], "enforce_invertibility": [True, False], "enforce_stationarity": [True, False], 'forecast_type': ['in_sample', 'out_of_sample']},
 
         "Autoregressive Linear neural unit": {"lags": steps, "mi": [1.0, 10.0], "minormit": [0, 1], "tlumenimi": [0.0, 100.0]},
         "Linear neural unit with weigths predict": {"lags": steps, "mi": [1.0, 10.0], "minormit": [0, 1], "tlumenimi": [0.0, 100.0]},
@@ -187,13 +187,21 @@ models_parameters_limits = {
         "Extreme learning machine": {"n_steps_in": steps, "n_hidden": [2, 300], "output_shape": ['batch', 'one_step'], "constant": [None, 1], "other_columns_lenght": [None, steps[1]], "alpha": alpha, "rbf_width": [0.0, 10.0], "activation_func": models.activations},
         "Gen Extreme learning machine": {"n_steps_in": steps, "alpha": alpha, "output_shape": ['batch', 'one_step'], "constant": [None, 1], "other_columns_lenght": [None, steps[1]]},
 
-        "Sklearn universal": {"model": models.regressors, "n_steps_in": steps, "output_shape": ['batch', 'one_step'], "constant": [None, 1]},
-
-        "Bayes Ridge Regression": {"n_steps_in": steps, "output_shape": ['batch', 'one_step'], "constant": [None, 1], "other_columns_lenght": [None, steps[1]], "alpha_1":[0.1e-6, 3e-6], "alpha_2":[0.1e-6, 3e-6], "lambda_1":[0.1e-6, 3e-6], "lambda_2":[0.1e-7, 3e-6]},
-        "Lasso Regression": {"n_steps_in": steps, "output_shape": ['batch', 'one_step'], "constant": [None, 1], "other_columns_lenght": [None, steps[1]], "alpha": alpha},
-        "Linear regression": {"n_steps_in": steps, "output_shape": ['batch', 'one_step'], "constant": [None, 1], "other_columns_lenght": [None, steps[1]]},
-        "Hubber regression": {"n_steps_in": steps, "output_shape": ['batch', 'one_step'], "constant": [None, 1], "other_columns_lenght": [None, steps[1]], "epsilon": [1.01, 5.0], "alpha": alpha},
-        "Ridge regression": {"n_steps_in": steps, "output_shape": ['batch', 'one_step'], "constant": [None, 1], "other_columns_lenght": [None, steps[1]], "alpha": alpha, "solver": ['auto', 'svd', 'cholesky', 'lsqr', 'sparse_cg', 'sag', 'saga']},
-        "Ridge regressionCV": {"n_steps_in": steps, "output_shape": ['batch', 'one_step'], "constant": [None, 1], "other_columns_lenght": [None, steps[1]], "gcv_mode" : ['auto', 'svd', 'eigen']},
+        "Sklearn regression": {"n_steps_in": steps, "regressor": ['lasso', 'linear', 'ridgecv', 'ridge'], "output_shape": ['batch', 'one_step'], "other_columns_lenght": [None, steps[1]], "constant": [None, 1], "alpha": alpha, "n_iter": [100, 500], "epsilon": [1.01, 5.0], "alphas": [[0.1, 0.1, 0.1], [0.5, 0.5, 0.5], [0.9, 0.9, 0.9]], "gcv_mode": ['auto', 'svd', 'eigen'], "solver": ['auto', 'svd', 'eigen']},
+        "Bayes Ridge Regression": {"n_steps_in": steps, "output_shape": ['batch', 'one_step'], "constant": [None, 1], "other_columns_lenght": [None, steps[1]], "alpha_1": [0.1e-6, 3e-6], "alpha_2": [0.1e-6, 3e-6], "lambda_1": [0.1e-6, 3e-6], "lambda_2": [0.1e-7, 3e-6]},
+        "Hubber regression": {"n_steps_in": steps, "output_shape": ['batch', 'one_step'], "constant": [None, 1], "other_columns_lenght": [None, steps[1]], "epsilon": [1.01, 5.0], "alpha": alpha}
 
 }
+
+# Test data that will will be used (not for main.py - only for compare_models.py)
+data_all_pickle = {
+                    #"Sin": data_test.gen_sin(),
+#                    "Sign": data_test.gen_sign,
+                    "Random": data_test.gen_random,
+#                    "Dynamic system": 'data4',
+#                    "Daily minimum temperatures": 'data5',
+#                    "Reálná data klapky": 'data6'
+                }
+
+# Name of test data that will be plotted and returned
+data_name_for_predicts = "Sin"

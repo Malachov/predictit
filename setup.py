@@ -1,25 +1,21 @@
-from setuptools import setup, find_packages
+#%%
+from setuptools import setup
 import io
-import os
 import sys
+import pathlib
+
+lib_path = pathlib.Path(__file__).resolve().parents[0]
+lib_path_str = lib_path.as_posix()
+sys.path.insert(0, lib_path_str)
 
 import predictit
 
 version = predictit.__version__
 
-def read(*filenames, **kwargs):
-    encoding = kwargs.get('encoding', 'utf-8')
-    sep = kwargs.get('sep', '\n')
-    buf = []
-    for filename in filenames:
-        with io.open(filename, encoding=encoding) as f:
-            buf.append(f.read())
-    return sep.join(buf)
-
-with open('README.md') as readme_file:
+with open(lib_path / 'README.md') as readme_file:
     readme = readme_file.read()
 
-with open('requirements.txt', 'r') as f:
+with open(lib_path / 'requirements.txt', 'r') as f:
     myreqs = [line.strip() for line in f]
 
 setup(
