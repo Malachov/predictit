@@ -1,0 +1,167 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>predictit.models.tf_mlp_batch module &#8212; predictit 08-01-2020 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="module-predictit.models.tf_mlp_batch">
+<span id="predictit-models-tf-mlp-batch-module"></span><h1>predictit.models.tf_mlp_batch module<a class="headerlink" href="#module-predictit.models.tf_mlp_batch" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="predictit.models.tf_mlp_batch.mlp_batch">
+<code class="sig-prename descclassname">predictit.models.tf_mlp_batch.</code><code class="sig-name descname">mlp_batch</code><span class="sig-paren">(</span><em class="sig-param">data</em>, <em class="sig-param">n_steps_in</em>, <em class="sig-param">n_features=1</em>, <em class="sig-param">predicts=7</em>, <em class="sig-param">epochs=200</em>, <em class="sig-param">units=32</em>, <em class="sig-param">save=1</em>, <em class="sig-param">already_trained=0</em>, <em class="sig-param">optimizer='adam'</em>, <em class="sig-param">loss='mse'</em>, <em class="sig-param">verbose=0</em>, <em class="sig-param">activation='relu'</em>, <em class="sig-param">metrics='acc'</em>, <em class="sig-param">timedistributed=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/predictit/models/tf_mlp_batch.html#mlp_batch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#predictit.models.tf_mlp_batch.mlp_batch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tensorflow multilayer perceptron.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>np.ndarray</em>) – Time series data.</p></li>
+<li><p><strong>n_steps_in</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of regressive members - inputs to neural unit. Defaults to 50.</p></li>
+<li><p><strong>n_features</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of columns. Defaults to 1.</p></li>
+<li><p><strong>predicts</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of predicted values. Defaults to 7.</p></li>
+<li><p><strong>epochs</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of epochs to evaluate. Defaults to 200.</p></li>
+<li><p><strong>units</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of neural units. Defaults to 32.</p></li>
+<li><p><strong>save</strong> (<em>int</em><em>, </em><em>optional</em>) – Whether save trained model on disk for fast use later. Defaults to 1.</p></li>
+<li><p><strong>already_trained</strong> (<em>int</em><em>, </em><em>optional</em>) – Whether use saved trained model from disk. Defaults to 0.</p></li>
+<li><p><strong>optimizer</strong> (<em>str</em><em>, </em><em>optional</em>) – Used optimizer. Defaults to ‘adam’.</p></li>
+<li><p><strong>loss</strong> (<em>str</em><em>, </em><em>optional</em>) – Loss function. Defaults to ‘mse’.</p></li>
+<li><p><strong>verbose</strong> (<em>int</em><em>, </em><em>optional</em>) – Wheter display details. Defaults to 0.</p></li>
+<li><p><strong>activation</strong> (<em>str</em><em>, </em><em>optional</em>) – Used activation function. Defaults to ‘relu’.</p></li>
+<li><p><strong>dropout</strong> (<em>int</em><em>, </em><em>optional</em>) – Whether use dropout layer. Defaults to -1.</p></li>
+<li><p><strong>metrics</strong> (<em>str</em><em>, </em><em>optional</em>) – Used metrics. Defaults to ‘acc’.</p></li>
+<li><p><strong>timedistributed</strong> (<em>int</em><em>, </em><em>optional</em>) – Whether use timedistributed layer. Defaults to 0.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Predictions of input time series.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">predictit</a></h1>
+
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=Malachov&repo=predictit&type=watch&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<div class="section" id="table-of-contents">
+<h3>Table of contents<a class="headerlink" href="#table-of-contents" title="Permalink to this headline">¶</a></h3>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="index.html">predictit</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="index.html#table-of-contents">Table of contents</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="index.html#id1">predictit</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="index.html#output">Output</a></li>
+<li class="toctree-l4"><a class="reference internal" href="index.html#how-to">How to</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="index.html#simple-example-with-pypi">Simple example with Pypi</a></li>
+<li class="toctree-l5"><a class="reference internal" href="index.html#example-with-own-data-from-csv-and-config">Example with own data from CSV and config</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="index.html#submodules">Submodules</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="index.html#id2">config</a></li>
+<li class="toctree-l4"><a class="reference internal" href="index.html#id3">main</a></li>
+<li class="toctree-l4"><a class="reference internal" href="index.html#id4">analyze</a></li>
+<li class="toctree-l4"><a class="reference internal" href="index.html#id5">best_params</a></li>
+<li class="toctree-l4"><a class="reference internal" href="index.html#id6">confidence_interval</a></li>
+<li class="toctree-l4"><a class="reference internal" href="index.html#id7">database</a></li>
+<li class="toctree-l4"><a class="reference internal" href="index.html#id8">data_prep</a></li>
+<li class="toctree-l4"><a class="reference internal" href="index.html#id9">evaluate_predictions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="index.html#id11">evaluate_predictions</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="index.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="index.html#id12">models</a></li>
+<li class="toctree-l4"><a class="reference internal" href="index.html#id13">test_data</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="index.html#indices-and-tables">Indices and tables</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Daniel Malachov.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/predictit.models.tf_mlp_batch.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+    <a href="https://github.com/Malachov/predictit" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>

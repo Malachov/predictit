@@ -5,7 +5,27 @@ from .sm_ar import ar
 
 
 # TODO for for epochs
-def autoreg_LNU_withwpred(data, predicts=7, lags=100, predicted_column_index=0, mi=0.1, minormit=0, tlumenimi=1, scope=1, shift=0, plot=0, random=0, seed=0):
+def autoreg_LNU_withwpred(data, predicts=7, lags=100, predicted_column_index=0, mi=0.1, minormit=0, damping=1, plot=0, random=0, scope=1, shift=0, seed=0):
+    """Autoregressive linear neural unit with weight prediction. It's simple one neuron one-step net that predict not only predictions itself,
+    but also use other faster method to predict weights evolution.
+
+    Args:
+        data (np.ndarray): Time series data.
+        predicts (int, optional): Number of predicted values. Defaults to 7.
+        lags (int, optional): Number of regressive members - inputs to neural unit. Defaults to 100.
+        predicted_column_index (int, optional): If multidimensional, define what column is predicted. Defaults to 0.
+        mi (float, optional): Learning rate. If not normalized must be much smaller. Defaults to 0.1.
+        minormit (int, optional): Whether normalize learning rate. Defaults to 0.
+        damping (int, optional): Whether damp learning rate or not. Defaults to 1.
+        plot (int, optional): Whether plot results. Defaults to 0.
+        random (int, optional): Whether initial weights are random or not. Defaults to 0.
+        scope (int, optional): Scope of random weights. Defaults to 1.
+        shift (int, optional): Shift of random weights. Defaults to 0.
+        seed (int, optional): Random weights but the same everytime. Defaults to 0.
+
+    Returns:
+        np.ndarray: Predictions of input time series.
+    """
 
     data = np.array(data)
     data_shape = data.shape
@@ -43,7 +63,7 @@ def autoreg_LNU_withwpred(data, predicts=7, lags=100, predicted_column_index=0, 
                 x[i][1] = data[j - 1]
             dydw = x[i]
             if minormit == 1:
-                minorm = miwide[i] / (tlumenimi + np.dot(x[i], x[i].T))
+                minorm = miwide[i] / (damping + np.dot(x[i], x[i].T))
                 dw = minorm * e[i][j] * dydw
             else:
                 dw = miwide[i] * e[i][j] * dydw

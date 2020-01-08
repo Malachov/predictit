@@ -3,9 +3,8 @@
 """
 Library/framework for making predictions. Choose best of 20 models
 (ARIMA, regressions, LSTM...). Preprocess data and chose optimal parameters
-of predictions. Output is plotly HTML interactive graph or database deploying. For tutorials and example view readme.
-
-For more read README.md
+of predictions. Output is plotly HTML interactive graph or database deploying.
+For tutorials and examples view readme (or tests).
 """
 
 from . import analyze
@@ -17,9 +16,8 @@ from . import database
 from . import evaluate_predictions
 from . import main
 from . import confidence_interval
-from . import pickle_test_data
 
-__version__ = "0.4"
+__version__ = "0.6"
 __author__ = "Daniel Malachov"
 __license__ = "MIT"
 __email__ = "malachovd@seznam.cz"

@@ -6,7 +6,7 @@ Most common output is plotly interactive graph, deploying to database and list o
 Printscreen of graph
 ![Printscreen of output HTML graph](https://raw.githubusercontent.com/Malachov/predictit/master/output_example.png)
 
-## How to
+## Installation
     pip install predictit
 
 Sometime you can have issues with installing some libraries.
@@ -14,6 +14,7 @@ For error: command 'gcc' failed with exit status 1
 
     sudo apt-get install python-dev
 
+## How to
 ### Simple example with Pypi
 ```Python
 import predictit

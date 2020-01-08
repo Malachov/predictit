@@ -1,4 +1,4 @@
-"""This is module for analyzing data
+"""This is module for data analysis. It create plots of data, it's distribution, it's details, autocorrelation function etc.
 """
 import numpy as np
 import matplotlib.pyplot as plt
@@ -14,6 +14,16 @@ from statsmodels.tsa.seasonal import seasonal_decompose
 
 
 def analyze_data(data, lags=5, window=5):
+    """Function that plot data, it's distribution, some details like minimum, maximum, std, mean etc.
+    It also create autocorrelation and partial autocorrelation (good for ARIMA models) and plot rolling mean and rolling std.
+    It also tell if data are probably stationary or not.
+
+    Args:
+        data (pd.DataFrame): Time series data.
+        lags (int, optional): Lags used for autocorrelation. Defaults to 5.
+        window (int, optional): Window for rolling average and rolling std. Defaults to 5.
+
+    """
 
     if not isinstance(data, pd.DataFrame):
         data_frame = pd.DataFrame(data=data)
@@ -27,10 +37,10 @@ def analyze_data(data, lags=5, window=5):
     plt.subplot(1, 2, 2)
     sns.distplot(data, bins=100, kde=True, color='skyblue')
     plt.xlabel('f(x)')
-    plt.ylabel("Rozdělení")
+    plt.ylabel("Distribution")
 
     plt.tight_layout()
-    plt.suptitle("Vykreslení funkce a jejího rozdělení", fontsize=20)
+    plt.suptitle("Data and it's distribution", fontsize=20)
     plt.subplots_adjust(top=0.88)
     plt.show()
 
@@ -82,12 +92,23 @@ def analyze_data(data, lags=5, window=5):
 
 
 def analyze_correlation(data):
+    """Plot correlation graph.
+    
+    Args:
+        data (np.ndarray): Time series data
+    """    
     sns.pairplot(data, diag_kind="kde")
     plt.show()
 
 
 def decompose(data, freq=365, model='additive'):
-
+    """Plot decomposition graph. Analze if data are seasonal.
+    
+    Args:
+        data (np.ndarray): Time series data
+        freq (int, optional): Seasonal interval. Defaults to 365.
+        model (str, optional): Additive or multiplicative. Defaults to 'additive'.
+    """    
     decomposition = seasonal_decompose(data, model=model, freq=freq)
 
     plt.figure(figsize=(15, 8))

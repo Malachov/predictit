@@ -1,46 +1,45 @@
+"""Module with function compare_predicted_to_test that Compare tested model with reality. It return some error criterion based on config.py"""
+
 import matplotlib.pyplot as plt
 import numpy as np
 
 
 def compare_predicted_to_test(predicted, test, train=None, criterion='mape', plot=0, modelname="Default model", dataname="default data", details=0):
+    """Compare tested model with reality.
 
-    """Compare tested model with reality
-    =========
-    Output:
-    --------
-        Error criterion -- MAPE or RMSE{f}
-        Graph of predictions and reality (Optional){plot}
-        Graph of history and predictions (Optional){plot}
+    Args:
+        predicted (np.ndarray): Model output.
+        test (np.ndarray): Correct values or output from data_pre funcs.
+        train (np.ndarray, optional): Real history values for plotting - for plot olny!. Defaults to None.
+        criterion (str, optional): 'mape' or 'rmse'. Defaults to 'mape'.
+        plot (int, optional): Whether create plot. Defaults to 0.
+        modelname (str, optional): Model name for plot. Defaults to "Default model".
+        dataname (str, optional): Data name for plot. Defaults to "default data".
+        details (int, optional): Whether print details. Defaults to 0.
 
-    Arguments:
-    --------
-        predicted - Model output
-        test -- Correct values or output from data_pre func
-        criterion -- 'mape' or 'rmse'
-        train -- Real history values for plotting - for plot olny! (Optional)
-        plot -- Whether create plot (Optional)
-        modelname -- Model name for plot (Optional)
-        dataname -- Data name for plot (Optional)
-        details -- Whether print details (Optional)
+    Returns:
+        float: Error criterion value (mape or rmse).
+        If in setup - return  plot of results.
+
     """
 
     predicts = len(predicted)
     if predicted is None:
-        return np.nan, np.nan, np.nan
+        return np.nan
 
     if (len(predicted) != len(test)):
         print('Test and predicted lenght not equeal')
-        return np.nan, np.nan, np.nan
+        return np.nan
 
     if predicted is not None:
         if plot:
             plt.figure(figsize=(10, 6))
-            plt.plot(test, label='Skutečnost')
-            plt.plot(predicted, label='Predikce')
+            plt.plot(test, label='Reality')
+            plt.plot(predicted, label='Prediction')
             plt.legend(loc="upper right")
             plt.xlabel('t')
-            plt.ylabel("Predikovaná hodnota")
-            plt.title("Predikce pomocí \n {} s daty {}".format(modelname, dataname))
+            plt.ylabel("Predicted value")
+            plt.title("Prediction with \n {} with data {}".format(modelname, dataname))
             plt.show()
 
             if train is not None:  # TODO delete if work also for date
@@ -52,8 +51,8 @@ def compare_predicted_to_test(predicted, test, train=None, criterion='mape', plo
                 plt.plot(tt[:window], train[-window:])
                 plt.plot(tt[window - 1:], predictedpluslast)
                 plt.xlabel('t')
-                plt.ylabel("Predikovaná hodnota")
-                plt.title("Historie plus predikce pomocí \n {} s daty {}".format(modelname, dataname))
+                plt.ylabel("Predicted value")
+                plt.title("History + predictions with \n {} with data {}".format(modelname, dataname))
                 plt.show()
 
         error = np.array(predicted) - np.array(test)
@@ -66,16 +65,12 @@ def compare_predicted_to_test(predicted, test, train=None, criterion='mape', plo
 
         if criterion == 'rmse':
             rmseerror = error ** 2
-            rmse = (sum(rmseerror) / predicts) ** (1 / 2)
+            criterion_value = (sum(rmseerror) / predicts) ** (1 / 2)
 
         if criterion == 'mape':
-            mape = np.mean(np.abs((test - predicted) / test)) * 100
+            criterion_value = np.mean(np.abs((test - predicted) / test)) * 100
 
         if details == 1:
-            print("Chyba predikcí modelu {} s daty {}: {}={}".format(modelname, dataname, 'criterion', criterion))
+            print(f"Error of model {modelname} on data {dataname}: {criterion}={criterion_value}")
 
-        if criterion == 'mape':
-            return mape
-
-        if criterion == 'rmse':
-            return rmse
+        return criterion_value

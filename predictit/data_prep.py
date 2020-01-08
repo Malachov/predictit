@@ -1,9 +1,22 @@
+"""Module for data preprocessing. Contain functions for removing outliers, NaN columns or 
+function for making inputs and outputs from time series if you want to see how functions work -
+working examples with printed results are in tests - visual.py.
+
+"""
+
 import pandas as pd
 import numpy as np
 
 
 def remove_nan_columns(data):
-    """Remove non-number columns"""
+    """Remove columns that are not a numbers.
+
+    Args:
+        data (np.ndarray): Time series data.
+
+    Returns:
+        np.ndarray: Cleaned time series data.
+    """
 
     remember = 0
     cleaned = data.copy()
@@ -31,12 +44,22 @@ def remove_nan_columns(data):
     return cleaned
 
 
-def keep_corelated_data(data, predicted_column_index=0):
+def keep_corelated_data(data, predicted_column_index=0, threshold=0.2):
+    """Remove columns that are not corelated enough to predicted columns.
+
+    Args:
+        data (np.array, pd.DataFrame): Time series data.
+        predicted_column_index (int, optional): Column that is predicted. Defaults to 0.
+        threshold (float, optional): After correlation matrix is evaluated, all columns that are correlated less than threshold are deleted. Defaults to 0.2.
+
+    Returns:
+        np.array, pd.DataFrame: Data with no columns that are not corelated with predicted column.
+    """
 
     if isinstance(data, np.ndarray):
         corr = pd.DataFrame(np.corrcoef(data))
         range_array = np.array(range(len(corr)))
-        names_to_del = range_array[corr[0] <= abs(0.2)]
+        names_to_del = range_array[corr[0] <= abs(threshold)]
         data = np.delete(data, names_to_del, axis=0)
 
     if isinstance(data, pd.DataFrame):
@@ -48,18 +71,21 @@ def keep_corelated_data(data, predicted_column_index=0):
 
 
 def remove_outliers(data, predicted_column_index=0, threshold=3):
-    """Remove values far from mean - probably errors
-    ======
+    """Remove values far from mean - probably errors.
 
-    Output:
-    -------
-    Cleaned data{arr, list}
+    Args:
+        data (np.array, pd.DataFrame, list): Time series data.
+        predicted_column_index (int, optional): Column that is predicted. Defaults to 0.
+        threshold (int, optional): How many times must be standard deviation from mean to be ignored. Defaults to 3.
 
-    Arguments:
-    -------
-        data {arr, list} -- Data to be cleaned
-        predicted_column_index {int} -- Number of predicted column (default: {0})
-        threshold {f} -- Threshold that limit values defined by multiplier of standard deviation (default: {3})
+    Returns:
+        np.array, pd.DataFrame: Cleaned data.
+
+    Examples:
+
+        >>> data = np.array([[1, 3, 5, 2, 3, 4, 5, 66, 3]])
+        >>> print(remove_outliers(data))
+        [1, 3, 5, 2, 3, 4, 5, 3]
     """
 
     if isinstance(data, pd.DataFrame):
@@ -69,8 +95,9 @@ def remove_outliers(data, predicted_column_index=0, threshold=3):
 
         data = data[abs(data[data.columns[0]] - data_mean) < threshold * data_std]
 
-    if isinstance(data, np.ndarray):
-
+    else:
+        if not isinstance(data, np.ndarray):
+            data = np.array(data)
         data_shape = data.shape
 
         if len(data_shape) == 1:
@@ -93,12 +120,22 @@ def remove_outliers(data, predicted_column_index=0, threshold=3):
 
 
 def do_difference(dataset):
-    """Transform data into neighbor difference. For example from [1, 2, 4] into [1, 2]
+    """Transform data into neighbor difference. For example from [1, 2, 4] into [1, 2].
 
-    Arguments:
-        dataset {1D array, list}
+    Args:
+        dataset (np.ndarray): One-dimensional numpy array.
+
+    Returns:
+        np.ndarray: Differenced data.
+
+    Examples:
+
+        >>> data = np.array([1, 3, 5, 2])
+        >>> print(remove_outliers(data))
+        [2, 2, -3]
     """
-    assert len(np.shape(dataset)) == 1, 'Data input must be one-dimensional'
+
+    assert len(np.shape(dataset)) == 1, 'Data input must be one-dimensional.'
     diff = list()
     for i in range(1, len(dataset)):
         value = dataset[i] - dataset[i - 1]
@@ -107,7 +144,22 @@ def do_difference(dataset):
 
 
 def inverse_difference(differenced_predictions, last_undiff_value):
-    "Transform do_difference transform back"
+    """Transform do_difference transform back.
+    
+    Args:
+        differenced_predictions (np.ndarray): Differenced data from do_difference function.
+        last_undiff_value (float): First value to computer the rest.
+    
+    Returns:
+        np.ndarray: Normal data, not the additive series.
+
+    Examples:
+
+        >>> data = np.array([1, 1, 1, 1])
+        >>> print(inverse_difference(data, 1))
+        [2, 3, 4, 5]
+    """
+
     first = last_undiff_value + differenced_predictions[0]
     diff = [first]
     for i in range(1, len(differenced_predictions)):
@@ -117,6 +169,17 @@ def inverse_difference(differenced_predictions, last_undiff_value):
 
 
 def standardize(data, predicted_column_index=0, standardizer='standardize'):
+    """Standardize or normalize data. More standardize methods available.
+
+    Args:
+        data (np.ndarray): Time series data.
+        predicted_column_index (int, optional): Index of column that is predicted. Defaults to 0.
+        standardizer (str, optional): '01' and '-11' means scope from to for normalization.
+            'robust' use RobustScaler and 'standard' use StandardScaler - mean is 0 and std is 1. Defaults to 'standardize'.
+
+    Returns:
+        np.ndarray: Standardized data.
+    """
 
     from sklearn import preprocessing
 
@@ -157,15 +220,24 @@ def standardize(data, predicted_column_index=0, standardizer='standardize'):
 
 
 def split(data, predicts=7, predicted_column_index=0):
-    '''Divide data set on train and test set
-    Inputs
-        data - dataframe, array, CSV or list
-    Output
-        train
-        test
-    example:2
-    train, test = split(data)
-    '''
+    """Divide data set on train and test set.
+
+    Args:
+        data (pd.DataFrame, np.ndarray): Time series data.
+        predicts (int, optional): Number of predicted values. Defaults to 7.
+        predicted_column_index (int, optional): Index of column that is predicted. Defaults to 0.
+    
+    Returns:
+        np.array, np.array: Train set and test set.
+
+    Examples:
+
+        >>> data = np.array([1, 2, 3, 4])
+        >>> train, test = (split(data, predicts=2))
+        >>> print(train, test)
+        [2, 3]
+        [4, 5]
+    """
 
     if isinstance(data, pd.DataFrame):
         data = data.values
@@ -194,11 +266,24 @@ def split(data, predicts=7, predicted_column_index=0):
 
 
 def make_sequences(data, n_steps_in, n_steps_out=1, constant=None, predicted_column_index=0, other_columns_lenght=None):
-    ''' From [1, 2, 3, 4, 5, 6, 7, 8]
+    """Function that create inputs and outputs to models.
+    From [1, 2, 3, 4, 5, 6, 7, 8]
 
         Creates [1, 2, 3]  [4]
                 [5, 6, 7]  [8]
-    '''
+
+    Args:
+        data (np.array): Time series data.
+        n_steps_in (int): Number of input members.
+        n_steps_out (int, optional): Number of output members. For one-step models use 1. Defaults to 1.
+        constant (bool, optional): If use bias (add 1 to first place to every member). Defaults to None.
+        predicted_column_index (int, optional): [description]. Defaults to 0.
+        other_columns_lenght (int, optional): Length of non-predicted columns that are evaluated in inputs. If None, than same length as predicted column. Defaults to None.
+
+    Returns:
+        np.array, np.array: X and y. Inputs and outputs (that can be used for example in sklearn models).
+
+    """
 
     def make_seq(data, n_steps_in, n_steps_out=1, constant=None):
         X, y = list(), list()
@@ -218,7 +303,16 @@ def make_sequences(data, n_steps_in, n_steps_out=1, constant=None, predicted_col
         return X, y
 
     data = np.array(data)
+
+    if not other_columns_lenght:
+        data = data[predicted_column_index]
+
     data_shape = data.shape
+
+    if data_shape[0] == 1:
+        data = data.reshape(-1)
+        data_shape = data.shape
+
 
     if len(data_shape) == 1:
         X_list, y = make_seq(data=data, n_steps_in=n_steps_in, n_steps_out=n_steps_out, constant=constant)
@@ -238,13 +332,12 @@ def make_sequences(data, n_steps_in, n_steps_out=1, constant=None, predicted_col
             other_columns.append(other_columns_sequentions)
 
         other_columns_array = np.array(other_columns)
-
-        if other_columns_lenght:
-            other_columns_array = other_columns_array[:, :, -other_columns_lenght:]
+        other_columns_array = other_columns_array[:, :, -other_columns_lenght:]
 
         for i in range(len(X_only)):
+            if data_shape[0] != 1:
+                other_columns_list = list(other_columns_array[:, i, :].reshape(-1))
 
-            other_columns_list = list(other_columns_array[:, i, :].reshape(-1))
             X_list.append(other_columns_list + list(X_only[i]))
 
     X = np.array(X_list)
@@ -256,17 +349,20 @@ def make_sequences(data, n_steps_in, n_steps_out=1, constant=None, predicted_col
 
 
 def make_x_input(data, n_steps_in, predicted_column_index=0, other_columns_lenght=None, constant=None):
-    """Make input into model
+    """Make input into model.
 
-    Arguments:
-        data {arr, list}
-        n_steps_in {int} -- Lags going into model
-    
-    Keyword Arguments:
-        predicted_column_index {int} -- Index of predicted column (default: {0})
-        other_columns_lenght {int} -- Lags of other columns (default: {None})
-        constant {int} -- Can be 1 - constant added into every input (default: {None})
+    Args:
+        data (np.array): Time series data.
+        n_steps_in (int): Lags going into model.
+        predicted_column_index (int, optional): Index of predicted column. Defaults to 0.
+        other_columns_lenght (int, optional): Lags of other columns. If none, than same length as predicted column Defaults to None.
+        constant (bool, optional): If use bias (add 1 to first place to every member). Defaults to None.
+
+    Returns:
+        np.array: y input in model.
+
     """
+
     data = np.array(data)
     data_shape = data.shape
 
@@ -298,30 +394,3 @@ def make_x_input(data, n_steps_in, predicted_column_index=0, other_columns_lengh
 def smooth():
     # TODO
     pass
-
-
-'''
-def normalize01(data):
-    data = np.array(data)
-    data = data.reshape(-1, 1)
-    scaler = preprocessing.MinMaxScaler(feature_range=(0, 1))
-    scaled = scaler.fit_transform(data)
-    return scaled
-
-def denormalize01(scaled):
-    scaler = preprocessing.MinMaxScaler(feature_range=(0, 1))
-    denormalized = scaler.inverse_transform(scaled)
-    data = data.reshape(-1)
-    return denormalized
-
-def standardize(data):
-    dataT = data.reshape(-1, 1)
-    scaler = preprocessing.StandardScaler()
-    scaled = scaler.fit_transform(dataT)
-    return scaled
-
-def destandardize(scaled):
-    scaler = preprocessing.StandardScaler()
-    destandardized = scaler.inverse_transform(scaled)
-    return destandardized
-'''

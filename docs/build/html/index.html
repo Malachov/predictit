@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>predictit &#8212; predictit 0.22 documentation</title>
+    <title>predictit &#8212; predictit 08-01-2020 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -30,9 +30,7 @@
 
           <div class="body" role="main">
             
-  <div class="toctree-wrapper compound">
-</div>
-<div class="section" id="predictit">
+  <div class="section" id="predictit">
 <h1>predictit<a class="headerlink" href="#predictit" title="Permalink to this headline">¶</a></h1>
 <p>Library/framework for making predictions. Choose best of 20 models (ARIMA, regressions, LSTM…) from libraries like statsmodels, sci-kit, tensorflow and some own models. Library also automaticcaly preprocess data and chose optimal parameters of predictions.</p>
 <div class="section" id="output">
@@ -41,8 +39,8 @@
 Printscreen of graph</p>
 <a class="reference external image-reference" href="https://raw.githubusercontent.com/Malachov/predictit/master/output_example.png"><img alt="Printscreen of output HTML graph" src="https://raw.githubusercontent.com/Malachov/predictit/master/output_example.png" /></a>
 </div>
-<div class="section" id="how-to">
-<h2>How to<a class="headerlink" href="#how-to" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-guess notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">predictit</span>
 </pre></div>
 </div>
@@ -51,6 +49,9 @@ For error: command ‘gcc’ failed with exit status 1</p>
 <div class="highlight-guess notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="k">get</span> <span class="n">install</span> <span class="n">python</span><span class="o">-</span><span class="n">dev</span>
 </pre></div>
 </div>
+</div>
+<div class="section" id="how-to">
+<h2>How to<a class="headerlink" href="#how-to" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="simple-example-with-pypi">
 <h3>Simple example with Pypi<a class="headerlink" href="#simple-example-with-pypi" title="Permalink to this headline">¶</a></h3>
 <div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">predictit</span>
@@ -85,11 +86,8 @@ For error: command ‘gcc’ failed with exit status 1</p>
 
             <span class="s2">&quot;Extreme learning machine&quot;</span><span class="p">:</span> <span class="n">predictit</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">elm</span><span class="p">,</span>
 
-            <span class="s2">&quot;Sklearn universal&quot;</span><span class="p">:</span> <span class="n">predictit</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">sklearn_universal</span><span class="p">,</span>
+            <span class="s2">&quot;Regression&quot;</span><span class="p">:</span> <span class="n">models</span><span class="o">.</span><span class="n">regression</span>
 
-            <span class="s2">&quot;Bayes Ridge Regression&quot;</span><span class="p">:</span> <span class="n">predictit</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">regression_bayes_ridge</span><span class="p">,</span>
-            <span class="s2">&quot;Hubber regression&quot;</span><span class="p">:</span> <span class="n">predictit</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">regression_hubber</span><span class="p">,</span>
-            <span class="s2">&quot;Lasso Regression&quot;</span><span class="p">:</span> <span class="n">predictit</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">regression_lasso</span><span class="p">,</span>
            <span class="p">}</span>
 
 <span class="c1"># Define parameters of models</span>
@@ -98,7 +96,6 @@ For error: command ‘gcc’ failed with exit status 1</p>
 <span class="n">output_shape</span> <span class="o">=</span> <span class="s1">&#39;batch&#39;</span>  <span class="c1"># Whether batch or one-step models</span>
 
 <span class="n">models_parameters</span> <span class="o">=</span> <span class="p">{</span>
-
 
         <span class="s2">&quot;AR (Autoregression)&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;plot&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;method&#39;</span><span class="p">:</span> <span class="s1">&#39;cmle&#39;</span><span class="p">,</span> <span class="s1">&#39;ic&#39;</span><span class="p">:</span> <span class="s1">&#39;aic&#39;</span><span class="p">,</span> <span class="s1">&#39;trend&#39;</span><span class="p">:</span> <span class="s1">&#39;nc&#39;</span><span class="p">,</span> <span class="s1">&#39;solver&#39;</span><span class="p">:</span> <span class="s1">&#39;lbfgs&#39;</span><span class="p">},</span>
         <span class="s2">&quot;ARMA&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;plot&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;p&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="s2">&quot;q&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;method&#39;</span><span class="p">:</span> <span class="s1">&#39;mle&#39;</span><span class="p">,</span> <span class="s1">&#39;ic&#39;</span><span class="p">:</span> <span class="s1">&#39;aic&#39;</span><span class="p">,</span> <span class="s1">&#39;trend&#39;</span><span class="p">:</span> <span class="s1">&#39;nc&#39;</span><span class="p">,</span> <span class="s1">&#39;solver&#39;</span><span class="p">:</span> <span class="s1">&#39;lbfgs&#39;</span><span class="p">,</span> <span class="s1">&#39;forecast_type&#39;</span><span class="p">:</span> <span class="s1">&#39;in_sample&#39;</span><span class="p">},</span>
@@ -111,9 +108,8 @@ For error: command ‘gcc’ failed with exit status 1</p>
 
         <span class="s2">&quot;Sklearn universal&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;n_steps_in&quot;</span><span class="p">:</span> <span class="n">n_steps_in</span><span class="p">,</span> <span class="s2">&quot;output_shape&quot;</span><span class="p">:</span> <span class="s2">&quot;one_step&quot;</span><span class="p">,</span> <span class="s2">&quot;model&quot;</span><span class="p">:</span> <span class="n">predictit</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">default_regressor</span><span class="p">,</span> <span class="s2">&quot;constant&quot;</span><span class="p">:</span> <span class="bp">None</span><span class="p">},</span>
 
-        <span class="s2">&quot;Bayes Ridge Regression&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;n_steps_in&quot;</span><span class="p">:</span> <span class="n">n_steps_in</span><span class="p">,</span> <span class="s2">&quot;output_shape&quot;</span><span class="p">:</span> <span class="n">output_shape</span><span class="p">,</span> <span class="s2">&quot;other_columns_lenght&quot;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span> <span class="s2">&quot;constant&quot;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span> <span class="s2">&quot;alpha_1&quot;</span><span class="p">:</span> <span class="mf">1.e-6</span><span class="p">,</span> <span class="s2">&quot;alpha_2&quot;</span><span class="p">:</span> <span class="mf">1.e-6</span><span class="p">,</span> <span class="s2">&quot;lambda_1&quot;</span><span class="p">:</span> <span class="mf">1.e-6</span><span class="p">,</span> <span class="s2">&quot;lambda_2&quot;</span><span class="p">:</span> <span class="mf">1.e-6</span><span class="p">},</span>
-        <span class="s2">&quot;Hubber regression&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;n_steps_in&quot;</span><span class="p">:</span> <span class="n">n_steps_in</span><span class="p">,</span> <span class="s2">&quot;output_shape&quot;</span><span class="p">:</span> <span class="n">output_shape</span><span class="p">,</span> <span class="s2">&quot;other_columns_lenght&quot;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span> <span class="s2">&quot;constant&quot;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span> <span class="s2">&quot;epsilon&quot;</span><span class="p">:</span> <span class="mf">1.35</span><span class="p">,</span> <span class="s2">&quot;alpha&quot;</span><span class="p">:</span> <span class="mf">0.0001</span><span class="p">},</span>
-        <span class="s2">&quot;Lasso Regression&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;n_steps_in&quot;</span><span class="p">:</span> <span class="n">n_steps_in</span><span class="p">,</span> <span class="s2">&quot;output_shape&quot;</span><span class="p">:</span> <span class="n">output_shape</span><span class="p">,</span> <span class="s2">&quot;other_columns_lenght&quot;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span> <span class="s2">&quot;constant&quot;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span> <span class="s2">&quot;alpha&quot;</span><span class="p">:</span> <span class="mf">0.6</span><span class="p">}</span>
+        <span class="s2">&quot;Sklearn regression&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;regressor&quot;</span><span class="p">:</span> <span class="s1">&#39;linear&#39;</span><span class="p">,</span> <span class="s2">&quot;n_steps_in&quot;</span><span class="p">:</span> <span class="n">n_steps_in</span><span class="p">,</span> <span class="s2">&quot;output_shape&quot;</span><span class="p">:</span> <span class="n">output_shape</span><span class="p">,</span> <span class="s2">&quot;other_columns_lenght&quot;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span> <span class="s2">&quot;constant&quot;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span> <span class="s2">&quot;alpha&quot;</span><span class="p">:</span> <span class="mf">0.0001</span><span class="p">,</span> <span class="s2">&quot;n_iter&quot;</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span> <span class="s2">&quot;epsilon&quot;</span><span class="p">:</span> <span class="mf">1.35</span><span class="p">,</span> <span class="s2">&quot;alphas&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="s2">&quot;gcv_mode&quot;</span><span class="p">:</span> <span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="s2">&quot;solver&quot;</span><span class="p">:</span> <span class="s1">&#39;auto&#39;</span><span class="p">}</span>
+
 
         <span class="p">}</span>
 
@@ -121,6 +117,72 @@ For error: command ‘gcc’ failed with exit status 1</p>
 </pre></div>
 </div>
 </div>
+</div>
+</div>
+<div class="section" id="submodules">
+<h1>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="id1">
+<h2><a class="reference external" href="predictit.config.html">config</a><a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-predictit.config"></span><p>All config for main file. Most of values are boolean 1 or 0. You can setup here data source, models to use,
+whether you want find optimal parameters etc. Some setting can be inserted as function parameters, then it has higher priority.
+All values are commented and easy to understand.</p>
+</div>
+<div class="section" id="id2">
+<h2><a class="reference external" href="predictit.main.html">main</a><a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-predictit.main"></span><p>This is main module for making predictions. After setup config.py (data source), run predict function.
+There is also predict_multiple function for predicting more columns. It’s not necessary to run all models everytime,
+so there is also function compare models, that return results of models on the test data. Then you can config again only good models.</p>
+<p>There are working examples in main readme and also in test_it module.</p>
+</div>
+<div class="section" id="id3">
+<h2><a class="reference external" href="predictit.analyze.html">analyze</a><a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-predictit.analyze"></span><p>This is module for data analysis. It create plots of data, it’s distribution, it’s details, autocorrelation function etc.</p>
+</div>
+<div class="section" id="id4">
+<h2><a class="reference external" href="predictit.best_params.html">best_params</a><a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-predictit.best_params"></span><p>Module with main function optimize that find optimal input paramaters for function. Arguments are input model, initial function arguments and arguments limits.
+More info is in optimize function documentation</p>
+</div>
+<div class="section" id="id5">
+<h2><a class="reference external" href="predictit.confidence_interval.html">confidence_interval</a><a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-predictit.confidence_interval"></span><p>Module to find area with some probability where predictions will be. It’s used mainly for plotting where it create grey area where we can expect values.</p>
+</div>
+<div class="section" id="id6">
+<h2><a class="reference external" href="predictit.database.html">database</a><a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-predictit.database"></span><p>Module include two functions: database_load and database_deploy. First download data from database - it’s necessary to set up connect credentials in config and edit query!
+The database_deploy than use predicted values and deploy it to database server.</p>
+</div>
+<div class="section" id="id7">
+<h2><a class="reference external" href="predictit.data_prep.html">data_prep</a><a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-predictit.data_prep"></span><p>Module for data preprocessing. Contain functions for removing outliers, NaN columns or
+function for making inputs and outputs from time series if you want to see how functions work -
+working examples with printed results are in tests - visual.py.</p>
+</div>
+<div class="section" id="id8">
+<h2><a class="reference external" href="predictit.evaluate_predictions.html">evaluate_predictions</a><a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-predictit.evaluate_predictions"></span><p>Module with function compare_predicted_to_test that Compare tested model with reality. It return some error criterion based on config.py</p>
+</div>
+<div class="section" id="id9">
+<h2><a class="reference external" href="predictit.main_for_develop.html">main_for_develop</a><a class="headerlink" href="#id9" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-predictit.main_for_develop"></span><p>Just copy of inner content of main function. Developing is much faster
+having all variables in variable explorer and all plots in jupyter cell because code is not in fuction but declarative.
+After finishing developing, just copy result back in main.</p>
+</div>
+</div>
+<div class="section" id="subpackages">
+<h1>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="id10">
+<h2><a class="reference external" href="predictit.models.html">models</a><a class="headerlink" href="#id10" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-predictit.models"></span><p>Subpackage include models from libraries such as Tensorflow, Statsmodels, Sklearn and some own simple models.
+Various models are included autoregressive model, ARIMA, LSTM, various regressions such as linear or ridge
+and finally some neural units and conjugate gradient. You can use compare_models function to compare models on test data.
+You can see results of all models in interactive plot.</p>
+<p>All models are described in docstrings in it’s modules.</p>
+</div>
+<div class="section" id="id11">
+<h2><a class="reference external" href="predictit.test_data.html">test_data</a><a class="headerlink" href="#id11" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-predictit.test_data"></span><p>Module with test data that can be use as data for development of framework, but aslo can be changed by user
+and then used for compare_models function to find the best suited models for user defined data. Data than can be pickled to faster loading.</p>
 </div>
 </div>
 <div class="section" id="indices-and-tables">
@@ -146,16 +208,54 @@ For error: command ‘gcc’ failed with exit status 1</p>
 
 
 
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=Malachov&repo=predictit&type=watch&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
 
 
-<h3>Navigation</h3>
 
-<div class="relations">
-<h3>Related Topics</h3>
+
+
+<div class="section" id="table-of-contents">
+<h3>Table of contents<a class="headerlink" href="#table-of-contents" title="Permalink to this headline">¶</a></h3>
+<div class="toctree-wrapper compound">
 <ul>
-  <li><a href="#">Documentation overview</a><ul>
-  </ul></li>
+<li class="toctree-l1"><a class="reference internal" href="index.html">predictit</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="index.html#table-of-contents">Table of contents</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="index.html#id1">predictit</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="index.html#output">Output</a></li>
+<li class="toctree-l4"><a class="reference internal" href="index.html#how-to">How to</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="index.html#simple-example-with-pypi">Simple example with Pypi</a></li>
+<li class="toctree-l5"><a class="reference internal" href="index.html#example-with-own-data-from-csv-and-config">Example with own data from CSV and config</a></li>
 </ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="index.html#submodules">Submodules</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="index.html#id2">config</a></li>
+<li class="toctree-l4"><a class="reference internal" href="index.html#id3">main</a></li>
+<li class="toctree-l4"><a class="reference internal" href="index.html#id4">analyze</a></li>
+<li class="toctree-l4"><a class="reference internal" href="index.html#id5">best_params</a></li>
+<li class="toctree-l4"><a class="reference internal" href="index.html#id6">confidence_interval</a></li>
+<li class="toctree-l4"><a class="reference internal" href="index.html#id7">database</a></li>
+<li class="toctree-l4"><a class="reference internal" href="index.html#id8">data_prep</a></li>
+<li class="toctree-l4"><a class="reference internal" href="index.html#id9">evaluate_predictions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="index.html#id11">evaluate_predictions</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="index.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="index.html#id12">models</a></li>
+<li class="toctree-l4"><a class="reference internal" href="index.html#id13">test_data</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="index.html#indices-and-tables">Indices and tables</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
 </div>
 <div id="searchbox" style="display: none" role="search">
   <h3 id="searchlabel">Quick search</h3>
@@ -167,23 +267,15 @@ For error: command ‘gcc’ failed with exit status 1</p>
     </div>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
-
-
-
-
-
-
-
-
         </div>
       </div>
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2019, Daniel Malachov.
+      &copy;2020, Daniel Malachov.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.2.1</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.3.1</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |
@@ -191,6 +283,10 @@ For error: command ‘gcc’ failed with exit status 1</p>
           rel="nofollow">Page source</a>
     </div>
 
+    
+    <a href="https://github.com/Malachov/predictit" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
     
 
     

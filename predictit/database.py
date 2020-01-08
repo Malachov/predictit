@@ -1,3 +1,8 @@
+"""Module include two functions: database_load and database_deploy. First download data from database - it's necessary to set up connect credentials in config and edit query!
+The database_deploy than use predicted values and deploy it to database server.
+
+"""
+
 import pandas as pd
 import pyodbc
 from sqlalchemy import create_engine
@@ -6,16 +11,21 @@ from . import config
 
 
 def database_load(server=config.server, database=config.database, freq='D', index_col='DateBK', data_limit=2000, last=1):
-    """Load database into dataframe and create datetime index
+    """Load database into dataframe and create datetime index. !!! This function have to be change for every particular database !!!
 
-    Keyword Arguments:
-        server {string} -- Name of server (default: {config.server})
-        database {string} -- Name of database (default: {config.database})
-        freq {Datetime frequency} -- For example days 'D' or hours 'H' (default: {'D'})
-        index_col {int} -- Index of predicted column (default: {'DateBK'})
-        data_limit {int} -- Max lengt of data (default: {2000})
-        last {bool} -- Include or not last value (default: {1})
+    Args:
+        server (string, optional): Name of server. Defaults to config.server.
+        database (str, optional): Name of database. Defaults to config.database.
+        freq (str, optional): For example days 'D' or hours 'H'. Defaults to 'D'.
+        index_col (str, optional): Index of predicted column. Defaults to 'DateBK'.
+        data_limit (int, optional): Max lengt of data. Defaults to 2000.
+        last (int, optional): Include last value or not. Defaults to 1.
+
+    Returns:
+        pd.DataFrame: Dataframe with data from database based on input SQL query.
+
     """
+
     server = 'SERVER={};'.format(server)
     database = 'DATABASE={};'.format(database)
     sql_params = r'DRIVER={ODBC Driver 13 for SQL Server};' + server + database + 'Trusted_Connection=yes;'
@@ -86,31 +96,30 @@ def database_load(server=config.server, database=config.database, freq='D', inde
     else:
         df.set_index('DateBK', drop=True, inplace=True)
 
-    print(query)
-
     dates = ['IsoWeekYear', 'MonthNumberOfYear', 'DayNumberOfMonth', 'HourOfDay']
     dates_columns = df.columns
     used_dates = [c for c in dates if c in dates_columns]
     df.drop(used_dates, axis=1, inplace=True)
 
     if last:
-        df_not_last = df.iloc[::-1]
+        df = df.iloc[::-1]
 
     else:
-        df_not_last = df.iloc[1:-1, :]
-        df_not_last = df_not_last.iloc[::-1]
+        df = df.iloc[1:, :]
+        df = df.iloc[::-1]
 
-    return df_not_last
+    return df
 
 
 def database_deploy(last_date, sum_number, sum_duration, freq='D'):
-    """Deploy dataframe to SQL server. Differ on concrete database - necessary to setup
+    """Deploy dataframe to SQL server. !!! Differ on concrete database - necessary to setup for each database.
 
-    Arguments:
-        last_date {date} -- Last date of data
-        sum_number {Values to deploy} -- One of predicted columns
-        sum_duration {Values to deploy} -- One of predicted columns
-        freq {str} -- Datetime frequency (default: {'D'})
+    Args:
+        last_date (date): Last date of data.
+        sum_number (Values to deploy):  One of predicted columns.
+        sum_duration (Values to deploy):  One of predicted columns.
+        freq (str, optional):  Datetime frequency. Defaults to 'D'.
+
     """
 
     lenght = len(sum_number)

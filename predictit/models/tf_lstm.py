@@ -8,7 +8,29 @@ import os
 
 from ..data_prep import make_sequences
 
+
 def lstm(data, n_steps, n_features=1, predicts=7, epochs=200, units=50, save=1, already_trained=0, optimizer='adam', loss='mse', verbose=0, activation='relu', metrics='mape', timedistributed=0):
+    """Tensorflow LSTM model.
+
+    Args:
+        data (np.ndarray): Time series data.
+        n_steps_in (int, optional): Number of regressive members - inputs to neural unit. Defaults to 50.
+        n_features (int, optional): Number of columns. Defaults to 1.
+        predicts (int, optional): Number of predicted values. Defaults to 7.
+        epochs (int, optional): Number of epochs to evaluate. Defaults to 100.
+        units (int, optional): Number of neural units. Defaults to 50.
+        optimizer (str, optional): Used optimizer. Defaults to 'adam'.
+        loss (str, optional): Loss function. Defaults to 'mse'.
+        verbose (int, optional): Wheter display details. Defaults to 0.
+        activation (str, optional): Used activation function. Defaults to 'relu'.
+        dropout (int, optional): Whether use dropout layer. Defaults to -1.
+        metrics (str, optional): Used metrics. Defaults to 'acc'.
+        timedistributed (int, optional): Whether use timedistributed layer. Defaults to 0.
+
+    Returns:
+        np.ndarray: Predictions of input time series.
+
+    """
 
     # TODO batch and one-step in one model as parameter
     # TODO batch lstm.predict_sequencies_multiple(model, x_test, 50, 50)

@@ -1,39 +1,10 @@
 # -*- coding: utf-8 -*-
-"""All the models with all the parameters
+""" Subpackage include models from libraries such as Tensorflow, Statsmodels, Sklearn and some own simple models.
+Various models are included autoregressive model, ARIMA, LSTM, various regressions such as linear or ridge
+and finally some neural units and conjugate gradient. You can use compare_models function to compare models on test data.
+You can see results of all models in interactive plot.
 
-Parameters in common in models (default in brackets):
------------------------ 
-
-        data - Data input to model - list, array, or dataframe
-        predicts - Number of predicted values
-        plot - If 1, plot results
-
-'AR (Autoregression)': ar
--------------------
-
-
-
-'Linear neural unit': autoregLNU
------------------
-
-        lags(100) - počet předchozích kroků, podle kterých bude model počítat
-        plot(0) - pokud 1, tak vykreslí grafy
-        mi(0.1) - Učící krok - bude vybrán nejlepší z desetinásobků, takže ladit od 0 do 1
-        random(0) - pokud 1, váhy budou inicializovány náhodně (pro linear zbytečné)
-        seed(0) - Seed náhodných inicializací - náhodná čísla pro konkrétní seed budou vždy stejná
-
-'Linear neural unit with weigt predictions': autoregLNUwithwpred
----------------------
-
-    Narozdíl od LNU, zde jsou predikovány i hodnoty jednotlivých vah
-    Parametry (defaultně v závorce):
-        data - data která vstupují do modelu - list, array, nebo dataframe
-        predicts(7) - počet predikovaných hodnot
-        lags(100) - počet předchozích kroků, podle kterých bude model počítat
-        plot(0) - pokud 1, tak vykreslí grafy
-        mi(0.1) - Učící krok - bude vybrán nejlepší z desetinásobků, takže ladit od 0 do 1
-        random(0) - pokud 1, váhy budou inicializovány náhodně (pro linear zbytečné)
-        seed(0) - Seed náhodných inicializací - náhodná čísla pro konkrétní seed budou vždy stejná
+All models are described in docstrings in it's modules.
 """
 
 # Moje
@@ -47,6 +18,12 @@ from .sm_arma import arma
 from .sm_arima import arima
 from .sm_sarima import sarima
 
+# Scikit
+from .sklearn_regression import regression
+
+# For comparing results with just an average values
+from .compare_with_average import compare_with_average
+
 # Tensorflow, Keras
 tensorflowit = 0
 
@@ -59,15 +36,6 @@ if tensorflowit:
     from .tf_mlp_batch import mlp_batch
     from .tf_mlp import mlp
 
-# Scikit
-from .sklearn_regression import regression
-
-# Extreme machine learning
-from .elm import elm
-from .elm_gen import elm_gen
-
-# For comparing results with just an average values
-from .compare_with_average import compare_with_average
 
 if tensorflowit:
     from keras import optimizers

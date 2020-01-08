@@ -1,10 +1,13 @@
 """ Test module. Auto pytest that can be started ide.
-Also in jupyter cell in VS Code and debug"""
+Also in jupyter cell in VS Code and debug
+
+"""
 
 #%%
 
 import sys
 import pathlib
+import numpy as np
 
 script_dir = pathlib.Path(__file__).resolve()
 lib_path_str = script_dir.parents[1].as_posix()
@@ -26,6 +29,14 @@ except Exception:
 import predictit
 from predictit import config
 from predictit.models.sklearn_regression import get_regressors
+
+
+def test_own_data():
+
+    data = np.random.randn(1, 100)
+    result = predictit.main.predict(data, predicts=1)
+    assert result[0]
+    return result
 
 
 def test_main_from_config_1():
@@ -70,11 +81,9 @@ def test_main_from_config_1():
                     #"Bidirectional LSTM": predictit.models.lstm_bidirectional,
                     #"LSTM batch": predictit.models.lstm_batch,
 
-                    "Sklearn regression": predictit.models.sklearn_regression,
-
+                    "Sklearn regression": predictit.models.regression,
                     "Bayes ridge regression": predictit.models.regression,
                     "Hubber regression": predictit.models.regression,
-                    "Regression": predictit.models.regression,
 
                     "Compare with average": predictit.models.compare_with_average
 
@@ -97,41 +106,37 @@ def test_main_from_config_2():
         config.data_transform = 'difference'
         config.repeatit = 0
         config.other_columns = 1
-        config.lengths = 0
+        config.lengths = 3
         config.criterion = 'rmse'
         config.remove_outliers = 1
         config.compareit = 10
         config.last_row = 1
         config.correlation_threshold = 0.2
-        config.optimizeit = 0
+        config.optimizeit = 1
         config.optimizeit_final = 1
-        config.optimizeit_limit = 0.001
-        config.optimizeit_final_limit = 0.001
+        config.optimizeit_limit = 0.1
+        config.optimizeit_final_limit = 0.01
         config.piclkeit = 0
         config.standardizeit = 1
 
         config.used_models = {
-                    "AR (Autoregression)": predictit.models.ar,
-                    "ARMA": predictit.models.arma,
-                    "ARIMA (Autoregression integrated moving average)": predictit.models.arima,
-                    "SARIMAX (Seasonal ARIMA)": predictit.models.sarima,
+            "AR (Autoregression)": predictit.models.ar,
+            "ARMA": predictit.models.arma,
+            "ARIMA (Autoregression integrated moving average)": predictit.models.arima,
+            "SARIMAX (Seasonal ARIMA)": predictit.models.sarima,
 
-                    "Autoregressive Linear neural unit": predictit.models.autoreg_LNU,
-                    "Linear neural unit with weigths predict": predictit.models.autoreg_LNU_withwpred,
-                    "Conjugate gradient": predictit.models.cg,
+            "Autoregressive Linear neural unit": predictit.models.autoreg_LNU,
+            "Linear neural unit with weigths predict": predictit.models.autoreg_LNU_withwpred,
+            "Conjugate gradient": predictit.models.cg,
 
-                    "Extreme learning machine": predictit.models.elm,
-                    "Gen Extreme learning machine": predictit.models.elm_gen,
+            "Extreme learning machine": predictit.models.elm,
+            "Gen Extreme learning machine": predictit.models.elm_gen,
 
-                    #"LSTM": predictit.models.lstm,
-                    #"Bidirectional LSTM": predictit.models.lstm_bidirectional,
-                    #"LSTM batch": predictit.models.lstm_batch,
+            "Sklearn regression": predictit.models.regression,
+            "Bayes ridge regression": predictit.models.regression,
+            "Hubber regression": predictit.models.regression,
 
-                    "Bayes ridge regression": predictit.models.regression,
-                    "Hubber regression": predictit.models.regression,
-                    "Sklearn regression": predictit.models.regression,
-
-                    "Compare with average": predictit.models.compare_with_average
+            "Compare with average": predictit.models.compare_with_average
         }
 
         n_steps_in = 3
@@ -148,10 +153,6 @@ def test_main_from_config_2():
                 "ARMA": {"plot": 0, "p": 3, "q": 0, 'method': 'mle', 'ic': 'aic', 'trend': 'nc', 'solver': 'lbfgs', 'forecast_type': 'in_sample'},
                 "ARIMA (Autoregression integrated moving average)": {"p": 3, "d": 0, "q": 0, "plot": 0, 'method': 'css', 'ic': 'aic', 'trend': 'nc', 'solver': 'nm', 'forecast_type': 'out_of_sample'},
                 "SARIMAX (Seasonal ARIMA)": {"plot": 0, "p": 4, "d": 0, "q": 0, "pp": 1, "dd": 0, "qq": 0, "season": 12, "method": "lbfgs", "trend": 'nc', "enforce_invertibility": False, "enforce_stationarity": False, "verbose": 0},
-
-
-            # "ARIMA (Autoregression integrated moving average)": {"p": [1, maxorder], "d": [0,1], "q": order, 'method': ['css-mle', 'mle', 'css'], 'trend': ['c', 'nc'], 'solver': ['lbfgs', 'bfgs', 'newton', 'nm', 'cg'], 'forecast_type': ['in_sample', 'out_of_sample']},
-
 
                 "Autoregressive Linear neural unit": {"plot": 0, "lags": n_steps_in, "mi": 1, "minormit": 0, "tlumenimi": 1},
                 "Linear neural unit with weigths predict": {"plot": 0, "lags": n_steps_in, "mi": 1, "minormit": 0, "tlumenimi": 1},
@@ -214,6 +215,7 @@ def test_main_from_config_2():
     return result_2
 
 
+
 def test_main_multiple():
 
     if 1:
@@ -223,7 +225,8 @@ def test_main_multiple():
         config.freqs = ['D', 'M']
         config.csv_from_test_data_name = '5000 Sales Records.csv'
         config.predicted_columns = ['Units Sold', 'Total Profit']
-
+        config.optimizeit = 0
+        config.optimizeit_final = 0
 
     result_multiple = predictit.main.predict_multiple_columns()
     assert result_multiple[0][0][0]
@@ -231,6 +234,7 @@ def test_main_multiple():
 
 
 if __name__ == "__main__":
+    #result = test_own_data()
     #result_1 = test_main_from_config_1()
     #result_2 = test_main_from_config_2()
     result_multiple = test_main_multiple()

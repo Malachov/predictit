@@ -1,6 +1,5 @@
 #%%
 from setuptools import setup
-import io
 import sys
 import pathlib
 

@@ -1,1 +1,36 @@
-/* This file intentionally left blank. */
+div.document {
+    width: 1250px;
+    margin: 75px auto 0 auto;
+
+}
+
+div.sphinxsidebar {
+    width: 255px;
+}
+
+div.bodywrapper {
+    margin: 0 0 0 290px;
+}
+
+div.body {
+    max-width: 900px;
+    padding: 40px 30px 0 30px;
+}
+
+p {
+    text-indent: 30px;
+}
+
+.function > dt:first-of-type {
+    padding-top: 20px !important;
+    padding-bottom: 15px !important;
+}
+
+.field-list p {
+    text-indent: -58px;
+    margin-left: 72px;
+}
+
+.headerlink {
+    visibility: hidden;
+}

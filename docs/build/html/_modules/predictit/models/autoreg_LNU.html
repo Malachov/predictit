@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>predictit.models.autoreg_LNU &#8212; predictit 0.22 documentation</title>
+    <title>predictit.models.autoreg_LNU &#8212; predictit 08-01-2020 documentation</title>
     <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
@@ -31,22 +31,27 @@
           <div class="body" role="main">
             
   <h1>Source code for predictit.models.autoreg_LNU</h1><div class="highlight"><pre>
-<span></span><span class="c1">#%%</span>
-<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
-<div class="viewcode-block" id="autoreg_LNU"><a class="viewcode-back" href="../../../predictit.models.html#predictit.models.autoreg_LNU.autoreg_LNU">[docs]</a><span class="k">def</span> <span class="nf">autoreg_LNU</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">predicts</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">lags</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">mi</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">minormit</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">predicted_column_index</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">tlumenimi</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">plot</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">random</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">seed</span> <span class="o">=</span> <span class="mi">0</span><span class="p">):</span>
+
+<div class="viewcode-block" id="autoreg_LNU"><a class="viewcode-back" href="../../../predictit.models.autoreg_LNU.html#predictit.models.autoreg_LNU.autoreg_LNU">[docs]</a><span class="k">def</span> <span class="nf">autoreg_LNU</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">predicts</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">lags</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">mi</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">minormit</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">predicted_column_index</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">plot</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">random</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">damping</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Autoregressive linear neural unit.</span>
-<span class="sd">    Inputs</span>
-<span class="sd">        mii = learning step of Grad descent</span>
-<span class="sd">        predicts = number of predicted values, lags = number of history values used in calculation</span>
-<span class="sd">        plot = if 1, plot</span>
-<span class="sd">        random = if 1, neural weights are intitialised randomly with</span>
-<span class="sd">            scope = max - min random weights</span>
-<span class="sd">            shift = shift of random weights</span>
-<span class="sd">            seed = if random values needs to be repeated</span>
-<span class="sd">    Output</span>
-<span class="sd">        Predictions</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        data (np.ndarray): Time series data.</span>
+<span class="sd">        predicts (int, optional): Number of predicted values. Defaults to 7.</span>
+<span class="sd">        lags (int, optional): Number of regressive members - inputs to neural unit. Defaults to 100.</span>
+<span class="sd">        predicted_column_index (int, optional): If multidimensional, define what column is predicted. Defaults to 0.</span>
+<span class="sd">        mi (float, optional): Learning rate. If not normalized must be much smaller. Defaults to 0.1.</span>
+<span class="sd">        minormit (int, optional): Whether normalize learning rate. Defaults to 0.</span>
+<span class="sd">        damping (int, optional): Whether damp learning rate or not. Defaults to 1.</span>
+<span class="sd">        plot (int, optional): Whether plot results. Defaults to 0.</span>
+<span class="sd">        random (int, optional): Whether initial weights are random or not. Defaults to 0.</span>
+<span class="sd">        seed (int, optional): Random weights but the same everytime. Defaults to 0.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        np.ndarray: Predictions of input time series.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
@@ -55,7 +60,7 @@
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_shape</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">predicted_column_index</span><span class="p">]</span>
 
-    <span class="n">miwide</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">mi</span> <span class="o">*</span> <span class="mi">10</span><span class="p">,</span> <span class="n">mi</span><span class="p">,</span> <span class="n">mi</span> <span class="o">/</span> <span class="mi">10</span><span class="p">,</span> <span class="n">mi</span> <span class="o">/</span> <span class="mi">100</span><span class="p">,</span> <span class="n">mi</span><span class="o">/</span><span class="mi">1000</span><span class="p">,</span> <span class="n">mi</span><span class="o">/</span><span class="mi">100000</span><span class="p">,</span> <span class="n">mi</span><span class="o">/</span><span class="mi">1000000</span><span class="p">,</span> <span class="n">mi</span><span class="o">/</span><span class="mi">100000000</span><span class="p">,</span> <span class="n">mi</span><span class="o">/</span><span class="mi">100000000000</span><span class="p">])</span>
+    <span class="n">miwide</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">mi</span> <span class="o">*</span> <span class="mi">10</span><span class="p">,</span> <span class="n">mi</span><span class="p">,</span> <span class="n">mi</span> <span class="o">/</span> <span class="mi">10</span><span class="p">,</span> <span class="n">mi</span> <span class="o">/</span> <span class="mi">100</span><span class="p">,</span> <span class="n">mi</span> <span class="o">/</span> <span class="mi">1000</span><span class="p">,</span> <span class="n">mi</span> <span class="o">/</span> <span class="mi">100000</span><span class="p">,</span> <span class="n">mi</span> <span class="o">/</span> <span class="mi">1000000</span><span class="p">,</span> <span class="n">mi</span> <span class="o">/</span> <span class="mi">100000000</span><span class="p">,</span> <span class="n">mi</span> <span class="o">/</span> <span class="mi">100000000000</span><span class="p">])</span>
     <span class="n">miwidelen</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">miwide</span><span class="p">)</span>
     <span class="n">leng</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
     <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">miwidelen</span><span class="p">,</span> <span class="n">leng</span><span class="p">))</span>
@@ -68,16 +73,16 @@
     <span class="k">if</span> <span class="n">plot</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
         <span class="n">wall</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">miwidelen</span><span class="p">,</span> <span class="n">leng</span><span class="p">,</span> <span class="n">lags</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
 
-    <span class="k">if</span> <span class="n">seed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="mi">0</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">seed</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
         <span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
 
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">miwidelen</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">random</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
             <span class="n">w</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">lags</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
         <span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
-        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">leng</span><span class="p">):</span> <span class="c1"># NOTE nároky na paměť i čas?? možná neponechávat index i ale pouze konečné sumy a hodnoty přepisovat - nebo ponechat pro predikci w??</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">leng</span><span class="p">):</span>
             <span class="n">y</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">w</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
-            <span class="k">if</span> <span class="n">y</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">1000</span> <span class="o">*</span> <span class="nb">max</span><span class="p">(</span><span class="n">data</span><span class="p">):</span> <span class="c1"># Ochrana proti nekonvergujícím hodnotám učícího kroku</span>
+            <span class="k">if</span> <span class="n">y</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">1000</span> <span class="o">*</span> <span class="nb">max</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
                 <span class="n">e</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1000000</span>
                 <span class="k">break</span>
             <span class="n">e</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">-</span> <span class="n">y</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span>
@@ -86,7 +91,7 @@
                 <span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">j</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
             <span class="n">dydw</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
             <span class="k">if</span> <span class="n">minormit</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-                <span class="n">minorm</span> <span class="o">=</span> <span class="n">miwide</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">/</span> <span class="p">(</span><span class="n">tlumenimi</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">T</span><span class="p">))</span>
+                <span class="n">minorm</span> <span class="o">=</span> <span class="n">miwide</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">/</span> <span class="p">(</span><span class="n">damping</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">T</span><span class="p">))</span>
                 <span class="n">dw</span> <span class="o">=</span> <span class="n">minorm</span> <span class="o">*</span> <span class="n">e</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">*</span> <span class="n">dydw</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">dw</span> <span class="o">=</span> <span class="n">miwide</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">e</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">*</span> <span class="n">dydw</span>
@@ -107,22 +112,22 @@
             <span class="n">x</span><span class="p">[</span><span class="n">bestmiindex</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">predictions</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
     
     <span class="k">if</span> <span class="n">plot</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span><span class="mi">7</span><span class="p">))</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">7</span><span class="p">))</span>
 
         <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="n">bestmiindex</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Predikce&#39;</span><span class="p">);</span> <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;t&#39;</span><span class="p">)</span>
-        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Skutečnost&#39;</span><span class="p">);</span> <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;t&#39;</span><span class="p">)</span>
-        <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s2">&quot;upper right&quot;</span><span class="p">)</span>
-        <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;y&quot;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="n">bestmiindex</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Predikce&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;t&#39;</span><span class="p">);</span> <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;y&quot;</span><span class="p">);</span> <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s2">&quot;upper right&quot;</span><span class="p">)</span>
+
+        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Skutečnost&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;t&#39;</span><span class="p">)</span>
 
         <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
-        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">e</span><span class="p">[</span><span class="n">bestmiindex</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Chyba při tvorbě modelu&#39;</span><span class="p">);</span> <span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">();</span> <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;t&#39;</span><span class="p">)</span>
-        <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s2">&quot;upper right&quot;</span><span class="p">)</span>
-        <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Chyba&quot;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">e</span><span class="p">[</span><span class="n">bestmiindex</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Chyba při tvorbě modelu&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">();</span> <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;t&#39;</span><span class="p">);</span> <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Chyba&quot;</span><span class="p">);</span> <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s2">&quot;upper right&quot;</span><span class="p">)</span>
 
         <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
-        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">wall</span><span class="p">[</span><span class="n">bestmiindex</span><span class="p">]);</span> <span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">();</span> <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;t&#39;</span><span class="p">)</span>
-        <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Hodnoty vah&quot;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">wall</span><span class="p">[</span><span class="n">bestmiindex</span><span class="p">])</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">();</span> <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;t&#39;</span><span class="p">);</span> <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Hodnoty vah&quot;</span><span class="p">)</span>
 
         <span class="n">plt</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="s2">&quot;Predikovaná vs. skutečná hodnota, chyba a váhy&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
         <span class="n">plt</span><span class="o">.</span><span class="n">subplots_adjust</span><span class="p">(</span><span class="n">top</span><span class="o">=</span><span class="mf">0.88</span><span class="p">)</span>
@@ -133,6 +138,7 @@
         <span class="k">return</span> <span class="kc">None</span>
 
     <span class="k">return</span> <span class="p">(</span><span class="n">predictions</span><span class="p">)</span></div>
+    
 </pre></div>
 
           </div>
@@ -148,18 +154,54 @@
 
 
 
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=Malachov&repo=predictit&type=watch&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
 
 
-<h3>Navigation</h3>
 
-<div class="relations">
-<h3>Related Topics</h3>
+
+
+<div class="section" id="table-of-contents">
+<h3>Table of contents<a class="headerlink" href="#table-of-contents" title="Permalink to this headline">¶</a></h3>
+<div class="toctree-wrapper compound">
 <ul>
-  <li><a href="../../../index.html">Documentation overview</a><ul>
-  <li><a href="../../index.html">Module code</a><ul>
-  </ul></li>
-  </ul></li>
+<li class="toctree-l1"><a class="reference internal" href="index.html">predictit</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="index.html#table-of-contents">Table of contents</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="index.html#id1">predictit</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="index.html#output">Output</a></li>
+<li class="toctree-l4"><a class="reference internal" href="index.html#how-to">How to</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="index.html#simple-example-with-pypi">Simple example with Pypi</a></li>
+<li class="toctree-l5"><a class="reference internal" href="index.html#example-with-own-data-from-csv-and-config">Example with own data from CSV and config</a></li>
 </ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="index.html#submodules">Submodules</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="index.html#id2">config</a></li>
+<li class="toctree-l4"><a class="reference internal" href="index.html#id3">main</a></li>
+<li class="toctree-l4"><a class="reference internal" href="index.html#id4">analyze</a></li>
+<li class="toctree-l4"><a class="reference internal" href="index.html#id5">best_params</a></li>
+<li class="toctree-l4"><a class="reference internal" href="index.html#id6">confidence_interval</a></li>
+<li class="toctree-l4"><a class="reference internal" href="index.html#id7">database</a></li>
+<li class="toctree-l4"><a class="reference internal" href="index.html#id8">data_prep</a></li>
+<li class="toctree-l4"><a class="reference internal" href="index.html#id9">evaluate_predictions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="index.html#id11">evaluate_predictions</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="index.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="index.html#id12">models</a></li>
+<li class="toctree-l4"><a class="reference internal" href="index.html#id13">test_data</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="index.html#indices-and-tables">Indices and tables</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
 </div>
 <div id="searchbox" style="display: none" role="search">
   <h3 id="searchlabel">Quick search</h3>
@@ -171,27 +213,23 @@
     </div>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
-
-
-
-
-
-
-
-
         </div>
       </div>
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2019, Daniel Malachov.
+      &copy;2020, Daniel Malachov.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.2.1</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.3.1</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
     </div>
 
+    
+    <a href="https://github.com/Malachov/predictit" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
     
 
     

@@ -1,25 +1,26 @@
+""" Module to find area with some probability where predictions will be. It's used mainly for plotting where it create grey area where we can expect values."""
+
 import pandas as pd
 import statsmodels.api as sm
 import numpy as np
 
 
 def bounds(data, predicts=7, confidence=0.1, p=1, d=0, q=0):
+    """Function to find confidence interval of prediction for graph.
 
-    """Function to find confidence interval of prediction for graph
-    ======
-    Output:
-    ------
-        ARIMA predictions {arr}, Confidency{f}, Bounds{arr}
+    Args:
+        data (np.ndarray): Time series data
+        predicts (int, optional): [description]. Defaults to 7.
+        confidence (float, optional): [description]. Defaults to 0.1.
+        p (int, optional): 1st order of ARIMA. Defaults to 1.
+        d (int, optional): 2nd order of ARIMA. Defaults to 0.
+        q (int, optional): 3rd order of ARIMA. Defaults to 0.
 
-    Arguments:
-    ------
-        data {arr, list} -- Data for prediction
-        predicts{int} -- Number of predictions
-        confidence{f (0,1)} -- Confidency area
-        p{} -- Order of ARIMA model
-        d{} -- Order of ARIMA model
-        q{} -- Order of ARIMA model
+    Returns:
+        list, list: Lower bound, upper bound.
+
     """
+
     if len(data) <= 10:
         return
 
