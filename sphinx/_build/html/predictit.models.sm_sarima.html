@@ -1,0 +1,168 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>predictit.models.sm_sarima module &#8212; predictit 08-01-2020 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="module-predictit.models.sm_sarima">
+<span id="predictit-models-sm-sarima-module"></span><h1>predictit.models.sm_sarima module<a class="headerlink" href="#module-predictit.models.sm_sarima" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="predictit.models.sm_sarima.sarima">
+<code class="sig-prename descclassname">predictit.models.sm_sarima.</code><code class="sig-name descname">sarima</code><span class="sig-paren">(</span><em class="sig-param">data</em>, <em class="sig-param">predicts=7</em>, <em class="sig-param">plot=0</em>, <em class="sig-param">p=1</em>, <em class="sig-param">d=1</em>, <em class="sig-param">q=1</em>, <em class="sig-param">pp=1</em>, <em class="sig-param">dd=1</em>, <em class="sig-param">qq=1</em>, <em class="sig-param">predicted_column_index=0</em>, <em class="sig-param">season=12</em>, <em class="sig-param">method='lbfgs'</em>, <em class="sig-param">trend='n'</em>, <em class="sig-param">enforce_invertibility=False</em>, <em class="sig-param">enforce_stationarity=False</em>, <em class="sig-param">forecast_type='out_of_sample'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/predictit/models/sm_sarima.html#sarima"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#predictit.models.sm_sarima.sarima" title="Permalink to this definition">¶</a></dt>
+<dd><p>Seasonal autoregressive model from statsmodels library with moving average part and with integrated part.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>np.ndarray</em>) – Time series data</p></li>
+<li><p><strong>predicts</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of predicted values. Defaults to 7.</p></li>
+<li><p><strong>plot</strong> (<em>int</em><em>, </em><em>optional</em>) – Whether plot results. Defaults to 0.</p></li>
+<li><p><strong>p</strong> (<em>int</em><em>, </em><em>optional</em>) – 1st order of ARIMA. Defaults to 3.</p></li>
+<li><p><strong>d</strong> (<em>int</em><em>, </em><em>optional</em>) – 2nd order of ARIMA. Defaults to 1.</p></li>
+<li><p><strong>q</strong> (<em>int</em><em>, </em><em>optional</em>) – 3rd order of ARIMA. Defaults to 0.</p></li>
+<li><p><strong>pp</strong> (<em>int</em><em>, </em><em>optional</em>) – Seasonal 1st order of ARIMA. Defaults to 1.</p></li>
+<li><p><strong>dd</strong> (<em>int</em><em>, </em><em>optional</em>) – Seasonal 2nd order of ARIMA. Defaults to 1.</p></li>
+<li><p><strong>qq</strong> (<em>int</em><em>, </em><em>optional</em>) – Seasonal 3rd order of ARIMA. Defaults to 1.</p></li>
+<li><p><strong>predicted_column_index</strong> (<em>int</em><em>, </em><em>optional</em>) – If multidimensional, define what column is predicted. Defaults to 0.</p></li>
+<li><p><strong>season</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of seasons that repeats. Defaults to 12.</p></li>
+<li><p><strong>method</strong> (<em>str</em><em>, </em><em>optional</em>) – Parameter of statsmodels fit function. Defaults to ‘lbfgs’.</p></li>
+<li><p><strong>trend</strong> (<em>str</em><em>, </em><em>optional</em>) – Parameter of statsmodels SARIMAX function. Defaults to ‘n’.</p></li>
+<li><p><strong>enforce_invertibility</strong> (<em>bool</em><em>, </em><em>optional</em>) – Parameter of statsmodels SARIMAX function. Defaults to False.</p></li>
+<li><p><strong>enforce_stationarity</strong> (<em>bool</em><em>, </em><em>optional</em>) – Parameter of statsmodels SARIMAX function. Defaults to False.</p></li>
+<li><p><strong>forecast_type</strong> (<em>str</em><em>, </em><em>optional</em>) – Whether in_sample or out_of_sample prediction. Defaults to ‘out_of_sample’.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Predictions of input time series.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">predictit</a></h1>
+
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=Malachov&repo=predictit&type=watch&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<div class="section" id="table-of-contents">
+<h3>Table of contents<a class="headerlink" href="#table-of-contents" title="Permalink to this headline">¶</a></h3>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="index.html">predictit</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="index.html#table-of-contents">Table of contents</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="index.html#id1">predictit</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="index.html#output">Output</a></li>
+<li class="toctree-l4"><a class="reference internal" href="index.html#how-to">How to</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="index.html#simple-example-with-pypi">Simple example with Pypi</a></li>
+<li class="toctree-l5"><a class="reference internal" href="index.html#example-with-own-data-from-csv-and-config">Example with own data from CSV and config</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="index.html#submodules">Submodules</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="index.html#id2">config</a></li>
+<li class="toctree-l4"><a class="reference internal" href="index.html#id3">main</a></li>
+<li class="toctree-l4"><a class="reference internal" href="index.html#id4">analyze</a></li>
+<li class="toctree-l4"><a class="reference internal" href="index.html#id5">best_params</a></li>
+<li class="toctree-l4"><a class="reference internal" href="index.html#id6">confidence_interval</a></li>
+<li class="toctree-l4"><a class="reference internal" href="index.html#id7">database</a></li>
+<li class="toctree-l4"><a class="reference internal" href="index.html#id8">data_prep</a></li>
+<li class="toctree-l4"><a class="reference internal" href="index.html#id9">evaluate_predictions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="index.html#id11">evaluate_predictions</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="index.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="index.html#id12">models</a></li>
+<li class="toctree-l4"><a class="reference internal" href="index.html#id13">test_data</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="index.html#indices-and-tables">Indices and tables</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Daniel Malachov.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/predictit.models.sm_sarima.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+    <a href="https://github.com/Malachov/predictit" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>

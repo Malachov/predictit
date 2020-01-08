@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>Table of contents &#8212; predictit 08-01-2020 documentation</title>
+    <title>predictit.models.cg module &#8212; predictit 08-01-2020 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -30,40 +30,33 @@
 
           <div class="body" role="main">
             
-  <div class="section" id="table-of-contents">
-<h1>Table of contents<a class="headerlink" href="#table-of-contents" title="Permalink to this headline">¶</a></h1>
-<div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="index.html">predictit</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="index.html#output">Output</a></li>
-<li class="toctree-l2"><a class="reference internal" href="index.html#installation">Installation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="index.html#how-to">How to</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="index.html#simple-example-with-pypi">Simple example with Pypi</a></li>
-<li class="toctree-l3"><a class="reference internal" href="index.html#example-with-own-data-from-csv-and-config">Example with own data from CSV and config</a></li>
+  <div class="section" id="module-predictit.models.cg">
+<span id="predictit-models-cg-module"></span><h1>predictit.models.cg module<a class="headerlink" href="#module-predictit.models.cg" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="predictit.models.cg.cg">
+<code class="sig-prename descclassname">predictit.models.cg.</code><code class="sig-name descname">cg</code><span class="sig-paren">(</span><em class="sig-param">data</em>, <em class="sig-param">n_steps_in=50</em>, <em class="sig-param">predicts=7</em>, <em class="sig-param">predicted_column_index=0</em>, <em class="sig-param">epochs=100</em>, <em class="sig-param">constant=1</em>, <em class="sig-param">other_columns_lenght=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/predictit/models/cg.html#cg"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#predictit.models.cg.cg" title="Permalink to this definition">¶</a></dt>
+<dd><p>Conjugate gradient model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>np.ndarray</em>) – Time series data.</p></li>
+<li><p><strong>n_steps_in</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of regressive members - inputs to neural unit. Defaults to 50.</p></li>
+<li><p><strong>predicts</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of predicted values. Defaults to 7.</p></li>
+<li><p><strong>predicted_column_index</strong> (<em>int</em><em>, </em><em>optional</em>) – If multidimensional, define what column is predicted. Defaults to 0.</p></li>
+<li><p><strong>epochs</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of epochs to evaluate. Defaults to 100.</p></li>
+<li><p><strong>constant</strong> (<em>int</em><em>, </em><em>optional</em>) – Whether use bias. Defaults to 1.</p></li>
+<li><p><strong>other_columns_lenght</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of members from not-predicted columns. Defaults to None.</p></li>
 </ul>
-</li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="index.html#submodules">Submodules</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="index.html#id1">config</a></li>
-<li class="toctree-l2"><a class="reference internal" href="index.html#id2">main</a></li>
-<li class="toctree-l2"><a class="reference internal" href="index.html#id3">analyze</a></li>
-<li class="toctree-l2"><a class="reference internal" href="index.html#id4">best_params</a></li>
-<li class="toctree-l2"><a class="reference internal" href="index.html#id5">confidence_interval</a></li>
-<li class="toctree-l2"><a class="reference internal" href="index.html#id6">database</a></li>
-<li class="toctree-l2"><a class="reference internal" href="index.html#id7">data_prep</a></li>
-<li class="toctree-l2"><a class="reference internal" href="index.html#id8">evaluate_predictions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="index.html#id9">main_for_develop</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="index.html#subpackages">Subpackages</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="index.html#id10">models</a></li>
-<li class="toctree-l2"><a class="reference internal" href="index.html#id11">test_data</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="index.html#indices-and-tables">Indices and tables</a></li>
-</ul>
-</div>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Predictions of input time series.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
 </div>
 
 
@@ -151,7 +144,7 @@
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |
-      <a href="_sources/tooc.rst.txt"
+      <a href="_sources/predictit.models.cg.rst.txt"
           rel="nofollow">Page source</a>
     </div>
 

@@ -1,0 +1,178 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>predictit.models.sm_ar &#8212; predictit 08-01-2020 documentation</title>
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for predictit.models.sm_ar</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">statsmodels.tsa.ar_model</span> <span class="k">import</span> <span class="n">AR</span><span class="p">,</span> <span class="n">_ar_predict_out_of_sample</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<div class="viewcode-block" id="ar"><a class="viewcode-back" href="../../../predictit.models.sm_ar.html#predictit.models.sm_ar.ar">[docs]</a><span class="k">def</span> <span class="nf">ar</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">predicts</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">plot</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">predicted_column_index</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;cmle&#39;</span><span class="p">,</span> <span class="n">ic</span><span class="o">=</span><span class="s1">&#39;aic&#39;</span><span class="p">,</span> <span class="n">trend</span><span class="o">=</span><span class="s1">&#39;nc&#39;</span><span class="p">,</span> <span class="n">solver</span><span class="o">=</span><span class="s1">&#39;lbfgs&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Autoregressive model from statsmodels library.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        data (np.ndarray): Time series data.</span>
+<span class="sd">        predicts (int, optional): Number of predicted values. Defaults to 7.</span>
+<span class="sd">        plot (int, optional): Whether plot results. Defaults to 0.</span>
+<span class="sd">        predicted_column_index (int, optional): If multidimensional, define what column is predicted. Defaults to 0.</span>
+<span class="sd">        method (str, optional): Parameter of statsmodels fit function. Defaults to &#39;cmle&#39;.</span>
+<span class="sd">        ic (str, optional): Parameter of statsmodels fit function. Defaults to &#39;aic&#39;.</span>
+<span class="sd">        trend (str, optional): Parameter of statsmodels fit function. Defaults to &#39;nc&#39;.</span>
+<span class="sd">        solver (str, optional): Parameter of statsmodels fit function. Defaults to &#39;lbfgs&#39;.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        np.ndarray: Predictions of input time series.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="n">data_shape</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">model</span> <span class="o">=</span> <span class="n">AR</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">model</span> <span class="o">=</span> <span class="n">AR</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">predicted_column_index</span><span class="p">])</span>
+
+        <span class="n">model_fit</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">,</span> <span class="n">ic</span><span class="o">=</span><span class="n">ic</span><span class="p">,</span> <span class="n">trend</span><span class="o">=</span><span class="n">trend</span><span class="p">,</span> <span class="n">solver</span><span class="o">=</span><span class="n">solver</span><span class="p">,</span> <span class="n">disp</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="c1">#window = model_fit.k_ar</span>
+        <span class="c1">#coef = model_fit.params</span>
+
+        <span class="n">endogg</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">endog</span><span class="p">]</span>
+        <span class="n">predictions</span> <span class="o">=</span> <span class="n">_ar_predict_out_of_sample</span><span class="p">(</span><span class="n">endogg</span><span class="p">,</span> <span class="n">model_fit</span><span class="o">.</span><span class="n">params</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">k_ar</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">k_trend</span><span class="p">,</span> <span class="n">steps</span> <span class="o">=</span> <span class="n">predicts</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">plot</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">predictions</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;red&#39;</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+        <span class="n">predictions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">predictions</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">predictions</span>
+
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">err</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">]</span> <span class="o">*</span> <span class="n">predicts</span></div>
+
+        
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">predictit</a></h1>
+
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=Malachov&repo=predictit&type=watch&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<div class="section" id="table-of-contents">
+<h3>Table of contents<a class="headerlink" href="#table-of-contents" title="Permalink to this headline">¶</a></h3>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="index.html">predictit</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="index.html#table-of-contents">Table of contents</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="index.html#id1">predictit</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="index.html#output">Output</a></li>
+<li class="toctree-l4"><a class="reference internal" href="index.html#how-to">How to</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="index.html#simple-example-with-pypi">Simple example with Pypi</a></li>
+<li class="toctree-l5"><a class="reference internal" href="index.html#example-with-own-data-from-csv-and-config">Example with own data from CSV and config</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="index.html#submodules">Submodules</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="index.html#id2">config</a></li>
+<li class="toctree-l4"><a class="reference internal" href="index.html#id3">main</a></li>
+<li class="toctree-l4"><a class="reference internal" href="index.html#id4">analyze</a></li>
+<li class="toctree-l4"><a class="reference internal" href="index.html#id5">best_params</a></li>
+<li class="toctree-l4"><a class="reference internal" href="index.html#id6">confidence_interval</a></li>
+<li class="toctree-l4"><a class="reference internal" href="index.html#id7">database</a></li>
+<li class="toctree-l4"><a class="reference internal" href="index.html#id8">data_prep</a></li>
+<li class="toctree-l4"><a class="reference internal" href="index.html#id9">evaluate_predictions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="index.html#id11">evaluate_predictions</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="index.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="index.html#id12">models</a></li>
+<li class="toctree-l4"><a class="reference internal" href="index.html#id13">test_data</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="index.html#indices-and-tables">Indices and tables</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Daniel Malachov.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+    <a href="https://github.com/Malachov/predictit" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>
