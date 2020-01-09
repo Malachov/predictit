@@ -4,7 +4,7 @@ The database_deploy than use predicted values and deploy it to database server.
 """
 
 import pandas as pd
-import pyodbc
+#import pyodbc
 from sqlalchemy import create_engine
 import urllib
 from . import config
@@ -30,7 +30,10 @@ def database_load(server=config.server, database=config.database, freq='D', inde
     database = 'DATABASE={};'.format(database)
     sql_params = r'DRIVER={ODBC Driver 13 for SQL Server};' + server + database + 'Trusted_Connection=yes;'
 
-    sql_conn = pyodbc.connect(sql_params)
+
+
+    sql_conn = 0
+    #sql_conn = pyodbc.connect(sql_params)
 
     columns = '''   D.[DateBK],
                     D.[IsoWeekYear]'''
