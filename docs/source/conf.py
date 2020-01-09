@@ -20,9 +20,15 @@ import sys
 import pathlib
 import datetime
 
+
 script_dir = pathlib.Path(__file__).resolve()
 lib_path = script_dir.parents[2].as_posix()
 sys.path.insert(0, lib_path)
+
+# Delete one.. its foru source extension
+sys.path.insert(1, script_dir.as_posix())
+lib_path2 = script_dir.parents[2] / 'predictit'
+sys.path.insert(2, lib_path2.as_posix())
 
 
 # -- Project information -----------------------------------------------------
