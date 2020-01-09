@@ -11,3 +11,4 @@ seaborn
 statsmodels
 lightgbm
 scikit_learn
+m2r
