@@ -30,7 +30,7 @@ Submodules
 
 .. automodule:: predictit.config
 
-`main <predictit.main.html>`_
+`main <predictit.main>`_
 -----------------------------
 
 .. automodule:: predictit.main
