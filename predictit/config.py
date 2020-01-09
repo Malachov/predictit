@@ -2,6 +2,17 @@
 whether you want find optimal parameters etc. Some setting can be inserted as function parameters, then it has higher priority.
 All values are commented and easy to understand.
 
+Examples:
+
+    >>> data_source = 'csv'  # 'csv' or 'sql' or 'test'
+    >>> plot = 1  # If 1, plot interactive graph
+    >>> debug = 1  # Debug - print all results and all the errors on the way
+    >>> used_models = {
+    >>>        "AR (Autoregression)": models.ar,
+    >>>        "Autoregressive Linear neural unit": models.autoreg_LNU,
+    >>>        "Sklearn regression": models.regression,
+    >>>         }
+
 """
 
 from . import models

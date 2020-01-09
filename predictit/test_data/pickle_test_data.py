@@ -1,11 +1,11 @@
-""" Pickle test data on disk for faster loading if set up in config.py."""
+"""Module containing function for pickling test data if set up in config.py."""
 
 from pathlib import Path
 import pickle
 
 
 def pickle_data_all(data_all_pickle, datalength=1000000):
-
+    """Pickle test data on disk for faster loading."""
     script_dir = Path(__file__).resolve().parent
     data_folder = script_dir / "pickled"
 

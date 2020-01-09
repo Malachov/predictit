@@ -9,69 +9,66 @@ After finishing developing, just copy result back in main.
 import sys
 from pathlib import Path
 
+if __name__ == "__main__":
 
-this_path = Path(__file__).resolve().parents[1]
-this_path_string = str(this_path)
+    this_path = Path(__file__).resolve().parents[1]
+    this_path_string = str(this_path)
 
-# If used not as a library but as standalone framework, add path to be able to import predictit
-sys.path.insert(0, this_path_string)
+    # If used not as a library but as standalone framework, add path to be able to import predictit
+    sys.path.insert(0, this_path_string)
 
-try:
-    __IPYTHON__
-    from IPython import get_ipython
-    ipython = get_ipython()
-    magic_load_ex = '%load_ext autoreload'
-    magic_autoreload = '%autoreload 2'
-    ipython.magic(magic_load_ex)
-    ipython.magic(magic_autoreload)
+    try:
+        __IPYTHON__
+        from IPython import get_ipython
+        ipython = get_ipython()
+        magic_load_ex = '%load_ext autoreload'
+        magic_autoreload = '%autoreload 2'
+        ipython.magic(magic_load_ex)
+        ipython.magic(magic_autoreload)
 
-except Exception:
-    pass
+    except Exception:
+        pass
 
-import numpy as np
-import matplotlib.pyplot as plt
-from prettytable import PrettyTable
-import time
-import pickle
-import os
-import plotly as pl
-import cufflinks as cfe
-import sklearn
-import pandas as pd
-import warnings
-from sklearn import preprocessing
-import traceback
+    import numpy as np
+    import matplotlib.pyplot as plt
+    from prettytable import PrettyTable
+    import time
+    import pickle
+    import os
+    import plotly as pl
+    import cufflinks as cfe
+    import sklearn
+    import pandas as pd
+    import warnings
+    from sklearn import preprocessing
+    import traceback
 
-import predictit
-from predictit import config
-import predictit.data_prep as dp
+    import predictit
+    from predictit import config
+    import predictit.data_prep as dp
 
-data = []
-predicts = None
-predicted_column=None
-freq=None
+    data = []
+    predicts = None
+    predicted_column=None
+    freq=None
 
-if 1:
-    config.debug = 1
-    config.plot = 0
-    config.data_source = 'csv'
-    config.date_index = 5
-    config.freqs = ['D', 'M']
-    config.csv_from_test_data_name = '5000 Sales Records.csv'
-    config.predicted_columns = ['Units Sold', 'Total Profit']
-    config.optimizeit = 0
-    config.optimizeit_final = 0
-    config.used_models = {
+    if 1:
+        config.debug = 1
+        config.plot = 0
+        config.data_source = 'csv'
+        config.date_index = 5
+        config.freqs = ['D', 'M']
+        config.csv_from_test_data_name = '5000 Sales Records.csv'
+        config.predicted_columns = ['Units Sold', 'Total Profit']
+        config.optimizeit = 0
+        config.optimizeit_final = 0
+        config.used_models = {
 
 
-        "Extreme learning machine": predictit.models.regression,
-        "Gen Extreme learning machine": predictit.models.regression,
+            "Extreme learning machine": predictit.models.regression,
+            "Gen Extreme learning machine": predictit.models.regression,
 
-}
-
-if 1:
-#def predict(data=None, predicts=None, predicted_column=None, freq=None):
-
+    }
 
 
 
