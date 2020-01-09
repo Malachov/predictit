@@ -3,6 +3,28 @@
 Submodules
 ==========
 
+`predictit.config module`_
+
+`config <predictit.config.html>`__
+
+
+
+
+:ref:`predictit.config module`
+
+
+`predictit.config`_
+
+
+:ref:`predictit.config`
+
+:ref:`predictit.config.rst`
+:ref:`predictit.config.rst`_
+
+
+
+
+
 `config <predictit.config.html>`_
 ---------------------------------
 

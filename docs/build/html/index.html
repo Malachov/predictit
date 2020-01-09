@@ -121,8 +121,15 @@ For error: command ‘gcc’ failed with exit status 1</p>
 </div>
 <div class="section" id="submodules">
 <h1>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="id1">
-<h2><a class="reference external" href="predictit.config.html">config</a><a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<p><a href="#id14"><span class="problematic" id="id15">`predictit.config module`_</span></a></p>
+<p><a class="reference external" href="predictit.config.html">config</a></p>
+<p><a class="reference internal" href="predictit.config.html#module-predictit.config"><span class="std std-ref">predictit.config module</span></a></p>
+<p><a href="#id16"><span class="problematic" id="id17">`predictit.config`_</span></a></p>
+<p><span class="xref std std-ref">predictit.config</span></p>
+<p><span class="xref std std-ref">predictit.config.rst</span>
+<a href="#id1"><span class="problematic" id="id2">:ref:`predictit.config.rst`_</span></a></p>
+<div class="section" id="id3">
+<h2><a class="reference external" href="predictit.config.html">config</a><a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
 <span class="target" id="module-predictit.config"></span><p>All config for main file. Most of values are boolean 1 or 0. You can setup here data source, models to use,
 whether you want find optimal parameters etc. Some setting can be inserted as function parameters, then it has higher priority.
 All values are commented and easy to understand.</p>
@@ -138,43 +145,43 @@ All values are commented and easy to understand.</p>
 </pre></div>
 </div>
 </div>
-<div class="section" id="id2">
-<h2><a class="reference external" href="predictit.main.html">main</a><a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id4">
+<h2><a class="reference external" href="predictit.main.html">main</a><a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h2>
 <span class="target" id="module-predictit.main"></span><p>This is main module for making predictions. After setup config.py (data source), run predict function.
 There is also predict_multiple function for predicting more columns. It’s not necessary to run all models everytime,
 so there is also function compare models, that return results of models on the test data. Then you can config again only good models.</p>
 <p>There are working examples in main readme and also in test_it module.</p>
 </div>
-<div class="section" id="id3">
-<h2><a class="reference external" href="predictit.analyze.html">analyze</a><a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id5">
+<h2><a class="reference external" href="predictit.analyze.html">analyze</a><a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h2>
 <span class="target" id="module-predictit.analyze"></span><p>This is module for data analysis. It create plots of data, it’s distribution, it’s details, autocorrelation function etc.</p>
 </div>
-<div class="section" id="id4">
-<h2><a class="reference external" href="predictit.best_params.html">best_params</a><a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id6">
+<h2><a class="reference external" href="predictit.best_params.html">best_params</a><a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h2>
 <span class="target" id="module-predictit.best_params"></span><p>Module with main function optimize that find optimal input paramaters for function. Arguments are input model, initial function arguments and arguments limits.
 More info is in optimize function documentation</p>
 </div>
-<div class="section" id="id5">
-<h2><a class="reference external" href="predictit.confidence_interval.html">confidence_interval</a><a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id7">
+<h2><a class="reference external" href="predictit.confidence_interval.html">confidence_interval</a><a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h2>
 <span class="target" id="module-predictit.confidence_interval"></span><p>Module to find area with some probability where predictions will be. It’s used mainly for plotting where it create grey area where we can expect values.</p>
 </div>
-<div class="section" id="id6">
-<h2><a class="reference external" href="predictit.database.html">database</a><a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id8">
+<h2><a class="reference external" href="predictit.database.html">database</a><a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h2>
 <span class="target" id="module-predictit.database"></span><p>Module include two functions: database_load and database_deploy. First download data from database - it’s necessary to set up connect credentials in config and edit query!
 The database_deploy than use predicted values and deploy it to database server.</p>
 </div>
-<div class="section" id="id7">
-<h2><a class="reference external" href="predictit.data_prep.html">data_prep</a><a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id9">
+<h2><a class="reference external" href="predictit.data_prep.html">data_prep</a><a class="headerlink" href="#id9" title="Permalink to this headline">¶</a></h2>
 <span class="target" id="module-predictit.data_prep"></span><p>Module for data preprocessing. Contain functions for removing outliers, NaN columns or
 function for making inputs and outputs from time series if you want to see how functions work -
 working examples with printed results are in tests - visual.py.</p>
 </div>
-<div class="section" id="id8">
-<h2><a class="reference external" href="predictit.evaluate_predictions.html">evaluate_predictions</a><a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id10">
+<h2><a class="reference external" href="predictit.evaluate_predictions.html">evaluate_predictions</a><a class="headerlink" href="#id10" title="Permalink to this headline">¶</a></h2>
 <span class="target" id="module-predictit.evaluate_predictions"></span><p>Module with function compare_predicted_to_test that Compare tested model with reality. It return some error criterion based on config.py</p>
 </div>
-<div class="section" id="id9">
-<h2><a class="reference external" href="predictit.main_for_develop.html">main_for_develop</a><a class="headerlink" href="#id9" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id11">
+<h2><a class="reference external" href="predictit.main_for_develop.html">main_for_develop</a><a class="headerlink" href="#id11" title="Permalink to this headline">¶</a></h2>
 <span class="target" id="module-predictit.main_for_develop"></span><p>Just copy of inner content of main function. Developing is much faster
 having all variables in variable explorer and all plots in jupyter cell because code is not in fuction but declarative.
 After finishing developing, just copy result back in main.</p>
@@ -182,16 +189,16 @@ After finishing developing, just copy result back in main.</p>
 </div>
 <div class="section" id="subpackages">
 <h1>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="id10">
-<h2><a class="reference external" href="predictit.models.html">models</a><a class="headerlink" href="#id10" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id12">
+<h2><a class="reference external" href="predictit.models.html">models</a><a class="headerlink" href="#id12" title="Permalink to this headline">¶</a></h2>
 <span class="target" id="module-predictit.models"></span><p>Subpackage include models from libraries such as Tensorflow, Statsmodels, Sklearn and some own simple models.
 Various models are included autoregressive model, ARIMA, LSTM, various regressions such as linear or ridge
 and finally some neural units and conjugate gradient. You can use compare_models function to compare models on test data.
 You can see results of all models in interactive plot.</p>
 <p>All models are described in docstrings in it’s modules.</p>
 </div>
-<div class="section" id="id11">
-<h2><a class="reference external" href="predictit.test_data.html">test_data</a><a class="headerlink" href="#id11" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id13">
+<h2><a class="reference external" href="predictit.test_data.html">test_data</a><a class="headerlink" href="#id13" title="Permalink to this headline">¶</a></h2>
 <span class="target" id="module-predictit.test_data"></span><p>Module with test data that can be use as data for development of framework, but aslo can be changed by user
 and then used for compare_models function to find the best suited models for user defined data. Data than can be pickled to faster loading.</p>
 </div>
@@ -233,9 +240,9 @@ and then used for compare_models function to find the best suited models for use
 
         <li class="toctree-l2"><a class="reference internal" href="index.html#submodules">Submodules</a>
         <ul>
-            <li class="toctree-l3"><a class="reference internal" href="predictit.config.html">config</a></li>
-            <li class="toctree-l3"><a class="reference internal" href="predictit.main.html">main</a></li>
-            <li class="toctree-l3"><a class="reference internal" href="predictit.analyze.html">analyze</a></li>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.config/">config</a></li>
+            <li class="toctree-l3"><a class="reference internal" href="predictit.main">main</a></li>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.analyze.html">analyze</a></li>
             <li class="toctree-l3"><a class="reference internal" href="predictit.best_params.html">best_params</a></li>
             <li class="toctree-l3"><a class="reference internal" href="predictit.confidence_interval.html">confidence_interval</a></li>
             <li class="toctree-l3"><a class="reference internal" href="predictit.database.html">database</a></li>
