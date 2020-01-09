@@ -34,15 +34,7 @@ author = 'Daniel Malachov'
 # The full version, including alpha/beta/rc tags
 release = datetime.datetime.now().strftime('%d-%m-%Y')
 
-
-
-
-paath = "joooo"
-
-
-
-
-
+master_doc = 'index'
 
 source_suffix = ['.rst', '.md']
 
