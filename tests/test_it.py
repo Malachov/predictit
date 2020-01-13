@@ -74,8 +74,8 @@ def test_main_from_config_1():
                     "Linear neural unit with weigths predict": predictit.models.autoreg_LNU_withwpred,
                     "Conjugate gradient": predictit.models.cg,
 
-                    "Extreme learning machine": predictit.models.elm,
-                    "Gen Extreme learning machine": predictit.models.elm_gen,
+                    "Extreme learning machine": predictit.models.regression,
+                    "Gen Extreme learning machine": predictit.models.regression,
 
                     #"LSTM": predictit.models.lstm,
                     #"Bidirectional LSTM": predictit.models.lstm_bidirectional,
@@ -121,16 +121,16 @@ def test_main_from_config_2():
 
         config.used_models = {
             "AR (Autoregression)": predictit.models.ar,
-            "ARMA": predictit.models.arma,
-            "ARIMA (Autoregression integrated moving average)": predictit.models.arima,
-            "SARIMAX (Seasonal ARIMA)": predictit.models.sarima,
+            #"ARMA": predictit.models.arma,
+            #"ARIMA (Autoregression integrated moving average)": predictit.models.arima,
+            #"SARIMAX (Seasonal ARIMA)": predictit.models.sarima,
 
-            "Autoregressive Linear neural unit": predictit.models.autoreg_LNU,
-            "Linear neural unit with weigths predict": predictit.models.autoreg_LNU_withwpred,
+            #"Autoregressive Linear neural unit": predictit.models.autoreg_LNU,
+            #"Linear neural unit with weigths predict": predictit.models.autoreg_LNU_withwpred,
             "Conjugate gradient": predictit.models.cg,
 
-            "Extreme learning machine": predictit.models.elm,
-            "Gen Extreme learning machine": predictit.models.elm_gen,
+            "Extreme learning machine": predictit.models.regression,
+            #"Gen Extreme learning machine": predictit.models.regression,
 
             "Sklearn regression": predictit.models.regression,
             "Bayes ridge regression": predictit.models.regression,
@@ -175,8 +175,8 @@ def test_main_from_config_2():
         iterations = 2
 
         # This is for final optimalisation of the best model, not for all models
-        config.fragments_final = 2 * fragments
-        config.iterations_final = 2 * iterations
+        config.fragments_final = fragments
+        config.iterations_final = iterations
 
         # Threshold values
         # If you need integers, type just number, if you need float, type dot (e.g. 2.0)
@@ -233,8 +233,15 @@ def test_main_multiple():
     return result_multiple
 
 
+def test_compare_models():
+    data_length = 1000
+    data_all = {'sin': predictit.test_data.data_test.gen_sin(data_length), 'Sign': predictit.test_data.data_test.gen_sign(data_length), 'Random data': predictit.test_data.data_test.gen_random(data_length)}
+    predictit.main.compare_models(data_all)
+
+
 if __name__ == "__main__":
     #result = test_own_data()
     #result_1 = test_main_from_config_1()
     #result_2 = test_main_from_config_2()
-    result_multiple = test_main_multiple()
+    #result_multiple = test_main_multiple()
+    test_compare_models()

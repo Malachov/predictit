@@ -32,7 +32,8 @@ def sarima(data, predicts=7, plot=0, p=1, d=1, q=1, pp=1, dd=1, qq=1, predicted_
 
     """
 
-    data_shape = data.shape
+    data = np.array(data)
+    data_shape = np.shape(data)
     if len(data_shape) > 1:
         data = data[predicted_column_index]
 

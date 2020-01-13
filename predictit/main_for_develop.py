@@ -47,14 +47,24 @@ if __name__ == "__main__":
     from predictit import config
     import predictit.data_prep as dp
 
-    data = []
+    data_length = 1000
+    data = predictit.test_data.data_test.gen_sign(data_length)
     predicts = None
     predicted_column=None
     freq=None
 
-    if 1:
-        config.debug = 1
-        config.plot = 0
+    config.debug = 1
+    config.lengths = 0
+    config.criterion = 'mape'  # 'mape' or 'rmse'
+
+    config.used_models = {
+            "Sklearn regression": predictit.models.regression,
+
+}
+
+    if 0:
+        config.debug = 0
+        config.plot = 1
         config.data_source = 'csv'
         config.date_index = 5
         config.freqs = ['D', 'M']
@@ -224,9 +234,13 @@ if __name__ == "__main__":
             data_for_predictions_df = pd.DataFrame(data_for_predictions, columns=[predicted_column_name])
 
         else:
-            data_for_predictions = data_for_predictions[-config.datalength:].reshape(1, -1)
 
+
+
+            data_for_predictions = data_for_predictions[-config.datalength:].reshape(1, -1)
             predicted_column_index = 0
+
+
             if config.remove_outliers:
                 data_for_predictions = dp.remove_outliers(data_for_predictions, predicted_column_index=predicted_column_index, threshold=config.remove_outliers)
 
@@ -264,6 +278,7 @@ if __name__ == "__main__":
         data_for_predictions, final_scaler = dp.standardize(data_for_predictions, standardizer=config.standardize)
     if config.standardize == 'robust':
         data_for_predictions, final_scaler = dp.standardize(data_for_predictions, standardizer=config.standardize)
+
 
     data_shape = np.shape(data_for_predictions)
     data_length = len(column_for_prediction)
@@ -602,8 +617,13 @@ if __name__ == "__main__":
             fill = None)
 
         layout = pl.graph_objs.Layout(
-            yaxis = dict(title='Datum'),
-            title = 'Predikce',
+            yaxis = dict(title='Values'),
+            title = {   'text': config.plot_name,
+                        'y':0.9,
+                        'x':0.5,
+                        'xanchor': 'center',
+                        'yanchor': 'top'},
+            titlefont = {"size": 28},
             showlegend = False)
 
         graph_data = [lower_bound, trace, upper_bound, history]

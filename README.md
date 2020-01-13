@@ -6,9 +6,11 @@ Most common output is plotly interactive graph, deploying to database and list o
 Printscreen of graph
 ![Printscreen of output HTML graph](https://raw.githubusercontent.com/Malachov/predictit/master/output_example.png)
 
-## Oficial repo and documentation
-![repo on github](https://github.com/Malachov/predictit)
-![official documentation](https://predictit.readthedocs.io)
+## Oficial repo and documentation links
+
+![Repo on github](https://github.com/Malachov/predictit)
+
+![Official readthedocs documentation](https://predictit.readthedocs.io)
 
 ## Installation
     pip install predictit

@@ -70,7 +70,6 @@ def regression( data, regressor='bayesianridge', n_steps_in=50, predicts=7, pred
     if other_columns_lenght is None:
         other_columns_lenght = n_steps_in
 
-
     if output_shape == 'one_step':
         X, y = make_sequences(data, n_steps_in=n_steps_in, predicted_column_index=predicted_column_index, other_columns_lenght=other_columns_lenght, constant=constant)
 

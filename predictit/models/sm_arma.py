@@ -23,15 +23,13 @@ def arma(data, predicts=7, plot=0, p=3, q=1, predicted_column_index=0, method='m
     """
 
     data = np.array(data)
-    data_shape = data.shape
+    data_shape = np.shape(data)
+    if len(data_shape) > 1:
+        data = data[predicted_column_index]
 
     order = (p, q)
 
-    if len(data.shape) == 1:
-        model = sm.tsa.ARMA(data, order=order)
-
-    else:
-        model = sm.tsa.ARMA(data[predicted_column_index], order=order)
+    model = sm.tsa.ARMA(data, order=order)
 
     model_fit = model.fit(method=method, ic=ic, trend=trend, solver=solver, disp=0)
 

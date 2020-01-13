@@ -304,15 +304,14 @@ def make_sequences(data, n_steps_in, n_steps_out=1, constant=None, predicted_col
 
     data = np.array(data)
 
-    if not other_columns_lenght:
-        data = data[predicted_column_index]
-
     data_shape = data.shape
 
     if data_shape[0] == 1:
         data = data.reshape(-1)
         data_shape = data.shape
 
+    if not other_columns_lenght and len(data_shape) > 1:
+        data = data[predicted_column_index]
 
     if len(data_shape) == 1:
         X_list, y = make_seq(data=data, n_steps_in=n_steps_in, n_steps_out=n_steps_out, constant=constant)

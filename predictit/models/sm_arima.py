@@ -26,9 +26,10 @@ def arima(data, predicts=7, plot=0, p=3, d=1, q=0, predicted_column_index=0, met
         np.ndarray: Predictions of input time series.
     """
 
-    # data_shape = data.shape
-    # if len(data_shape) > 1:
-    #     data = data[predicted_column_index]
+    data = np.array(data)
+    data_shape = np.shape(data)
+    if len(data_shape) > 1:
+        data = data[predicted_column_index]
 
     order = (p, d, q)
 

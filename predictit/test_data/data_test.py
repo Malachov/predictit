@@ -4,7 +4,7 @@ import numpy as np
 
 
 # Sin
-def gen_sin(n):
+def gen_sin(n, periods=200):
     """Generate test data of length n in sinus shape.
 
     Args:
@@ -14,13 +14,12 @@ def gen_sin(n):
         np.ndarray: Sinus shaped data.
     """
 
-    t = np.linspace(0, 8 * np.pi, n)
+    t = np.linspace(0, periods * np.pi, n)
     data1 = np.sin(t)
     return data1
 
-
 # Sign
-def gen_sign(n):
+def gen_sign(n, periods=200):
     """Generate test data of length n in signum shape.
 
     Args:
@@ -30,7 +29,7 @@ def gen_sign(n):
         np.ndarray: Signum shaped data.
     """
 
-    data1 = gen_sin(n)
+    data1 = gen_sin(n, periods=periods)
     data2 = np.sign(data1)
     return data2
 

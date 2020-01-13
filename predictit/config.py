@@ -49,10 +49,10 @@ datalength = 100  # The length of the data used for prediction
 data_transform = None  # 'difference' or None - Transform the data on differences between two neighbor values
 
 # Evaulation is repeated couple of times on shifted data for ensuring results (remove accidentaly good results)
-debug = 1  # Debug - print all results and all the errors on the way
+debug = 0  # Debug - print all results and all the errors on the way
 repeatit = 2  # How many times is computation repeated
 other_columns = 0  # If 0, only predicted column will be used for making predictions.
-lengths = 0  # Compute on various length of data (1, 1/2, 1/4...). Automatically choose the best length. If 0, use only full length.
+lengths = 1  # Compute on various length of data (1, 1/2, 1/4...). Automatically choose the best length. If 0, use only full length.
 confidence = 0.8  # Area of confidence in result plot (grey area where we suppose values) - Bigger value, narrower area - maximum 1
 remove_outliers = 0  # Remove extraordinary values. Value is threshold for ignored values. Value means how many times standard deviation from the average threshold is far
 standardize = 'standardize'  # one from 'standardize', '-11', '01', 'robust'
@@ -69,6 +69,7 @@ optimizeit_final_limit = 0.1  # If optimize paratmeters of the best model
 plotallmodels = 0  # Plot all models (recommended only in interactive jupyter window)
 already_trained = 0  # Computationaly hard models (LSTM) load from disk
 #tensorflowit = 0  # Whether use computationally hard models (slow even just on library load)
+plot_name = 'Predictions'
 
 piclkeit = 1  # Wheter save serialized !test! data on disk, that can speed up loading
 from_pickled = 1
@@ -144,8 +145,8 @@ models_parameters = {
        # "ARIMA (Autoregression integrated moving average)": {"p": [1, maxorder], "d": [0,1], "q": order, 'method': ['css-mle', 'mle', 'css'], 'trend': ['c', 'nc'], 'solver': ['lbfgs', 'bfgs', 'newton', 'nm', 'cg'], 'forecast_type': ['in_sample', 'out_of_sample']},
 
 
-        "Autoregressive Linear neural unit": {"plot": 0, "lags": n_steps_in, "mi": 1, "minormit": 0, "tlumenimi": 1},
-        "Linear neural unit with weigths predict": {"plot": 0, "lags": n_steps_in, "mi": 1, "minormit": 0, "tlumenimi": 1},
+        "Autoregressive Linear neural unit": {"plot": 0, "lags": n_steps_in, "mi": 1, "minormit": 0, "damping": 1},
+        "Linear neural unit with weigths predict": {"plot": 0, "lags": n_steps_in, "mi": 1, "minormit": 0, "damping": 1},
         "Conjugate gradient": {"n_steps_in": n_steps_in, "epochs": 5, "constant": 1, "other_columns_lenght": None},
 
 
@@ -201,8 +202,8 @@ models_parameters_limits = {
         "ARIMA (Autoregression integrated moving average)": {"p": [1, maxorder], "d": [0, 1], "q": order, 'method': ['css'], 'trend': ['c', 'nc'], 'solver': ['lbfgs', 'bfgs', 'newton', 'nm', 'cg'], 'forecast_type': ['in_sample', 'out_of_sample']},
         "SARIMAX (Seasonal ARIMA)": {"p": [1, maxorder], "d": order, "q": order, "pp": order, "dd": order, "qq": order, "season": order, "method": ['lbfgs', 'bfgs', 'newton', 'nm', 'cg', 'ncg', 'powell'], "trend": ['n', 'c', 't', 'ct'], "enforce_invertibility": [True, False], "enforce_stationarity": [True, False], 'forecast_type': ['in_sample', 'out_of_sample']},
 
-        "Autoregressive Linear neural unit": {"lags": steps, "mi": [1.0, 10.0], "minormit": [0, 1], "tlumenimi": [0.0, 100.0]},
-        "Linear neural unit with weigths predict": {"lags": steps, "mi": [1.0, 10.0], "minormit": [0, 1], "tlumenimi": [0.0, 100.0]},
+        "Autoregressive Linear neural unit": {"lags": steps, "mi": [1.0, 10.0], "minormit": [0, 1], "damping": [0.0, 100.0]},
+        "Linear neural unit with weigths predict": {"lags": steps, "mi": [1.0, 10.0], "minormit": [0, 1], "damping": [0.0, 100.0]},
         "Conjugate gradient": {"n_steps_in": steps, "epochs": epochs, "constant": [None, 1], "other_columns_lenght": [None, steps[1]]},
 
 

@@ -18,9 +18,11 @@ sys.path.insert(0, lib_path_str)
 import predictit
 import predictit.data_prep as dp
 
-data = np.array([[1, 3, 5, 2, 3, 4, 5, 66, 3, 2, 4, 5, 6, 0, 0, 0, 0, 7, 3, 4, 55, 3, 2, 5, 6]])
-#data = np.array([1, 3, 5, 2, 3, 4, 5, 66, 3, 2, 4, 5, 6, 0, 0, 0, 0, 7, 3, 4, 55, 3, 2, 5, 6])
-column_for_prediction = data[0]
+#data = np.array([[1, 3, 5, 2, 3, 4, 5, 66, 3, 2, 4, 5, 6, 0, 0, 0, 0, 7, 3, 4, 55, 3, 2, 5, 6]])
+data = np.array([1, 3, 5, 2, 3, 4, 5, 66, 3, 2, 4, 5, 6, 0, 0, 0, 0, 7, 3, 4, 55, 3, 2, 5, 6])
+column_for_prediction = np.array([1, 3, 5, 2, 3, 4, 5, 66, 3, 2, 4, 5, 6, 0, 0, 0, 0, 7, 3, 4, 55, 3, 2, 5, 6])
+
+#column_for_prediction = data[0]
 data_multi_col = np.array([[1, 22, 3, 3], [5, 6, 7, 6], [8, 9, 10, 6]])
 #data_multi_col = data_multi_col.astype('float64')
 

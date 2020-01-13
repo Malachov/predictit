@@ -265,7 +265,7 @@ def predict(data=[], predicts=None, predicted_column=None, freq=None, return_mod
 
     if config.lengths:
         data_lengths = [data_length, int(data_length / 2), int(data_length / 4), min_data_length + 50, min_data_length]
-        data_lengths = [k for k in data_lengths if k >= min_data_length]
+        #data_lengths = [k for k in data_lengths if k >= min_data_length]
     else:
         data_lengths = [data_length]
 
@@ -582,8 +582,13 @@ def predict(data=[], predicts=None, predicted_column=None, freq=None, return_mod
             fill = None)
 
         layout = pl.graph_objs.Layout(
-            yaxis = dict(title='Datum'),
-            title = 'Predikce',
+            yaxis = dict(title='Values'),
+            title = {   'text': config.plot_name,
+                        'y':0.9,
+                        'x':0.5,
+                        'xanchor': 'center',
+                        'yanchor': 'top'},
+            titlefont = {"size": 28},
             showlegend = False)
 
         graph_data = [lower_bound, trace, upper_bound, history]
@@ -667,3 +672,70 @@ def predict_multiple_columns(data=[], predicted_columns=[], freqs=[], database_d
     return predictions_full
 
 
+def compare_models(data_all, data_length=1000):
+    """Function that helps to choose apropriate models. It evaluate it on test data and then return results.
+    After you know what models are the best, you can use only them in functions predict() or predict_multiple.
+    You can define your own test data and find best modules for your process. You can pickle data if you are use it 
+    more often to faster loading.
+
+    Args:
+        data_all (dict): Dictionary of data names and data values (np.array). You can use data from test_data module, data_test script (e.g. gen_sin()).
+        data_length (int, optional): If data are pickled, length that will be used. Defaults to 1000.
+
+    """
+
+    if config.piclkeit:
+        from predictit.test_data.pickle_test_data import pickle_data_all
+        import pickle
+        pickle_data_all(data_all, datalength=data_length)
+
+    if config.from_pickled:
+
+        script_dir = Path(__file__).resolve().parent
+        data_folder = script_dir / "test_data" / "pickled"
+
+        for i, j in data_all.items():
+            file_name = i + '.pickle'
+            file_adress = data_folder / file_name
+            try:
+                with open(file_adress, "rb") as input_file:
+                    data = pickle.load(input_file)
+                data_all[i] = data
+            except Exception:
+                warnings.warn(f"\n Error: {traceback.format_exc()} \n Warning - test data not loaded - First in config.py pickleit = 1, that save the data on disk, then load from pickled. \n")
+
+    results = {}
+
+    for i, j in data_all.items():
+        config.plot_name = i
+        try:
+            result = predictit.main.predict(data=j, return_model_criterion=1)
+            results[i] = (result - np.nanmin(result)) / (np.nanmax(result) - np.nanmin(result))
+
+        except Exception:
+            results[i] = np.nan
+
+    results_array = np.stack((results.values()), axis=0)
+
+    all_data_average = np.nanmean(results_array, axis=0)
+
+    models_best_results = np.nanmin(all_data_average, axis=1)
+    best_compared_model = int(np.nanargmin(models_best_results))
+    best_compared_model_name = list(config.used_models.keys())[best_compared_model]
+
+    all_lengths_average = np.nanmean(all_data_average, axis=0)
+    best_all_lengths_index = np.nanargmin(all_lengths_average)
+
+    models_names = list(config.used_models.keys())
+
+    models_table = PrettyTable()
+    models_table.field_names = ["Model", "Average standardized {} error".format(config.criterion)]
+
+    # Fill the table
+    for i, j in enumerate(models_names):
+        models_table.add_row([models_names[i], models_best_results[i]])
+
+    print(f'\n {models_table} \n')
+
+    print(f"\n\nBest model is {best_compared_model_name}")
+    print(f"\n\nBest data length index is {best_all_lengths_index}")
