@@ -3,23 +3,19 @@ Library/framework for making predictions. Choose best of 20 models (ARIMA, regre
 
 ## Output
 Most common output is plotly interactive graph, deploying to database and list of results.
-Printscreen of graph
+
 ![Printscreen of output HTML graph](https://raw.githubusercontent.com/Malachov/predictit/master/output_example.png)
 
 ## Oficial repo and documentation links
 
-![Repo on github](https://github.com/Malachov/predictit)
+[Repo on github](https://github.com/Malachov/predictit)
 
-![Official readthedocs documentation](https://predictit.readthedocs.io)
+[Official readthedocs documentation](https://predictit.readthedocs.io)
 
 ## Installation
     pip install predictit
 
-Sometime you can have issues with installing some libraries.
-For error: command 'gcc' failed with exit status 1
-
-    sudo apt-get install python-dev
-
+Sometime you can have issues with installing some libraries from requirements (e.g. numpy because not BLAS / LAPACK). There are also two libraries - Tensorflow and pyodbc not in requirements, because not necessary, but troublesome. If library not installed with pip, check which library don't work, install manually with stackoverflow and repeat...
 
 ## How to
 Software can be used in two ways. As a python library or as standalone framework.

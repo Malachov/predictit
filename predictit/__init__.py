@@ -17,7 +17,7 @@ from . import evaluate_predictions
 from . import main
 from . import confidence_interval
 
-__version__ = "0.61"
+__version__ = "0.62"
 __author__ = "Daniel Malachov"
 __license__ = "MIT"
 __email__ = "malachovd@seznam.cz"
