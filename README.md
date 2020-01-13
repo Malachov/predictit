@@ -22,14 +22,19 @@ For error: command 'gcc' failed with exit status 1
 
 
 ## How to
-### Simple example with Pypi
+Software can be used in two ways. As a python library or as standalone framework.
+Main function is predict in main.py script.
+There is also predict_multiple_columns if you want to predict more at once (columns or time frequentions).
+There is also function compare_models that evaluate test data and can tell you which models are best. Then you can use only that. It's recommended also to use arguments optimization just once, change initial parameters in config and turn optimization off for performance reasons.
+
+### Simple example of predict function with Pypi
 ```Python
 import predictit
 
 predictions = predictit.main.predict()  # Make prediction on test data
 ```
 
-### Example with own data from CSV and config
+### Example of predict function with own data from CSV and config
 ```Python
 import predictit
 
