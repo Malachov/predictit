@@ -1,0 +1,32 @@
+language: python
+cache: pip
+python:
+
+  - "3.7"
+
+branches:
+  only:
+  - master
+
+before_install:
+  - sudo apt-get install unixodbc-dev
+  - sudo apt-get install libblas-dev liblapack-dev libatlas-base-dev gfortran
+
+install:
+  - pip install pip --upgrade
+  - pip install pytest
+  - pip install -r requirements.txt
+  - python setup.py install
+
+script: python -m pytest -v tests/test_it.py
+
+deploy:
+  provider: releases
+  api_key: $GITHUB_TOKEN
+  name: "Release test"
+  body: "test \n test \r\n + /r/n *"
+  overwrite: true
+  skip_cleanup: true
+  file: '*'
+  on:
+    tags: true

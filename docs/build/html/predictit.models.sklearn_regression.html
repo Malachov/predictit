@@ -1,0 +1,169 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>predictit.models.sklearn_regression module &#8212; predictit 09-01-2020 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="module-predictit.models.sklearn_regression">
+<span id="predictit-models-sklearn-regression-module"></span><h1>predictit.models.sklearn_regression module<a class="headerlink" href="#module-predictit.models.sklearn_regression" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="predictit.models.sklearn_regression.get_regressors">
+<code class="sig-prename descclassname">predictit.models.sklearn_regression.</code><code class="sig-name descname">get_regressors</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/predictit/models/sklearn_regression.html#get_regressors"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#predictit.models.sklearn_regression.get_regressors" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create list of all regressors from sklearn (classes, that can be called). E.g. [bayes_ridge_regressor, linear_regressor]</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="predictit.models.sklearn_regression.regression">
+<code class="sig-prename descclassname">predictit.models.sklearn_regression.</code><code class="sig-name descname">regression</code><span class="sig-paren">(</span><em class="sig-param">data, regressor='bayesianridge', n_steps_in=50, predicts=7, predicted_column_index=0, output_shape='one_step', other_columns_lenght=None, constant=None, alpha=0.0001, alpha_1=1e-06, alpha_2=1e-06, lambda_1=1e-06, lambda_2=1e-06, n_iter=300, epsilon=1.35, alphas=[0.1, 0.5, 1], gcv_mode='auto', solver='auto', n_hidden=20, rbf_width=0, activation_func='selu'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/predictit/models/sklearn_regression.html#regression"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#predictit.models.sklearn_regression.regression" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sklearn regression model. Regressor is input parameter. It can be linear, or ridge, or Huber. It use function that return
+all existing regressor (with function optimize it automaticcaly find the best one). It also contain extreme learning machine model from sklearn extensions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>np.ndarray</em>) – Time series data.</p></li>
+<li><p><strong>regressor</strong> (<em>str</em><em>, </em><em>optional</em>) – Regressor that sklearn use. Defaults to ‘bayesianridge’.</p></li>
+<li><p><strong>n_steps_in</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of regressive members entering the model. Defaults to 50.</p></li>
+<li><p><strong>predicts</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of predicted values. Defaults to 7.</p></li>
+<li><p><strong>predicted_column_index</strong> (<em>int</em><em>, </em><em>optional</em>) – If multidimensional, define what column is predicted. Defaults to 0.</p></li>
+<li><p><strong>output_shape</strong> (<em>str</em><em>, </em><em>optional</em>) – Whether one-step or batch evaluation. Defaults to ‘one_step’.</p></li>
+<li><p><strong>other_columns_lenght</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of members from not-predicted columns. Defaults to None.</p></li>
+<li><p><strong>constant</strong> (<em>int</em><em>, </em><em>optional</em>) – Whether use bias. Defaults to 1.</p></li>
+<li><p><strong>alpha</strong> (<em>float</em><em>, </em><em>optional</em>) – Parameter of some regressor. Defaults to 0.0001.</p></li>
+<li><p><strong>alpha_1</strong> (<em>float</em><em>, </em><em>optional</em>) – Parameter of some regressor. Defaults to 1.e-6.</p></li>
+<li><p><strong>alpha_2</strong> (<em>float</em><em>, </em><em>optional</em>) – Parameter of some regressor. Defaults to 1.e-6.</p></li>
+<li><p><strong>lambda_1</strong> (<em>float</em><em>, </em><em>optional</em>) – Parameter of some regressor. Defaults to 1.e-6.</p></li>
+<li><p><strong>lambda_2</strong> (<em>float</em><em>, </em><em>optional</em>) – Parameter of some regressor. Defaults to 1.e-6.</p></li>
+<li><p><strong>n_iter</strong> (<em>int</em><em>, </em><em>optional</em>) – Parameter of some regressor. Defaults to 300.</p></li>
+<li><p><strong>epsilon</strong> (<em>float</em><em>, </em><em>optional</em>) – Parameter of some regressor. Defaults to 1.35.</p></li>
+<li><p><strong>alphas</strong> (<em>list</em><em>, </em><em>optional</em>) – Parameter of some regressor. Defaults to [0.1, 0.5, 1].</p></li>
+<li><p><strong>gcv_mode</strong> (<em>str</em><em>, </em><em>optional</em>) – Parameter of some regressor. Defaults to ‘auto’.</p></li>
+<li><p><strong>solver</strong> (<em>str</em><em>, </em><em>optional</em>) – Parameter of some regressor. Defaults to ‘auto’.</p></li>
+<li><p><strong>n_hidden</strong> (<em>int</em><em>, </em><em>optional</em>) – Parameter of some regressor. Defaults to 20.</p></li>
+<li><p><strong>rbf_width</strong> (<em>int</em><em>, </em><em>optional</em>) – Parameter of some regressor. Defaults to 0.</p></li>
+<li><p><strong>activation_func</strong> (<em>str</em><em>, </em><em>optional</em>) – Parameter of some regressor. Defaults to ‘selu’.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Predictions of input time series.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="logo">
+<a href="index.html">
+    <img class="logo" src="_static/logo.png" alt="Logo">
+</a>
+</div>
+
+<div class="section" id="table-of-contents">
+<h3>Table of contents</h3>
+<div class="toctree-wrapper compound">
+<ul>
+
+    <li class="toctree-l1"><a class="reference internal" href="index.html#predictit">predictit</a>
+    <ul>
+        <li class="toctree-l2"><a class="reference internal" href="index.html#output">Output</a></li>
+        <li class="toctree-l2"><a class="reference internal" href="index.html#installation">Installation</a></li>
+        <li class="toctree-l2"><a class="reference internal" href="index.html#how-to">How to</a>
+        <ul>
+            <li class="toctree-l3"><a class="reference internal" href="index.html#simple-example-with-pypi">Simple example with Pypi</a></li>
+            <li class="toctree-l3"><a class="reference internal" href="index.html#example-with-own-data-from-csv-and-config">Example with own data from CSV and config</a></li>
+        </ul></li>
+
+        <li class="toctree-l2"><a class="reference internal" href="index.html#submodules">Submodules</a>
+        <ul>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.config/">config</a></li>
+            <li class="toctree-l3"><a class="reference internal" href="predictit.main">main</a></li>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.analyze.html">analyze</a></li>
+            <li class="toctree-l3"><a class="reference internal" href="predictit.best_params.html">best_params</a></li>
+            <li class="toctree-l3"><a class="reference internal" href="predictit.confidence_interval.html">confidence_interval</a></li>
+            <li class="toctree-l3"><a class="reference internal" href="predictit.database.html">database</a></li>
+            <li class="toctree-l3"><a class="reference internal" href="predictit.data_prep.html">data_prep</a></li>
+            <li class="toctree-l3"><a class="reference internal" href="predictit.evaluate_predictions.html">evaluate_predictions</a></li>
+            <li class="toctree-l3"><a class="reference internal" href="predictit.main_for_develop.html">main_for_develop</a></li>
+        </ul></li>
+
+        <li class="toctree-l2"><a class="reference internal" href="index.html#subpackages">Subpackages</a>
+        <ul>
+            <li class="toctree-l3"><a class="reference internal" href="predictit.models.html">models</a></li>
+            <li class="toctree-l3"><a class="reference internal" href="predictit.test_data.html">test_data</a></li>
+        </ul></li>
+        <li class="toctree-l2"><a class="reference internal" href="genindex.html">Index</a></li>
+    </ul></li>
+
+</ul>
+</div>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Daniel Malachov.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/predictit.models.sklearn_regression.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+    <a href="https://github.com/Malachov/predictit" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,9 @@
+output_example.png
+output_example.html
+predictit/test_data/*.csv
+predictit/test_data/*.pickle
+predictit/test_data/*.txt
+.pytest_cache/
+__pycache__/
+predictit/.vscode/
+/__init__.py

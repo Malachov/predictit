@@ -1,0 +1,22 @@
+# List of what could be done
+
+- [ ] Remove sys.path.insert in main and do imports better way
+- [ ] Repair Sarimax model
+- [ ] Translate and finish models __init__ docstrings
+- [ ] Many steps in common in models. Make One separate function
+- [ ] Numba optimization
+- [ ] Remove tensorflowit from models __init__ to config tesnsorflowit=0, with other computationaly hard models 
+- [ ] Plot_all during learning option
+- [ ] One hot encoding: OneHotEncoder(dtype=np.int, sparse=True) dataframe string to num
+- [ ] Power transform. On input but also on output
+- [ ] New criterion model - with lagged values / autocorrelation for anomaly prediction
+- [ ] Nem models - HONU, Levenberg-Marquardt
+- [ ] Data smoothing as a parametr
+- [ ] PCA on higher dimension data
+- [ ] Dask for big data (dask.np.aray and dask dataframe)
+- [ ] Ensure for appropriate dtype in calculations - Optional? (64 best? performance vs. error)
+- [ ] New criterion model - with lagged values / autocorrelation for anomaly prediction
+- [ ] Join Autoreg_LNU and Autoreg_LNU_with.. into one model. Number of learning rates to argument
+- [ ] Conjugate gradient and autoreg LNU for multiple column data
+- [ ] LSTM bidirectional and batch as parameter to normal LSTM
+- [ ] Tensorflow MLP batch into normal as parametr
