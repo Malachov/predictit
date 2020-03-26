@@ -69,6 +69,10 @@ def compare_predicted_to_test(predicted, test, train=None, criterion='mape', plo
             no_zero_test = np.where(abs(test)>=1, test, 1)
             criterion_value = np.mean(np.abs((test - predicted) / no_zero_test)) * 100
 
+        if criterion == 'dwt':
+            from dtaidistance import dtw
+            criterion_value = dtw.distance_fast(predicted, test)
+
         if details == 1:
             print(f"Error of model {modelname} on data {dataname}: {criterion}={criterion_value}")
 

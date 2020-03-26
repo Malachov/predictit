@@ -101,3 +101,5 @@ models_parameters = {
 
 predictions = predictit.main.predict()
 ```
+
+Or if you downloaded it from github and not via pypi, just edit config as you need and run main.py

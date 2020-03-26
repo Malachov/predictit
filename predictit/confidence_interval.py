@@ -38,20 +38,17 @@ def bounds(data, predicts=7, confidence=0.1, p=1, d=0, q=0):
 
     except Exception:
 
-        try:
-            import data_prep
+        import data_prep
 
-            last_value = data[-1]
-            data = data_prep.do_difference(data)
+        last_value = data[-1]
+        data = data_prep.do_difference(data)
 
-            model = sm.tsa.ARIMA(data, order=order)
-            model_fit = model.fit(disp=0)
-            predictions = model_fit.forecast(steps=predicts, alpha=confidence)
+        model = sm.tsa.ARIMA(data, order=order)
+        model_fit = model.fit(disp=0)
+        predictions = model_fit.forecast(steps=predicts, alpha=confidence)
 
-            lower_bound = data_prep.inverse_difference(bounds[0], last_value)
-            upper_bound = data_prep.inverse_difference(bounds[1], last_value)
+        lower_bound = data_prep.inverse_difference(bounds[0], last_value)
+        upper_bound = data_prep.inverse_difference(bounds[1], last_value)
 
-        except Exception:
-            return None
 
     return lower_bound, upper_bound

@@ -1,0 +1,13 @@
+numpy
+pandas
+matplotlib
+SQLAlchemy
+sklearn_extensions
+cufflinks
+plotly
+prettytable
+scipy
+seaborn
+statsmodels
+scikit_learn
+m2r

@@ -11,13 +11,17 @@ from . import analyze
 from . import best_params
 from . import models
 from . import config
+from . import define_inputs
 from . import test_data
 from . import database
 from . import evaluate_predictions
-from . import main
 from . import confidence_interval
+from . import main
+from . import plot
+from . import misc
 
-__version__ = "0.822"
+
+__version__ = "1.01"
 __author__ = "Daniel Malachov"
 __license__ = "MIT"
 __email__ = "malachovd@seznam.cz"

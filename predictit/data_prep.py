@@ -6,42 +6,22 @@ working examples with printed results are in tests - visual.py.
 
 import pandas as pd
 import numpy as np
+from scipy.stats import yeojohnson
 
 
 def remove_nan_columns(data):
     """Remove columns that are not a numbers.
 
     Args:
-        data (np.ndarray): Time series data.
+        data (pd.DataFrame): Time series data.
 
     Returns:
-        np.ndarray: Cleaned time series data.
+        pd.DataFrame: Cleaned time series data.
     """
 
-    remember = 0
-    cleaned = data.copy()
+    data = data.select_dtypes(include='number')
 
-    if isinstance(cleaned, pd.DataFrame):
-        for i in cleaned.columns:
-            try:
-
-                int(cleaned.iloc[2, remember])
-                remember += 1
-
-            except Exception:
-                cleaned.drop([i], axis=1, inplace=True)
-
-    if isinstance(cleaned, np.ndarray):
-        for i in range(len(data)):
-            try:
-
-                int(cleaned[remember, 1])
-                remember +=1
-
-            except Exception:
-                cleaned = np.delete(cleaned, remember, axis=0)
-
-    return cleaned
+    return data
 
 
 def keep_corelated_data(data, predicted_column_index=0, threshold=0.2):
@@ -57,9 +37,9 @@ def keep_corelated_data(data, predicted_column_index=0, threshold=0.2):
     """
 
     if isinstance(data, np.ndarray):
-        corr = pd.DataFrame(np.corrcoef(data))
+        corr = np.corrcoef(data)
         range_array = np.array(range(len(corr)))
-        names_to_del = range_array[corr[0] <= abs(threshold)]
+        names_to_del = range_array[corr[predicted_column_index] <= abs(threshold)]
         data = np.delete(data, names_to_del, axis=0)
 
     if isinstance(data, pd.DataFrame):
@@ -95,35 +75,30 @@ def remove_outliers(data, predicted_column_index=0, threshold=3):
 
         data = data[abs(data[data.columns[0]] - data_mean) < threshold * data_std]
 
-    else:
-        if not isinstance(data, np.ndarray):
-            data = np.array(data)
+    if isinstance(data, np.ndarray):
+
         data_shape = data.shape
 
         if len(data_shape) == 1:
-            data = data[(data - data.mean()) < threshold * data.std()]
+            data = data[abs(data - data.mean()) < threshold * data.std()]
             return data
 
         else:
             data_mean = data[predicted_column_index].mean()
             data_std = data[predicted_column_index].std()
 
-            counter = 0
-            for i in range(len(data[predicted_column_index])):
+            range_array = np.array(range(data_shape[1]))
+            names_to_del = range_array[abs(data[predicted_column_index] - data_mean) > threshold * data_std]
+            data = np.delete(data, names_to_del, axis=1)
 
-                if abs(data[predicted_column_index, counter] - data_mean) > threshold * data_std:
-                    data = np.delete(data, counter, axis=1)
-                    counter -= 1
-                counter += 1
-
-    return data
+        return data
 
 
-def do_difference(dataset):
+def do_difference(data):
     """Transform data into neighbor difference. For example from [1, 2, 4] into [1, 2].
 
     Args:
-        dataset (np.ndarray): One-dimensional numpy array.
+        dataset (np.ndarray): Numpy on or multi dimensional array.
 
     Returns:
         np.ndarray: Differenced data.
@@ -135,21 +110,18 @@ def do_difference(dataset):
         [2, 2, -3]
     """
 
-    assert len(np.shape(dataset)) == 1, 'Data input must be one-dimensional.'
-    diff = list()
-    for i in range(1, len(dataset)):
-        value = dataset[i] - dataset[i - 1]
-        diff.append(value)
-    return np.array(diff)
+    diff = np.diff(data)
+
+    return diff
 
 
 def inverse_difference(differenced_predictions, last_undiff_value):
     """Transform do_difference transform back.
-    
+
     Args:
-        differenced_predictions (np.ndarray): Differenced data from do_difference function.
+        differenced_predictions (np.ndarray): One dimensional!! differenced data from do_difference function.
         last_undiff_value (float): First value to computer the rest.
-    
+
     Returns:
         np.ndarray: Normal data, not the additive series.
 
@@ -160,12 +132,12 @@ def inverse_difference(differenced_predictions, last_undiff_value):
         [2, 3, 4, 5]
     """
 
-    first = last_undiff_value + differenced_predictions[0]
-    diff = [first]
-    for i in range(1, len(differenced_predictions)):
-        value = differenced_predictions[i] + diff[i - 1]
-        diff.append(value)
-    return np.array(diff)
+    assert differenced_predictions.ndim == 1, 'Data input must be one-dimensional.'
+
+    differenced_predictions[0] = differenced_predictions[0] + last_undiff_value
+    undiff = np.cumsum(differenced_predictions)
+
+    return undiff
 
 
 def standardize(data, predicted_column_index=0, standardizer='standardize'):
@@ -242,7 +214,6 @@ def split(data, predicts=7, predicted_column_index=0):
     if isinstance(data, pd.DataFrame):
         data = data.values
 
-    data = np.array(data)
     data_shape = data.shape
 
     if len(data_shape) == 1:
@@ -265,129 +236,48 @@ def split(data, predicts=7, predicted_column_index=0):
     return (train, test)
 
 
-def make_sequences(data, n_steps_in, n_steps_out=1, constant=None, predicted_column_index=0, other_columns_lenght=None):
-    """Function that create inputs and outputs to models.
-    From [1, 2, 3, 4, 5, 6, 7, 8]
-
-        Creates [1, 2, 3]  [4]
-                [5, 6, 7]  [8]
+def fitted_power_transform(data, fitted_stdev, mean=None, fragments=10, iterations=5):
+    """Function mostly for data postprocessing. Function transforms data, so it will have 
+    similiar standar deviation, similiar mean if specified. It use Box-Cox power transform in SciPy lib.
 
     Args:
-        data (np.array): Time series data.
-        n_steps_in (int): Number of input members.
-        n_steps_out (int, optional): Number of output members. For one-step models use 1. Defaults to 1.
-        constant (bool, optional): If use bias (add 1 to first place to every member). Defaults to None.
-        predicted_column_index (int, optional): [description]. Defaults to 0.
-        other_columns_lenght (int, optional): Length of non-predicted columns that are evaluated in inputs. If None, than same length as predicted column. Defaults to None.
+        data (np.array): Array of data that should be transformed.
+        fitted_stdev (float): Standard deviation that we want to have.
+        mean (float, optional): Mean of transformed data. Defaults to None.
+        fragments (int, optional): How many lambdas will be used in one iteration. Defaults to 9.
+        iterations (int, optional): How many iterations will be used to find best transform. Defaults to 4.
 
     Returns:
-        np.array, np.array: X and y. Inputs and outputs (that can be used for example in sklearn models).
-
+        np.array: Transformed data with demanded standard deviation and mean.
     """
 
-    def make_seq(data, n_steps_in, n_steps_out=1, constant=None):
-        X, y = list(), list()
+    lmbda_low = 0
+    lmbda_high = 3
+    lmbd_arr = np.linspace(lmbda_low, lmbda_high, fragments)
+    lbmda_best_stdv_error = 1000000
 
-        for i in range(len(data)):
-            # find the end of this pattern
-            end_ix = i + n_steps_in
-            out_end_ix = end_ix + n_steps_out
-            # check if we are beyond the data
-            if out_end_ix > len(data):
-                break
-            # gather input and output parts of the pattern
-            seq_x, seq_y = data[i:end_ix], data[end_ix:out_end_ix]
-            X.append(seq_x)
-            y.append(seq_y)
+    for i in range(iterations):
+        for j in range(len(lmbd_arr)):
 
-        return X, y
+            power_transformed = yeojohnson(data, lmbda=lmbd_arr[j])
+            transformed_stdev = np.std(power_transformed)
+            if abs(transformed_stdev - fitted_stdev) < lbmda_best_stdv_error:
+                lbmda_best_stdv_error = abs(transformed_stdev - fitted_stdev)
+                lmbda_best_id = j
 
-    data = np.array(data)
+        if lmbda_best_id > 0:
+            lmbda_low = lmbd_arr[lmbda_best_id - 1]
+        if lmbda_best_id < len(lmbd_arr) - 1:
+            lmbda_high = lmbd_arr[lmbda_best_id + 1]
+        lmbd_arr = np.linspace(lmbda_low, lmbda_high, fragments)
 
-    data_shape = data.shape
+    transformed_results = yeojohnson(data, lmbda=lmbd_arr[j])
 
-    if data_shape[0] == 1:
-        data = data.reshape(-1)
-        data_shape = data.shape
+    if mean is not None:
+        mean_difference = np.mean(transformed_results) - mean
+        transformed_results = transformed_results - mean_difference
 
-    if not other_columns_lenght and len(data_shape) > 1:
-        data = data[predicted_column_index]
-
-    if len(data_shape) == 1:
-        X_list, y = make_seq(data=data, n_steps_in=n_steps_in, n_steps_out=n_steps_out, constant=constant)
-
-    else:
-
-        for_prediction = data[predicted_column_index, :]
-        other_data = np.delete(data, predicted_column_index, axis=0)
-
-        X_only, y = make_seq(for_prediction, n_steps_in=n_steps_in, n_steps_out=n_steps_out)
-
-        other_columns = []
-        X_list = []
-
-        for i in range(len(other_data)):
-            other_columns_sequentions, e = make_seq(other_data[i], n_steps_in=n_steps_in, n_steps_out=n_steps_out)
-            other_columns.append(other_columns_sequentions)
-
-        other_columns_array = np.array(other_columns)
-        other_columns_array = other_columns_array[:, :, -other_columns_lenght:]
-
-        for i in range(len(X_only)):
-            if data_shape[0] != 1:
-                other_columns_list = list(other_columns_array[:, i, :].reshape(-1))
-
-            X_list.append(other_columns_list + list(X_only[i]))
-
-    X = np.array(X_list)
-
-    if constant:
-        X = np.insert(X, 0, constant, axis=1)
-
-    return np.array(X), np.array(y)
-
-
-def make_x_input(data, n_steps_in, predicted_column_index=0, other_columns_lenght=None, constant=None):
-    """Make input into model.
-
-    Args:
-        data (np.array): Time series data.
-        n_steps_in (int): Lags going into model.
-        predicted_column_index (int, optional): Index of predicted column. Defaults to 0.
-        other_columns_lenght (int, optional): Lags of other columns. If none, than same length as predicted column Defaults to None.
-        constant (bool, optional): If use bias (add 1 to first place to every member). Defaults to None.
-
-    Returns:
-        np.array: y input in model.
-
-    """
-
-    data = np.array(data)
-    data_shape = data.shape
-
-    if len(data_shape) == 1:
-
-        x_input = data[-n_steps_in:]
-        if constant:
-            x_input = np.insert(x_input, 0, constant)
-
-    else:
-        for_prediction = data[predicted_column_index, -n_steps_in:]
-        other_data = np.delete(data, predicted_column_index, axis=0)
-
-        if other_columns_lenght:
-            other_cols = other_data[:, -other_columns_lenght:]
-        else:
-            other_cols = other_data[:, -n_steps_in:]
-
-        x_input = np.concatenate((other_cols, for_prediction), axis=None)
-
-        if constant:
-            x_input = np.insert(x_input, 0, constant)
-
-    x_input = x_input.reshape(1, -1)
-
-    return x_input
+    return transformed_results
 
 
 def smooth():
