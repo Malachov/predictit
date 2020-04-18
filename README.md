@@ -63,7 +63,7 @@ predictit.config.predicted_columns_names = 'Temp'  # Column name that we want to
 predictit.config.optimizeit = 0  # Find or not best parameters for models
 predictit.config.compareit = 6  # Visualize 6 best models
 predictit.config.repeatit = 4  # Repeat calculation 4x times on shifted data to reduce chance
-predictit.config.other_columns = 0  # Whether use other columns or not
+predictit.config.other_columns_length = 0  # Whether use other columns or not
 
 # Chose models that will be computed
 used_models = {

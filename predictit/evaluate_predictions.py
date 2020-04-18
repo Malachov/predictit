@@ -25,7 +25,7 @@ def compare_predicted_to_test(predicted, test, train=None, criterion='mape', plo
 
     predicts = len(predicted)
 
-    if (len(predicted) != len(test)):
+    if predicts != len(test):
         print('Test and predicted lenght not equeal')
         return np.nan
 

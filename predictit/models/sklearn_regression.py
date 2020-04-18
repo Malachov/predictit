@@ -1,7 +1,6 @@
 import sklearn
 from sklearn import linear_model
 import numpy as np
-import warnings
 
 
 def get_regressors():
@@ -21,20 +20,17 @@ def get_regressors():
     return regressors
 
 
-def train( sequentions, multicolumn_source=0, regressor='bayesianridge', predicts=7,
-                alpha=0.0001, alpha_1=1.e-6, alpha_2=1.e-6, lambda_1=1.e-6,
-                lambda_2=1.e-6, n_iter=300, epsilon=1.35, alphas=[0.1, 0.5, 1], gcv_mode='auto', solver='auto',
-                n_hidden=20, rbf_width=0, activation_func='selu', **kwargs):
+def train(sequentions, regressor='bayesianridge', predicts=7,
+          alpha=0.0001, alpha_1=1.e-6, alpha_2=1.e-6, lambda_1=1.e-6,
+          lambda_2=1.e-6, n_iter=300, epsilon=1.35, alphas=[0.1, 0.5, 1], gcv_mode='auto', solver='auto',
+          n_hidden=20, rbf_width=0, activation_func='selu', **kwargs):
     """Sklearn regression model. Regressor is input parameter. It can be linear, or ridge, or Huber. It use function that return
     all existing regressor (with function optimize it automaticcaly find the best one). It also contain extreme learning machine model from sklearn extensions.
 
     Args:
         sequentions (tuple(np.ndarray, np.ndarray, np.ndarray)) - Tuple (X, y, x_input) of input train vectors X, train outputs y, and input for prediction x_input
-        multicolumn_source (bool): If X vectors are created from more columns, or from just one (then it is not simply possible generate step by step).
         regressor (str, optional): Regressor that sklearn use. Defaults to 'bayesianridge'.
         predicts (int, optional): Number of predicted values. Defaults to 7.
-        other_columns_lenght (int, optional): Number of members from not-predicted columns. Defaults to None.
-        constant (int, optional): Whether use bias. Defaults to 1.
         alpha (float, optional): Parameter of some regressor. Defaults to 0.0001.
         alpha_1 (float, optional): Parameter of some regressor. Defaults to 1.e-6.
         alpha_2 (float, optional): Parameter of some regressor. Defaults to 1.e-6.
@@ -87,7 +83,6 @@ def train( sequentions, multicolumn_source=0, regressor='bayesianridge', predict
     model.fit(sequentions[0], sequentions[1])
 
     model.output_shape = sequentions[1].shape[1]
-    model.multicolumn_source = multicolumn_source
 
     return model
 
@@ -96,21 +91,14 @@ def predict(x_input, model, predicts=7):
 
     if model.output_shape == 1:
 
-        # For one column data is possible to iterate step by step simply, because is possible to generate x_input.
-        if not model.multicolumn_source:
+        predictions = []
 
-            predictions = []
+        for i in range(predicts):
 
-            for i in range(predicts):
-
-                yhat = model.predict(x_input)
-                x_input = np.insert(x_input, x_input.shape[1], yhat[0], axis=1)
-                x_input = np.delete(x_input, 0, axis=1)
-                predictions.append(yhat[0])
-
-        else:
-            warnings.warn(f"\n \t Use batch (y lengt equals to predict) or do not use other columns - multicolumn_source = 0\n")
-            predictions = np.nan
+            yhat = model.predict(x_input)
+            x_input = np.insert(x_input, x_input.shape[1], yhat[0], axis=1)
+            x_input = np.delete(x_input, 0, axis=1)
+            predictions.append(yhat[0])
 
     else:
 

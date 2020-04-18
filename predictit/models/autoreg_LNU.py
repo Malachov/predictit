@@ -2,7 +2,7 @@
 import numpy as np
 
 
-def train(sequentions, predicts=7, mi=1, mi_multiple=1, mi_linspace=(1e-4, 10, 20), epochs=10, w_predict=0, minormit=1, damping=1, plot=0, random=0, w_rand_scope=1, w_rand_shift=0, rand_seed=0):
+def train(sequentions, predicts=7, mi=1, mi_multiple=1, mi_linspace=(1e-8, 10, 20), epochs=10, w_predict=0, minormit=1, damping=1, plot=0, random=0, w_rand_scope=1, w_rand_shift=0, rand_seed=0):
     """Autoregressive linear neural unit with weight prediction. It's simple one neuron one-step net that predict not only predictions itself,
     but also use other faster method to predict weights evolution.
 
@@ -59,7 +59,7 @@ def train(sequentions, predicts=7, mi=1, mi_multiple=1, mi_linspace=(1e-4, 10, 2
                     break
 
                 e[i][j] = y_hat[j] - y[i][j]
-                dydw = X[i]  # TODO i + 1
+                dydw = X[j]  # TODO i + 1
                 if minormit == 1:
                     minorm = miwide[i] / (damping + np.dot(X[j], X[j].T))
                     dw = minorm * e[i][j] * dydw
@@ -91,6 +91,7 @@ def train(sequentions, predicts=7, mi=1, mi_multiple=1, mi_linspace=(1e-4, 10, 2
                     minorm = mi_best / (damping + np.dot(X[j], X[j].T))
                     dw = minorm * e_best_mi[j] * dydw
                 else:
+
                     dw = mi_best * e_best_mi[j] * dydw
                 w_best_mi = w_best_mi + dw
 

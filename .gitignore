@@ -7,4 +7,4 @@ predictit/test_data/*.txt
 __pycache__/
 docs/build/
 predictit/.vscode/
-/__init__.py
+predictit.egg-info

@@ -1,5 +1,6 @@
 import numpy as np
 from pathlib import Path
+from predictit.misc import traceback_warning
 
 
 def train(sequentions, layers='default', predicts=7, epochs=200, already_trained=0, train_next=1, save=1, saved_model_path_string='stored_models', optimizer='adam', loss='mse', verbose=0, metrics='accuracy', timedistributed=0, batch_size=64):
@@ -24,16 +25,15 @@ def train(sequentions, layers='default', predicts=7, epochs=200, already_trained
         BatchNormalization: momentum=0.99, epsilon=0.001
     Returns:
         np.ndarray: Predictions of input time series.
-
     """
 
     import keras
     import tensorflow as tf
 
     if layers == 'default':
-        layers = [['lstm', {'units': 32, 'activation': 'relu'}],
+        layers = [['lstm', {'units': 32, 'activation': 'relu', 'return_sequences': 1}],
                   ['dropout', {'rate': 0.1}],
-                  ['lstm', {'units': 32, 'activation': 'relu'}]]
+                  ['lstm', {'units': 7, 'activation': 'relu'}]]
 
     X = sequentions[0]
     y = sequentions[1]
@@ -79,14 +79,14 @@ def train(sequentions, layers='default', predicts=7, epochs=200, already_trained
         try:
             model = tf.keras.models.load_model(saved_model_path_string)
             model.load_weights(saved_model_path_string)
-        except Exception:
-            print("Model is not saved, first saveit = 1 in config")
+            if train_next:
+                model.fit(X, y, epochs=epochs, batch_size=64, verbose=verbose)
 
-        if train_next:
-            model.fit(X, y, epochs=epochs, batch_size=64, verbose=verbose)
+        except Exception:
+            raise NameError("Model is not saved, first saveit = 1 in config")
 
     model.layers_0_0 = layers[0][0]
-    model.X_shape_2 = X.shape[2]
+
     model.X_ndim = X_ndim
     model.y_shape_1 = y.shape[1]
 
@@ -94,8 +94,6 @@ def train(sequentions, layers='default', predicts=7, epochs=200, already_trained
 
 
 def predict(x_input, model, predicts=7):
-
-    assert (not(model.X_shape_2 > 1 and model.y_shape_1 != predicts)), 'One step prediction on multivariate data not implemented'
 
     if model.X_ndim == 2 and model.layers_0_0 == 'lstm':
         x_input = x_input.reshape(1, x_input.shape[1], x_input.shape[0])

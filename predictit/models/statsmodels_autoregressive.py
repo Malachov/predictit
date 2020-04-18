@@ -12,7 +12,8 @@ def train(data, model='ar', p=3, d=1, q=0, method='cmle', ic='aic', trend='nc', 
         method (str, optional): Parameter of statsmodels fit function. Defaults to 'cmle'.
         ic (str, optional): Parameter of statsmodels fit function. Defaults to 'aic'.
         trend (str, optional): Parameter of statsmodels fit function. Defaults to 'nc'.
-        solver (str, optional): Parameter of statsmodels fit function. Defaults to 'lbfgs'.
+        solver (str, optional):ort statsmodels.api as sm
+      File "/home/dan/.local/lib/pyt Parameter of statsmodels fit function. Defaults to 'lbfgs'.
 
     Returns:
         np.ndarray: Predictions of input time series.

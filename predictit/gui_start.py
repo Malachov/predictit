@@ -1,3 +1,4 @@
+#%%
 
 from pathlib import Path
 import eel
@@ -10,6 +11,7 @@ web_path = str(Path(__file__).resolve().parents[0] / "files_for_GUI")
 
 eel.init(web_path)
 
+
 # If some information from inside main(), define function here
 def edit_gui_py(content, id):
     eel.edit_gui_js(content, id)
@@ -17,25 +19,23 @@ def edit_gui_py(content, id):
 
 if __name__ == "__main__":
 
-    this_path = Path(__file__).resolve().parents[0]
+    this_path = Path(__file__).resolve().parents[1]
     this_path_string = str(this_path)
     save_plot_path = str(this_path / "files_for_GUI" / "plot.html")
 
     # If used not as a library but as standalone framework, add path to be able to import predictit if not opened in folder
     sys.path.insert(0, this_path_string)
 
-    import main
-    from config import config
+    import predictit
 
-    misc._GUI = 1
+    config = predictit.config.config
+
+    predictit.misc._GUI = 1
     config["show_plot"] = 0
     config["save_plot"] = 0
     config["return_type"] = "dict"
-
-
-
-
-    #config["csv_test_data_relative_path"] = ""
+    config["data"] = None
+    config["csv_test_data_relative_path"] = ""
 
     @eel.expose
     def make_predictions(configured):
@@ -49,7 +49,7 @@ if __name__ == "__main__":
         eel.edit_gui_js("Setup finished", "progress_phase")
 
         try:
-            results = main.predict()
+            results = predictit.main.predict()
 
             div = results["plot"]
 
