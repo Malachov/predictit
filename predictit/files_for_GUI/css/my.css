@@ -1,0 +1,288 @@
+@import url('https://fonts.googleapis.com/css?family=Cabin:400,500,700|Montserrat:400,500,700');
+
+#content > div, #content > p {
+    padding-top: 10px;
+
+}
+
+.flex-column {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.pre-wrapped {
+    white-space: pre-wrap;
+}
+
+#content {
+    padding-bottom: 20px;
+}
+
+#content > .label {
+    padding-top: 25px;
+    margin-right: auto;
+}
+
+
+td {
+    padding: 3px;
+    padding-right: 10px;
+    padding-left: 10px;
+} 
+
+.button {
+
+
+    margin-bottom: 0;
+    font-weight: 400;
+    text-align: center;
+
+    touch-action: manipulation;
+    cursor: pointer;
+
+    border: none;
+    padding: 6px 12px;
+    font-size: 14px;
+    line-height: 1.42857143;
+    border-radius: 4px;
+    min-width: 120px;
+    height: 32px;
+
+    color:
+    #fff;
+    
+    background-color:
+    #337ab7;
+
+}
+
+.button:hover {
+    background-color:#007bff;
+    border-color: #007bff;
+}
+
+.button:focus {
+    background-color: #218838;
+    outline: none;
+}
+
+.button-select {
+    margin-bottom: 0;
+    margin-left: 10px;
+    text-align: center;
+    touch-action: manipulation;
+    cursor: pointer;
+    border: none;
+    padding: 0px 7px;
+    font-size: 14px;
+    line-height: 1.42857143;
+    border-radius: 4px;
+    min-width: 120px;
+    height: 28px;
+    color: #fff;
+    background-color: #677d90;
+}
+.button-select:focus, .button-select:hover, .button-select:active {
+    outline: none;
+}
+
+.wellcome-heading {
+    margin-right: auto;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Cabin', sans-serif;
+    background-color: #fff;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-family: 'Cabin', sans-serif;
+    font-weight: 400;
+    color: #000;
+    line-height: 1.2;
+}
+
+h2 {
+    font-size: 60px;
+}
+
+p {
+    color: #726a84;
+    font-size: 16px;
+    font-weight: 300;
+    margin-top: 0;
+}
+
+label {
+    font-size: 22px;
+    color: #726a84;
+}
+
+.input-div-text{
+    display: flex;
+    flex-direction: column;
+}
+
+.main-container{
+    display: flex;
+    flex-wrap: wrap;
+    margin: 0 auto;
+    background-color: #d9f0e8;
+    min-height: 100vh;
+    box-sizing: border-box;
+    padding-top: 75px;
+}
+
+.subtitle {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+
+.flex-row {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+}
+
+.half {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    width: 40%;
+    margin: 0 auto;
+}
+
+@media only screen and (max-width: 960px) {
+.half {
+    width: 80%;
+}
+}
+
+@media only screen and (min-width: 960px) {
+.half.left {
+    margin-left: 7%;
+}
+
+.half.right {
+    margin-right: 7%;
+}
+}
+
+.label-text{
+    margin-top: 12px;
+    margin-bottom: 4px;
+}
+
+.config {
+    width: 60%;
+    padding-top: 10px;
+}
+
+/*
+.option {
+}
+*/
+
+.option-section {
+    margin-top: 40px;
+}
+
+.submit-section{
+    margin-top: 40px;
+}
+
+.input-text {
+    height: 30px;
+    border-width: 0px;
+    border-radius: 5px;
+    padding-left: 10px;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.switch-box {
+    margin: 0px 12px;
+}
+
+.switch-name {
+    display: flex;
+    align-items: center;
+}
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 52px;
+    height: 29px;
+    margin-left: 8px;
+  }
+
+.switch input { 
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    -webkit-transition: .4s;
+    transition: .4s;
+  }
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 22px;
+    width: 22px;
+    left: 5px;
+    bottom: 4px;
+    background-color: white;
+    -webkit-transition: .4s;
+    transition: .4s;
+  }
+
+  input:checked + .slider {
+    background-color: #2196F3;
+  }
+
+  input:focus + .slider {
+    box-shadow: 0 0 1px #2196F3;
+  }
+
+  input:checked + .slider:before {
+    -webkit-transform: translateX(20px);
+    -ms-transform: translateX(20px);
+    transform: translateX(20px);
+  }
+
+  /* Rounded sliders */
+  .slider.round {
+    border-radius: 34px;
+  }
+
+  .slider.round:before {
+    border-radius: 50%;
+  }

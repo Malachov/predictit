@@ -4,18 +4,14 @@ The database_deploy than use predicted values and deploy it to database server.
 """
 
 import pandas as pd
-#import pyodbc
-from sqlalchemy import create_engine
-import urllib
-from . import config
 
 
-def database_load(server=config.server, database=config.database, freq='D', index_col='DateBK', data_limit=2000, last=1):
+def database_load(server, database, freq='D', index_col='DateBK', data_limit=2000, last=1):
     """Load database into dataframe and create datetime index. !!! This function have to be change for every particular database !!!
 
     Args:
-        server (string, optional): Name of server. Defaults to config.server.
-        database (str, optional): Name of database. Defaults to config.database.
+        server (string, optional): Name of server.
+        database (str, optional): Name of database.
         freq (str, optional): For example days 'D' or hours 'H'. Defaults to 'D'.
         index_col (str, optional): Index of predicted column. Defaults to 'DateBK'.
         data_limit (int, optional): Max lengt of data. Defaults to 2000.
@@ -26,14 +22,13 @@ def database_load(server=config.server, database=config.database, freq='D', inde
 
     """
 
+    import pyodbc
+
     server = 'SERVER={};'.format(server)
     database = 'DATABASE={};'.format(database)
     sql_params = r'DRIVER={ODBC Driver 13 for SQL Server};' + server + database + 'Trusted_Connection=yes;'
 
-
-
-    sql_conn = 0
-    #sql_conn = pyodbc.connect(sql_params)
+    sql_conn = pyodbc.connect(sql_params)
 
     columns = '''   D.[DateBK],
                     D.[IsoWeekYear]'''
@@ -114,7 +109,7 @@ def database_load(server=config.server, database=config.database, freq='D', inde
     return df
 
 
-def database_deploy(last_date, sum_number, sum_duration, freq='D'):
+def database_deploy(server, database, last_date, sum_number, sum_duration, freq='D'):
     """Deploy dataframe to SQL server. !!! Differ on concrete database - necessary to setup for each database.
 
     Args:
@@ -124,6 +119,10 @@ def database_deploy(last_date, sum_number, sum_duration, freq='D'):
         freq (str, optional):  Datetime frequency. Defaults to 'D'.
 
     """
+
+    import pyodbc
+    from sqlalchemy import create_engine
+    import urllib
 
     lenght = len(sum_number)
 
@@ -150,7 +149,7 @@ def database_deploy(last_date, sum_number, sum_duration, freq='D'):
     dataframe_to_sql['DescriptionEng'] = [''] * lenght
     dataframe_to_sql['DataFlowLogInsertId'] = [35] * lenght
 
-    params = urllib.parse.quote_plus(r'DRIVER={driver};SERVER={server};DATABASE={database};Trusted_Connection=yes'.format(driver=r'{SQL Server}', server=config.server, database=config.database))
+    params = urllib.parse.quote_plus(r'DRIVER={driver};SERVER={server};DATABASE={database};Trusted_Connection=yes'.format(driver=r'{SQL Server}', server=server, database=database))
     conn_str = 'mssql+pyodbc:///?odbc_connect={}'.format(params)
 
     engine = create_engine(conn_str)

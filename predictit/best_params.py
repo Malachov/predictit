@@ -8,10 +8,10 @@ import time
 import sys
 import traceback
 
-from . import data_prep, evaluate_predictions
+from predictit import evaluate_predictions
 
 
-def optimize(model, kwargs, kwargs_limits, data, criterion='mape', fragments=10, iterations=3, predicts=7, details=0, time_limit=5, predicted_column_index=0, name='your model'):
+def optimize(model, kwargs, kwargs_limits, model_train_input, model_test_inputs, models_test_outputs, criterion='mape', multicolumn_source=0, fragments=10, iterations=3, details=0, time_limit=5, predicted_column_index=0, name='Your model'):
     """Function to find optimal parameters of function. For example if we want to find minimum of function x^2,
     we can use limits from -10 to 10. If we have 4 fragments and 3 iterations. it will separate interval on 4 parts,
     so we have aproximately points -10, -4, 4, 10. We evaluate the best one and make new interval to closest points,
@@ -25,12 +25,13 @@ def optimize(model, kwargs, kwargs_limits, data, criterion='mape', fragments=10,
         model (func): Function to be optimized (eg: ridgeregression).
         kwargs (dict): Initial arguments (eg: {"alpha": 0.1, "n_steps_in": 10}).
         kwargs_limits (dict): Bounds of arguments (eg: {"alpha": [0.1, 1], "n_steps_in":[2, 30]}).
-        data (list, array, dataframe col): Data on which function is optimized.
+        train_input (np.array or tuple(np.ndarray, np.ndarray, np.ndarray)): Data on which function is optimized. Use train data or sequentions (tuple with (X, y, x_input)) - depends on model. Defaults to None.
+        X (np.array): Input sequentions on which function is optimized. Use this or train_input - depends on model. Defaults to None.
+        y (np.array): Output on which function is optimized. Use this or train_input - depends on model. Defaults to None.
         criterion (str, optional): Error criterion used in evaluation. 'rmse' or 'mape'. Defaults to 'mape'.
         fragments (int, optional): Number of optimized intervals. Defaults to 10.
         iterations (int, optional): How many times will be initial interval divided into fragments. Defaults to 3.
-        predicts (int, optional): Number of predicted values. Defaults to 7.
-        details (int, optional): 0 print nothing, 1 print best parameters of models, 2 print every new best parameters achieved, 
+        details (int, optional): 0 print nothing, 1 print best parameters of models, 2 print every new best parameters achieved,
             3 prints all results. Bigger than 0 print precents of progress. Defaults to 0.
         time_limit (int, optional): How many seconds can one evaluation last. Defaults to 5.
         predicted_column_index (int, optional): If predicted data havbe more columns, which is predicted. Defaults to 0.
@@ -47,9 +48,13 @@ def optimize(model, kwargs, kwargs_limits, data, criterion='mape', fragments=10,
     kwargs_fragments = {}
     constant_kwargs = {key: value for (key, value) in kwargs.items() if key not in kwargs_limits}
     kwargs = {key: value for (key, value) in kwargs.items() if key not in constant_kwargs}
-    train, test = data_prep.split(data, predicts=predicts, predicted_column_index=predicted_column_index)
 
-    print(f'\n {name} \n')
+    n_test_samples = models_test_outputs.shape[0]
+    predicts = models_test_outputs.shape[1]
+
+    if details > 0:
+        print(f'\n {name} \n')
+
 
     def evaluatemodel(kwargs):
         """Evaluate error function for optimize function.
@@ -61,9 +66,18 @@ def optimize(model, kwargs, kwargs_limits, data, criterion='mape', fragments=10,
             float: MAPE or RMSE depends on optimize function argument
 
         """
-        predictions = model(train, **constant_kwargs, **kwargs)
-        modeleval = evaluate_predictions.compare_predicted_to_test(predictions, test, criterion=criterion, plot=0)
-        return modeleval
+
+        modeleval = np.zeros(n_test_samples)
+
+        trained_model = model.train(model_train_input, **constant_kwargs, **kwargs)
+
+        for repeat_iteration in range(n_test_samples):
+
+            predictions = model.predict(model_test_inputs[repeat_iteration], trained_model, predicts=predicts, multicolumn_source=multicolumn_source)
+            modeleval[repeat_iteration] = evaluate_predictions.compare_predicted_to_test(predictions, models_test_outputs[repeat_iteration], criterion=criterion, plot=0)
+
+        return np.mean(modeleval)
+
 
     def watchdog(timeout, code, *args, **kwargs):
         """Time-limited execution for optimization function."""
@@ -116,9 +130,9 @@ def optimize(model, kwargs, kwargs_limits, data, criterion='mape', fragments=10,
         else:
             kwargs_fragments[i] = np.unique(np.linspace(j[0], j[1], fragments))
 
-    for i in range(iterations):
+    for iteration in range(iterations):
         if details > 0:
-            print(f"Iteration {i + 1} / {iterations}")
+            print(f"Iteration {iteration + 1} / {iterations}")
 
         combinations = list(itertools.product(*kwargs_fragments.values()))
 
@@ -160,10 +174,10 @@ def optimize(model, kwargs, kwargs_limits, data, criterion='mape', fragments=10,
                     print("Optimization is in {} %".format(counter / percent))
 
         # If result not getting better through iteration, not worth of continuing. If last iteration, do not create intervals
-        if round(memory_result, 4) == round(best_result, 4) or i + 1 == iterations:
+
+        if (memory_result !=0 and round(memory_result, 6) == round(best_result, 6)) or iteration + 1 == iterations:
             if details == 1:
                 print(f"Best result {best_result} with parameters {best_params} on model {name} \n")
-
             return best_params
 
 
@@ -187,5 +201,3 @@ def optimize(model, kwargs, kwargs_limits, data, criterion='mape', fragments=10,
 
         if details == 1:
             print(f"Best result {best_result} with parameters {best_params} on model {name} \n")
-
-
