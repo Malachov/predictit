@@ -6,7 +6,7 @@ Submodules
 
 .. toctree::
 
-   predictit.test_data.data_test
+   predictit.test_data.generate_test_data
    predictit.test_data.pickle_test_data
 
 Module contents

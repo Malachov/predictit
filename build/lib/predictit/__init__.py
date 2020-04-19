@@ -21,7 +21,7 @@ from predictit import plot
 from predictit import test_data
 
 
-__version__ = "1.01"
+__version__ = "1.22"
 __author__ = "Daniel Malachov"
 __license__ = "MIT"
 __email__ = "malachovd@seznam.cz"

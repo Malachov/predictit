@@ -16,14 +16,17 @@ Submodules
 
    predictit.analyze
    predictit.best_params
-   predictit.confidence_interval
    predictit.config
-   predictit.data_prep
+   predictit.data_preprocessing
    predictit.database
+   predictit.define_inputs
    predictit.evaluate_predictions
+   predictit.gui_start
    predictit.main
    predictit.main_for_develop
-   predictit.test
+   predictit.misc
+   predictit.plot
+   predictit.tempCodeRunnerFile
 
 Module contents
 ---------------
