@@ -258,7 +258,12 @@ def data_consolidation(data, predicted_column, datalength, other_columns, do_rem
         if isinstance(predicted_column, str):
 
             predicted_column_name = predicted_column
-            predicted_column_index = data_for_predictions_df.columns.get_loc(predicted_column_name)
+
+            try:
+                predicted_column_index = data_for_predictions_df.columns.get_loc(predicted_column_name)
+            except Exception:
+                raise KeyError(f"Predicted column name - '{predicted_column}' not found in data. Change in config - predicted_column")
+
         else:
             predicted_column_index = predicted_column
             predicted_column_name = data_for_predictions_df.columns[predicted_column_index]

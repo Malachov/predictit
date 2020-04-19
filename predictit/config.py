@@ -19,11 +19,6 @@ Examples:
 
 from predictit import models
 
-
-
-import numpy as np
-
-
 config = {
 
 
@@ -33,23 +28,23 @@ config = {
 
 
     'used_function': 'predict',  # If running main.py script, execute function. Choices: 'predict', 'predict_multiple' or 'compare_models'. If import as library, ignored.
-    'data': np.array(list([range(120), range(1120, 1240)])),  # Use numpy array, or pandas dataframe. This will overwrite data_source. If you use csv, set up to None.
+    'data': None,  # Use numpy array, or pandas dataframe. This will overwrite data_source. If you use csv, set up to None.
     'data_all': None,  # Just for compare_models function. Dictionary of data names and it's values
     'data_source': 'csv',  # Data source. ('csv' or 'sql' or 'test')
 
     'csv_full_path': r'C:\Users\truton\ownCloud\Github\predictit_library\predictit\test_data\5000 Sales Records.csv',  # Full CSV path with suffix
-    'csv_test_data_relative_path': r'daily-minimum-temperatures.csv',  # CSV name with suffix in test_data (5000 Sales Records.csv or daily-minimum-temperatures.csv) !!! Turn off if not testing to not break csv full path !!!
+    'csv_test_data_relative_path': 'daily-minimum-temperatures.csv',  # CSV name with suffix in test_data (5000 Sales Records.csv or daily-minimum-temperatures.csv) !!! Turn off if not testing to not break csv full path !!!
 
-    'predicted_column': 0,  # Name of predicted column (for dataframe data) or it's index - string or int
+    'predicted_column': '',  # Name of predicted column (for dataframe data) or it's index - string or int
     'predicted_columns': [],  # For predict_multiple function only! List of names of predicted columns or it's indexes
 
     'return_type': 'dict',  # 'best', 'all', 'dict', or 'model_criterion'. Best return array of predictions, 'all' return more models (config.compareit) results sorted by how efficient they are.
                             # 'dict' return results as best result, all results, string div with plot and more. 'models_criterion' returns MAPE or RMSE (based on config) of all models in array.
-    'debug': 1,  # Debug - If 1, print all results and all the warnings and errors on the wignoreday, if 2, stop on all warnings.
+    'debug': 1,  # Debug - If 1, print all results and all the warnings and errors on the wignoreday, if 2, stop on all warnings
 
     'plot': 1,  # If 1, plot interactive graph
     'plot_type': 'plotly',  # 'plotly' (interactive) or matplotlib(faster)
-    'show_plot': 1,
+    'show_plot': 1,  # Whether display plot or not. If in jupyter dislplay in jupyter, else in default browser
     'save_plot': 0,  # (bool) - Html if plotly type, png if matplotlibtype
     'save_plot_path': '',  # Path where to save the plot (String), if empty string or 0 - saved to desktop
     'plot_name': 'Predictions',
@@ -108,26 +103,26 @@ config = {
     # !!! Do not comment out input_types, models_input or models_parameters or models_parameters_limits !!!
     'used_models': {
 
-                    # 'AR (Autoregression)': models.statsmodels_autoregressive,
-                    # 'ARMA': models.statsmodels_autoregressive,
-                    # 'ARIMA (Autoregression integrated moving average)': models.statsmodels_autoregressive,
-                    # # # 'SARIMAX (Seasonal ARIMA)': models.sarima,
+                    'AR (Autoregression)': models.statsmodels_autoregressive,
+                    'ARMA': models.statsmodels_autoregressive,
+                    'ARIMA (Autoregression integrated moving average)': models.statsmodels_autoregressive,
+                    ### 'SARIMAX (Seasonal ARIMA)': models.sarima,
 
-                    # 'Autoregressive Linear neural unit': models.autoreg_LNU,
-                    # 'Linear neural unit with weigths predict': models.autoreg_LNU,
-                    # 'Conjugate gradient': models.conjugate_gradient,
+                    'Autoregressive Linear neural unit': models.autoreg_LNU,
+                    'Linear neural unit with weigths predict': models.autoreg_LNU,
+                    'Conjugate gradient': models.conjugate_gradient,
 
                     # 'tensorflow_lstm': models.tensorflow,
                     # 'tensorflow_mlp': models.tensorflow,
 
-                    # 'Sklearn regression': models.sklearn_regression,
+                    'Sklearn regression': models.sklearn_regression,
                     'Bayes ridge regression': models.sklearn_regression,
-                    # 'Hubber regression': models.sklearn_regression,
+                    'Hubber regression': models.sklearn_regression,
 
-                    # 'Extreme learning machine': models.sklearn_regression,
-                    # 'Gen Extreme learning machine': models.sklearn_regression,
+                    'Extreme learning machine': models.sklearn_regression,
+                    'Gen Extreme learning machine': models.sklearn_regression,
 
-                    # 'Compare with average': models.compare_with_average
+                    'Compare with average': models.compare_with_average
     },
 }
 
@@ -186,8 +181,8 @@ config.update({
         'ARIMA (Autoregression integrated moving average)': {'model': 'arima', 'p': 3, 'd': 0, 'q': 0, 'method': 'css', 'ic': 'aic', 'trend': 'nc', 'solver': 'nm'},
         'SARIMAX (Seasonal ARIMA)': {'p': 4, 'd': 0, 'q': 0, 'pp': 1, 'dd': 0, 'qq': 0, 'season': 12, 'method': 'lbfgs', 'trend': 'nc', 'enforce_invertibility': False, 'enforce_stationarity': False},
 
-        'Autoregressive Linear neural unit': {'plot': 0, 'mi': 1, 'mi_multiple': 1, 'epochs': 20, 'w_predict': 0, 'minormit': 1, 'damping': 1},
-        'Linear neural unit with weigths predict': {'plot': 0, 'mi': 1, 'minormit': 0, 'damping': 1},
+        'Autoregressive Linear neural unit': {'mi_multiple': 1, 'mi_linspace': (1e-8, 1e-1, 20), 'epochs': 20, 'w_predict': 0, 'minormit': 0},
+        'Linear neural unit with weigths predict': {'mi': 1, 'mi_multiple': 0, 'epochs': 20, 'w_predict': 1, 'minormit': 1},
         'Conjugate gradient': {'epochs': 5},
 
         'tensorflow_lstm': {'layers': 'default', 'epochs': 200, 'already_trained': 0, 'save': 1, 'saved_model_path_string': 'stored_models', 'optimizer': 'adam', 'loss': 'mse', 'verbose': 0, 'metrics': 'accuracy', 'timedistributed': 0},

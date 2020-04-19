@@ -64,16 +64,29 @@ if __name__ == "__main__":
 
     predicted_column=[]
 
+
+
+    df = pd.DataFrame([range(200), range(1200, 1200)]).T
+    df['time'] = pd.date_range('2018-01-01', periods=len(df), freq='H')
+
+
+
     if 1:
-        # config["data"] = None
-        config["plot"] = 1
-        config["debug"] = 1
+        config.update({
+            "data": df,
+            "plot": 1,
+            "debug": 1,
+            "standardize": 0,
+
+            'models_parameters': {
+                'Autoregressive Linear neural unit': {'plot': 0, 'mi': 1, 'mi_multiple': 1, 'mi_linspace': (1e-8, 10, 20), 'epochs': 20, 'w_predict': 1, 'minormit': 1, 'damping': 1},
+            }
+        })
 
 
 
 
-
-
+    _GUI = predictit.misc._GUI
     # Add everything printed + warnings to variable to be able to print in GUI
     if _GUI:
         import io
@@ -83,6 +96,8 @@ if __name__ == "__main__":
 
     if config["use_config_preset"] and config["use_config_preset"] != 'none':
         config.update(presets[config["use_config_preset"]])
+        predictit.config.update_references_1()
+        predictit.config.update_references_2()
 
     # Parse all functions parameters and it's values
     args, _, _, values = inspect.getargvalues(inspect.currentframe())
@@ -143,7 +158,7 @@ if __name__ == "__main__":
             config['data'] = predictit.test_data.generate_test_data.gen_random(config['datalength'])
 
     ########################################################
-    ################## DATA PREPROCESSING ########### ANCHOR Data
+    ################## DATA PREPROCESSING ########### ANCHOR Preprocessing
     ########################################################
 
     if not config['predicted_column']:
@@ -152,7 +167,7 @@ if __name__ == "__main__":
     ### Data are used in shape (n_features, n_samples)!!! - other way that usual convention...
 
     data_for_predictions, data_for_predictions_df, predicted_column_name = predictit.data_preprocessing.data_consolidation(
-        config['data'], predicted_column=config['predicted_column'], datalength=config['datalength'], other_columns_length=config['other_columns_length'],
+        config['data'], predicted_column=config['predicted_column'], datalength=config['datalength'], other_columns=config['other_columns'],
         do_remove_outliers=config['remove_outliers'], datetime_index=config['datetime_index'], freq=config['freq'], dtype=config['dtype'])
 
     predicted_column_index = 0
@@ -162,18 +177,12 @@ if __name__ == "__main__":
     if config['analyzeit'] == 1 or config['analyzeit'] == 3:
         predictit.analyze.analyze_data(data_for_predictions.T, window=30)
 
-        # TODO repair decompose
-        #predictit.analyze.decompose(column_for_predictions_dataframe, freq=36, model='multiplicative')
-
     ########################################
     ############# Data analyze ###### ANCHOR Analyze
     ########################################
 
     if config['remove_outliers']:
         data_for_predictions = predictit.data_preprocessing.remove_outliers(data_for_predictions, predicted_column_index=predicted_column_index, threshold=config['remove_outliers'])
-
-
-
 
     if config['correlation_threshold'] and multicolumn:
         data_for_predictions = predictit.data_preprocessing.keep_corelated_data(data_for_predictions, threshold=config['correlation_threshold'])
@@ -224,7 +233,6 @@ if __name__ == "__main__":
         min_data_length = 3 * config['predicts'] + config['repeatit'] * config['predicts'] + config['default_n_steps_in']
 
     assert (min_data_length < data_length), 'To few data - set up less repeat value in settings or add more data'
-
 
     if config['lengths']:
         data_lengths = [data_length, int(data_length / 2), int(data_length / 4), min_data_length + 50, min_data_length]
@@ -287,6 +295,7 @@ if __name__ == "__main__":
             except Exception:
                 traceback_warning(f"Error in creating sequentions on input type: {input_type} model on data length: {data_length_iteration}")
                 continue
+
 
             for iterated_model_index, (iterated_model_name, iterated_model) in enumerate(config['used_models'].items()):
                 if config['models_input'][iterated_model_name] == input_type:
@@ -385,7 +394,7 @@ if __name__ == "__main__":
                         models_time[iterated_model_name] = (time.time() - start)
 
     ###########################################
-    ############# Evaluate models ############# ANCHOR Table
+    ############# Evaluate models ############# ANCHOR Evaluate
     ###########################################
 
     # Criterion is the best of average from repetitions
@@ -419,7 +428,7 @@ if __name__ == "__main__":
         predicted_models[this_model] = {'order': i, 'criterion': model_results[j], 'predictions': reality_results_matrix[j, np.argmin(repeated_average[j])], 'data_length': np.argmin(repeated_average[j])}
 
     ##########################################
-    ############# Results ############# ANCHOR Table
+    ############# Results ############# ANCHOR Results
     ##########################################
 
     best_model_predicts = predicted_models[best_model_name]['predictions']
@@ -457,7 +466,7 @@ if __name__ == "__main__":
                 print("Best models parameters", config['models_parameters'][j])
 
     ###############################
-    ######### Plot ######### ANCHOR Results
+    ######### Plot ######### ANCHOR Plot
     ###############################
     time_point = update_time_table(time_point)
     progress_phase = "plot"
@@ -480,3 +489,5 @@ if __name__ == "__main__":
     if _GUI:
         output = sys.stdout.getvalue()
         sys.stdout = stdout
+
+        print(output)

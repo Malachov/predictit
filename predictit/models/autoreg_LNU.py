@@ -21,24 +21,22 @@ def train(sequentions, predicts=7, mi=1, mi_multiple=1, mi_linspace=(1e-8, 10, 2
     Returns:
         np.ndarray: Predictions of input time series.
     """
-
     X = sequentions[0]
     y_hat = sequentions[1]
 
     if mi_multiple:
-        miwide = np.arange
         miwide = np.linspace(mi_linspace[0], mi_linspace[1], mi_linspace[2])
     else:
         miwide = np.array([mi])
 
     miwidelen = len(miwide)
     length = X.shape[0]
+    features = X.shape[1]
 
     y = np.zeros((miwidelen, length))
-    e = np.zeros((miwidelen, length))
-    wall = np.zeros((miwidelen, length, X.shape[1]))
+    e = np.zeros(length)
+    w_last = np.zeros((miwidelen, features))
     mi_error = np.zeros(miwidelen)
-
 
     if rand_seed != 0:
         random.seed(rand_seed)
@@ -46,63 +44,61 @@ def train(sequentions, predicts=7, mi=1, mi_multiple=1, mi_linspace=(1e-8, 10, 2
     if random == 1:
         w = np.random.rand(X.shape[1]) * w_rand_scope + w_rand_shift
     else:
-        w = np.zeros((miwidelen, X.shape[1]))
+        w = np.zeros(X.shape[1])
 
         for i in range(miwidelen):
 
             for j in range(length):
 
-                y[i][j] = np.dot(w[i], X[j])
+                y[i, j] = np.dot(w, X[j])
 
-                if y[i][j] > 100 * np.amax(X):
+                if y[i, j] > 100 * np.amax(X):
                     mi_error[i] = np.inf
                     break
 
-                e[i][j] = y_hat[j] - y[i][j]
+                e[j] = y_hat[j] - y[i, j]
                 dydw = X[j]  # TODO i + 1
                 if minormit == 1:
                     minorm = miwide[i] / (damping + np.dot(X[j], X[j].T))
-                    dw = minorm * e[i][j] * dydw
+                    dw = minorm * e[j] * dydw
                 else:
-                    dw = miwide[i] * e[i][j] * dydw
-                w[i] = w[i] + dw
-                wall[i][j][:] = w[i]
+                    dw = miwide[i] * e[j] * dydw
+                w = w + dw
 
-                mi_error[i] = np.sum(abs(e[-predicts:]))
-                bestmiindex = np.argmin(mi_error)
+            mi_error[i] = np.sum(abs(e[-predicts * 3:]))
+            w_last[i] = w
 
-        wall_best_mi = wall[bestmiindex]
+        bestmiindex = np.argmin(mi_error)
 
     if epochs:
 
         y_best_mi = np.zeros(length)
         e_best_mi = np.zeros(length)
         mi_best = miwide[bestmiindex]
-
-        w_best_mi = wall_best_mi[-1]
+        wall = np.zeros((features, length))
+        w_best_mi = w_last[bestmiindex]
 
         for i in range(epochs):
             for j in range(length):
 
                 y_best_mi[j] = np.dot(w_best_mi, X[j])
                 e_best_mi[j] = y_hat[j] - y_best_mi[j]
-                dydw = X[j]  # TODO i + 1
+                dydw = X[j]
                 if minormit == 1:
                     minorm = mi_best / (damping + np.dot(X[j], X[j].T))
                     dw = minorm * e_best_mi[j] * dydw
                 else:
-
                     dw = mi_best * e_best_mi[j] * dydw
                 w_best_mi = w_best_mi + dw
 
-    if w_predict:
-        #from .sm_ar import ar
-        from predictit.models import ar
-        wwt = np.zeros((X.shape[1], predicts))
+                wall[:, j] = w_best_mi
 
-        wall_best_mi_t = wall_best_mi.T
-        for i in range(X.shape[1]):
-            wwt[i] = ar(wall_best_mi_t[i], predicts=predicts)
+    if w_predict:
+        from . import statsmodels_autoregressive
+        wwt = np.zeros((features, predicts))
+
+        for i in range(features):
+            wwt[i] = statsmodels_autoregressive.predict(wall[i], statsmodels_autoregressive.train(wall[i]))
 
         w = wwt.T
 
@@ -111,12 +107,16 @@ def train(sequentions, predicts=7, mi=1, mi_multiple=1, mi_linspace=(1e-8, 10, 2
 
     if plot == 1:
 
-        import plotly as plt
+        from predictit.misc import _JUPYTER
+        if _JUPYTER:
+            get_ipython().run_line_magic('matplotlib', 'inline')
+
+        import matplotlib.pyplot as plt
 
         plt.figure(figsize=(12, 7))
 
         plt.subplot(3, 1, 1)
-        plt.plot(y[bestmiindex], label='Predictions')
+        plt.plot(y_best_mi, label='Predictions')
         plt.xlabel('t')
         plt.plot(y_hat, label='Reality')
         plt.xlabel('t'); plt.ylabel("y"); plt.legend(loc="upper right")
@@ -126,7 +126,7 @@ def train(sequentions, predicts=7, mi=1, mi_multiple=1, mi_linspace=(1e-8, 10, 2
         plt.legend(loc="upper right"); plt.ylabel("Chyba")
 
         plt.subplot(3, 1, 3)
-        plt.plot(wall[bestmiindex])
+        plt.plot(wall)
         plt.grid(); plt.xlabel('t'); plt.ylabel("Weights")
 
         plt.suptitle("Predictions vs reality, error and weights", fontsize=20)
@@ -137,8 +137,8 @@ def train(sequentions, predicts=7, mi=1, mi_multiple=1, mi_linspace=(1e-8, 10, 2
     return w
 
 
-
 def predict(x_input, w, predicts=7):
+
 
     x_input = x_input.ravel()
 
