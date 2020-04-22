@@ -1,5 +1,7 @@
-from predictit.config import config
 import numpy as np
+
+from predictit.misc import user_warning
+from predictit.config import config
 
 
 def make_sequences(data, n_steps_in, n_steps_out=1, constant=None, predicted_column_index=0, serialize_columns=1, default_other_columns_length=None):
@@ -27,7 +29,8 @@ def make_sequences(data, n_steps_in, n_steps_out=1, constant=None, predicted_col
     """
 
     if n_steps_out > n_steps_in:
-        raise Exception('n_steps_out have to be smaller than n_steps_in!')
+        n_steps_in = n_steps_out + 1
+        user_warning('n_steps_out was biggar than n_steps_in - n_steps_in changed during prediction!')
 
     if default_other_columns_length == 0:
         data = data[0].reshape(1, -1)

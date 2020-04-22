@@ -46,7 +46,9 @@ config_original = config.copy()
 
 
 def test_own_data():
-    result = predictit.main.predict(np.random.randn(1, 100), predicts=3, plot=config["show_plot"])
+    config.update({
+        'other_columns': 0})
+    result = predictit.main.predict(np.random.randn(5, 100), predicts=3, plot=config["show_plot"])
     assert result[0]
     return result
 
@@ -63,6 +65,7 @@ def test_main_from_config():
         'datalength': 100,
         'data_transform': None,
         'repeatit': 1,
+        'other_columns': 1,
         'other_columns_length': None,
         'lengths': 3,
         'criterion': 'mape',

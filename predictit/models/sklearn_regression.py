@@ -1,6 +1,7 @@
 import sklearn
 from sklearn import linear_model
 import numpy as np
+import sklearn_extensions.extreme_learning_machines.elm as elm
 
 
 def get_regressors():
@@ -20,7 +21,7 @@ def get_regressors():
     return regressors
 
 
-def train(sequentions, regressor='bayesianridge', predicts=7,
+def train(sequentions, regressor='bayesianridge', predicts=7, n_estimators=100,
           alpha=0.0001, alpha_1=1.e-6, alpha_2=1.e-6, lambda_1=1.e-6,
           lambda_2=1.e-6, n_iter=300, epsilon=1.35, alphas=[0.1, 0.5, 1], gcv_mode='auto', solver='auto',
           n_hidden=20, rbf_width=0, activation_func='selu', **kwargs):
@@ -49,32 +50,28 @@ def train(sequentions, regressor='bayesianridge', predicts=7,
         np.ndarray: Predictions of input time series.
     """
 
-    if regressor == 'bayesianridge' or regressor == 'default':
-        model= linear_model.BayesianRidge(n_iter=n_iter, alpha_1=alpha_1, alpha_2=alpha_2, lambda_1=lambda_1, lambda_2=lambda_2)
+    regressor_dict = {
+        'default': linear_model.BayesianRidge(n_iter=n_iter, alpha_1=alpha_1, alpha_2=alpha_2, lambda_1=lambda_1, lambda_2=lambda_2),
+        'bayesianridge': linear_model.BayesianRidge(n_iter=n_iter, alpha_1=alpha_1, alpha_2=alpha_2, lambda_1=lambda_1, lambda_2=lambda_2),
+        'huber': linear_model.HuberRegressor(epsilon=epsilon, max_iter=200, alpha=alpha),
+        'lasso': linear_model.Lasso(alpha=alpha),
+        'linear': linear_model.LinearRegression(),
+        'ridgecv': linear_model.RidgeCV(alphas=alphas, gcv_mode=gcv_mode),
+        'ridge': linear_model.Ridge(alpha=alpha, solver=solver),
+        'Extra trees': sklearn.ensemble.ExtraTreesRegressor(n_estimators=n_estimators),
+        'elm': elm.ELMRegressor(n_hidden=n_hidden, alpha=alpha, rbf_width=rbf_width, activation_func=activation_func),
+        'elm_gen': elm.GenELMRegressor(),
+        'Random forest': sklearn.ensemble.forest.RandomForestRegressor(),
+        'Decision tree': sklearn.tree.tree.DecisionTreeRegressor(),
+        'Gradient boosting': sklearn.ensemble.gradient_boosting.GradientBoostingRegressor(),
+        'KNeighbors': sklearn.neighbors.regression.KNeighborsRegressor(),
+        'Bagging': sklearn.ensemble.bagging.BaggingRegressor(),
+        'Stochastic gradient': sklearn.linear_model.stochastic_gradient.SGDRegressor(),
+        'Passive aggressive regression': sklearn.linear_model.PassiveAggressiveRegressor(),
+    }
 
-    elif regressor == 'huber':
-        model= linear_model.HuberRegressor(epsilon=epsilon, max_iter=200, alpha=alpha)
-
-    elif regressor == 'lasso':
-        model= linear_model.Lasso(alpha=alpha)
-
-    elif regressor == 'linear':
-        model= linear_model.LinearRegression()
-
-    elif regressor == 'ridgecv':
-        model= linear_model.RidgeCV(alphas=alphas, gcv_mode=gcv_mode)
-
-    elif regressor == 'ridge':
-        model= linear_model.Ridge(alpha=alpha, solver=solver)
-
-    elif regressor == 'elm':
-        from sklearn_extensions.extreme_learning_machines.elm import ELMRegressor
-        model= ELMRegressor(n_hidden=n_hidden, alpha=alpha, rbf_width=rbf_width, activation_func=activation_func)
-
-    elif regressor == 'elm_gen':
-        from sklearn_extensions.extreme_learning_machines.elm import GenELMRegressor
-        model= GenELMRegressor()
-
+    if regressor in regressor_dict.keys():
+        model = regressor_dict[regressor]
     else:
         model= regressor()
 

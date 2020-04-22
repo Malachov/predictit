@@ -58,14 +58,16 @@ import predictit
 config = predictit.config.config
 
 config.update({
-    'predicts': 7,  # Create 12 predictions
-    'data_source': 'test',  # Define that we load data from CSV
-    'datalength': 1000,  # Consider only last 1000 data points
+    'data_source': 'csv',  # Data source. ('csv' or 'sql' or 'test')
+    'csv_full_path': r'C:\Users\truton\ownCloud\Github\predictit_library\predictit\test_data\5000 Sales Records.csv',  # Full CSV path with suffix
     'predicted_column': 'Temp',  # Column name that we want to predict
+
+    'predicts': 7,  # Number of predicted values - 7 by default
+    'datalength': 1000,  # The length of the data used for prediction
     'compareit': 6,  # Visualize 6 best models
-    'repeatit': 30,  # Repeat calculation times on shifted data to evaluate error criterion
+    'repeatit': 50,  # Repeat calculation times on shifted data to evaluate error criterion
     'other_columns': 0,  # Whether use other columns or not
-    'debug': 1,  # Whether use other columns or not
+    'debug': 1,  # Whether print details and warnings
 
     # Chose models that will be computed
     'used_models': {
@@ -81,16 +83,13 @@ config.update({
 
     # Define parameters of models
 
-    'n_steps_in': 20,  # How many lagged values in models
-    'output_shape': 'batch',  # Whether batch or one-step models
-
     'models_parameters': {
 
         'AR (Autoregression)': {'model': 'ar', 'method': 'cmle', 'ic': 'aic', 'trend': 'nc', 'solver': 'lbfgs'},
         'ARIMA (Autoregression integrated moving average)': {'model': 'arima', 'p': 3, 'd': 0, 'q': 0, 'method': 'css', 'ic': 'aic', 'trend': 'nc', 'solver': 'nm'},
 
-        'Autoregressive Linear neural unit': {'plot': 0, 'mi': 1, 'mi_multiple': 1, 'epochs': 20, 'w_predict': 0, 'minormit': 1, 'damping': 1},
-        'Conjugate gradient': {'epochs': 5},
+        'Autoregressive Linear neural unit': {'mi_multiple': 1, 'mi_linspace': (1e-7, 1e-2, 200), 'epochs': 100, 'w_predict': 0, 'minormit': 0},
+        'Conjugate gradient': {'epochs': 200},
 
         'Bayes ridge regression': {'regressor': 'bayesianridge', 'n_iter': 300, 'alpha_1': 1.e-6, 'alpha_2': 1.e-6, 'lambda_1': 1.e-6, 'lambda_2': 1.e-6},
         'Sklearn regression': {'regressor': 'linear', 'alpha': 0.0001, 'n_iter': 100, 'epsilon': 1.35, 'alphas': [0.1, 0.5, 1], 'gcv_mode': 'auto', 'solver': 'auto', 'alpha_1': 1.e-6, 'alpha_2': 1.e-6, 'lambda_1': 1.e-6, 'lambda_2': 1.e-6, 'n_hidden': 20, 'rbf_width': 0, 'activation_func': 'selu'},

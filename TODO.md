@@ -32,32 +32,38 @@
     - [ ] Incremental learning
         - [ ] In sklearn (partial_fit)
 - [ ] Create prediction type - Regression, classification (binning inputs), anomaly prediction in config
+    - [ ] Binnig inputs - E.g. https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.Binarizer.html#sklearn.preprocessing.Binarizer
 - [ ] Ensamble learning - combine best models results to one result
 - [ ] Fast optimization model - (optimize each parameter separately and just combine)
 - [ ] Add scientific documentation into docstrings (equations and diagrams)
 - [ ] Add exogenous parametrs where possible
 - [ ] Finish TODOS in GUI
 - [ ] Do segmentation in time series (Matrix profile method) - 1) Use in analyze, 2) Detect anomalies
-- [] Numba optimization
+- [ ] Numba optimization
+- [ ] - Feature selection (which columns to use) - E.g. https://scikit-learn.org/stable/modules/feature_selection.html, https://towardsdatascience.com/feature-selection-with-pandas-e3690ad8504b
 
 ## Deals
 
-- [ ] In memory profile just call the function, do not copy and paste
+- [ ] Change congig data source just to data and do automatic parsing - dataframe or array or path
+- [ ] Print failed models apart and put not in table results
+- [ ] Test data from sklearn and csv test data from web - use in test_it.py - no big repository
 - [ ] Do table from detailed results (too long)
-- [ ] Dataframe data input for statsmodels - date as index
+- [ ] Test dataframe data input for statsmodels - date as index
 - [ ] Separate Plot to function + Plot_all during learning option - with real validate data for comparison
 - [ ] Add evaluation methods to visual test
-- Data preprocessing
+- [ ] Data preprocessing
     - [ ] Binning inputs
     - [ ] In remove_outliers function do not remove it, but interpolate by neighbors
 - [ ] Add residuals matrix from results_matrix
+- [ ] In optimization, compare models on more results to reduce chance
 - [ ] Remove sys.path.insert in main and do imports better way
 - [ ] Translate and finish models __init__ docstrings
 - [ ] Add plotly box plot for residuals of models in main.py (https://plot.ly/python/box-plots/), and box plot for error criterion (data lengths and for repetitions) on compare_models
-- Improve / edit existing models
+- [ ] Improve / edit existing models
     - [ ] Repair Sarimax model
     - [ ] For models with significant results diversity (ELM...) use optional bagging (mean of more results)
     - [ ] Add auto arima models from new libraries
     - [ ] Conjugate gradient and autoreg LNU for multiple column data
     - [ ] Add stochastig gradient method to autoreg (adam or adagrad)
 - [ ] Make waterfall diagram of spent time - preprocess - train - evaluation, plot - make progress bar for GUI
+- [ ] In memory profile just call the function, do not copy and paste

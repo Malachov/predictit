@@ -60,7 +60,9 @@ if __name__ == "__main__":
     # Add settings from command line if used
     parser = argparse.ArgumentParser(description='Prediction framework setting via command line parser!')
     parser.add_argument("--use_config_preset", type=str, choices=[None, 'fast'], help="Edit some selected config, other remains the same, check config_presets.py file.")
-    parser.add_argument("--used_function", type=str, choices=['predict', 'predict_multiple_columns', 'compare_models'], help="Which function in main.py use. One predict one column, ohter more at once, the last compare models on test data")
+    parser.add_argument("--used_function", type=str, choices=['predict', 'predict_multiple_columns', 'compare_models', 'validate_predictions'],
+                        help="""Which function in main.py use. Predict predict just one defined column, predict_multiple_columns predict more columns at once,
+                        compare_models compare models on defined test data, validate_predictions test models on data not used for training""")
     parser.add_argument("--data_source", type=str, choices=['csv', 'test'], help="What source of data to use")
     parser.add_argument("--csv_full_path", type=str, help="Full CSV path with suffix")
     parser.add_argument("--predicts", type=int, help="Number of predicted values - 7 by default")
@@ -70,7 +72,8 @@ if __name__ == "__main__":
     parser.add_argument("--freqs", type=list, help="For predict_multiple_columns function only! List of intervals of predictions 'M' - months, 'D' - Days, 'H' - Hours")
     parser.add_argument("--plot", type=bool, help="If 1, plot interactive graph")
     parser.add_argument("--datetime_index", type=int, help="Index of dataframe or it's name. Can be empty, then index 0 or new if no date column.")
-    parser.add_argument("--return_type", type=str, choices=['best', 'all', 'dict', 'model_criterion'], help="What will be returned by function. Best result, all results (array), dict with more results (best, all, string of plot in HTML...) or model_criterion with MAPE or RMSE (based on config) of all models")
+    parser.add_argument("--return_type", type=str, choices=['best', 'all', 'dict', 'models_error_criterion'], help="""What will be returned by function. Best result, all results (array),
+                        dict with more results (best, all, string of plot in HTML...) or models_error_criterion with MAPE or RMSE (based on config) of all models""")
     parser.add_argument("--datalength", type=int, help="The length of the data used for prediction")
     parser.add_argument("--debug", type=bool, help="Debug - print all results and all the errors on the way")
     parser.add_argument("--analyzeit", type=bool, help="Analyze input data - Statistical distribution, autocorrelation, seasonal decomposition etc.")
@@ -81,7 +84,7 @@ if __name__ == "__main__":
     parser.add_argument("--lengths", type=bool, help="Compute on various length of data (1, 1/2, 1/4...). Automatically choose the best length. If 0, use only full length.")
     parser.add_argument("--remove_outliers", type=bool, help="Remove extraordinary values. Value is threshold for ignored values. Value means how many times standard deviation from the average threshold is far")
     parser.add_argument("--standardize", type=str, choices=[None, 'standardize', '-11', '01', 'robust'], help="Data standardization, so all columns have similiar scopes")
-    parser.add_argument("--criterion", type=str, choices=['mape', 'rmse'], help="Error criterion used for model")
+    parser.add_argument("--error_criterion", type=str, choices=['mape', 'rmse'], help="Error criterion used for model")
     parser.add_argument("--compareit", type=int, help="How many models will be displayed in final plot. 0 if only the best one.")
 
     # Non empty command line args
@@ -97,11 +100,13 @@ if __name__ == "__main__":
 
 def predict(data=None, predicts=None, predicted_column=None, freq=None, models_parameters=None, data_source=None,
             csv_full_path=None, plot=None, used_models=None, datetime_index=None, return_type=None, datalength=None, data_transform=None, debug=None, analyzeit=None,
-            optimizeit=None, repeatit=None, other_columns=None, default_other_columns_length=None, lengths=None, remove_outliers=None, standardize=None, criterion=None, compareit=None, n_steps_in=None, output_shape=None):
+            optimizeit=None, repeatit=None, other_columns=None, default_other_columns_length=None, lengths=None, remove_outliers=None, standardize=None, error_criterion=None, compareit=None):
 
     """Make predictions mostly on time-series data. Data input can be set up in config.py (E.G. csv type, path and name),
     data can be used as input arguments to function (this has higher priority) or it can be setup as command line arguments (highest priority).
     Values defaults are None, because are in config.py
+
+    Returned ranked results are evaluate only on data that was in training set. If you want to have true error criterion, run function validate_predictions.
 
     Args:
         data (np.ndarray, pd.DataFrame): Time series. Can be 2-D - more columns.
@@ -111,10 +116,10 @@ def predict(data=None, predicts=None, predicted_column=None, freq=None, models_p
             If list with more values only the first one will be evaluated (use predict_multiple_columns function if you need that. Defaults to None.
         freq (str. 'H' or 'D' or 'M', optional): If date index available, resample data and predict in defined time frequency. Defaults to None.
 
+        **kwargs (dict): There is much more parameters of predict function. Check config.py for parameters details.
+
     Returns:
-        np.ndarray: Evaluated predicted values.
-        If in setup - return all models results {np.ndarray}.
-        If in setup - return interactive plot of results.
+        Depend on 'return_type' config value - return best prediction {np.ndarray}, all models results {np.ndarray}, detailed results{dict} or interactive plot or print tables of results
 
     """
 
@@ -153,9 +158,9 @@ def predict(data=None, predicts=None, predicted_column=None, freq=None, models_p
         return time.time()
     time_point = time_begin = time.time()
 
-    ###############################################
-    ################## LOAD DATA ########### ANCHOR Data
-    ###############################################
+    #######################################
+    ############## LOAD DATA ####### ANCHOR Data
+    #######################################
 
     progress_phase = "Data loading and preprocessing"
     update_gui(progress_phase, 'progress_phase')
@@ -181,7 +186,8 @@ def predict(data=None, predicts=None, predicted_column=None, freq=None, models_p
         ############# Load SQL data #############
         elif config['data_source'] == 'sql':
             try:
-                config['data'] = predictit.database.database_load(server=config['server'], database=config['database'], freq=config['freq'], data_limit=config['datalength'], last=config['last_row'])
+                config['data'] = predictit.database.database_load(server=config['server'], database=config['database'], freq=config['freq'],
+                                                                  data_limit=config['datalength'], last=config['last_row'])
             except Exception:
                 print("\n ERROR - Data load from SQL server failed - Setup server, database and predicted column name in config \n\n")
                 raise
@@ -189,18 +195,16 @@ def predict(data=None, predicts=None, predicted_column=None, freq=None, models_p
         elif config['data_source'] == 'test':
             config['data'] = predictit.test_data.generate_test_data.gen_random(config['datalength'])
 
-    ########################################################
-    ################## DATA PREPROCESSING ########### ANCHOR Preprocessing
-    ########################################################
+    ##############################################
+    ############ DATA PREPROCESSING ###### ANCHOR Preprocessing
+    #############################################
 
     if not config['predicted_column']:
         config['predicted_column'] = 0
 
-    ### Data are used in shape (n_features, n_samples)!!! - other way that usual convention...
+    ### Data are used in shape (n_features, n_samples)!!! - other way that usual convention... if iterate data_for_predictions[i] - you have columns
 
-    data_for_predictions, data_for_predictions_df, predicted_column_name = predictit.data_preprocessing.data_consolidation(
-        config['data'], predicted_column=config['predicted_column'], datalength=config['datalength'], other_columns=config['other_columns'],
-        do_remove_outliers=config['remove_outliers'], datetime_index=config['datetime_index'], freq=config['freq'], dtype=config['dtype'])
+    data_for_predictions, data_for_predictions_df, predicted_column_name = predictit.data_preprocessing.data_consolidation(config['data'])
 
     predicted_column_index = 0
 
@@ -314,9 +318,9 @@ def predict(data=None, predicts=None, predicted_column=None, freq=None, models_p
         used_input_types.append(config['models_input'][i])
     used_input_types = set(used_input_types)
 
-    ############################################
-    ############# Main loop ############# ANCHOR Main loop
-    ############################################
+    #######################################
+    ############# Main loop ######## ANCHOR Main loop
+    #######################################
 
     # Repeat evaluation on shifted data to eliminate randomness
     for data_length_index, data_length_iteration in enumerate(data_lengths):
@@ -334,8 +338,8 @@ def predict(data=None, predicts=None, predicted_column=None, freq=None, models_p
                     if config['models_input'][iterated_model_name] in ['one_step', 'one_step_constant']:
                         if multicolumn and config['predicts'] > 1:
 
-                            user_warning(f"Warning in model {iterated_model_name} \n\nOne-step prediction on multivariate data (more columns). " +
-                                         f"Use batch (y lengt equals to predict) or do use some one column data input in config models_input or predict just one value.")
+                            user_warning(f"""Warning in model {iterated_model_name} \n\nOne-step prediction on multivariate data (more columns).
+                                             Use batch (y lengt equals to predict) or do use some one column data input in config models_input or predict just one value.""")
                             continue
 
                     if isinstance(used_sequention, tuple):
@@ -360,12 +364,11 @@ def predict(data=None, predicts=None, predicted_column=None, freq=None, models_p
 
                             try:
                                 start_optimization = time.time()
-                                model_kwargs = {**config['models_parameters'][iterated_model_name]}
 
-                                best_kwargs = predictit.best_params.optimize(iterated_model, model_kwargs, config['models_parameters_limits'][iterated_model_name],
+                                best_kwargs = predictit.best_params.optimize(iterated_model, config['models_parameters'][iterated_model_name], config['models_parameters_limits'][iterated_model_name],
                                                                              model_train_input=model_train_input, model_test_inputs=model_test_inputs, models_test_outputs=models_test_outputs,
                                                                              fragments=config['fragments'], iterations=config['iterations'], time_limit=config['optimizeit_limit'],
-                                                                             criterion=config['criterion'], name=iterated_model_name, details=config['optimizeit_details'])
+                                                                             error_criterion=config['error_criterion'], name=iterated_model_name, details=config['optimizeit_details'])
 
                                 for k, l in best_kwargs.items():
 
@@ -391,7 +394,8 @@ def predict(data=None, predicts=None, predicted_column=None, freq=None, models_p
                             continue
 
                         # Remove wrong values out of scope to not be plotted
-                        one_reality_result[abs(one_reality_result) > 10 * data_abs_max] = np.nan
+
+                        one_reality_result[abs(one_reality_result) > 3 * data_abs_max] = np.nan
 
                         # Do inverse data preprocessing
                         if config['power_transformed'] == 1:
@@ -416,7 +420,7 @@ def predict(data=None, predicts=None, predicted_column=None, freq=None, models_p
                                 test_results_matrix[repeat_iteration, iterated_model_index, data_length_index] = predictit.data_preprocessing.fitted_power_transform(test_results_matrix[repeat_iteration, iterated_model_index, data_length_index], data_std, data_mean)
 
                             evaluated_matrix[repeat_iteration, iterated_model_index, data_length_index] = predictit.evaluate_predictions.compare_predicted_to_test(test_results_matrix[repeat_iteration, iterated_model_index, data_length_index],
-                                                                                                                                                                   models_test_outputs[repeat_iteration], criterion=config['criterion'])
+                                                                                                                                                                   models_test_outputs[repeat_iteration], error_criterion=config['error_criterion'])
 
                     except Exception:
                         traceback_warning(f"Error in {iterated_model_name} model on data length {data_length_iteration}")
@@ -424,9 +428,9 @@ def predict(data=None, predicts=None, predicted_column=None, freq=None, models_p
                     finally:
                         models_time[iterated_model_name] = (time.time() - start)
 
-    ###########################################
-    ############# Evaluate models ############# ANCHOR Evaluate
-    ###########################################
+    #############################################
+    ############# Evaluate models ######## ANCHOR Evaluate
+    #############################################
 
     # Criterion is the best of average from repetitions
     time_point = update_time_table(time_point)
@@ -455,50 +459,50 @@ def predict(data=None, predicts=None, predicted_column=None, freq=None, models_p
         if i == 0:
             best_model_name = this_model
 
-
-        predicted_models[this_model] = {'order': i, 'criterion': model_results[j], 'predictions': reality_results_matrix[j, np.argmin(repeated_average[j])], 'data_length': np.argmin(repeated_average[j])}
-
-    ##########################################
-    ############# Results ############# ANCHOR Results
-    ##########################################
+        predicted_models[this_model] = {'order': i + 1, 'error_criterion': model_results[j], 'predictions': reality_results_matrix[j, np.argmin(repeated_average[j])], 'data_length': np.argmin(repeated_average[j])}
 
     best_model_predicts = predicted_models[best_model_name]['predictions']
+    complete_dataframe = column_for_plot.copy()
 
-    if config['print_result']:
-        print(f"\n Best model is {best_model_name} \n\t with results {best_model_predicts} \n\t with model error {config['criterion']} = {predicted_models[best_model_name]['criterion']}")
-        print(f"\n\t with data length {data_lengths[predicted_models[best_model_name]['data_length']]} \n\t with paramters {config['models_parameters'][best_model_name]} \n")
+    if config['confidence_interval'] == 'default':
+        try:
+            lower_bound, upper_bound = predictit.misc.confidence_interval(column_for_plot, predicts=config['predicts'], confidence=config['confidence_interval'])
+            complete_dataframe['Lower bound'] = complete_dataframe['Upper bound'] = None
+            bounds = True
+        except Exception:
+            bounds = False
+            traceback_warning("Error in compute confidence interval")
 
+    else:
+        bounds = False
 
-    # Definition of the table for results
-    models_table = PrettyTable()
-    models_table.field_names = ['Model', f"Average {config['criterion']} error", "Time"]
+    last_date = column_for_plot.index[-1]
 
-    # Fill the table
+    if isinstance(last_date, (pd.core.indexes.datetimes.DatetimeIndex, pd._libs.tslibs.timestamps.Timestamp)):
+        date_index = pd.date_range(start=last_date, periods=config['predicts'] + 1, freq=column_for_plot.index.freq)[1:]
+        date_index = pd.to_datetime(date_index)
+
+    else:
+        date_index = list(range(last_date + 1, last_date + config['predicts'] + 1))
+
+    results_dataframe = pd.DataFrame(data={'Lower bound': lower_bound, 'Upper bound': upper_bound}, index=date_index) if bounds else pd.DataFrame(index=date_index)
+
     for i, j in predicted_models.items():
-        models_table.add_row([i, j['criterion'], models_time[i]])
+        if 'predictions' in j:
+            results_dataframe[f"{j['order']} - {i}"] = j['predictions']
+            complete_dataframe[f"{j['order']} - {i}"] = None
+            if j['order'] == 1:
+                best_model_name_plot = f"{j['order']} - {i}"
 
+    last_value = float(column_for_plot.iloc[-1])
 
-    if config['print_table']:
-        print(f'\n {models_table} \n')
+    complete_dataframe = pd.concat([complete_dataframe, results_dataframe], sort=False)
+    complete_dataframe.iloc[-config['predicts'] - 1] = last_value
 
-    ### Print detailed resuts ###
+    #######################################
+    ############# Plot ############# ANCHOR Plot
+    #######################################
 
-    if config['debug']:
-
-        for i, j in enumerate(models_names):
-            print(models_names[i])
-
-            for k in range(data_number):
-                print(f"\t With data length: {data_lengths[k]}  {config['criterion']} = {repeated_average[i, k]}")
-
-            if config['optimizeit']:
-                if j in models_optimizations_time:
-                    print(f"\t Time to optimize {models_optimizations_time[j]} \n")
-                print("Best models parameters", config['models_parameters'][j])
-
-    ###############################
-    ######### Plot ######### ANCHOR Plot
-    ###############################
     time_point = update_time_table(time_point)
     progress_phase = "plot"
     update_gui(progress_phase, 'progress_phase')
@@ -506,15 +510,53 @@ def predict(data=None, predicts=None, predicted_column=None, freq=None, models_p
     if config['plot']:
 
         plot_return = 'div' if _GUI else ''
-        div = predictit.plot.plotit(column_for_plot, predicted_models, plot_type=config['plot_type'], show=config['show_plot'], save=config['save_plot'], save_path=config['save_plot_path'], plot_return=plot_return)
+        div = predictit.plot.plotit(complete_dataframe, plot_type=config['plot_type'], show=config['show_plot'], save=config['save_plot'], save_path=config['save_plot_path'],
+                                    plot_return=plot_return, best_model_name=best_model_name_plot, predicted_column_name=predicted_column_name)
+
+
+    ####################################
+    ############# Results ####### ANCHOR Results
+    ####################################
+
+    if config['print']:
+        if config['print_result']:
+            print(f"\n Best model is {best_model_name} \n\t with results {best_model_predicts} \n\t with model error {config['error_criterion']} = {predicted_models[best_model_name]['error_criterion']}")
+            print(f"\n\t with data length {data_lengths[predicted_models[best_model_name]['data_length']]} \n\t with paramters {config['models_parameters'][best_model_name]} \n")
+
+
+        # Table of results
+        models_table = PrettyTable()
+        models_table.field_names = ['Model', f"Average {config['error_criterion']} error", "Time"]
+        # Fill the table
+        for i, j in predicted_models.items():
+            if i in models_time:
+                models_table.add_row([i, j['error_criterion'], models_time[i]])
+
+        if config['print_table']:
+            print(f'\n {models_table} \n')
+
+        time_parts_table.add_row(['Complete time', time.time() - time_begin])
+
+        if config['print_time_table']:
+            print(f'\n {time_parts_table} \n')
+
+        ### Print detailed resuts ###
+        if config['print_detailed_result']:
+
+            for i, j in enumerate(models_names):
+                print(models_names[i])
+
+                for k in range(data_number):
+                    print(f"\t With data length: {data_lengths[k]}  {config['error_criterion']} = {repeated_average[i, k]}")
+
+                if config['optimizeit']:
+                    if j in models_optimizations_time:
+                        print(f"\t Time to optimize {models_optimizations_time[j]} \n")
+                    print("Best models parameters", config['models_parameters'][j])
 
     time_point = update_time_table(time_point)
     progress_phase = 'finished'
     update_gui(progress_phase, 'progress_phase')
-    time_parts_table.add_row(['Complete time', time.time() - time_begin])
-
-    if config['print_time_table']:
-        print(f'\n {time_parts_table} \n')
 
     # Return stdout and stop collect warnings and printed output
     if _GUI:
@@ -523,36 +565,41 @@ def predict(data=None, predicts=None, predicted_column=None, freq=None, models_p
 
         print(output)
 
-    ############################
-    ### Return ### ANCHOR Return
-    ############################
+    ################################
+    ########### Return ###### ANCHOR Return
+    ################################
 
-    if config['return_type'] == 'model_criterion':
+    if config['return_type'] == 'models_error_criterion':
         return repeated_average
 
-    if config['return_type'] == 'all':
+    elif config['return_type'] == 'all':
         return reality_results_matrix
 
     elif not config['return_type'] or config['return_type'] == 'best':
         return best_model_predicts
 
-    elif config['return_type'] == 'dict':
-        results = {}
-        results['best'] = best_model_predicts
-        results['all'] = results
-        results['time_table'] = time_parts_table.get_html_string()
-        results['models_table'] = models_table.get_html_string()
+    elif config['return_type'] == 'results dataframe':
+        return results_dataframe
+
+    elif config['return_type'] == 'detailed results dictionary':
+        detailed_results_dictionary = {
+            'predicted_models': predicted_models,
+            'best': best_model_predicts,
+            'all': reality_results_matrix,
+            'time_table': time_parts_table.get_html_string(),
+            'models_table': models_table.get_html_string(),
+        }
 
         if _GUI:
-            results['plot'] = div
-            results['output'] = output
+            detailed_results_dictionary['plot'] = div
+            detailed_results_dictionary['output'] = output
 
-        return results
+        return detailed_results_dictionary
 
 
-def predict_multiple_columns(data=None, predicted_columns=None, freqs=None, database_deploy=None, predicts=None, models_parameters=None, data_source=None,
+def predict_multiple_columns(data=None, predicted_columns=None, freqs=None, database_deploy=None, predicts=None, models_parameters=None, data_source=None, error_criterion=None, compareit=None,
                              csv_full_path=None, plot=None, used_models=None, datetime_index=None, return_all=None, datalength=None, data_transform=None, debug=None, analyzeit=None,
-                             optimizeit=None, repeatit=None, other_columns=None, default_other_columns_length=None, lengths=None, remove_outliers=None, standardize=None, criterion=None, compareit=None, n_steps_in=None, output_shape=None):
+                             optimizeit=None, repeatit=None, other_columns=None, default_other_columns_length=None, lengths=None, remove_outliers=None, standardize=None):
     """Predict multiple colums and multiple frequencions at once. Use predict function.
 
     Args:
@@ -601,9 +648,9 @@ def predict_multiple_columns(data=None, predicted_columns=None, freqs=None, data
     return predictions_full
 
 
-def compare_models(data_all=None, predicts=None, predicted_column=None, freq=None, models_parameters=None, data_source=None,
+def compare_models(data_all=None, predicts=None, predicted_column=None, freq=None, models_parameters=None, data_source=None, compareit=None,
                    csv_full_path=None, plot=None, used_models=None, datetime_index=None, return_all=None, datalength=None, data_transform=None, debug=None, analyzeit=None,
-                   optimizeit=None, repeatit=None, other_columns=None, default_other_columns_length=None, lengths=None, remove_outliers=None, standardize=None, criterion=None, compareit=None, n_steps_in=None, output_shape=None):
+                   optimizeit=None, repeatit=None, other_columns=None, default_other_columns_length=None, lengths=None, remove_outliers=None, standardize=None, error_criterion=None,):
     """Function that helps to choose apropriate models. It evaluate it on test data and then return results.
     After you know what models are the best, you can use only them in functions predict() or predict_multiple_columns.
     You can define your own test data and find best modules for your process. You can pickle data if you are use it
@@ -611,8 +658,7 @@ def compare_models(data_all=None, predicts=None, predicted_column=None, freq=Non
 
     Args:
         data_all (dict): Dictionary of data names and data values (np.array). You can use data from test_data module, generate_test_data script (e.g. gen_sin()).
-        data_length (int, optional): Length that will be used. Defaults to 1000.
-        **kwargs (dict): Data specific parameters. Mostly for predicted_column value.
+        **kwargs (dict): All parameters of predict function. Check config.py for parameters details.
 
     """
 
@@ -624,7 +670,8 @@ def compare_models(data_all=None, predicts=None, predicted_column=None, freq=Non
 
     # If no data_all inserted, default will be used
     if config['data_all'] is None:
-        config['data_all'] = {'sin': predictit.test_data.generate_test_data.gen_sin(config['datalength']), 'Sign': predictit.test_data.generate_test_data.gen_sign(config['datalength']), 'Random data': predictit.test_data.generate_test_data.gen_random(config['datalength'])}
+        config['data_all'] = {'sin': predictit.test_data.generate_test_data.gen_sin(config['datalength']), 'Sign': predictit.test_data.generate_test_data.gen_sign(config['datalength']),
+                              'Random data': predictit.test_data.generate_test_data.gen_random(config['datalength'])}
 
     ### Pickle option was removed, add if you need it...
     # if config['pickleit']:
@@ -651,7 +698,7 @@ def compare_models(data_all=None, predicts=None, predicted_column=None, freq=Non
     for i, j in config['data_all'].items():
         config['plot_name'] = i
         try:
-            result = predict(data=j, return_type="model_criterion")
+            result = predict(data=j, return_type="models_error_criterion")
             results[i] = (result - np.nanmin(result)) / (np.nanmax(result) - np.nanmin(result))
 
         except Exception:
@@ -663,7 +710,7 @@ def compare_models(data_all=None, predicts=None, predicted_column=None, freq=Non
 
     results_array = np.stack(list(results.values()), axis=0)
 
-    results_array[np.isnan(results_array)] = np.inf
+    # results_array[np.isnan(results_array)] = np.inf
 
     all_data_average = np.nanmean(results_array, axis=0)
 
@@ -694,6 +741,53 @@ def compare_models(data_all=None, predicts=None, predicted_column=None, freq=Non
     print(f"\n\nBest data length index is {best_all_lengths_index}")
 
 
+def validate_predictions(data_list=None, data=None, predicts=None, predicted_column=None, freq=None, models_parameters=None, data_source=None, compareit=None,
+                         csv_full_path=None, plot=None, used_models=None, datetime_index=None, return_type=None, datalength=None, data_transform=None, debug=None, analyzeit=None,
+                         optimizeit=None, repeatit=None, other_columns=None, default_other_columns_length=None, lengths=None, remove_outliers=None, standardize=None, error_criterion=None):
+    """Function that evaluate models on test data that was not in train data. It create interactive plots of models results compared with test data.
+    It is recommended to use this function in jupyter notebook because of big number of plots that jupyter do not wait to quit. Typical use case is that we have just one data
+    and we separate it on chunks. We can see if model is able of generalization. Result error criterions are printed. It has number - order - as it is good
+    on data in train set, it has alse error on test set. Error criterion can be 'rmse', 'mape', or similiarity based 'dtw' (dynamic time warping).
+
+    Args:
+        data_list (dict): Dictionary of data names and data values (np.array). You can use data from test_data module, generate_test_data script (e.g. gen_sin()).
+        **kwargs (dict): All parameters of predict function. Check config.py for parameters details.
+
+    """
+    import json
+
+    config.update({'plot': 0, 'return_type': 'results dataframe', 'confidence_interval': 0, 'print': 0})
+
+    for i, data_part in enumerate(config['data_list']):
+
+        results_error_criterion = {}
+
+        data_for_predictions, data_for_predictions_df, predicted_column_name = predictit.data_preprocessing.data_consolidation(
+            data_part, predicted_column=config['predicted_column'], datalength=config['datalength'], other_columns=config['other_columns'],
+            do_remove_outliers=config['remove_outliers'], datetime_index=config['datetime_index'], freq=config['freq'], dtype=config['dtype'])
+
+        column_for_plot = data_for_predictions_df.iloc[-7 * config['predicts']: -config['predicts'], 0]
+
+        train, test = predictit.data_preprocessing.split(data_for_predictions, predicts=config['predicts'])
+
+        results_dataframe = predict(train)
+
+        for col in results_dataframe.columns:
+            results_error_criterion[col] = predictit.evaluate_predictions.compare_predicted_to_test(results_dataframe[col], test, train=train, error_criterion=config['error_criterion'])
+
+        results_dataframe['Test'] = test
+
+        complete_dataframe = pd.concat([column_for_plot, results_dataframe], sort=False)
+        complete_dataframe.iloc[-config['predicts'] - 1] = float(column_for_plot.iloc[-1])
+
+
+        predictit.plot.plotit(complete_dataframe, plot_type=config['plot_type'], show=config['show_plot'], save=config['save_plot'], save_path=config['save_plot_path'], plot_return=False, best_model_name='Test', predicted_column_name=predicted_column_name)
+
+        results_for_printing = json.dumps(results_error_criterion, indent=4)
+
+        print(f"\nOrder - model - {config['error_criterion']}\n\n{results_for_printing[2: -1]}")
+
+
 if __name__ == "__main__" and config['used_function']:
     if config['used_function'] == 'predict':
         prediction_results = predict()
@@ -703,3 +797,6 @@ if __name__ == "__main__" and config['used_function']:
 
     elif config['used_function'] == 'compare_models':
         compare_models()
+
+    elif config['used_function'] == 'validate_predictions':
+        validate_predictions()

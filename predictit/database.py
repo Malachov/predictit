@@ -6,7 +6,7 @@ The database_deploy than use predicted values and deploy it to database server.
 import pandas as pd
 
 
-def database_load(server, database, freq='D', index_col='DateBK', data_limit=2000, last=1):
+def database_load(server, database, freq='D', index_col='DateBK', data_limit=2000):
     """Load database into dataframe and create datetime index. !!! This function have to be change for every particular database !!!
 
     Args:
@@ -15,7 +15,6 @@ def database_load(server, database, freq='D', index_col='DateBK', data_limit=200
         freq (str, optional): For example days 'D' or hours 'H'. Defaults to 'D'.
         index_col (str, optional): Index of predicted column. Defaults to 'DateBK'.
         data_limit (int, optional): Max lengt of data. Defaults to 2000.
-        last (int, optional): Include last value or not. Defaults to 1.
 
     Returns:
         pd.DataFrame: Dataframe with data from database based on input SQL query.
@@ -99,12 +98,8 @@ def database_load(server, database, freq='D', index_col='DateBK', data_limit=200
     used_dates = [c for c in dates if c in dates_columns]
     df.drop(used_dates, axis=1, inplace=True)
 
-    if last:
-        df = df.iloc[::-1]
-
-    else:
-        df = df.iloc[1:, :]
-        df = df.iloc[::-1]
+    df = df.iloc[1:, :]
+    df = df.iloc[::-1]
 
     return df
 
@@ -120,7 +115,6 @@ def database_deploy(server, database, last_date, sum_number, sum_duration, freq=
 
     """
 
-    import pyodbc
     from sqlalchemy import create_engine
     import urllib
 

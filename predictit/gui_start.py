@@ -5,7 +5,6 @@ import eel
 import sys
 import warnings
 import traceback
-import misc
 
 web_path = str(Path(__file__).resolve().parents[0] / "files_for_GUI")
 
@@ -31,11 +30,14 @@ if __name__ == "__main__":
     config = predictit.config.config
 
     predictit.misc._GUI = 1
-    config["show_plot"] = 0
-    config["save_plot"] = 0
-    config["return_type"] = "dict"
-    config["data"] = None
-    config["csv_test_data_relative_path"] = ""
+    config.update({
+        "show_plot": 0,
+        "save_plot": 0,
+        "return_type": 'detailed results dictionary',
+        "data": None,
+        'data_source': 'csv',
+        "csv_test_data_relative_path": "",
+    })
 
     @eel.expose
     def make_predictions(configured):

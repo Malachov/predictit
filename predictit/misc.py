@@ -17,7 +17,6 @@ except Exception:
 
 
 def user_warning(message):
-
     warnings.warn(f"\033[93m \n\n\t{message}\n\n \033[0m", stacklevel=2)
 
 
@@ -46,9 +45,7 @@ def confidence_interval(data, predicts=7, confidence=0.1, p=1, d=0, q=0):
 
     """
 
-    import pandas as pd
     import statsmodels
-    import numpy as np
 
     if len(data) <= 10:
         return

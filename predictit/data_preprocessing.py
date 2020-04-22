@@ -8,6 +8,9 @@ Default output data shape is (n_features, n_sample) !!! Its different than usual
 import pandas as pd
 import numpy as np
 from scipy.stats import yeojohnson
+import warnings
+
+from predictit.config import config
 
 
 def keep_corelated_data(data, predicted_column_index=0, threshold=0.5):
@@ -22,17 +25,24 @@ def keep_corelated_data(data, predicted_column_index=0, threshold=0.5):
         np.array: Data with no columns that are not corelated with predicted column.
     """
 
-    corr = np.corrcoef(data)
-    range_array = np.array(range(corr.shape[0]))
-    names_to_del = range_array[abs(corr[predicted_column_index]) <= threshold]
-    data = np.delete(data, names_to_del, axis=0)
+    # If some row have no variance - RuntimeWarning warning in correlation matrix computing and then in comparing
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", RuntimeWarning)
+
+        corr = np.corrcoef(data)
+        corr = np.nan_to_num(corr, 0)
+
+        range_array = np.array(range(corr.shape[0]))
+        columns_to_del = range_array[abs(corr[predicted_column_index]) <= threshold]
+
+        data = np.delete(data, columns_to_del, axis=0)
+
+        return data
 
     # if isinstance(data, pd.DataFrame):
     #     corr = data.corr()
-    #     names_to_del = list(corr[corr[corr.columns[predicted_column_index]] <= abs(0.6)].index)
-    #     data.drop(columns=names_to_del, inplace=True)
-
-    return data
+    #     columns_to_del = list(corr[corr[corr.columns[predicted_column_index]] <= abs(0.6)].index)
+    #     data.drop(columns=columns_to_del, inplace=True)
 
 
 def remove_outliers(data, predicted_column_index=0, threshold=3):
@@ -169,21 +179,29 @@ def split(data, predicts=7, predicted_column_index=0):
         [4, 5]
     """
 
-    # if data.ndim == 1:
-    #     train = data[:(len(data) - predicts)]
-    #     test = data[-predicts:]
+    if isinstance(data, (pd.Series, pd.DataFrame)):
+        train = data.iloc[: -predicts]
+        test = data.iloc[-predicts:]
+        if test.shape[1] > 1:
+            test = test[predicted_column_index]
 
-    #     if predicts > (len(data)):
-    #         print('To few data, train/test not returned')
-    #         return ([np.nan], [np.nan] * predicts)
+    if isinstance(data, np.ndarray):
 
-    if predicts > (data.shape[1]):
-        print('To few data, train/test not returned')
-        return ([np.nan], np.array([np.nan] * predicts))
+        if data.ndim == 1:
+            train = data[:(len(data) - predicts)]
+            test = data[-predicts:]
 
-    train = data[:, :-predicts]
+            if predicts > (len(data)):
+                print('To few data, train/test not returned')
+                return ([np.nan], [np.nan] * predicts)
 
-    test = data[predicted_column_index, -predicts:]
+        if predicts > (data.shape[1]):
+            print('To few data, train/test not returned')
+            return ([np.nan], np.array([np.nan] * predicts))
+
+        train = data[:, :-predicts]
+
+        test = data[predicted_column_index, -predicts:]
 
     return (train, test)
 
@@ -238,57 +256,51 @@ def smooth():
 
 
 
+def data_consolidation(data):
 
-def data_consolidation(data, predicted_column, datalength, other_columns, do_remove_outliers, datetime_index='', freq='', dtype='float32'):
-
-    ### pd.Series ###
+    ### Pandas dataframe and series ###
 
     if isinstance(data, pd.Series):
 
-        predicted_column_name = data.name
+        data = pd.Dataframe(data)
 
-        data_for_predictions_df = pd.DataFrame(data[-datalength:])
-        data_for_predictions = data_for_predictions_df.values.reshape(1, -1)
+    if isinstance(data, pd.DataFrame):
+        data_for_predictions_df = data.iloc[-config['datalength']:, ]
 
-    ### pd.DataFrame ###
+        if isinstance(config['predicted_column'], str):
 
-    elif isinstance(data, pd.DataFrame):
-        data_for_predictions_df = data.iloc[-datalength:, ]
-
-        if isinstance(predicted_column, str):
-
-            predicted_column_name = predicted_column
+            predicted_column_name = config['predicted_column']
 
             try:
                 predicted_column_index = data_for_predictions_df.columns.get_loc(predicted_column_name)
             except Exception:
-                raise KeyError(f"Predicted column name - '{predicted_column}' not found in data. Change in config - predicted_column")
+                raise KeyError(f"Predicted column name - '{config['predicted_column']}' not found in data. Change in config - predicted_column")
 
         else:
-            predicted_column_index = predicted_column
+            predicted_column_index = config['predicted_column']
             predicted_column_name = data_for_predictions_df.columns[predicted_column_index]
 
 
         if isinstance(data.index, (pd.core.indexes.datetimes.DatetimeIndex, pd._libs.tslibs.timestamps.Timestamp)):
-            datetime_index = 'index'
+            config['datetime_index'] = 'index'
 
-        if datetime_index is not None:
+        if config['datetime_index'] is not None:
 
-            if datetime_index == 'index':
+            if config['datetime_index'] == 'index':
                 pass
 
-            elif isinstance(datetime_index, str):
-                data_for_predictions_df.set_index(datetime_index, drop=True, inplace=True)
+            elif isinstance(config['datetime_index'], str):
+                data_for_predictions_df.set_index(config['datetime_index'], drop=True, inplace=True)
 
             else:
-                data_for_predictions_df.set_index(data_for_predictions_df.columns[datetime_index], drop=True, inplace=True)
+                data_for_predictions_df.set_index(data_for_predictions_df.columns[config['datetime_index']], drop=True, inplace=True)
 
             data_for_predictions_df.index = pd.to_datetime(data_for_predictions_df.index)
 
-            if freq:
+            if config['freq']:
                 data_for_predictions_df.sort_index(inplace=True)
-                data_for_predictions_df = data_for_predictions_df.resample(freq).sum()
-                data_for_predictions_df = data_for_predictions_df.asfreq(freq, fill_value=0)
+                data_for_predictions_df = data_for_predictions_df.resample(config['freq']).sum()
+                data_for_predictions_df = data_for_predictions_df.asfreq(config['freq'], fill_value=0)
 
             else:
 
@@ -303,7 +315,7 @@ def data_consolidation(data, predicted_column, datalength, other_columns, do_rem
         # Make predicted column index 0
         data_for_predictions_df.insert(0, predicted_column_name, data_for_predictions_df.pop(predicted_column_name))
 
-        if other_columns:
+        if config['other_columns']:
 
             data_for_predictions_df = data_for_predictions_df.select_dtypes(include='number')
             data_for_predictions = data_for_predictions_df.values.T
@@ -323,24 +335,24 @@ def data_consolidation(data, predicted_column, datalength, other_columns, do_rem
         if data_for_predictions.shape[0] > data_for_predictions.shape[1]:
             data_for_predictions = data_for_predictions.T
 
-        data_for_predictions = data_for_predictions[:, -datalength:]
+        data_for_predictions = data_for_predictions[:, -config['datalength']:]
 
-        if other_columns and predicted_column != 0 and data_for_predictions.shape[0] != 1:
+        if config['other_columns'] and config['predicted_column'] != 0 and data_for_predictions.shape[0] != 1:
+
             # Make predicted column on index 0
-            data_for_predictions[[0, predicted_column], :] = data_for_predictions[[predicted_column, 0], :]
+            data_for_predictions[[0, config['predicted_column']], :] = data_for_predictions[[config['predicted_column'], 0], :]
 
-        if not other_columns:
+        if not config['other_columns']:
             data_for_predictions = data_for_predictions[0].reshape(1, -1)
 
     else:
         raise TypeError("Input data must be in pd.dataframe, pd.series or numpy array.\n"
                         "If you use csv or sql data source, its converted automatically. Check config comments...")
 
-    data_for_predictions = data_for_predictions.astype(dtype, copy=False)
+    data_for_predictions = data_for_predictions.astype(config['dtype'], copy=False)
 
     if 'data_for_predictions_df' not in locals():
         data_for_predictions_df = pd.DataFrame(data_for_predictions.T)
         data_for_predictions_df.rename(columns={0: predicted_column_name})
-        # data_for_predictions_df = pd.DataFrame(data_for_predictions.reshape(-1), columns=[predicted_column_name])
 
     return data_for_predictions, data_for_predictions_df, predicted_column_name

@@ -3,15 +3,14 @@ More info is in optimize function documentation"""
 
 import numpy as np
 import itertools
-import warnings
 import time
 import sys
-import traceback
 
-from predictit import evaluate_predictions
+from . import evaluate_predictions
+from .misc import traceback_warning
 
 
-def optimize(model, kwargs, kwargs_limits, model_train_input, model_test_inputs, models_test_outputs, criterion='mape', multicolumn_source=0, fragments=10, iterations=3, details=0, time_limit=5, predicted_column_index=0, name='Your model'):
+def optimize(model, kwargs, kwargs_limits, model_train_input, model_test_inputs, models_test_outputs, error_criterion='mape', multicolumn_source=0, fragments=10, iterations=3, details=0, time_limit=5, predicted_column_index=0, name='Your model'):
     """Function to find optimal parameters of function. For example if we want to find minimum of function x^2,
     we can use limits from -10 to 10. If we have 4 fragments and 3 iterations. it will separate interval on 4 parts,
     so we have aproximately points -10, -4, 4, 10. We evaluate the best one and make new interval to closest points,
@@ -28,7 +27,7 @@ def optimize(model, kwargs, kwargs_limits, model_train_input, model_test_inputs,
         train_input (np.array or tuple(np.ndarray, np.ndarray, np.ndarray)): Data on which function is optimized. Use train data or sequentions (tuple with (X, y, x_input)) - depends on model. Defaults to None.
         X (np.array): Input sequentions on which function is optimized. Use this or train_input - depends on model. Defaults to None.
         y (np.array): Output on which function is optimized. Use this or train_input - depends on model. Defaults to None.
-        criterion (str, optional): Error criterion used in evaluation. 'rmse' or 'mape'. Defaults to 'mape'.
+        error_criterion (str, optional): Error criterion used in evaluation. 'rmse' or 'mape'. Defaults to 'mape'.
         fragments (int, optional): Number of optimized intervals. Defaults to 10.
         iterations (int, optional): How many times will be initial interval divided into fragments. Defaults to 3.
         details (int, optional): 0 print nothing, 1 print best parameters of models, 2 print every new best parameters achieved,
@@ -52,9 +51,6 @@ def optimize(model, kwargs, kwargs_limits, model_train_input, model_test_inputs,
     n_test_samples = models_test_outputs.shape[0]
     predicts = models_test_outputs.shape[1]
 
-    if details > 0:
-        print(f'\n {name} \n')
-
 
     def evaluatemodel(kwargs):
         """Evaluate error function for optimize function.
@@ -73,8 +69,8 @@ def optimize(model, kwargs, kwargs_limits, model_train_input, model_test_inputs,
 
         for repeat_iteration in range(n_test_samples):
 
-            predictions = model.predict(model_test_inputs[repeat_iteration], trained_model, predicts=predicts, multicolumn_source=multicolumn_source)
-            modeleval[repeat_iteration] = evaluate_predictions.compare_predicted_to_test(predictions, models_test_outputs[repeat_iteration], criterion=criterion, plot=0)
+            predictions = model.predict(model_test_inputs[repeat_iteration], trained_model, predicts=predicts)
+            modeleval[repeat_iteration] = evaluate_predictions.compare_predicted_to_test(predictions, models_test_outputs[repeat_iteration], error_criterion=error_criterion, plot=0)
 
         return np.mean(modeleval)
 
@@ -101,24 +97,21 @@ def optimize(model, kwargs, kwargs_limits, model_train_input, model_test_inputs,
         finally:
             sys.settrace(old_tracer)
 
+
     # Test default parameters (can be the best)
     best_result = evaluatemodel(kwargs)
+
+    if details > 0:
+        print(f"\n\nOptimization of model {name}:\n\n\tDefault parameters result: {best_result}\n")
+
     best_params = kwargs
 
     # If result isn't better during iteration, return results
     memory_result = 0
 
     # If such a warning occur, parameters combination skipped
-    if details == 2:
-        warnings.filterwarnings('once')
-
-    else:
-        warnings.filterwarnings('ignore')
-
-
-    warnings.filterwarnings('error', category=RuntimeWarning)
-    #warnings.filterwarnings('error', message=r".*ambiguous*")
-
+    # warnings.filterwarnings('error', category=RuntimeWarning)
+    # warnings.filterwarnings('error', message=r".*ambiguous*")
 
     for i, j in kwargs_limits.items():
 
@@ -132,7 +125,7 @@ def optimize(model, kwargs, kwargs_limits, model_train_input, model_test_inputs,
 
     for iteration in range(iterations):
         if details > 0:
-            print(f"Iteration {iteration + 1} / {iterations}")
+            print(f"Iteration {iteration + 1} / {iterations} results: \n")
 
         combinations = list(itertools.product(*kwargs_fragments.values()))
 
@@ -156,30 +149,29 @@ def optimize(model, kwargs, kwargs_limits, model_train_input, model_test_inputs,
                     best_params = kombi[k]
 
                     if details == 2:
-                        print(f"New best result {best_result} on model {name} with parameters \n \t {best_params}")
+                        print(f"\n\t\tNew best result {best_result} with parameters: \t {best_params}\n")
 
             except Exception:
-                if details == 2:
-                    warnings.warn(f"\n \t Error on model {name}: with params {kombi[k]} - {traceback.format_exc()} \n")
+                if details > 0:
+                    traceback_warning(f"Error on model {name}: with params {kombi[k]}")
+                res = np.nan
 
             finally:
 
                 if details == 3:
-                    print(f"Result {res} on model {name} with parameters \n \t {kombi[k]}")
+                    print(f"    {res}  with parameters:  {kombi[k]}")
 
                 if counter == 0:
                     return best_params
 
                 if details > 0 and percent > 0 and counter % 10 == 1:
-                    print("Optimization is in {} %".format(counter / percent))
+                    print(f"Optimization is in {counter / percent} %")
 
         # If result not getting better through iteration, not worth of continuing. If last iteration, do not create intervals
-
-        if (memory_result !=0 and round(memory_result, 6) == round(best_result, 6)) or iteration + 1 == iterations:
-            if details == 1:
-                print(f"Best result {best_result} with parameters {best_params} on model {name} \n")
+        if (memory_result !=0 and round(memory_result, 6) == round(best_result, 6)) or iteration + 1 == iterations or not best_params:
+            if details > 0:
+                print(f"Best result {best_result} with parameters {best_params}")
             return best_params
-
 
         memory_result = best_result
 
@@ -199,5 +191,4 @@ def optimize(model, kwargs, kwargs_limits, model_train_input, model_test_inputs,
                 if isinstance(j[0], int):
                     kwargs_fragments[i] = list(set([int(round(k)) for k in kwargs_fragments[i]]))
 
-        if details == 1:
-            print(f"Best result {best_result} with parameters {best_params} on model {name} \n")
+

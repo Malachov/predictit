@@ -4,14 +4,14 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-def compare_predicted_to_test(predicted, test, train=None, criterion='mape', plot=0, modelname="Default model", dataname="default data", details=0):
+def compare_predicted_to_test(predicted, test, train=None, error_criterion='mape', plot=0, modelname="Default model", dataname="default data", details=0):
     """Compare tested model with reality.
 
     Args:
         predicted (np.ndarray): Model output.
         test (np.ndarray): Correct values or output from data_pre funcs.
         train (np.ndarray, optional): Real history values for plotting - for plot olny!. Defaults to None.
-        criterion (str, optional): 'mape' or 'rmse'. Defaults to 'mape'.
+        error_criterion (str, optional): 'mape' or 'rmse'. Defaults to 'mape'.
         plot (int, optional): Whether create plot. Defaults to 0.
         modelname (str, optional): Model name for plot. Defaults to "Default model".
         dataname (str, optional): Data name for plot. Defaults to "default data".
@@ -41,7 +41,6 @@ def compare_predicted_to_test(predicted, test, train=None, criterion='mape', plo
             plt.show()
 
             if train is not None:  # TODO delete if work also for date
-                plt.figure(figsize=(10, 6))
                 tt = range(len(predicted) * 10)
                 window = len(predicted) * 9
                 predictedpluslast = np.insert(predicted, 0, train[-1])
@@ -61,19 +60,21 @@ def compare_predicted_to_test(predicted, test, train=None, criterion='mape', plo
         mae = sumabserror / predicts
         '''
 
-        if criterion == 'rmse':
+        if error_criterion == 'rmse':
             rmseerror = error ** 2
             criterion_value = (sum(rmseerror) / predicts) ** (1 / 2)
 
-        if criterion == 'mape':
+        if error_criterion == 'mape':
             no_zero_test = np.where(abs(test)>=1, test, 1)
             criterion_value = np.mean(np.abs((test - predicted) / no_zero_test)) * 100
 
-        if criterion == 'dwt':
+        if error_criterion == 'dwt':
+            predicted_double = predicted.astype('double')
+            test_double = test.astype('double')
             from dtaidistance import dtw
-            criterion_value = dtw.distance_fast(predicted, test)
+            criterion_value = dtw.distance_fast(predicted_double, test_double)
 
         if details == 1:
-            print(f"Error of model {modelname} on data {dataname}: {criterion}={criterion_value}")
+            print(f"Error of model {modelname} on data {dataname}: {error_criterion}={criterion_value}")
 
         return criterion_value

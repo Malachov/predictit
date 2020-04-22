@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 
 """
-Library/framework for making predictions. Choose best of 20 models
-(ARIMA, regressions, LSTM...). Preprocess data and chose optimal parameters
-of predictions. Output is plotly HTML interactive graph or database deploying.
+Library/framework for making predictions. Choose best of more than models
+(AR, ARIMA, many regressions, nerual nets like MLP or LSTM...). Preprocess data and chose optimal parameters
+of predictions. Output is plotly HTML interactive plot, numpy array of results or database deploying.
+
 For tutorials and examples view readme (or tests).
 """
 
@@ -15,10 +16,11 @@ from predictit import data_preprocessing
 from predictit import database
 from predictit import define_inputs
 from predictit import evaluate_predictions
-from predictit import main
 from predictit import misc
 from predictit import plot
 from predictit import test_data
+
+from predictit import main
 
 
 __version__ = "1.22"

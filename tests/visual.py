@@ -36,8 +36,8 @@ predicted_column_index = 0
 # Define some longer functions, that is bad to compute in f strings...
 seqs, Y, x_input, test_inputs = predictit.define_inputs.make_sequences(data, n_steps_in=6, n_steps_out=1, constant=1)
 seqs_2, Y_2, x_input2, test_inputs2 = predictit.define_inputs.make_sequences(data, n_steps_in=4, n_steps_out=2, constant=0)
-seqs_m, Y_m, x_input_m, test_inputs_m = predictit.define_inputs.make_sequences(data_multi_col, n_steps_in=4, n_steps_out=1, other_columns_length=None, constant=1)
-seqs_2_m, Y_2_m, x_input2_m, test_inputs2_m = predictit.define_inputs.make_sequences(data_multi_col, n_steps_in=3, n_steps_out=2, other_columns_length=1, constant=0)
+seqs_m, Y_m, x_input_m, test_inputs_m = predictit.define_inputs.make_sequences(data_multi_col, n_steps_in=4, n_steps_out=1, default_other_columns_length=None, constant=1)
+seqs_2_m, Y_2_m, x_input2_m, test_inputs2_m = predictit.define_inputs.make_sequences(data_multi_col, n_steps_in=3, n_steps_out=2, default_other_columns_length=1, constant=0)
 
 print("""
         ###############
@@ -59,7 +59,7 @@ print(f"""
 
 ### Remove outliers ###\n
 
-With outliers: \n {data} \n\nWith no outliers: \n{dp.remove_outliers(data)} \n
+With outliers: \n {data} \n\nWith no outliers: \n{dp.remove_outliers(data, threshold = 3)} \n
 
 ### Difference transform ### \n
 Original data: \n {column_for_prediction} \n\nDifferenced data: \n{dp.do_difference(column_for_prediction)} \n\nBackward difference: \n{dp.inverse_difference(dp.do_difference(column_for_prediction), column_for_prediction[0])} \n
@@ -91,10 +91,10 @@ Inverse standardization: \n {dp.standardize(data_multi_col)[1].inverse_transform
 ### Split ### \n
 Original: \n {data_multi_col} \n\nsplited train: \n{dp.split(data_multi_col, predicts=2, predicted_column_index=0)[0]} \n \n\nsplited test: \n{dp.split(data_multi_col, predicts=2, predicted_column_index=0)[1]} \n
 
-### Make sequences - n_steps_in=4, n_steps_out=1, other_columns_length=None, constant=1 ### \n
+### Make sequences - n_steps_in=4, n_steps_out=1, default_other_columns_length=None, constant=1 ### \n
 Original: \n {data_multi_col} \n\nsequences: \n{seqs_m} \n\nY: \n{Y_m} \nx_input: \n\n{x_input_m} \n
 
-### Make batch sequences - n_steps_in=3, n_steps_out=2, other_columns_length=1, constant=0 ### \n
+### Make batch sequences - n_steps_in=3, n_steps_out=2, default_other_columns_length=1, constant=0 ### \n
 Original: \n {data_multi_col} \n\nsequences: \n{seqs_2_m} \n\nY: \n{Y_2_m} \nx_input: \n\n{x_input2_m} \n
 
         ###########################

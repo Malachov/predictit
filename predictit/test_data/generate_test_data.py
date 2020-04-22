@@ -3,7 +3,6 @@
 import numpy as np
 
 
-# Sin
 def gen_sin(n, periods=220):
     """Generate test data of length n in sinus shape.
 
@@ -14,11 +13,14 @@ def gen_sin(n, periods=220):
         np.ndarray: Sinus shaped data.
     """
 
+    if not n:
+        n = 1000
+
     t = np.linspace(0, periods * np.pi, n)
     data1 = np.sin(t)
     return data1
 
-# Sign
+
 def gen_sign(n, periods=220):
     """Generate test data of length n in signum shape.
 
@@ -28,6 +30,9 @@ def gen_sign(n, periods=220):
     Returns:
         np.ndarray: Signum shaped data.
     """
+
+    if not n:
+        n = 1000
 
     data1 = gen_sin(n, periods=periods)
     data2 = np.sign(data1)
@@ -44,6 +49,9 @@ def gen_random(n):
     Returns:
         np.ndarray: Random test data.
     """
+
+    if not n:
+        n = 1000
 
     data3 = np.random.randn(n) * 5 + 10
     return data3

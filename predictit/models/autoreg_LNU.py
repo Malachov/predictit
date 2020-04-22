@@ -10,6 +10,7 @@ def train(sequentions, predicts=7, mi=1, mi_multiple=1, mi_linspace=(1e-8, 10, 2
         data (np.ndarray): Time series data.
         predicts (int, optional): Number of predicted values. Defaults to 7.
         mi (float, optional): Learning rate. If not normalized must be much smaller. Defaults to 0.1.
+        mi_multiple (np.ndarray, optional): Used learning rate numpy linspace arguments. Defaults to mi_linspace=(1e-8, 10, 20).
         minormit (int, optional): Whether normalize learning rate. Defaults to 0.
         damping (int, optional): Whether damp learning rate or not. Defaults to 1.
         plot (int, optional): Whether plot results. Defaults to 0.
@@ -98,7 +99,7 @@ def train(sequentions, predicts=7, mi=1, mi_multiple=1, mi_linspace=(1e-8, 10, 2
         wwt = np.zeros((features, predicts))
 
         for i in range(features):
-            wwt[i] = statsmodels_autoregressive.predict(wall[i], statsmodels_autoregressive.train(wall[i]))
+            wwt[i] = statsmodels_autoregressive.predict(wall[i], statsmodels_autoregressive.train(wall[i]), predicts=predicts)
 
         w = wwt.T
 
