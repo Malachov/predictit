@@ -40,7 +40,11 @@ if __name__ == "__main__":
     from predictit.config import config, presets
     from predictit.misc import traceback_warning, user_warning, _GUI
 
-
+    def update_gui(content, id):
+        try:
+            gui_start.edit_gui_py(content, id)
+        except Exception:
+            pass
 
 
 
@@ -51,17 +55,11 @@ if __name__ == "__main__":
     #     data_complete = pd.concat([data_complete, pd.read_csv(file, index_col=False, sep='\t', decimal=',', encoding='cp1250')])
 
     data_complete = pd.read_csv("/home/dan/ownCloud/Github/Oxy_data/Train/20160303.txt", index_col=False, sep='\t', decimal=',', encoding='cp1250')[10: -100]
-
-    data_complete['čas'] = pd.to_datetime(data_complete['čas'])
-    data_complete.set_index(['čas'], inplace=True)
-
-    data_complete = data_complete.astype('float64')
-    data_complete.dropna(how='any', inplace=True, axis=1)
-
     config = predictit.config.config
 
     config.update({
-        'used_function': 'predict',
+        'used_function': 'compare_models',
+
         'data_all': {
             'data 1': data_complete[:-20],
             'data 2': data_complete[:-100],
@@ -72,11 +70,12 @@ if __name__ == "__main__":
         },
         'data': data_complete[-1000:],
         'predicted_column': 'CO2 (%)',
+        'datetime_index': 'čas',  # Index of dataframe datetime column or it's name if it has datetime column. If there already is index in input data, it will be used automatically.
 
         'debug': 1,
-
+        'freq': '10S',
         'default_n_steps_in': 15,
-        'datalength': 3000,
+        'datalength': 0,
         'other_columns': 0,
         'default_other_columns_length': 2,
         'standardize': 'standardize',
@@ -88,38 +87,14 @@ if __name__ == "__main__":
         'optimizeit_limit': 10,
         'optimizeit_details': 3,
 
-        'criterion': 'dwt',
         'predicts': 12,
         'compareit': 20,
         'repeatit': 50,
         'return_type': 'best',
 
 
-        # 'used_models': {
 
-        # #     # 'Extra trees regression': predictit.models.sklearn_regression,
 
-        # # #     'AR (Autoregression)': predictit.models.statsmodels_autoregressive,
-        #     'ARMA': predictit.models.statsmodels_autoregressive,
-        #     'ARIMA (Autoregression integrated moving average)': predictit.models.statsmodels_autoregressive,
-        # # #     ## 'SARIMAX (Seasonal ARIMA)': predictit.models.sarima,
-
-        # # #     # 'Autoregressive Linear neural unit': predictit.models.autoreg_LNU,
-        # # #     # 'Linear neural unit with weigths predict': predictit.models.autoreg_LNU,
-        # # #     'Conjugate gradient': predictit.models.conjugate_gradient,
-
-        # # #     # # 'tensorflow_lstm': predictit.models.tensorflow,
-        # # #     # # 'tensorflow_mlp': predictit.models.tensorflow,
-
-        # #     'Sklearn regression': predictit.models.sklearn_regression,
-        # # #     'Bayes ridge regression': predictit.models.sklearn_regression,
-        # # #     'Hubber regression': predictit.models.sklearn_regression,
-
-        # # #     'Extreme learning machine': predictit.models.sklearn_regression,
-        # # #     'Gen Extreme learning machine': predictit.models.sklearn_regression,
-
-        # # #     'Compare with average': predictit.models.compare_with_average
-        # },
 
 
 
@@ -127,16 +102,7 @@ if __name__ == "__main__":
 
 
 
-    def update_gui(content, id):
-        try:
-            gui_start.edit_gui_py(content, id)
-        except Exception:
-            pass
-
-
-
-
-
+    config['standardize'] = 0
 
 
 
@@ -150,8 +116,6 @@ if __name__ == "__main__":
 
     if config["use_config_preset"] and config["use_config_preset"] != 'none':
         config.update(presets[config["use_config_preset"]])
-        predictit.config.update_references_1()
-        predictit.config.update_references_2()
 
     # Parse all functions parameters and it's values
     args, _, _, values = inspect.getargvalues(inspect.currentframe())
@@ -163,8 +127,14 @@ if __name__ == "__main__":
     if not config['repeatit']:
         config['repeatit'] = 1
 
+    # Some config values are derived from other values. If it has been changed, it has to be updated.
     predictit.config.update_references_1()
     predictit.config.update_references_2()
+
+    # Find difference between original config and set values and if there are any differences, raise error
+    config_errors = set(config.keys()) - predictit.config.config_check_set
+    if config_errors:
+        raise KeyError(f"Some config values: {config_errors} was named incorrectly. Check config.py for more informations")
 
     # Definition of the table for spent time on code parts
     time_parts_table = PrettyTable()
@@ -211,6 +181,7 @@ if __name__ == "__main__":
 
         elif config['data_source'] == 'test':
             config['data'] = predictit.test_data.generate_test_data.gen_random(config['datalength'])
+            user_warning("Test data was used. Setup config.py where are possible options with comments. Data can be insert as function parameters, with editing config.py or with CLI.")
 
     ##############################################
     ############ DATA PREPROCESSING ###### ANCHOR Preprocessing
@@ -219,11 +190,13 @@ if __name__ == "__main__":
     if not config['predicted_column']:
         config['predicted_column'] = 0
 
-    ### Data are used in shape (n_features, n_samples)!!! - other way that usual convention...
+    ### Data are used in shape (n_features, n_samples)!!! - other way that usual convention... if iterate data_for_predictions[i] - you have columns
 
-    data_for_predictions, data_for_predictions_df, predicted_column_name = predictit.data_preprocessing.data_consolidation(
-        config['data'], predicted_column=config['predicted_column'], datalength=config['datalength'], other_columns=config['other_columns'],
-        do_remove_outliers=config['remove_outliers'], datetime_index=config['datetime_index'], freq=config['freq'], dtype=config['dtype'])
+    data_for_predictions, data_for_predictions_df, predicted_column_name = predictit.data_preprocessing.data_consolidation(config['data'])
+
+    if config['mode'] == 'validate':
+        data_for_predictions, test = predictit.data_preprocessing.split(data_for_predictions, predicts=config['predicts'])
+        data_for_predictions_df, test_df = predictit.data_preprocessing.split(data_for_predictions_df, predicts=config['predicts'])
 
     predicted_column_index = 0
 
@@ -332,6 +305,8 @@ if __name__ == "__main__":
 
     models_test_outputs = models_test_outputs[::-1]
 
+    data_end = -config['predicts'] - config['repeatit'] - 100 if config['mode'] == 'validate' else None
+
     used_input_types = []
     for i in models_names:
         used_input_types.append(config['models_input'][i])
@@ -341,7 +316,6 @@ if __name__ == "__main__":
     ############# Main loop ######## ANCHOR Main loop
     #######################################
 
-    # Repeat evaluation on shifted data to eliminate randomness
     for data_length_index, data_length_iteration in enumerate(data_lengths):
 
         for input_type in used_input_types:
@@ -357,23 +331,25 @@ if __name__ == "__main__":
                     if config['models_input'][iterated_model_name] in ['one_step', 'one_step_constant']:
                         if multicolumn and config['predicts'] > 1:
 
-                            user_warning(f"Warning in model {iterated_model_name} \n\nOne-step prediction on multivariate data (more columns). " +
-                                         f"Use batch (y lengt equals to predict) or do use some one column data input in config models_input or predict just one value.")
+                            user_warning(f"""Warning in model {iterated_model_name} \n\nOne-step prediction on multivariate data (more columns).
+                                             Use batch (y lengt equals to predict) or do use some one column data input in config models_input or predict just one value.""")
                             continue
 
                     if isinstance(used_sequention, tuple):
-                        model_train_input = (used_sequention[0][data_length - data_length_iteration:, :], used_sequention[1][data_length - data_length_iteration:, :])
+                        model_train_input = (used_sequention[0][data_length - data_length_iteration: data_end, :], used_sequention[1][data_length - data_length_iteration: data_end, :])
                         model_predict_input = used_sequention[2]
                         model_test_inputs = used_sequention[3]
 
                     elif used_sequention.ndim == 1:
-                        model_train_input = model_predict_input = used_sequention[data_length - data_length_iteration:]
+                        model_train_input = used_sequention[data_length - data_length_iteration: data_end]
+                        model_predict_input = used_sequention[data_length - data_length_iteration:]
                         model_test_inputs = []
                         for i in range(config['repeatit']):
                             model_test_inputs.append(used_sequention[data_length - data_length_iteration: - config['predicts'] - config['repeatit'] + i + 1])
 
                     else:
-                        model_train_input = model_predict_input = used_sequention[:, data_length - data_length_iteration:]
+                        model_train_input = used_sequention[:, data_length - data_length_iteration: data_end]
+                        model_predict_input = used_sequention[:, data_length - data_length_iteration:]
                         model_test_inputs = []
                         for i in range(config['repeatit']):
                             model_test_inputs.append(used_sequention[:, data_length - data_length_iteration: - config['predicts'] - config['repeatit'] + i + 1])
@@ -413,7 +389,8 @@ if __name__ == "__main__":
                             continue
 
                         # Remove wrong values out of scope to not be plotted
-                        one_reality_result[abs(one_reality_result) > 10 * data_abs_max] = np.nan
+
+                        one_reality_result[abs(one_reality_result) > 3 * data_abs_max] = np.nan
 
                         # Do inverse data preprocessing
                         if config['power_transformed'] == 1:
@@ -479,7 +456,8 @@ if __name__ == "__main__":
 
         predicted_models[this_model] = {'order': i + 1, 'error_criterion': model_results[j], 'predictions': reality_results_matrix[j, np.argmin(repeated_average[j])], 'data_length': np.argmin(repeated_average[j])}
 
-    best_model_predicts = predicted_models[best_model_name]['predictions']
+    best_model_predicts = predicted_models[best_model_name]['predictions'] if best_model_name in predicted_models else "Best model had an error"
+
     complete_dataframe = column_for_plot.copy()
 
     if config['confidence_interval'] == 'default':
@@ -512,6 +490,10 @@ if __name__ == "__main__":
             if j['order'] == 1:
                 best_model_name_plot = f"{j['order']} - {i}"
 
+    if config['mode'] == 'validate':
+        best_model_name_plot = 'Test'
+        results_dataframe['Test'] = test
+
     last_value = float(column_for_plot.iloc[-1])
 
     complete_dataframe = pd.concat([complete_dataframe, results_dataframe], sort=False)
@@ -528,7 +510,8 @@ if __name__ == "__main__":
     if config['plot']:
 
         plot_return = 'div' if _GUI else ''
-        div = predictit.plot.plotit(complete_dataframe, plot_type=config['plot_type'], show=config['show_plot'], save=config['save_plot'], save_path=config['save_plot_path'], plot_return=plot_return, best_model_name=best_model_name_plot, predicted_column_name=predicted_column_name)
+        div = predictit.plot.plotit(complete_dataframe, plot_type=config['plot_type'], show=config['show_plot'], save=config['save_plot'], save_path=config['save_plot_path'],
+                                    plot_return=plot_return, best_model_name=best_model_name_plot, predicted_column_name=predicted_column_name)
 
 
     ####################################
@@ -541,13 +524,13 @@ if __name__ == "__main__":
             print(f"\n\t with data length {data_lengths[predicted_models[best_model_name]['data_length']]} \n\t with paramters {config['models_parameters'][best_model_name]} \n")
 
 
-        # Definition of the table for results
+        # Table of results
         models_table = PrettyTable()
         models_table.field_names = ['Model', f"Average {config['error_criterion']} error", "Time"]
-
         # Fill the table
         for i, j in predicted_models.items():
-            models_table.add_row([i, j['error_criterion'], models_time[i]])
+            if i in models_time:
+                models_table.add_row([i, j['error_criterion'], models_time[i]])
 
         if config['print_table']:
             print(f'\n {models_table} \n')

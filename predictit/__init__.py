@@ -10,8 +10,8 @@ For tutorials and examples view readme (or tests).
 
 from predictit import analyze
 from predictit import best_params
-from predictit import config
 from predictit import models
+from predictit import config
 from predictit import data_preprocessing
 from predictit import database
 from predictit import define_inputs
@@ -23,7 +23,7 @@ from predictit import test_data
 from predictit import main
 
 
-__version__ = "1.22"
+__version__ = "1.25"
 __author__ = "Daniel Malachov"
 __license__ = "MIT"
 __email__ = "malachovd@seznam.cz"

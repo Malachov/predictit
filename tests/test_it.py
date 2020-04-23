@@ -9,9 +9,7 @@ import pathlib
 import numpy as np
 import pandas as pd
 
-script_dir = pathlib.Path(__file__).resolve()
-lib_path_str = script_dir.parents[1].as_posix()
-sys.path.insert(0, lib_path_str)
+sys.path.insert(0, pathlib.Path(__file__).resolve().parents[1].as_posix())
 
 try:
     __IPYTHON__
@@ -29,17 +27,20 @@ except Exception:
 import predictit
 from predictit.config import config
 
-if 'tensorflow_mlp' in config['used_models']:
-    del config['used_models']['tensorflow_mlp']
-if 'tensorflow_lstm' in config['used_models']:
-    del config['used_models']['tensorflow_lstm']
-
 config.update({
     'return_type': 'best',
     'debug': 1,
     'plot': 0,
     'show_plot': 0,
     'data': None,
+    'used_models': {
+        "AR (Autoregression)": predictit.models.statsmodels_autoregressive,
+        "Conjugate gradient": predictit.models.conjugate_gradient,
+        "Extreme learning machine": predictit.models.sklearn_regression,
+        "Sklearn regression": predictit.models.sklearn_regression,
+        "Bayes ridge regression": predictit.models.sklearn_regression,
+        "Compare with average": predictit.models.compare_with_average
+    }
 })
 
 config_original = config.copy()
@@ -77,22 +78,7 @@ def test_main_from_config():
         'standardize': '01',
 
         'used_models': {
-            "AR (Autoregression)": predictit.models.statsmodels_autoregressive,
-            "ARMA": predictit.models.statsmodels_autoregressive,
-            "ARIMA (Autoregression integrated moving average)": predictit.models.statsmodels_autoregressive,
-
-            "Autoregressive Linear neural unit": predictit.models.autoreg_LNU,
-            "Linear neural unit with weigths predict": predictit.models.autoreg_LNU,
-            "Conjugate gradient": predictit.models.conjugate_gradient,
-
-            "Extreme learning machine": predictit.models.sklearn_regression,
-            "Gen Extreme learning machine": predictit.models.sklearn_regression,
-
-            "Sklearn regression": predictit.models.sklearn_regression,
-            "Bayes ridge regression": predictit.models.sklearn_regression,
             "Hubber regression": predictit.models.sklearn_regression,
-
-            "Compare with average": predictit.models.compare_with_average
         }
     })
 
@@ -196,9 +182,12 @@ def test_main_multiple():
 def test_compare_models():
     config.update(config_original.copy())
     data_length = 1000
-    config["optimizeit"] = 0
     data_all = {'sin': predictit.test_data.generate_test_data.gen_sin(data_length), 'Sign': predictit.test_data.generate_test_data.gen_sign(data_length), 'Random data': predictit.test_data.generate_test_data.gen_random(data_length)}
-    predictit.main.compare_models(data_all)
+    try:
+        predictit.main.compare_models(data_all)
+    except Exception:
+        ok = 'nok'
+    assert ok == 'fine'
 
 
 if __name__ == "__main__":
@@ -208,10 +197,12 @@ if __name__ == "__main__":
     # print("\n\ntest_main_optimize_and_args\n")
     # result_2 = test_main_optimize_and_args()
     # print("\n\ntest_main_dataframe\n")
-    result_2 = test_main_dataframe()
+    # result_2 = test_main_dataframe()
     # print("\n\ntest_main_multiple\n")
     # result_multiple = test_main_multiple()
     # print("\n\ntest_main_multiple\n")
     # test_compare_models()
+    # print("\n\ntest_validate_models\n")
+    test_validate_models()
 
     pass

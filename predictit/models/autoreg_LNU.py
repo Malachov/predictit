@@ -2,7 +2,7 @@
 import numpy as np
 
 
-def train(sequentions, predicts=7, mi=1, mi_multiple=1, mi_linspace=(1e-8, 10, 20), epochs=10, w_predict=0, minormit=1, damping=1, plot=0, random=0, w_rand_scope=1, w_rand_shift=0, rand_seed=0):
+def train(sequentions, predicts=30, mi=1, mi_multiple=1, mi_linspace=(1e-8, 10, 20), epochs=10, w_predict=0, minormit=1, damping=1, plot=0, random=0, w_rand_scope=1, w_rand_shift=0, rand_seed=0):
     """Autoregressive linear neural unit with weight prediction. It's simple one neuron one-step net that predict not only predictions itself,
     but also use other faster method to predict weights evolution.
 

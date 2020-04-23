@@ -1,5 +1,12 @@
 # List of what have been done in new versions
 
+
+## v1.2x. - 03/2020
+
+- [x] Validation mode in config. Results are evaluated on data that was not in train data.
+- [x] Remove nan values - all column option was added
+- [x] User colored warnings in misc (not only traceback warnings)
+
 ## v1.1. - 03/2020
 
 ### Big Deals

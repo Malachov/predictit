@@ -11,6 +11,7 @@ from scipy.stats import yeojohnson
 import warnings
 
 from predictit.config import config
+from predictit.misc import user_warning
 
 
 def keep_corelated_data(data, predicted_column_index=0, threshold=0.5):
@@ -183,9 +184,9 @@ def split(data, predicts=7, predicted_column_index=0):
         train = data.iloc[: -predicts]
         test = data.iloc[-predicts:]
         if test.shape[1] > 1:
-            test = test[predicted_column_index]
+            test = test.iloc[:, predicted_column_index]
 
-    if isinstance(data, np.ndarray):
+    elif isinstance(data, np.ndarray):
 
         if data.ndim == 1:
             train = data[:(len(data) - predicts)]
@@ -203,7 +204,7 @@ def split(data, predicts=7, predicted_column_index=0):
 
         test = data[predicted_column_index, -predicts:]
 
-    return (train, test)
+    return train, test
 
 
 def fitted_power_transform(data, fitted_stdev, mean=None, fragments=10, iterations=5):
@@ -274,7 +275,7 @@ def data_consolidation(data):
             try:
                 predicted_column_index = data_for_predictions_df.columns.get_loc(predicted_column_name)
             except Exception:
-                raise KeyError(f"Predicted column name - '{config['predicted_column']}' not found in data. Change in config - predicted_column")
+                raise KeyError(f"Predicted column name - '{config['predicted_column']}' not found in data. Change in config - 'predicted_column'")
 
         else:
             predicted_column_index = config['predicted_column']
@@ -290,7 +291,10 @@ def data_consolidation(data):
                 pass
 
             elif isinstance(config['datetime_index'], str):
-                data_for_predictions_df.set_index(config['datetime_index'], drop=True, inplace=True)
+                try:
+                    data_for_predictions_df.set_index(config['datetime_index'], drop=True, inplace=True)
+                except Exception:
+                    raise KeyError(f"Datetime name / index from config - '{config['datetime_index']}' not found in data. Change in config - 'datetime_index'")
 
             else:
                 data_for_predictions_df.set_index(data_for_predictions_df.columns[config['datetime_index']], drop=True, inplace=True)
@@ -304,18 +308,19 @@ def data_consolidation(data):
 
             else:
 
-                try:
-                    data_for_predictions_df.index.freq = pd.infer_freq(data_for_predictions_df.index)
-                except Exception:
-                    pass
+                data_for_predictions_df.index.freq = pd.infer_freq(data_for_predictions_df.index)
 
                 if data_for_predictions_df.index.freq is None:
+                    user_warning("Datetime index was provided from config, but frequency guess failed. Specify 'freq' in config to resample and have equal sampling.")
                     data_for_predictions_df.reset_index(inplace=True)
 
         # Make predicted column index 0
         data_for_predictions_df.insert(0, predicted_column_name, data_for_predictions_df.pop(predicted_column_name))
 
         if config['other_columns']:
+
+            if config['remove_nans'] == 'any_columns':
+                data_for_predictions_df.dropna(how='any', inplace=True, axis=1)
 
             data_for_predictions_df = data_for_predictions_df.select_dtypes(include='number')
             data_for_predictions = data_for_predictions_df.values.T
@@ -337,9 +342,8 @@ def data_consolidation(data):
 
         data_for_predictions = data_for_predictions[:, -config['datalength']:]
 
+        # Make predicted column on index 0
         if config['other_columns'] and config['predicted_column'] != 0 and data_for_predictions.shape[0] != 1:
-
-            # Make predicted column on index 0
             data_for_predictions[[0, config['predicted_column']], :] = data_for_predictions[[config['predicted_column'], 0], :]
 
         if not config['other_columns']:
@@ -347,7 +351,7 @@ def data_consolidation(data):
 
     else:
         raise TypeError("Input data must be in pd.dataframe, pd.series or numpy array.\n"
-                        "If you use csv or sql data source, its converted automatically. Check config comments...")
+                        "If you use csv or sql data source, its converted automatically, but setup csv_full_path. Check config comments fore  more informations...")
 
     data_for_predictions = data_for_predictions.astype(config['dtype'], copy=False)
 

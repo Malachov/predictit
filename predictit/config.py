@@ -9,44 +9,52 @@ Examples:
     >>>     'plot': 1  # If 1, plot interactive graph
     >>>     'debug': 1  # Debug - print all results and all the errors on the way
     >>>     'used_models': {
-    >>>            'AR (Autoregression)': models.ar,
-    >>>            'Autoregressive Linear neural unit': models.autoreg_LNU,
-    >>>            'Sklearn regression': models.regression,
+    >>>            'AR (Autoregression)': predictit.models.ar,
+    >>>            'Autoregressive Linear neural unit': predictit.models.autoreg_LNU,
+    >>>            'Sklearn regression': predictit.models.regression,
     >>>             }
     >>> }
 
 '''
 
-from predictit import models
+import predictit
+
 
 config = {
 
     # Edit presets as you need but beware - it will overwrite normal config. Default presets edit for example number of used models, number of lengths, n_steps_in
 
-    'used_function': 'predict',  # If running main.py script, execute function. Choices: 'predict', 'predict_multiple', 'compare_models' or 'validate_predictions'. If import as library, ignored.
+    'used_function': 'predict',  # If running main.py script, execute function. Choices: 'predict', 'predict_multiple' or 'compare_models'. If import as library, ignore - just use function.
 
-    'use_config_preset': 'none',  # 'fast', 'normal', 'optimize' or 'none'. Edit some selected config, other remains the same, check config_presets.py file.
+    'use_config_preset': 'none',  # 'fast', 'normal' or 'none'. Edit some selected config, other remains the same, check config_presets.py file.
+
+    # Input settings
 
     'data': None,  # Use numpy array, or pandas dataframe. This will overwrite data_source. If you use csv, set up to None.
-    'data_all': None,  # Just for compare_models function. Dictionary of data names and it's values
-    'data_list': None,  # Data for 'validate_predictions' used function. It have to be list. Usually data parts defined by slices. E.g. [data_complete[:-20], data_complete[:-100], data_complete[:-200]]
+    'data_all': None,  # Just for compare_models function. Dictionary of data names and it's values or list of data parts.
 
     'data_source': 'test',  # Data source. ('csv' or 'sql' or 'test') - If sql, you have to edit the query to fit your database
 
     'csv_full_path': r'',  # Full CSV path with suffix
     'csv_test_data_relative_path': '',  # CSV name with suffix in test_data folder (5000 Sales Records.csv or daily-minimum-temperatures.csv) !!! Turn it off if not testing to not break csv full path !!! Test data are gitignored... use your own
 
-    'predicted_column': '',  # Name of predicted column (for dataframe data) or it's index - string or int
+    'predicted_column': 'CO (ppm)',  # Name of predicted column (for dataframe data) or it's index - string or int
     'predicted_columns': [],  # For predict_multiple function only! List of names of predicted columns or it's indexes
 
     'freq': 0,  # Interval for predictions 'M' - months, 'D' - Days, 'H' - Hours.
     'freqs': [],  # For predict_multiple function only! List of intervals of predictions 'M' - months, 'D' - Days, 'H' - Hours. Default use []
 
-    'datetime_index': None,  # Index of dataframe datetime column or it's name if it has datetime column. If there already is index in input data, it will be used automatically.
+    'datetime_index': 'čas',  # Index of dataframe datetime column or it's name if it has datetime column. If there already is index in input data, it will be used automatically. Data are sorted by time.
+
+    'datalength': 10000,  # The length of the data used for prediction. If 0, than full length
+
+    # Output settings
+
     'predicts': 7,  # Number of predicted values - 7 by default
 
-    'return_type': 'best',  # 'best', 'all', 'dict', or 'models_error_criterion'. y return array of predictions, 'all' return more models (config.compareit) results sorted by how efficient they are. 'results dataframe' return results and models names in columns.
-                            # 'detailed results dictionary' is used for GUI and return results as best result, all results, string div with plot and more. 'models_error_criterion' returns MAPE, RMSE (based on config) or dynamic warping criterion of all models in array.
+    'mode': 'predict',  # If 'validate', put apart last few values (defined py by 'predict') and evaluate on test data that was not in train set.
+    'return_type': 'best',  # 'best', 'all', 'dict', 'models_error_criterion' or 'detailed_results_dictionary'. 'best' return array of predictions, 'all' return more models (config.compareit) results sorted by how efficient they are. 'results dataframe' return results and models names in columns.
+                            # 'detailed_results_dictionary' is used for GUI and return results as best result, all results, string div with plot and more. 'models_error_criterion' returns MAPE, RMSE (based on config) or dynamic warping criterion of all models in array.
     'debug': 1,  # Debug - If 1, print all results and all the warnings and errors on the wignoreday, if 2, stop on all warnings
 
     'plot': 1,  # If 1, plot interactive graph
@@ -62,12 +70,13 @@ config = {
     'print_result': 1,  # Whether print best model results and model details
     'print_detailed_result': 0,  # Whether print detailed results
 
-    ### Next section to standardize is in updated if using presets.
+    # Prediction parameters settings
+
     'default_n_steps_in': 15,  # How many lagged values are in vector input to model.
-    'datalength': 0,  # The length of the data used for prediction. If 0, than full length
     'other_columns': 1,  # If use other columns. Bool.
     'default_other_columns_length': 2,  # Other columns vector length used for predictions. If None, lengths same as predicted columnd. If 0, other columns are not used for prediction.
-    'dtype': 'float32',
+    'remove_nans': 'any_columns',  # 'any_columns' will remove all the columns where is at least one nan column.
+    'dtype': 'float32',  # Main dtype used in prediction.
     'repeatit': 50,  # How many times is computation repeated for error criterion evaluation.
     'lengths': 0,  # Compute on various length of data (1, 1/2, 1/4...). Automatically choose the best length. If 0, use only full length.
 
@@ -98,6 +107,7 @@ config = {
 
     # Two asterisks means bulk edit values
 
+    # Extra trees regression and tensorflow are turned off by default, because too timeconsuming
     # If editting or adding new models, name of the models have to be the same as in models module
     # If using presets - overwriten
 
@@ -105,22 +115,23 @@ config = {
     # Do not comment out input_types, models_input or models_parameters
     'used_models': {
 
-        **{model_name: models.statsmodels_autoregressive for model_name in [
+        **{model_name: predictit.models.statsmodels_autoregressive for model_name in [
             'AR (Autoregression)', 'ARMA', 'ARIMA (Autoregression integrated moving average)']},  # 'SARIMAX (Seasonal ARIMA)'
 
-        'Autoregressive Linear neural unit': models.autoreg_LNU,
-        'Linear neural unit with weigths predict': models.autoreg_LNU,
-        'Conjugate gradient': models.conjugate_gradient,
+        **{model_name: predictit.models.autoreg_LNU for model_name in [
+            'Autoregressive Linear neural unit', 'Autoregressive Linear neural unit normalized', 'Linear neural unit with weigths predict']},
 
-        # 'tensorflow_lstm': models.tensorflow,
-        # 'tensorflow_mlp': models.tensorflow,
+        'Conjugate gradient': predictit.models.conjugate_gradient,
 
-        **{model_name: models.sklearn_regression for model_name in [
-            'Sklearn regression', 'Bayes ridge regression', 'Hubber regression', 'Extra trees regression', 'Decision tree regression',
+        # 'tensorflow_lstm': predictit.models.tensorflow,
+        # 'tensorflow_mlp': predictit.models.tensorflow,
+
+        **{model_name: predictit.models.sklearn_regression for model_name in [  # 'Extra trees regression'
+            'Sklearn regression', 'Bayes ridge regression', 'Hubber regression', 'Decision tree regression',
             'KNeighbors regression', 'Random forest regression', 'Bagging regression', 'Stochastic gradient regression',
             'Passive aggressive regression', 'Extreme learning machine', 'Gen Extreme learning machine', 'Gradient boosting']},
 
-        'Compare with average': models.compare_with_average
+        'Compare with average': predictit.models.compare_with_average
     },
 }
 
@@ -152,7 +163,7 @@ config.update({
             'AR (Autoregression)', 'ARMA', 'ARIMA (Autoregression integrated moving average)', 'SARIMAX (Seasonal ARIMA)']},
 
         **{model_name: 'one_in_one_out_constant' for model_name in [
-            'Autoregressive Linear neural unit', 'Linear neural unit with weigths predict', 'Conjugate gradient']},
+            'Autoregressive Linear neural unit', 'Autoregressive Linear neural unit normalized', 'Linear neural unit with weigths predict', 'Conjugate gradient']},
 
         **{model_name: 'batch' for model_name in [
             'Sklearn regression', 'Bayes ridge regression', 'Hubber regression', 'Extra trees regression', 'Decision tree regression', 'KNeighbors regression', 'Random forest regression',
@@ -174,7 +185,8 @@ config.update({
         # 'SARIMAX (Seasonal ARIMA)': {'p': 4, 'd': 0, 'q': 0, 'pp': 1, 'dd': 0, 'qq': 0, 'season': 12, 'method': 'lbfgs', 'trend': 'nc', 'enforce_invertibility': False, 'enforce_stationarity': False},
 
         'Autoregressive Linear neural unit': {'mi_multiple': 1, 'mi_linspace': (1e-9, 1e-4, 200), 'epochs': 100, 'w_predict': 0, 'minormit': 0},
-        'Linear neural unit with weigths predict': {'mi': 1, 'mi_multiple': 0, 'epochs': 100, 'w_predict': 1, 'minormit': 1, 'predicts': config['predicts']},
+        'Autoregressive Linear neural unit normalized': {'mi_multiple': 1, 'mi_linspace': (1e-1, 10, 5), 'epochs': 100, 'w_predict': 0, 'minormit': 1},
+        'Linear neural unit with weigths predict': {'mi_multiple': 1, 'mi_linspace': (1e-9, 1e-4, 200), 'epochs': 100, 'w_predict': 1, 'minormit': 0},
         'Conjugate gradient': {'epochs': 200},
 
         'tensorflow_lstm': {'layers': 'default', 'epochs': 200, 'already_trained': 0, 'save': 1, 'saved_model_path_string': 'stored_models', 'optimizer': 'adam', 'loss': 'mse', 'verbose': 0, 'metrics': 'accuracy', 'timedistributed': 0},
@@ -219,7 +231,7 @@ config.update({
 
     'maxorder': 20,
 
-    'regressors': models.sklearn_regression.get_regressors()
+    'regressors': predictit.models.sklearn_regression.get_regressors()
 })
 
 
@@ -295,10 +307,10 @@ presets = {
 
         # If editting or adding new models, name of the models have to be the same as in models module
         'used_models': {
-            'AR (Autoregression)': models.statsmodels_autoregressive,
-            'Conjugate gradient': models.conjugate_gradient,
-            'Sklearn regression': models.sklearn_regression,
-            'Compare with average': models.compare_with_average
+            'AR (Autoregression)': predictit.models.statsmodels_autoregressive,
+            'Conjugate gradient': predictit.models.conjugate_gradient,
+            'Sklearn regression': predictit.models.sklearn_regression,
+            'Compare with average': predictit.models.compare_with_average
         },
     }
 }
@@ -310,26 +322,27 @@ presets['normal'] = {
 
     'used_models': {
 
-        # **{model_name: models.statsmodels_autoregressive for model_name in [
+        # **{model_name: predictit.models.statsmodels_autoregressive for model_name in [
         #     'AR (Autoregression)', 'ARMA', 'ARIMA (Autoregression integrated moving average)']},  # 'SARIMAX (Seasonal ARIMA)'
 
-        # 'Autoregressive Linear neural unit': models.autoreg_LNU,
-        # 'Linear neural unit with weigths predict': models.autoreg_LNU,
-        # 'Conjugate gradient': models.conjugate_gradient,
+        # 'Autoregressive Linear neural unit': predictit.models.autoreg_LNU,
+        # 'Linear neural unit with weigths predict': predictit.models.autoreg_LNU,
+        # 'Conjugate gradient': predictit.models.conjugate_gradient,
 
-        # # 'tensorflow_lstm': models.tensorflow,
-        # # 'tensorflow_mlp': models.tensorflow,
+        # # 'tensorflow_lstm': predictit.models.tensorflow,
+        # # 'tensorflow_mlp': predictit.models.tensorflow,
 
-        **{model_name: models.sklearn_regression for model_name in [
+        **{model_name: predictit.models.sklearn_regression for model_name in [
             'Sklearn regression', 'Bayes ridge regression', 'Hubber regression', 'Extra trees regression', 'Decision tree regression',
             'KNeighbors regression', 'Random forest regression', 'Bagging regression', 'Stochastic gradient regression',
             'Passive aggressive regression', 'Extreme learning machine', 'Gen Extreme learning machine', 'Gradient boosting']},
 
-        'Compare with average': models.compare_with_average
+        'Compare with average': predictit.models.compare_with_average
     },
 }
 
 
-
 update_references_1()
 update_references_2()
+
+config_check_set = set(config.keys())

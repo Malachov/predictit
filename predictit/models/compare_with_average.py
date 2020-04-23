@@ -17,7 +17,7 @@ def predict(data, model, predicts=7):
         np.ndarray: Predictions of input time series.
     """
 
-    data = data[-3 * predicts:]
+    data = data[-predicts:]
     summed = sum(data)
     average = summed / len(data)
     predictions_list = [average] * predicts

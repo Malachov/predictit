@@ -33,7 +33,7 @@ if __name__ == "__main__":
     config.update({
         "show_plot": 0,
         "save_plot": 0,
-        "return_type": 'detailed results dictionary',
+        "return_type": 'detailed_results_dictionary',
         "data": None,
         'data_source': 'csv',
         "csv_test_data_relative_path": "",

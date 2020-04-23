@@ -41,6 +41,7 @@
 - [ ] Do segmentation in time series (Matrix profile method) - 1) Use in analyze, 2) Detect anomalies
 - [ ] Numba optimization
 - [ ] - Feature selection (which columns to use) - E.g. https://scikit-learn.org/stable/modules/feature_selection.html, https://towardsdatascience.com/feature-selection-with-pandas-e3690ad8504b
+- [ ] Do validate predictions on repeatit from config - generate different models inputs and test inputs
 
 ## Deals
 
@@ -48,6 +49,7 @@
 - [ ] Print failed models apart and put not in table results
 - [ ] Test data from sklearn and csv test data from web - use in test_it.py - no big repository
 - [ ] Do table from detailed results (too long)
+- [ ] Check if can some dictionaries replace with sets
 - [ ] Test dataframe data input for statsmodels - date as index
 - [ ] Separate Plot to function + Plot_all during learning option - with real validate data for comparison
 - [ ] Add evaluation methods to visual test
@@ -67,3 +69,4 @@
     - [ ] Add stochastig gradient method to autoreg (adam or adagrad)
 - [ ] Make waterfall diagram of spent time - preprocess - train - evaluation, plot - make progress bar for GUI
 - [ ] In memory profile just call the function, do not copy and paste
+- [ ] Finish config presets

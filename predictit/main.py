@@ -133,8 +133,6 @@ def predict(data=None, predicts=None, predicted_column=None, freq=None, models_p
 
     if config["use_config_preset"] and config["use_config_preset"] != 'none':
         config.update(presets[config["use_config_preset"]])
-        predictit.config.update_references_1()
-        predictit.config.update_references_2()
 
     # Parse all functions parameters and it's values
     args, _, _, values = inspect.getargvalues(inspect.currentframe())
@@ -146,8 +144,14 @@ def predict(data=None, predicts=None, predicted_column=None, freq=None, models_p
     if not config['repeatit']:
         config['repeatit'] = 1
 
+    # Some config values are derived from other values. If it has been changed, it has to be updated.
     predictit.config.update_references_1()
     predictit.config.update_references_2()
+
+    # Find difference between original config and set values and if there are any differences, raise error
+    config_errors = set(config.keys()) - predictit.config.config_check_set
+    if config_errors:
+        raise KeyError(f"Some config values: {config_errors} was named incorrectly. Check config.py for more informations")
 
     # Definition of the table for spent time on code parts
     time_parts_table = PrettyTable()
@@ -194,6 +198,7 @@ def predict(data=None, predicts=None, predicted_column=None, freq=None, models_p
 
         elif config['data_source'] == 'test':
             config['data'] = predictit.test_data.generate_test_data.gen_random(config['datalength'])
+            user_warning("Test data was used. Setup config.py where are possible options with comments. Data can be insert as function parameters, with editing config.py or with CLI.")
 
     ##############################################
     ############ DATA PREPROCESSING ###### ANCHOR Preprocessing
@@ -205,6 +210,10 @@ def predict(data=None, predicts=None, predicted_column=None, freq=None, models_p
     ### Data are used in shape (n_features, n_samples)!!! - other way that usual convention... if iterate data_for_predictions[i] - you have columns
 
     data_for_predictions, data_for_predictions_df, predicted_column_name = predictit.data_preprocessing.data_consolidation(config['data'])
+
+    if config['mode'] == 'validate':
+        data_for_predictions, test = predictit.data_preprocessing.split(data_for_predictions, predicts=config['predicts'])
+        data_for_predictions_df, test_df = predictit.data_preprocessing.split(data_for_predictions_df, predicts=config['predicts'])
 
     predicted_column_index = 0
 
@@ -313,6 +322,8 @@ def predict(data=None, predicts=None, predicted_column=None, freq=None, models_p
 
     models_test_outputs = models_test_outputs[::-1]
 
+    data_end = -config['predicts'] - config['repeatit'] - 100 if config['mode'] == 'validate' else None
+
     used_input_types = []
     for i in models_names:
         used_input_types.append(config['models_input'][i])
@@ -322,7 +333,6 @@ def predict(data=None, predicts=None, predicted_column=None, freq=None, models_p
     ############# Main loop ######## ANCHOR Main loop
     #######################################
 
-    # Repeat evaluation on shifted data to eliminate randomness
     for data_length_index, data_length_iteration in enumerate(data_lengths):
 
         for input_type in used_input_types:
@@ -343,18 +353,20 @@ def predict(data=None, predicts=None, predicted_column=None, freq=None, models_p
                             continue
 
                     if isinstance(used_sequention, tuple):
-                        model_train_input = (used_sequention[0][data_length - data_length_iteration:, :], used_sequention[1][data_length - data_length_iteration:, :])
+                        model_train_input = (used_sequention[0][data_length - data_length_iteration: data_end, :], used_sequention[1][data_length - data_length_iteration: data_end, :])
                         model_predict_input = used_sequention[2]
                         model_test_inputs = used_sequention[3]
 
                     elif used_sequention.ndim == 1:
-                        model_train_input = model_predict_input = used_sequention[data_length - data_length_iteration:]
+                        model_train_input = used_sequention[data_length - data_length_iteration: data_end]
+                        model_predict_input = used_sequention[data_length - data_length_iteration:]
                         model_test_inputs = []
                         for i in range(config['repeatit']):
                             model_test_inputs.append(used_sequention[data_length - data_length_iteration: - config['predicts'] - config['repeatit'] + i + 1])
 
                     else:
-                        model_train_input = model_predict_input = used_sequention[:, data_length - data_length_iteration:]
+                        model_train_input = used_sequention[:, data_length - data_length_iteration: data_end]
+                        model_predict_input = used_sequention[:, data_length - data_length_iteration:]
                         model_test_inputs = []
                         for i in range(config['repeatit']):
                             model_test_inputs.append(used_sequention[:, data_length - data_length_iteration: - config['predicts'] - config['repeatit'] + i + 1])
@@ -461,7 +473,8 @@ def predict(data=None, predicts=None, predicted_column=None, freq=None, models_p
 
         predicted_models[this_model] = {'order': i + 1, 'error_criterion': model_results[j], 'predictions': reality_results_matrix[j, np.argmin(repeated_average[j])], 'data_length': np.argmin(repeated_average[j])}
 
-    best_model_predicts = predicted_models[best_model_name]['predictions']
+    best_model_predicts = predicted_models[best_model_name]['predictions'] if best_model_name in predicted_models else "Best model had an error"
+
     complete_dataframe = column_for_plot.copy()
 
     if config['confidence_interval'] == 'default':
@@ -493,6 +506,10 @@ def predict(data=None, predicts=None, predicted_column=None, freq=None, models_p
             complete_dataframe[f"{j['order']} - {i}"] = None
             if j['order'] == 1:
                 best_model_name_plot = f"{j['order']} - {i}"
+
+    if config['mode'] == 'validate':
+        best_model_name_plot = 'Test'
+        results_dataframe['Test'] = test
 
     last_value = float(column_for_plot.iloc[-1])
 
@@ -564,6 +581,7 @@ def predict(data=None, predicts=None, predicted_column=None, freq=None, models_p
         sys.stdout = stdout
 
         print(output)
+
 
     ################################
     ########### Return ###### ANCHOR Return
@@ -668,6 +686,8 @@ def compare_models(data_all=None, predicts=None, predicted_column=None, freq=Non
     # Edit config.py default values with arguments values if exist
     config.update({key: value for key, value in values.items() if key in args & values.keys() and value is not None})
 
+    config.update({'mode': 'validate', 'confidence_interval': 0})
+
     # If no data_all inserted, default will be used
     if config['data_all'] is None:
         config['data_all'] = {'sin': predictit.test_data.generate_test_data.gen_sin(config['datalength']), 'Sign': predictit.test_data.generate_test_data.gen_sign(config['datalength']),
@@ -695,7 +715,12 @@ def compare_models(data_all=None, predicts=None, predicted_column=None, freq=Non
 
     results = {}
 
-    for i, j in config['data_all'].items():
+    data_dict = config['data_all']
+
+    if isinstance(data_dict, list):
+        data_dict = {f"Data {i}": j for i, j in enumerate(data_dict)}
+
+    for i, j in data_dict.items():
         config['plot_name'] = i
         try:
             result = predict(data=j, return_type="models_error_criterion")
@@ -704,9 +729,6 @@ def compare_models(data_all=None, predicts=None, predicted_column=None, freq=Non
         except Exception:
             traceback_warning(f"Comparison for data {i} didn't finished.")
             results[i] = np.nan
-
-    print(list(results.values()))
-
 
     results_array = np.stack(list(results.values()), axis=0)
 
@@ -741,52 +763,6 @@ def compare_models(data_all=None, predicts=None, predicted_column=None, freq=Non
     print(f"\n\nBest data length index is {best_all_lengths_index}")
 
 
-def validate_predictions(data_list=None, data=None, predicts=None, predicted_column=None, freq=None, models_parameters=None, data_source=None, compareit=None,
-                         csv_full_path=None, plot=None, used_models=None, datetime_index=None, return_type=None, datalength=None, data_transform=None, debug=None, analyzeit=None,
-                         optimizeit=None, repeatit=None, other_columns=None, default_other_columns_length=None, lengths=None, remove_outliers=None, standardize=None, error_criterion=None):
-    """Function that evaluate models on test data that was not in train data. It create interactive plots of models results compared with test data.
-    It is recommended to use this function in jupyter notebook because of big number of plots that jupyter do not wait to quit. Typical use case is that we have just one data
-    and we separate it on chunks. We can see if model is able of generalization. Result error criterions are printed. It has number - order - as it is good
-    on data in train set, it has alse error on test set. Error criterion can be 'rmse', 'mape', or similiarity based 'dtw' (dynamic time warping).
-
-    Args:
-        data_list (dict): Dictionary of data names and data values (np.array). You can use data from test_data module, generate_test_data script (e.g. gen_sin()).
-        **kwargs (dict): All parameters of predict function. Check config.py for parameters details.
-
-    """
-    import json
-
-    config.update({'plot': 0, 'return_type': 'results dataframe', 'confidence_interval': 0, 'print': 0})
-
-    for i, data_part in enumerate(config['data_list']):
-
-        results_error_criterion = {}
-
-        data_for_predictions, data_for_predictions_df, predicted_column_name = predictit.data_preprocessing.data_consolidation(
-            data_part, predicted_column=config['predicted_column'], datalength=config['datalength'], other_columns=config['other_columns'],
-            do_remove_outliers=config['remove_outliers'], datetime_index=config['datetime_index'], freq=config['freq'], dtype=config['dtype'])
-
-        column_for_plot = data_for_predictions_df.iloc[-7 * config['predicts']: -config['predicts'], 0]
-
-        train, test = predictit.data_preprocessing.split(data_for_predictions, predicts=config['predicts'])
-
-        results_dataframe = predict(train)
-
-        for col in results_dataframe.columns:
-            results_error_criterion[col] = predictit.evaluate_predictions.compare_predicted_to_test(results_dataframe[col], test, train=train, error_criterion=config['error_criterion'])
-
-        results_dataframe['Test'] = test
-
-        complete_dataframe = pd.concat([column_for_plot, results_dataframe], sort=False)
-        complete_dataframe.iloc[-config['predicts'] - 1] = float(column_for_plot.iloc[-1])
-
-
-        predictit.plot.plotit(complete_dataframe, plot_type=config['plot_type'], show=config['show_plot'], save=config['save_plot'], save_path=config['save_plot_path'], plot_return=False, best_model_name='Test', predicted_column_name=predicted_column_name)
-
-        results_for_printing = json.dumps(results_error_criterion, indent=4)
-
-        print(f"\nOrder - model - {config['error_criterion']}\n\n{results_for_printing[2: -1]}")
-
 
 if __name__ == "__main__" and config['used_function']:
     if config['used_function'] == 'predict':
@@ -797,6 +773,3 @@ if __name__ == "__main__" and config['used_function']:
 
     elif config['used_function'] == 'compare_models':
         compare_models()
-
-    elif config['used_function'] == 'validate_predictions':
-        validate_predictions()
