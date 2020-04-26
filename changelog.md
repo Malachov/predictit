@@ -1,11 +1,16 @@
 # List of what have been done in new versions
 
+## v1.3x. - 04.2020
+
+- [x] Data smoothing - Savitzky-Golay filter in data preprocessing
+- [x] Many new models from sklearn - Decision trees, bagging, Gradient boosting...
+- [x] Publish script to generate documentation and push to pypi
 
 ## v1.2x. - 03/2020
 
 - [x] Validation mode in config. Results are evaluated on data that was not in train data.
 - [x] Remove nan values - all column option was added
-- [x] User colored warnings in misc (not only traceback warnings)
+- [x] User colored warnings in misc (not only traceback warnings) and colorized error raising
 
 ## v1.1. - 03/2020
 

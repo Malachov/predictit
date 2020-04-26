@@ -7,11 +7,11 @@ Default output data shape is (n_features, n_sample) !!! Its different than usual
 
 import pandas as pd
 import numpy as np
-from scipy.stats import yeojohnson
+import scipy
 import warnings
 
 from predictit.config import config
-from predictit.misc import user_warning
+from predictit.misc import user_warning, colorize
 
 
 def keep_corelated_data(data, predicted_column_index=0, threshold=0.5):
@@ -90,10 +90,10 @@ def do_difference(data):
     """Transform data into neighbor difference. For example from [1, 2, 4] into [1, 2].
 
     Args:
-        dataset (np.ndarray): Numpy on or multi dimensional array.
+        dataset (ndarray): Numpy on or multi dimensional array.
 
     Returns:
-        np.ndarray: Differenced data.
+        ndarray: Differenced data.
 
     Examples:
 
@@ -111,11 +111,11 @@ def inverse_difference(differenced_predictions, last_undiff_value):
     """Transform do_difference transform back.
 
     Args:
-        differenced_predictions (np.ndarray): One dimensional!! differenced data from do_difference function.
+        differenced_predictions (ndarray): One dimensional!! differenced data from do_difference function.
         last_undiff_value (float): First value to computer the rest.
 
     Returns:
-        np.ndarray: Normal data, not the additive series.
+        ndarray: Normal data, not the additive series.
 
     Examples:
 
@@ -135,13 +135,13 @@ def standardize(data, predicted_column_index=0, used_scaler='standardize'):
     """Standardize or normalize data. More standardize methods available.
 
     Args:
-        data (np.ndarray): Time series data.
+        data (ndarray): Time series data.
         predicted_column_index (int, optional): Index of column that is predicted. Defaults to 0.
         used_scaler (str, optional): '01' and '-11' means scope from to for normalization.
             'robust' use RobustScaler and 'standard' use StandardScaler - mean is 0 and std is 1. Defaults to 'standardize'.
 
     Returns:
-        np.ndarray: Standardized data.
+        ndarray: Standardized data.
     """
 
     from sklearn import preprocessing
@@ -164,12 +164,12 @@ def split(data, predicts=7, predicted_column_index=0):
     """Divide data set on train and test set.
 
     Args:
-        data (pd.DataFrame, np.ndarray): Time series data.
+        data (pandas.DataFrame, ndarray): Time series data.
         predicts (int, optional): Number of predicted values. Defaults to 7.
         predicted_column_index (int, optional): Index of column that is predicted. Defaults to 0.
 
     Returns:
-        np.array, np.array: Train set and test set.
+        ndarray, ndarray: Train set and test set.
 
     Examples:
 
@@ -230,7 +230,7 @@ def fitted_power_transform(data, fitted_stdev, mean=None, fragments=10, iteratio
     for i in range(iterations):
         for j in range(len(lmbd_arr)):
 
-            power_transformed = yeojohnson(data, lmbda=lmbd_arr[j])
+            power_transformed = scipy.stats.yeojohnson(data, lmbda=lmbd_arr[j])
             transformed_stdev = np.std(power_transformed)
             if abs(transformed_stdev - fitted_stdev) < lbmda_best_stdv_error:
                 lbmda_best_stdv_error = abs(transformed_stdev - fitted_stdev)
@@ -242,7 +242,7 @@ def fitted_power_transform(data, fitted_stdev, mean=None, fragments=10, iteratio
             lmbda_high = lmbd_arr[lmbda_best_id + 1]
         lmbd_arr = np.linspace(lmbda_low, lmbda_high, fragments)
 
-    transformed_results = yeojohnson(data, lmbda=lmbd_arr[j])
+    transformed_results = scipy.stats.yeojohnson(data, lmbda=lmbd_arr[j])
 
     if mean is not None:
         mean_difference = np.mean(transformed_results) - mean
@@ -251,9 +251,24 @@ def fitted_power_transform(data, fitted_stdev, mean=None, fragments=10, iteratio
     return transformed_results
 
 
-def smooth():
-    # TODO
-    pass
+def smooth(data, filter='savgol', filter_args=(101, 2)):
+    """Smooth data (reduce noise) with using some filter.
+
+    Args:
+        data (ndarray): Input data.
+        filter (str, optional): Used filter. Defaults to 'savgol'.
+        filter_args (tuple, optional): Used filter arguments. Defaults to (101, 2).
+
+    Returns:
+        ndarray: Cleaned data with less noise.
+
+    'savgol' filter means Savitzky-Golay filter. For more info on filter check scipy docs.
+    """
+
+    if filter == 'savgol':
+        filtered = scipy.signal.savgol_filter(data, filter_args[0], filter_args[1])
+
+    return filtered
 
 
 
@@ -275,7 +290,7 @@ def data_consolidation(data):
             try:
                 predicted_column_index = data_for_predictions_df.columns.get_loc(predicted_column_name)
             except Exception:
-                raise KeyError(f"Predicted column name - '{config['predicted_column']}' not found in data. Change in config - 'predicted_column'")
+                raise KeyError(colorize(f"Predicted column name - '{config['predicted_column']}' not found in data. Change in config - 'predicted_column'"))
 
         else:
             predicted_column_index = config['predicted_column']
@@ -294,7 +309,7 @@ def data_consolidation(data):
                 try:
                     data_for_predictions_df.set_index(config['datetime_index'], drop=True, inplace=True)
                 except Exception:
-                    raise KeyError(f"Datetime name / index from config - '{config['datetime_index']}' not found in data. Change in config - 'datetime_index'")
+                    raise KeyError(colorize(f"Datetime name / index from config - '{config['datetime_index']}' not found in data. Change in config - 'datetime_index'"))
 
             else:
                 data_for_predictions_df.set_index(data_for_predictions_df.columns[config['datetime_index']], drop=True, inplace=True)
@@ -350,8 +365,8 @@ def data_consolidation(data):
             data_for_predictions = data_for_predictions[0].reshape(1, -1)
 
     else:
-        raise TypeError("Input data must be in pd.dataframe, pd.series or numpy array.\n"
-                        "If you use csv or sql data source, its converted automatically, but setup csv_full_path. Check config comments fore  more informations...")
+        raise TypeError(colorize("""Input data must be in pd.dataframe, pd.series or numpy array. If you use csv or sql data source, its converted automatically,
+                                 but setup csv_full_path. Check config comments fore  more informations..."""))
 
     data_for_predictions = data_for_predictions.astype(config['dtype'], copy=False)
 

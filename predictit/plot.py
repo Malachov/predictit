@@ -7,7 +7,6 @@ import os
 
 def plotit(complete_dataframe, plot_type='plotly', show=1, save=0, save_path='', plot_return=None, bounds='default', predicted_column_name='', best_model_name=''):
 
-
     if save:
         if not save_path:
             save_path = os.path.normpath(os.path.expanduser('~/Desktop') + '/plot.html')
@@ -15,6 +14,10 @@ def plotit(complete_dataframe, plot_type='plotly', show=1, save=0, save_path='',
     if plot_type == 'plotly':
 
         import plotly as pl
+
+        if not misc._JUPYTER:
+            import plotly.io as pio
+            pio.renderers.default = "browser"
 
         complete_dataframe = complete_dataframe.copy()
         graph_data = []
@@ -85,7 +88,7 @@ def plotit(complete_dataframe, plot_type='plotly', show=1, save=0, save_path='',
         fig.layout.update(
             yaxis=dict(title='Values'),
             title={'text': config['plot_name'],
-                   'y': 0.9,  # if jupyter else 0.95,
+                   'y': 0.9 if misc._JUPYTER else 0.95,
                    'x': 0.5,
                    'xanchor': 'center',
                    'yanchor': 'top'},

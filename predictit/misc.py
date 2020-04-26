@@ -1,6 +1,7 @@
 import warnings
 import traceback
 import textwrap
+import os
 
 _JUPYTER = 0
 _GUI = 0
@@ -15,6 +16,17 @@ try:
 except Exception:
     pass
 
+# To enable colors in cmd...
+os.system('')
+
+
+def colorize(message):
+    class X(str):
+        def __repr__(self):
+            return f"\033[93m {message} \033[0m"
+
+    return X(message)
+
 
 def user_warning(message):
     warnings.warn(f"\033[93m \n\n\t{message}\n\n \033[0m", stacklevel=2)
@@ -23,7 +35,7 @@ def user_warning(message):
 def traceback_warning(message=''):
     import pygments
 
-    separated_traceback = pygments.highlight(traceback.format_exc(), pygments.lexers.PythonTracebackLexer(), pygments.formatters.TerminalFormatter())
+    separated_traceback = pygments.highlight(traceback.format_exc(), pygments.lexers.PythonTracebackLexer(), pygments.formatters.Terminal256Formatter())
     separated_traceback = textwrap.indent(text=f"\n\n{message}\n====================\n\n{separated_traceback}\n====================\n", prefix='    ')
 
     warnings.warn(f"\n\n\n{separated_traceback}\n\n")
@@ -79,3 +91,23 @@ def confidence_interval(data, predicts=7, confidence=0.1, p=1, d=0, q=0):
 
 
     return lower_bound, upper_bound
+
+    ### Pickle option was removed, add if you need it...
+    # if config['pickleit']:
+    #     from predictit.test_data.pickle_test_data import pickle_data_all
+    #     import pickle
+    #     pickle_data_all(config['data_all'], datalength=config['datalength'])
+
+    # if config['from_pickled']:
+
+    #     script_dir = Path(__file__).resolve().parent
+    #     data_folder = script_dir / "test_data" / "pickled"
+
+    #     for i, j in config['data_all'].items():
+    #         file_name = i + '.pickle'
+    #         file_path = data_folder / file_name
+    #         try:
+    #             with open(file_path, "rb") as input_file:
+    #                 config['data_all'][i] = pickle.load(input_file)
+    #         except Exception:
+    #             traceback_warning(f"Test data not loaded - First in config['py'] pickleit = 1, that save the data on disk, then load from pickled.")

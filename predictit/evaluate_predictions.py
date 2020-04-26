@@ -2,7 +2,7 @@
 
 import matplotlib.pyplot as plt
 import numpy as np
-
+import predictit.misc
 
 def compare_predicted_to_test(predicted, test, train=None, error_criterion='mape', plot=0, modelname="Default model", dataname="default data", details=0):
     """Compare tested model with reality.
@@ -64,15 +64,18 @@ def compare_predicted_to_test(predicted, test, train=None, error_criterion='mape
             rmseerror = error ** 2
             criterion_value = (sum(rmseerror) / predicts) ** (1 / 2)
 
-        if error_criterion == 'mape':
+        elif error_criterion == 'mape':
             no_zero_test = np.where(abs(test)>=1, test, 1)
             criterion_value = np.mean(np.abs((test - predicted) / no_zero_test)) * 100
 
-        if error_criterion == 'dwt':
+        elif error_criterion == 'dtw':
             predicted_double = predicted.astype('double')
             test_double = test.astype('double')
             from dtaidistance import dtw
             criterion_value = dtw.distance_fast(predicted_double, test_double)
+
+        else:
+            raise KeyError(predictit.misc.colorize(f"bad 'error_criterion' config - '{error_criterion}'. Use some from options from config comment..."))
 
         if details == 1:
             print(f"Error of model {modelname} on data {dataname}: {error_criterion}={criterion_value}")

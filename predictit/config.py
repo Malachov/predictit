@@ -2,73 +2,87 @@
 whether you want find optimal parameters etc. Some setting can be inserted as function parameters, then it has higher priority.
 All values are commented and easy to understand.
 
+If you downloaded the script, edit, save and run function from main, if you use library, import config and edit values...
 Examples:
 
-    >>> config = {
-    >>>     'data_source': 'csv'  # 'csv' or 'sql' or 'test'
-    >>>     'plot': 1  # If 1, plot interactive graph
-    >>>     'debug': 1  # Debug - print all results and all the errors on the way
+    >>> import predictit
+    >>> from predictit.config import config
+
+    >>> config.update({
+    >>>     'data_source': 'csv',
+    >>>     'csv_full_path': 'my/path/to.csv',
+    >>>     'plot': 1,
+    >>>     'debug': 1,
     >>>     'used_models': {
     >>>            'AR (Autoregression)': predictit.models.ar,
     >>>            'Autoregressive Linear neural unit': predictit.models.autoreg_LNU,
     >>>            'Sklearn regression': predictit.models.regression,
-    >>>             }
+    >>>     }
     >>> }
+
+    >>> predictions = predictit.main.predict()
 
 '''
 
 import predictit
 
 
+import numpy as np
+
+
 config = {
 
-    # Edit presets as you need but beware - it will overwrite normal config. Default presets edit for example number of used models, number of lengths, n_steps_in
+    # Edit presets as you need but beware - it will overwrite normal config. Default presets edit for example number of used models, number of lengths, n_steps_in.
 
-    'used_function': 'predict',  # If running main.py script, execute function. Choices: 'predict', 'predict_multiple' or 'compare_models'. If import as library, ignore - just use function.
+    'used_function': 'predict_multiple',  # If running main.py script, execute function. Choices: 'predict', 'predict_multiple' or 'compare_models'. If import as library, ignore - just use function.
 
     'use_config_preset': 'none',  # 'fast', 'normal' or 'none'. Edit some selected config, other remains the same, check config_presets.py file.
 
     # Input settings
 
-    'data': None,  # Use numpy array, or pandas dataframe. This will overwrite data_source. If you use csv, set up to None.
+    'data': np.random.randn(100, 100),  # Use numpy array, or pandas dataframe. This will overwrite data_source. If you use csv, set up to None.
     'data_all': None,  # Just for compare_models function. Dictionary of data names and it's values or list of data parts.
 
-    'data_source': 'test',  # Data source. ('csv' or 'sql' or 'test') - If sql, you have to edit the query to fit your database
+    'data_source': 'test',  # Data source. ('csv' or 'sql' or 'test') - If sql, you have to edit the query to fit your database.
 
-    'csv_full_path': r'',  # Full CSV path with suffix
-    'csv_test_data_relative_path': '',  # CSV name with suffix in test_data folder (5000 Sales Records.csv or daily-minimum-temperatures.csv) !!! Turn it off if not testing to not break csv full path !!! Test data are gitignored... use your own
+    'csv_full_path': r'',  # Full CSV path with suffix.
+    'csv_test_data_relative_path': '',  # CSV name with suffix in test_data folder (5000 Sales Records.csv or daily-minimum-temperatures.csv) !!! Turn it off if not testing to not break csv full path !!! Test data are gitignored... use your own.
 
-    'predicted_column': 'CO (ppm)',  # Name of predicted column (for dataframe data) or it's index - string or int
-    'predicted_columns': [],  # For predict_multiple function only! List of names of predicted columns or it's indexes
+    'predicted_column': 'CO (ppm)',  # Name of predicted column (for dataframe data) or it's index - string or int.
+    'predicted_columns': ['*'],  # For predict_multiple function only! List of names of predicted columns or it's indexes. If 'data' is dataframe or numpy, then you can use '*' to predict all the columns.
 
     'freq': 0,  # Interval for predictions 'M' - months, 'D' - Days, 'H' - Hours.
-    'freqs': [],  # For predict_multiple function only! List of intervals of predictions 'M' - months, 'D' - Days, 'H' - Hours. Default use []
+    'freqs': [],  # For predict_multiple function only! List of intervals of predictions 'M' - months, 'D' - Days, 'H' - Hours. Default use [].
 
     'datetime_index': 'čas',  # Index of dataframe datetime column or it's name if it has datetime column. If there already is index in input data, it will be used automatically. Data are sorted by time.
 
-    'datalength': 10000,  # The length of the data used for prediction. If 0, than full length
+    'datalength': 2000,  # The length of the data used for prediction. If 0, than full length.
 
     # Output settings
 
-    'predicts': 7,  # Number of predicted values - 7 by default
+    'predicts': 7,  # Number of predicted values - 7 by default.
 
     'mode': 'predict',  # If 'validate', put apart last few values (defined py by 'predict') and evaluate on test data that was not in train set.
+    'validation_gap': 10,  # If 'mode' == 'validate', then describe how many samples are between train and test set. The bigger gap is, the bigger knowledge generalization is necesssary.
     'return_type': 'best',  # 'best', 'all', 'dict', 'models_error_criterion' or 'detailed_results_dictionary'. 'best' return array of predictions, 'all' return more models (config.compareit) results sorted by how efficient they are. 'results dataframe' return results and models names in columns.
                             # 'detailed_results_dictionary' is used for GUI and return results as best result, all results, string div with plot and more. 'models_error_criterion' returns MAPE, RMSE (based on config) or dynamic warping criterion of all models in array.
-    'debug': 1,  # Debug - If 1, print all results and all the warnings and errors on the wignoreday, if 2, stop on all warnings
+    'debug': 1,  # Debug - If 1, print all results and all the warnings and errors on the wignoreday, if 2, stop on all warnings.
 
-    'plot': 1,  # If 1, plot interactive graph
-    'plot_type': 'plotly',  # 'plotly' (interactive) or matplotlib(faster)
-    'show_plot': 1,  # Whether display plot or not. If in jupyter dislplay in jupyter, else in default browser
-    'save_plot': 0,  # (bool) - Html if plotly type, png if matplotlibtype
-    'save_plot_path': '',  # Path where to save the plot (String), if empty string or 0 - saved to desktop
+    'plot': 1,  # If 1, plot interactive graph.
+    'plot_type': 'plotly',  # 'plotly' (interactive) or matplotlib.
+    'show_plot': 1,  # Whether display plot or not. If in jupyter dislplay in jupyter, else in default browser.
+    'save_plot': 0,  # (bool) - Html if plotly type, png if matplotlibtype.
+    'save_plot_path': '',  # Path where to save the plot (String), if empty string or 0 - saved to desktop.
     'plot_name': 'Predictions',
+    'plot_history_length': 300,  # How many historic values will be plotted
+    'plot_number_of_models': 6,  # confiNumber of plotted models. If none or 0, than all models will be evaluated. 1 if only the best one.
 
-    'print': 1,  # Turn on and off all printed details at once
-    'print_table': 1,  # Whether print table with models errors and time to compute
-    'print_time_table': 0,  # Whether print table with models errors and time to compute
-    'print_result': 1,  # Whether print best model results and model details
-    'print_detailed_result': 0,  # Whether print detailed results
+    'print': 1,  # Turn on and off all printed details at once.
+    'print_table': 1,  # Whether print table with models errors and time to compute.
+    'print_number_of_models': None,  # How many models will be evaluated and printed in results table. If none or 0, than all models will be evaluated. 1 if only the best one.
+    'print_time_table': 1,  # Whether print table with models errors and time to compute.
+    'print_result': 1,  # Whether print best model results and model details.
+    'print_detailed_result': 0,  # Whether print detailed results.
 
     # Prediction parameters settings
 
@@ -80,55 +94,54 @@ config = {
     'repeatit': 50,  # How many times is computation repeated for error criterion evaluation.
     'lengths': 0,  # Compute on various length of data (1, 1/2, 1/4...). Automatically choose the best length. If 0, use only full length.
 
-    'data_transform': 0,  # 'difference' or 0 - Transform the data on differences between two neighbor values,
+    'data_transform': 0,  # 'difference' or 0 - Transform the data on differences between two neighbor values.
     'analyzeit': 0,  # Analyze input data - Statistical distribution, autocorrelation, seasonal decomposition etc. If 1, analyze original data, if 2 analyze preprocessed data, if 3, then both.
-    'standardize': 'standardize',  # One from None, 'standardize', '-11', '01', 'robust'
+    'standardize': 'standardize',  # One from None, 'standardize', '-11', '01', 'robust'.
 
-    'optimizeit': 0,  # Find optimal parameters of models
-    'optimizeit_details': 2,  # 1 print best parameters of models, 2 print every new best parameters achieved, 3 prints all results
-    'optimizeit_limit': 1,  # How many seconds can take one model optimization
+    'optimizeit': 0,  # Find optimal parameters of models.
+    'optimizeit_details': 2,  # 1 print best parameters of models, 2 print every new best parameters achieved, 3 prints all results.
+    'optimizeit_limit': 1,  # How many seconds can take one model optimization.
 
     'power_transformed': 0,  # Whether transform results to have same standard deviation and mean as train data. 0 no power transform, 1 on output and 2 on output and before evaluating.
-    'remove_outliers': 0,  # Remove extraordinary values. Value is threshold for ignored values. Value means how many times standard deviation from the average threshold is far (have to be > 3, else delete most)
-    'error_criterion': 'mape',  # 'mape' or 'rmse' or 'dwt' (dynamic time warp)
-    'compareit': 10,  # How many models will be displayed in final plot. 0 if only the best one.
-    'last_row': 0,  # If 0, erase last row (for example in day frequency, day is not complete yet)
-    'correlation_threshold': 0.5,  # If evaluating from more collumns, use only collumns that are correlated. From 0 (All columns included) to 1 (only column itself)
-    'confidence_interval': 0,  # Area of confidence in result plot (grey area where we suppose values) - Bigger value, narrower area - maximum 1
-    'already_trained': 0,  # Computationaly hard models (LSTM) load from disk
-    #'plotallmodels': 0,  # Plot all models (recommended only in interactive jupyter window)
+    'remove_outliers': 0,  # Remove extraordinary values. Value is threshold for ignored values. Value means how many times standard deviation from the average threshold is far (have to be > 3, else delete most).
+    'error_criterion': 'mape',  # 'mape' or 'rmse' or 'dtw' (dynamic time warping).
+    'last_row': 0,  # If 0, erase last row (for example in day frequency, day is not complete yet).
+    'correlation_threshold': 0.5,  # If evaluating from more collumns, use only collumns that are correlated. From 0 (All columns included) to 1 (only column itself).Z
+    'confidence_interval': 0,  # Area of confidence in result plot (grey area where we suppose values) - Bigger value, narrower area - maximum 1.
+    'already_trained': 0,  # Computationaly hard models (LSTM) load from disk.
+    #'plotallmodels': 0,  # Plot all models (recommended only in interactive jupyter window).
 
 
     #################################
     ### Models, that will be used ###
     #################################
-    # Verbose documentation is in models module (__init__.py) and it's files
-    # Ctrl and Click on import name in main, or right click and go to definition
+    # Verbose documentation is in models module (__init__.py) and it's files.
+    # Ctrl and Click on import name in main, or right click and go to definition.
 
     # Two asterisks means bulk edit values
 
-    # Extra trees regression and tensorflow are turned off by default, because too timeconsuming
-    # If editting or adding new models, name of the models have to be the same as in models module
-    # If using presets - overwriten
+    # Extra trees regression and tensorflow are turned off by default, because too timeconsuming.
+    # If editting or adding new models, name of the models have to be the same as in models module.
+    # If using presets - overwriten.
 
     # Comment out models you don't want to use.
-    # Do not comment out input_types, models_input or models_parameters
+    # Do not comment out input_types, models_input or models_parameters.
     'used_models': {
 
         **{model_name: predictit.models.statsmodels_autoregressive for model_name in [
             'AR (Autoregression)', 'ARMA', 'ARIMA (Autoregression integrated moving average)']},  # 'SARIMAX (Seasonal ARIMA)'
 
         **{model_name: predictit.models.autoreg_LNU for model_name in [
-            'Autoregressive Linear neural unit', 'Autoregressive Linear neural unit normalized', 'Linear neural unit with weigths predict']},
+            'Autoregressive Linear neural unit', 'Autoregressive Linear neural unit normalized']},  # , 'Linear neural unit with weigths predict'
 
         'Conjugate gradient': predictit.models.conjugate_gradient,
 
         # 'tensorflow_lstm': predictit.models.tensorflow,
         # 'tensorflow_mlp': predictit.models.tensorflow,
 
-        **{model_name: predictit.models.sklearn_regression for model_name in [  # 'Extra trees regression'
+        **{model_name: predictit.models.sklearn_regression for model_name in [  # 'Extra trees regression', 'Random forest regression', 'Bagging regression'
             'Sklearn regression', 'Bayes ridge regression', 'Hubber regression', 'Decision tree regression',
-            'KNeighbors regression', 'Random forest regression', 'Bagging regression', 'Stochastic gradient regression',
+            'KNeighbors regression', 'Stochastic gradient regression',
             'Passive aggressive regression', 'Extreme learning machine', 'Gen Extreme learning machine', 'Gradient boosting']},
 
         'Compare with average': predictit.models.compare_with_average
@@ -175,8 +188,8 @@ config.update({
         'Compare with average': 'data_one_column'
     },
 
-    # If using presets - overwriten
-    # If commented - default parameters will be used
+    # If using presets - overwriten.
+    # If commented - default parameters will be used.
     'models_parameters': {
 
         'AR (Autoregression)': {'model': 'ar', 'method': 'cmle', 'ic': 'aic', 'trend': 'nc', 'solver': 'lbfgs'},
@@ -184,9 +197,9 @@ config.update({
         'ARIMA (Autoregression integrated moving average)': {'model': 'arima', 'p': 3, 'd': 0, 'q': 0, 'method': 'css', 'ic': 'aic', 'trend': 'nc', 'solver': 'nm'},
         # 'SARIMAX (Seasonal ARIMA)': {'p': 4, 'd': 0, 'q': 0, 'pp': 1, 'dd': 0, 'qq': 0, 'season': 12, 'method': 'lbfgs', 'trend': 'nc', 'enforce_invertibility': False, 'enforce_stationarity': False},
 
-        'Autoregressive Linear neural unit': {'mi_multiple': 1, 'mi_linspace': (1e-9, 1e-4, 200), 'epochs': 100, 'w_predict': 0, 'minormit': 0},
-        'Autoregressive Linear neural unit normalized': {'mi_multiple': 1, 'mi_linspace': (1e-1, 10, 5), 'epochs': 100, 'w_predict': 0, 'minormit': 1},
-        'Linear neural unit with weigths predict': {'mi_multiple': 1, 'mi_linspace': (1e-9, 1e-4, 200), 'epochs': 100, 'w_predict': 1, 'minormit': 0},
+        'Autoregressive Linear neural unit': {'mi_multiple': 1, 'mi_linspace': (1e-5, 1e-4, 3), 'epochs': 10, 'w_predict': 0, 'minormit': 0},
+        'Autoregressive Linear neural unit normalized': {'mi': 1, 'mi_multiple': 0, 'epochs': 10, 'w_predict': 0, 'minormit': 1},
+        'Linear neural unit with weigths predict': {'mi_multiple': 1, 'mi_linspace': (1e-5, 1e-4, 3), 'epochs': 10, 'w_predict': 1, 'minormit': 0},
         'Conjugate gradient': {'epochs': 200},
 
         'tensorflow_lstm': {'layers': 'default', 'epochs': 200, 'already_trained': 0, 'save': 1, 'saved_model_path_string': 'stored_models', 'optimizer': 'adam', 'loss': 'mse', 'verbose': 0, 'metrics': 'accuracy', 'timedistributed': 0},
@@ -212,18 +225,18 @@ config.update({
     ########################################
     ### Models parameters optimizations ###
     ########################################
-    # Find best parameters for prediction
-    # Example how it works. Function predict_with_my_model(param1, param2)
-    # If param1 limits are [0, 10], and 'fragments': 5, it will be evaluated for [0, 2, 4, 6, 8, 10]
+    # Find best parameters for prediction.
+    # Example how it works. Function predict_with_my_model(param1, param2).
+    # If param1 limits are [0, 10], and 'fragments': 5, it will be evaluated for [0, 2, 4, 6, 8, 10].
     # Then it finds best value and make new interval that is again divided in 5 parts...
-    # This is done as many times as iteration value is
+    # This is done as many times as iteration value is.
     'fragments': 4,
     'iterations': 2,
 
-    # Threshold values
-    # If you need integers, type just number, if you need float, type dot (e.g. 2.0)
+    # Threshold values.
+    # If you need integers, type just number, if you need float, type dot (e.g. 2.0).
 
-    # This boundaries repeat across models
+    # This boundaries repeat across models.
     'alpha': [0.0, 1.0],
     'epochs': [1, 300],
     'units': [1, 100],
@@ -235,10 +248,10 @@ config.update({
 })
 
 
-# !! Every parameters here have to be in models_parameters, or error
+# !! Every parameters here have to be in models_parameters, or error.
 # Some models can be very computationaly hard - use optimizeit_limit or already_trained!
 # If models here are commented, they are not optimized !
-# You can optmimize as much parameters as you want - for example just one (much faster)
+# You can optmimize as much parameters as you want - for example just one (much faster).
 def update_references_2():
     config.update({
         'models_parameters_limits': {
@@ -297,7 +310,7 @@ config.update({
 ### Presets ###
 ###############
 
-# Edit if you want, but it's not necessary from here - Mostly for GUI
+# Edit if you want, but it's not necessary from here - Mostly for GUI.
 
 ###!!! overwrite defined settings !!!###
 presets = {

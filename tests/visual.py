@@ -10,7 +10,6 @@ import pandas as pd
 import numpy as np
 import time
 
-# TODO dataprep i na dataframe a numpy zvlast
 
 script_dir = pathlib.Path(__file__).resolve()
 lib_path_str = script_dir.parents[1].as_posix()
@@ -18,6 +17,7 @@ sys.path.insert(0, lib_path_str)
 
 import predictit
 import predictit.data_preprocessing as dp
+import predictit.
 
 if predictit.misc._JUPYTER:
     get_ipython().run_line_magic('matplotlib', 'inline')
@@ -33,12 +33,6 @@ data_multi_col = np.array([[1, 22, 3, 3, 5, 8, 3, 3, 5, 8], [5, 6, 7, 6, 7, 8, 3
 dataframe_raw = pd.DataFrame(data_multi_col)
 predicted_column_index = 0
 
-# Define some longer functions, that is bad to compute in f strings...
-seqs, Y, x_input, test_inputs = predictit.define_inputs.make_sequences(data, n_steps_in=6, n_steps_out=1, constant=1)
-seqs_2, Y_2, x_input2, test_inputs2 = predictit.define_inputs.make_sequences(data, n_steps_in=4, n_steps_out=2, constant=0)
-seqs_m, Y_m, x_input_m, test_inputs_m = predictit.define_inputs.make_sequences(data_multi_col, n_steps_in=4, n_steps_out=1, default_other_columns_length=None, constant=1)
-seqs_2_m, Y_2_m, x_input2_m, test_inputs2_m = predictit.define_inputs.make_sequences(data_multi_col, n_steps_in=3, n_steps_out=2, default_other_columns_length=1, constant=0)
-
 print("""
         ###############
         ### Analyze ###
@@ -47,11 +41,17 @@ print("""
 
 predictit.analyze.analyze_data(column_for_prediction)
 
+# Define some longer functions of data_preprocessing, that is bad to compute in f strings...
+seqs, Y, x_input, test_inputs = predictit.define_inputs.make_sequences(data, n_steps_in=6, n_steps_out=1, constant=1)
+seqs_2, Y_2, x_input2, test_inputs2 = predictit.define_inputs.make_sequences(data, n_steps_in=4, n_steps_out=2, constant=0)
+seqs_m, Y_m, x_input_m, test_inputs_m = predictit.define_inputs.make_sequences(data_multi_col, n_steps_in=4, n_steps_out=1, default_other_columns_length=None, constant=1)
+seqs_2_m, Y_2_m, x_input2_m, test_inputs2_m = predictit.define_inputs.make_sequences(data_multi_col, n_steps_in=3, n_steps_out=2, default_other_columns_length=1, constant=0)
+
 print(f"""
 
-        #################
-        ### Data_prep ###
-        #################
+        ##########################
+        ### Data_preprocessing ###
+        ##########################
 
     ##################
     ### One column ###
@@ -97,10 +97,23 @@ Original: \n {data_multi_col} \n\nsequences: \n{seqs_m} \n\nY: \n{Y_m} \nx_input
 ### Make batch sequences - n_steps_in=3, n_steps_out=2, default_other_columns_length=1, constant=0 ### \n
 Original: \n {data_multi_col} \n\nsequences: \n{seqs_2_m} \n\nY: \n{Y_2_m} \nx_input: \n\n{x_input2_m} \n
 
+""")
+
+
+
+print(f"""
+
+        #######################
+        ### Defining inputs ###
+        #######################\n
+""")
+
+
+print(f"""
+
         ###########################
         ### Data_postprocessing ###
         ###########################\n
-
 ### Fitt power transform ### \n
 Original: \n {data}, original std = {data.std()}, original mean = {data.mean()} \n\ntransformed: \n{dp.fitted_power_transform(data, 10, 10)} \n\ntransformed std = {dp.fitted_power_transform(data, 10, 10).std()},
 transformed mean = {dp.fitted_power_transform(data, 10, 10).mean()} (shoud be 10 and 10)\n

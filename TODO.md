@@ -45,6 +45,7 @@
 
 ## Deals
 
+- [ ] Use gui_start also on pypi
 - [ ] Change congig data source just to data and do automatic parsing - dataframe or array or path
 - [ ] Print failed models apart and put not in table results
 - [ ] Test data from sklearn and csv test data from web - use in test_it.py - no big repository

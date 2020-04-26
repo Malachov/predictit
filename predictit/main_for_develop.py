@@ -54,7 +54,7 @@ if __name__ == "__main__":
     # for file in list(glob.glob(f'{lib_path_str}/*.txt')):
     #     data_complete = pd.concat([data_complete, pd.read_csv(file, index_col=False, sep='\t', decimal=',', encoding='cp1250')])
 
-    data_complete = pd.read_csv("/home/dan/ownCloud/Github/Oxy_data/Train/20160303.txt", index_col=False, sep='\t', decimal=',', encoding='cp1250')[10: -100]
+    data_complete = pd.read_csv(r"C:\Users\truton\ownCloud\Github\Oxy_data\Dan\data\20160125.txt", index_col=False, sep='\t', decimal=',', encoding='cp1250')[10: -100]
     config = predictit.config.config
 
     config.update({
@@ -88,7 +88,7 @@ if __name__ == "__main__":
         'optimizeit_details': 3,
 
         'predicts': 12,
-        'compareit': 20,
+        'print_number_of_models': 20,
         'repeatit': 50,
         'return_type': 'best',
 
@@ -442,7 +442,7 @@ if __name__ == "__main__":
     sorted_results = np.argsort(model_results)
 
     if config['compareit']:
-        sorted_results = sorted_results[:config['compareit']]
+        sorted_results = sorted_results[:config['print_number_of_models']]
     else:
         sorted_results = sorted_results[0]
 

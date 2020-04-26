@@ -38,7 +38,6 @@ config.update({
         "Conjugate gradient": predictit.models.conjugate_gradient,
         "Extreme learning machine": predictit.models.sklearn_regression,
         "Sklearn regression": predictit.models.sklearn_regression,
-        "Bayes ridge regression": predictit.models.sklearn_regression,
         "Compare with average": predictit.models.compare_with_average
     }
 })
@@ -67,11 +66,11 @@ def test_main_from_config():
         'data_transform': None,
         'repeatit': 1,
         'other_columns': 1,
-        'other_columns_length': None,
+        'default_other_columns_length': None,
         'lengths': 3,
-        'criterion': 'mape',
+        'error_criterion': 'mape',
         'remove_outliers': 0,
-        'compareit': 10,
+        'print_number_of_models': 10,
         'last_row': 0,
         'correlation_threshold': 0.2,
         'optimizeit': 0,
@@ -99,9 +98,9 @@ def test_main_optimize_and_args():
             'datalength': 1000,
             'default_n_steps_in': 5,
             'data_transform': 'difference',
-            'criterion': 'rmse',
+            'error_criterion': 'rmse',
             'remove_outliers': 1,
-            'compareit': 10,
+            'print_number_of_models': 1,
             'last_row': 1,
             'correlation_threshold': 0.2,
             'optimizeit': 1,
@@ -133,13 +132,12 @@ def test_main_dataframe():
             'freq': '',
             'predicted_column': 0,
             'datalength': 300,
-            'other_columns_length': 5,
+            'default_other_columns_length': 5,
             'data_transform': None,
             'repeatit': 1,
             'lengths': 3,
-            'criterion': 'mape',
+            'error_criterion': 'dtw',
             'remove_outliers': 0,
-            'compareit': 10,
             'last_row': 0,
             'correlation_threshold': 0.4,
             'standardize': 'standardize',
@@ -185,6 +183,7 @@ def test_compare_models():
     data_all = {'sin': predictit.test_data.generate_test_data.gen_sin(data_length), 'Sign': predictit.test_data.generate_test_data.gen_sign(data_length), 'Random data': predictit.test_data.generate_test_data.gen_random(data_length)}
     try:
         predictit.main.compare_models(data_all)
+        ok = 'fine'
     except Exception:
         ok = 'nok'
     assert ok == 'fine'
@@ -197,12 +196,10 @@ if __name__ == "__main__":
     # print("\n\ntest_main_optimize_and_args\n")
     # result_2 = test_main_optimize_and_args()
     # print("\n\ntest_main_dataframe\n")
-    # result_2 = test_main_dataframe()
+    # result_3 = test_main_dataframe()
     # print("\n\ntest_main_multiple\n")
     # result_multiple = test_main_multiple()
     # print("\n\ntest_main_multiple\n")
-    # test_compare_models()
-    # print("\n\ntest_validate_models\n")
-    test_validate_models()
+    test_compare_models()
 
     pass

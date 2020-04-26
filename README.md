@@ -47,7 +47,7 @@ Open config.py (only script you need to edit (very simple)), do the setup. Mainl
 Run code below in terminal in predictit folder and change csv path (test data are not included in library because of size!). Use main.py --help for more parameters info.
 
 ```
-python main.py --function predict --data_source 'csv' --csv_path 'test_data/daily-minimum-temperatures.csv' --predicted_column 1
+python main.py --function predict --data_source 'csv' --csv_full_path 'test_data/daily-minimum-temperatures.csv' --predicted_column 1
 ```
 
 ### Example of using as a library as a pro with editting config.py
@@ -64,12 +64,12 @@ config.update({
 
     'predicts': 7,  # Number of predicted values - 7 by default
     'datalength': 1000,  # The length of the data used for prediction
-    'compareit': 6,  # Visualize 6 best models
+    'print_number_of_models': 6,  # Visualize 6 best models
     'repeatit': 50,  # Repeat calculation times on shifted data to evaluate error criterion
     'other_columns': 0,  # Whether use other columns or not
     'debug': 1,  # Whether print details and warnings
 
-    # Chose models that will be computed
+    # Chose models that will be computed - remove if you want to use all the models
     'used_models': {
         "AR (Autoregression)": predictit.models.statsmodels_autoregressive,
 
