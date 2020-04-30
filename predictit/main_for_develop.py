@@ -1,98 +1,81 @@
+#!/usr/bin/python
 #%%
+"""This is copy of main.py for developing reasons."""
+import sys
+from pathlib import Path
+import numpy as np
+from prettytable import PrettyTable
+import time
+import pandas as pd
+import argparse
+import inspect
+import warnings
 
-""" Just copy of inner content of main function. Developing is much faster
-having all variables in variable explorer and all plots in jupyter cell because code is not in fuction but declarative.
-After finishing developing, just copy result back in main.
+this_path = Path(__file__).resolve().parents[1]
+this_path_string = str(this_path)
 
-"""
+# try:
+#     import predictit
+# except Exception:
+#     If used not as a library but as standalone framework, add path to be able to import predictit if not opened in folder
+sys.path.insert(0, this_path_string)
+import predictit
+
+from predictit.config import config, presets
+from predictit.misc import traceback_warning, user_warning, colorize
+
+try:
+    import gui_start  # Not included in predictit if used as python library
+except Exception:
+    pass
 
 
+def update_gui(content, id):
+    try:
+        gui_start.edit_gui_py(content, id)
+    except Exception:
+        pass
+
+
+if config['debug'] == 1:
+    warnings.filterwarnings('once')
+elif config['debug'] == 2:
+    warnings.filterwarnings('error')
+else:
+    warnings.filterwarnings('ignore')
+
+for i in config['ignored_warnings']:
+    warnings.filterwarnings('ignore', message=fr"[\s\S]*{i}*")
 
 if __name__ == "__main__":
 
-    from pathlib import Path
-    import sys
-
-    jupyter = 0
-    this_path = Path(__file__).resolve().parents[1]
-    this_path_string = str(this_path)
-
-    from pathlib import Path
-    import numpy as np
-    #import matplotlib.pyplot as plt
-    from prettytable import PrettyTable
-    import time
-    import pandas as pd
-    import warnings
-    import inspect
-    import argparse
-
-    this_path = Path(__file__).resolve().parents[1]
-    this_path_string = str(this_path)
-
-    if 'predictit' not in sys.modules:
-
-        # If used not as a library but as standalone framework, add path to be able to import predictit if not opened in folder
-        sys.path.insert(0, this_path_string)
-
-        import predictit
-
-    from predictit.config import config, presets
-    from predictit.misc import traceback_warning, user_warning, _GUI
-
-    def update_gui(content, id):
-        try:
-            gui_start.edit_gui_py(content, id)
-        except Exception:
-            pass
 
 
-
-
-    data_complete = pd.DataFrame()
-
-    # for file in list(glob.glob(f'{lib_path_str}/*.txt')):
-    #     data_complete = pd.concat([data_complete, pd.read_csv(file, index_col=False, sep='\t', decimal=',', encoding='cp1250')])
-
-    data_complete = pd.read_csv(r"C:\Users\truton\ownCloud\Github\Oxy_data\Dan\data\20160125.txt", index_col=False, sep='\t', decimal=',', encoding='cp1250')[10: -100]
-    config = predictit.config.config
 
     config.update({
-        'used_function': 'compare_models',
+        # 'data': predictit.test_data.generate_test_data.gen_sin(),
+        'data': predictit.test_data.generate_test_data.gen_slope(),
+        'data_source': 'test',
+        'predicted_column': '',
+        'datetime_index': '',
+        'datalength': 1000,
+        'error_criterion': 'rmse',
+        'last_row': 1,
+        'correlation_threshold': 0.2,
+        'models_parameters': {"Bayes ridge regression": {"regressor": 'bayesianridge', "n_iter": 300, "alpha_1": 1.e-6, "alpha_2": 1.e-6, "lambda_1": 1.e-6, "lambda_2": 1.e-6}},
 
-        'data_all': {
-            'data 1': data_complete[:-20],
-            'data 2': data_complete[:-100],
-            'data 3': data_complete[:-200],
-            'data 4': data_complete[:-300],
-            'data 5': data_complete[:-400],
-            'data 6': data_complete[:-500],
-        },
-        'data': data_complete[-1000:],
-        'predicted_column': 'CO2 (%)',
-        'datetime_index': 'čas',  # Index of dataframe datetime column or it's name if it has datetime column. If there already is index in input data, it will be used automatically.
+        'models_parameters_limits': {"Bayes ridge regression": {"alpha_1": [0.1e-6, 3e-6], "alpha_2": [0.1e-6, 3e-6], 'lambda_1': [0.1e-6, 3e-6]}},
 
-        'debug': 1,
-        'freq': '10S',
-        'default_n_steps_in': 15,
-        'datalength': 0,
-        'other_columns': 0,
-        'default_other_columns_length': 2,
-        'standardize': 'standardize',
+        'predicts': 3,
+        'default_n_steps_in': 25,
+        'used_models': {"Sklearn regression": predictit.models.sklearn_regression},
+        'standardize': 0,
         'remove_outliers': 0,
-        'correlation_threshold': 0,
-        'data_transform': 0,
-
-        'optimizeit': 0,
-        'optimizeit_limit': 10,
-        'optimizeit_details': 3,
-
-        'predicts': 12,
-        'print_number_of_models': 20,
-        'repeatit': 50,
-        'return_type': 'best',
+    
 
 
+        # 'data_transform': 'difference',
+        # 'mode': 'validate',  # If 'validate', put apart last few ('predicts' + 'validation_gap') values and evaluate on test data that was not in train set. Do not setup - use compare_models function, it will use it automattically.
 
 
 
@@ -100,9 +83,6 @@ if __name__ == "__main__":
 
     })
 
-
-
-    config['standardize'] = 0
 
 
 
@@ -134,7 +114,7 @@ if __name__ == "__main__":
     # Find difference between original config and set values and if there are any differences, raise error
     config_errors = set(config.keys()) - predictit.config.config_check_set
     if config_errors:
-        raise KeyError(f"Some config values: {config_errors} was named incorrectly. Check config.py for more informations")
+        raise KeyError(colorize(f"Some config values: {config_errors} was named incorrectly. Check config.py for more informations"))
 
     # Definition of the table for spent time on code parts
     time_parts_table = PrettyTable()
@@ -162,25 +142,22 @@ if __name__ == "__main__":
                     csv_path = data_location / config['csv_test_data_relative_path']
                     config['csv_full_path'] = Path(csv_path).as_posix()
                 except Exception:
-                    print(f"\n ERROR - Test data load failed - Setup CSV adress and column name in config \n\n")
-                    raise
+                    raise FileNotFoundError(colorize(f"\n ERROR - Test data load failed - Setup CSV adress and column name in config \n\n"))
             try:
-                config['data'] = pd.read_csv(config['csv_full_path'], header=0).iloc[-config['datalength']:, :]
+                config['data'] = pd.read_csv(config['csv_full_path'], header=0).iloc[-config['max_imported_length']:, :]
             except Exception:
-                print("\n ERROR - Data load failed - Setup CSV adress and column name in config \n\n")
-                raise
+                raise FileNotFoundError(colorize(f"\n ERROR - Test data load failed - Setup CSV adress and column name in config \n\n"))
 
         ############# Load SQL data #############
         elif config['data_source'] == 'sql':
             try:
                 config['data'] = predictit.database.database_load(server=config['server'], database=config['database'], freq=config['freq'],
-                                                                  data_limit=config['datalength'], last=config['last_row'])
+                                                                  data_limit=config['max_imported_length'], last=config['last_row'])
             except Exception:
-                print("\n ERROR - Data load from SQL server failed - Setup server, database and predicted column name in config \n\n")
-                raise
+                raise RuntimeError(colorize(f"ERROR - Data load from SQL server failed - Setup server, database and predicted column name in config"))
 
         elif config['data_source'] == 'test':
-            config['data'] = predictit.test_data.generate_test_data.gen_random(config['datalength'])
+            config['data'] = predictit.test_data.generate_test_data.gen_random()
             user_warning("Test data was used. Setup config.py where are possible options with comments. Data can be insert as function parameters, with editing config.py or with CLI.")
 
     ##############################################
@@ -190,69 +167,72 @@ if __name__ == "__main__":
     if not config['predicted_column']:
         config['predicted_column'] = 0
 
-    ### Data are used in shape (n_features, n_samples)!!! - other way that usual convention... if iterate data_for_predictions[i] - you have columns
+    if config['data'] is None:
+        raise TypeError(colorize("Data not loaded. Check config.py and use 'data_source' - csv and path or assign data to 'data'"))
 
     data_for_predictions, data_for_predictions_df, predicted_column_name = predictit.data_preprocessing.data_consolidation(config['data'])
 
     if config['mode'] == 'validate':
         data_for_predictions, test = predictit.data_preprocessing.split(data_for_predictions, predicts=config['predicts'])
-        data_for_predictions_df, test_df = predictit.data_preprocessing.split(data_for_predictions_df, predicts=config['predicts'])
+        data_for_predictions_df, _ = predictit.data_preprocessing.split(data_for_predictions_df, predicts=config['predicts'])
 
+    # In data consolidation predicted column was replaced on index 0 as first column
     predicted_column_index = 0
 
-    multicolumn = 0 if data_for_predictions.shape[0] == 1 else 1
+    multicolumn = 0 if data_for_predictions.shape[1] == 1 else 1
 
-    if config['analyzeit'] == 1 or config['analyzeit'] == 3:
-        predictit.analyze.analyze_data(data_for_predictions.T, window=30)
+    column_for_predictions_series = data_for_predictions_df.iloc[:, 0]
 
     ########################################
     ############# Data analyze ###### ANCHOR Analyze
     ########################################
 
+    if config['analyzeit'] == 1 or config['analyzeit'] == 3:
+        print("Analyze of unprocessed data")
+        try:
+            predictit.analyze.analyze_data(data_for_predictions[:, 0], column_for_predictions_series, window=30)
+            predictit.analyze.analyze_correlation(data_for_predictions_df)
+            predictit.analyze.decompose(data_for_predictions[:, 0], **config['analyze_seasonal_decompose'])
+        except Exception:
+            traceback_warning("Analyze failed")
+
     if config['remove_outliers']:
         data_for_predictions = predictit.data_preprocessing.remove_outliers(data_for_predictions, predicted_column_index=predicted_column_index, threshold=config['remove_outliers'])
+
+    if config['smooth']:
+        data_for_predictions = predictit.data_preprocessing.smooth(data_for_predictions, config['smooth'][0], config['smooth'][1])
 
     if config['correlation_threshold'] and multicolumn:
         data_for_predictions = predictit.data_preprocessing.keep_corelated_data(data_for_predictions, threshold=config['correlation_threshold'])
 
-    ### Data preprocessing, common for all datatypes ###
-
-    column_for_predictions_dataframe = data_for_predictions_df[data_for_predictions_df.columns[0]].to_frame()
-    column_for_plot = column_for_predictions_dataframe.iloc[-7 * config['predicts']:]
-
-    last_value = column_for_plot.iloc[-1]
-
-    try:
-        number_check = int(last_value)
-    except Exception:
-        raise ValueError(f"\n ERROR - Predicting not a number datatype. Maybe bad config['predicted_columns'] setup.\n Predicted datatype is {type(last_value[1])} \n\n")
-
     if config['data_transform'] == 'difference':
+        last_undiff_value = data_for_predictions[-1, 0]
 
-        for i in range(len(data_for_predictions)):
-            data_for_predictions[i, 1:] = predictit.data_preprocessing.do_difference(data_for_predictions[i])
+        for i in range(data_for_predictions.shape[1]):
+            data_for_predictions[1:, i] = predictit.data_preprocessing.do_difference(data_for_predictions[:, i])
 
     if config['standardize']:
         data_for_predictions, final_scaler = predictit.data_preprocessing.standardize(data_for_predictions, used_scaler=config['standardize'])
 
-    column_for_predictions = data_for_predictions[predicted_column_index]
+    column_for_predictions = data_for_predictions[:, predicted_column_index]
 
     ############# Processed data analyze ############
 
     data_shape = np.shape(data_for_predictions)
     data_length = len(column_for_predictions)
 
-    data_std = np.std(data_for_predictions[0, -30:])
-    data_mean = np.mean(data_for_predictions[0, -30:])
+    data_std = np.std(column_for_predictions[-30:])
+    data_mean = np.mean(column_for_predictions[-30:])
     data_abs_max = max(abs(column_for_predictions.min()), abs(column_for_predictions.max()))
 
-    multicolumn = 0 if data_shape[0] == 1 else 1
+    multicolumn = 0 if data_shape[1] == 1 else 1
 
     if config['analyzeit'] == 2 or config['analyzeit'] == 3:
-        predictit.analyze.analyze_data(data_for_predictions.T, window=30)
-
-        # TODO repair decompose
-        #predictit.analyze.decompose(column_for_predictions_dataframe, freq=36, model='multiplicative')
+        print("\n\n Analyze of preprocessed data \n")
+        try:
+            predictit.analyze.analyze_data(column_for_predictions, pd.Series(column_for_predictions), window=30)
+        except Exception:
+            traceback_warning("Analyze failed")
 
     min_data_length = 3 * config['predicts'] + config['default_n_steps_in']
 
@@ -305,7 +285,7 @@ if __name__ == "__main__":
 
     models_test_outputs = models_test_outputs[::-1]
 
-    data_end = -config['predicts'] - config['repeatit'] - 100 if config['mode'] == 'validate' else None
+    data_end = -config['predicts'] - config['repeatit'] - config['validation_gap'] if config['mode'] == 'validate' else None
 
     used_input_types = []
     for i in models_names:
@@ -400,7 +380,7 @@ if __name__ == "__main__":
                             one_reality_result = final_scaler.inverse_transform(one_reality_result.reshape(-1, 1)).ravel()
 
                         if config['data_transform'] == 'difference':
-                            one_reality_result = predictit.data_preprocessing.inverse_difference(one_reality_result, last_value)
+                            one_reality_result = predictit.data_preprocessing.inverse_difference(one_reality_result, last_undiff_value)
 
                         reality_results_matrix[iterated_model_index, data_length_index] = one_reality_result
 
@@ -441,12 +421,8 @@ if __name__ == "__main__":
 
     sorted_results = np.argsort(model_results)
 
-    if config['compareit']:
-        sorted_results = sorted_results[:config['print_number_of_models']]
-    else:
-        sorted_results = sorted_results[0]
-
-    predicted_models = {}
+    predicted_models_for_table = {}
+    predicted_models_for_plot = {}
 
     for i, j in enumerate(sorted_results):
         this_model = list(config['used_models'].keys())[j]
@@ -454,15 +430,19 @@ if __name__ == "__main__":
         if i == 0:
             best_model_name = this_model
 
-        predicted_models[this_model] = {'order': i + 1, 'error_criterion': model_results[j], 'predictions': reality_results_matrix[j, np.argmin(repeated_average[j])], 'data_length': np.argmin(repeated_average[j])}
+        if not config['print_number_of_models'] or i < config['print_number_of_models']:
+            predicted_models_for_table[this_model] = {'order': i + 1, 'error_criterion': model_results[j], 'predictions': reality_results_matrix[j, np.argmin(repeated_average[j])], 'data_length': np.argmin(repeated_average[j])}
 
-    best_model_predicts = predicted_models[best_model_name]['predictions'] if best_model_name in predicted_models else "Best model had an error"
+        if not config['print_number_of_models'] is None or i < config['plot_number_of_models']:
+            predicted_models_for_plot[this_model] = {'order': i + 1, 'error_criterion': model_results[j], 'predictions': reality_results_matrix[j, np.argmin(repeated_average[j])], 'data_length': np.argmin(repeated_average[j])}
 
-    complete_dataframe = column_for_plot.copy()
+    best_model_predicts = predicted_models_for_table[best_model_name]['predictions'] if best_model_name in predicted_models_for_table else "Best model had an error"
 
-    if config['confidence_interval'] == 'default':
+    complete_dataframe = column_for_predictions_series[-config['plot_history_length']:].to_frame()
+
+    if config['confidence_interval']:
         try:
-            lower_bound, upper_bound = predictit.misc.confidence_interval(column_for_plot, predicts=config['predicts'], confidence=config['confidence_interval'])
+            lower_bound, upper_bound = predictit.misc.confidence_interval(column_for_predictions_series, predicts=config['predicts'], confidence=config['confidence_interval'])
             complete_dataframe['Lower bound'] = complete_dataframe['Upper bound'] = None
             bounds = True
         except Exception:
@@ -472,10 +452,10 @@ if __name__ == "__main__":
     else:
         bounds = False
 
-    last_date = column_for_plot.index[-1]
+    last_date = column_for_predictions_series.index[-1]
 
     if isinstance(last_date, (pd.core.indexes.datetimes.DatetimeIndex, pd._libs.tslibs.timestamps.Timestamp)):
-        date_index = pd.date_range(start=last_date, periods=config['predicts'] + 1, freq=column_for_plot.index.freq)[1:]
+        date_index = pd.date_range(start=last_date, periods=config['predicts'] + 1, freq=column_for_predictions_series.index.freq)[1:]
         date_index = pd.to_datetime(date_index)
 
     else:
@@ -483,7 +463,7 @@ if __name__ == "__main__":
 
     results_dataframe = pd.DataFrame(data={'Lower bound': lower_bound, 'Upper bound': upper_bound}, index=date_index) if bounds else pd.DataFrame(index=date_index)
 
-    for i, j in predicted_models.items():
+    for i, j in predicted_models_for_plot.items():
         if 'predictions' in j:
             results_dataframe[f"{j['order']} - {i}"] = j['predictions']
             complete_dataframe[f"{j['order']} - {i}"] = None
@@ -494,7 +474,7 @@ if __name__ == "__main__":
         best_model_name_plot = 'Test'
         results_dataframe['Test'] = test
 
-    last_value = float(column_for_plot.iloc[-1])
+    last_value = float(column_for_predictions_series.iloc[-1])
 
     complete_dataframe = pd.concat([complete_dataframe, results_dataframe], sort=False)
     complete_dataframe.iloc[-config['predicts'] - 1] = last_value
@@ -513,6 +493,9 @@ if __name__ == "__main__":
         div = predictit.plot.plotit(complete_dataframe, plot_type=config['plot_type'], show=config['show_plot'], save=config['save_plot'], save_path=config['save_plot_path'],
                                     plot_return=plot_return, best_model_name=best_model_name_plot, predicted_column_name=predicted_column_name)
 
+    time_point = update_time_table(time_point)
+    progress_phase = "Completed"
+    update_gui(progress_phase, 'progress_phase')
 
     ####################################
     ############# Results ####### ANCHOR Results
@@ -520,15 +503,15 @@ if __name__ == "__main__":
 
     if config['print']:
         if config['print_result']:
-            print(f"\n Best model is {best_model_name} \n\t with results {best_model_predicts} \n\t with model error {config['error_criterion']} = {predicted_models[best_model_name]['error_criterion']}")
-            print(f"\n\t with data length {data_lengths[predicted_models[best_model_name]['data_length']]} \n\t with paramters {config['models_parameters'][best_model_name]} \n")
+            print(f"\n Best model is {best_model_name} \n\t with results {best_model_predicts} \n\t with model error {config['error_criterion']} = {predicted_models_for_table[best_model_name]['error_criterion']}")
+            print(f"\n\t with data length {data_lengths[predicted_models_for_table[best_model_name]['data_length']]} \n\t with paramters {config['models_parameters'][best_model_name]} \n")
 
 
         # Table of results
         models_table = PrettyTable()
         models_table.field_names = ['Model', f"Average {config['error_criterion']} error", "Time"]
         # Fill the table
-        for i, j in predicted_models.items():
+        for i, j in predicted_models_for_table.items():
             if i in models_time:
                 models_table.add_row([i, j['error_criterion'], models_time[i]])
 

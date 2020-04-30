@@ -1,8 +1,13 @@
 #!/bin/sh
 
-cd ../docs
+cd ../docs/source
+
+rm -v !("conf.py"|"index.rst"|"tooc.rst")
+
+cd ..
 
 sphinx-apidoc -f -e -o source/ ../predictit
+rm predictit.tempCodeRunnerFile.rst
 
 cd ..
 
@@ -13,4 +18,4 @@ rm -r -f dist
 rm -r -f predictit.egg-info
 rm -r -f build
 
-ECHO Job done
+echo 'Job done'

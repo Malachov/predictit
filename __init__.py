@@ -1,2 +1,4 @@
-from predictit_library import tests
-from predictit_library import predictit
+from . import tests
+from . import predictit
+
+__all__ = [tests, predictit]

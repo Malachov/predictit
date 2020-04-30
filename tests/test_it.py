@@ -11,19 +11,6 @@ import pandas as pd
 
 sys.path.insert(0, pathlib.Path(__file__).resolve().parents[1].as_posix())
 
-try:
-    __IPYTHON__
-    from IPython import get_ipython
-    ipython = get_ipython()
-    magic_load_ex = '%load_ext autoreload'
-    magic_autoreload = '%autoreload 2'
-
-    ipython.magic(magic_load_ex)
-    ipython.magic(magic_autoreload)
-
-except Exception:
-    pass
-
 import predictit
 from predictit.config import config
 
@@ -62,14 +49,6 @@ def test_main_from_config():
         'datetime_index': 5,
         'freq': 'M',
         'predicted_column': 'Units Sold',
-        'datalength': 100,
-        'data_transform': None,
-        'repeatit': 1,
-        'other_columns': 1,
-        'default_other_columns_length': None,
-        'lengths': 3,
-        'error_criterion': 'mape',
-        'remove_outliers': 0,
         'print_number_of_models': 10,
         'last_row': 0,
         'correlation_threshold': 0.2,
@@ -92,6 +71,7 @@ def test_main_optimize_and_args():
         config.update(config_original.copy())
         config.update({
             'data_source': 'test',
+            'predicted_column': '',
             'predicts': 3,
             'datetime_index': '',
             'freq': 'M',
@@ -179,8 +159,7 @@ def test_main_multiple():
 
 def test_compare_models():
     config.update(config_original.copy())
-    data_length = 1000
-    data_all = {'sin': predictit.test_data.generate_test_data.gen_sin(data_length), 'Sign': predictit.test_data.generate_test_data.gen_sign(data_length), 'Random data': predictit.test_data.generate_test_data.gen_random(data_length)}
+    data_all = {'sin': [predictit.test_data.generate_test_data.gen_sin(), 0]}#, 'Sign': predictit.test_data.generate_test_data.gen_sign(), 'Random data': predictit.test_data.generate_test_data.gen_random()}
     try:
         predictit.main.compare_models(data_all)
         ok = 'fine'
@@ -194,12 +173,12 @@ if __name__ == "__main__":
     # print("\n\ntest_main_from_config\n")
     # result_1 = test_main_from_config()
     # print("\n\ntest_main_optimize_and_args\n")
-    # result_2 = test_main_optimize_and_args()
+    result_2 = test_main_optimize_and_args()
     # print("\n\ntest_main_dataframe\n")
     # result_3 = test_main_dataframe()
     # print("\n\ntest_main_multiple\n")
     # result_multiple = test_main_multiple()
     # print("\n\ntest_main_multiple\n")
-    test_compare_models()
+    # test_compare_models()
 
     pass

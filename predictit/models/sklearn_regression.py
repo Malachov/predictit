@@ -51,7 +51,6 @@ def train(sequentions, regressor='bayesianridge', predicts=7, n_estimators=100,
     """
 
     regressor_dict = {
-        'default': linear_model.BayesianRidge(n_iter=n_iter, alpha_1=alpha_1, alpha_2=alpha_2, lambda_1=lambda_1, lambda_2=lambda_2),
         'bayesianridge': linear_model.BayesianRidge(n_iter=n_iter, alpha_1=alpha_1, alpha_2=alpha_2, lambda_1=lambda_1, lambda_2=lambda_2),
         'huber': linear_model.HuberRegressor(epsilon=epsilon, max_iter=200, alpha=alpha),
         'lasso': linear_model.Lasso(alpha=alpha),

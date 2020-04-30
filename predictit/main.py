@@ -190,7 +190,7 @@ def predict(data=None, predicts=None, predicted_column=None, freq=None, models_p
                 except Exception:
                     raise FileNotFoundError(colorize(f"\n ERROR - Test data load failed - Setup CSV adress and column name in config \n\n"))
             try:
-                config['data'] = pd.read_csv(config['csv_full_path'], header=0).iloc[-config['datalength']:, :]
+                config['data'] = pd.read_csv(config['csv_full_path'], header=0).iloc[-config['max_imported_length']:, :]
             except Exception:
                 raise FileNotFoundError(colorize(f"\n ERROR - Test data load failed - Setup CSV adress and column name in config \n\n"))
 
@@ -198,13 +198,13 @@ def predict(data=None, predicts=None, predicted_column=None, freq=None, models_p
         elif config['data_source'] == 'sql':
             try:
                 config['data'] = predictit.database.database_load(server=config['server'], database=config['database'], freq=config['freq'],
-                                                                  data_limit=config['datalength'], last=config['last_row'])
+                                                                  data_limit=config['max_imported_length'], last=config['last_row'])
             except Exception:
                 raise RuntimeError(colorize(f"ERROR - Data load from SQL server failed - Setup server, database and predicted column name in config"))
 
         elif config['data_source'] == 'test':
-            config['data'] = predictit.test_data.generate_test_data.gen_random(config['datalength'])
-            user_warning("Test data was used. Setup config.py where are possible options with comments. Data can be insert as function parameters, with editing config.py or with CLI.")
+            config['data'] = predictit.test_data.generate_test_data.gen_random()
+            user_warning("Test data was used. Setup config.py 'data_source'. Check official readme or do >>> predictit.config.print_config() to see all possible options with comments. Data can be insert as function parameters, with editing config.py or with CLI.")
 
     ##############################################
     ############ DATA PREPROCESSING ###### ANCHOR Preprocessing
@@ -213,69 +213,72 @@ def predict(data=None, predicts=None, predicted_column=None, freq=None, models_p
     if not config['predicted_column']:
         config['predicted_column'] = 0
 
-    ### Data are used in shape (n_features, n_samples)!!! - other way that usual convention... if iterate data_for_predictions[i] - you have columns
+    if config['data'] is None:
+        raise TypeError(colorize("Data not loaded. Check config.py and use 'data_source' - csv and path or assign data to 'data'"))
 
     data_for_predictions, data_for_predictions_df, predicted_column_name = predictit.data_preprocessing.data_consolidation(config['data'])
 
     if config['mode'] == 'validate':
         data_for_predictions, test = predictit.data_preprocessing.split(data_for_predictions, predicts=config['predicts'])
-        data_for_predictions_df, test_df = predictit.data_preprocessing.split(data_for_predictions_df, predicts=config['predicts'])
+        data_for_predictions_df, _ = predictit.data_preprocessing.split(data_for_predictions_df, predicts=config['predicts'])
 
+    # In data consolidation predicted column was replaced on index 0 as first column
     predicted_column_index = 0
 
-    multicolumn = 0 if data_for_predictions.shape[0] == 1 else 1
+    multicolumn = 0 if data_for_predictions.shape[1] == 1 else 1
 
-    if config['analyzeit'] == 1 or config['analyzeit'] == 3:
-        predictit.analyze.analyze_data(data_for_predictions.T, window=30)
+    column_for_predictions_series = data_for_predictions_df.iloc[:, 0]
 
     ########################################
     ############# Data analyze ###### ANCHOR Analyze
     ########################################
 
+    if config['analyzeit'] == 1 or config['analyzeit'] == 3:
+        print("Analyze of unprocessed data")
+        try:
+            predictit.analyze.analyze_data(data_for_predictions[:, 0], column_for_predictions_series, window=30)
+            predictit.analyze.analyze_correlation(data_for_predictions_df)
+            predictit.analyze.decompose(data_for_predictions[:, 0], **config['analyze_seasonal_decompose'])
+        except Exception:
+            traceback_warning("Analyze failed")
+
     if config['remove_outliers']:
         data_for_predictions = predictit.data_preprocessing.remove_outliers(data_for_predictions, predicted_column_index=predicted_column_index, threshold=config['remove_outliers'])
+
+    if config['smooth']:
+        data_for_predictions = predictit.data_preprocessing.smooth(data_for_predictions, config['smooth'][0], config['smooth'][1])
 
     if config['correlation_threshold'] and multicolumn:
         data_for_predictions = predictit.data_preprocessing.keep_corelated_data(data_for_predictions, threshold=config['correlation_threshold'])
 
-    ### Data preprocessing, common for all datatypes ###
-
-    column_for_predictions_dataframe = data_for_predictions_df[data_for_predictions_df.columns[0]].to_frame()
-    column_for_plot = column_for_predictions_dataframe.iloc[-config['plot_history_length']:]
-
-    last_value = column_for_plot.iloc[-1]
-
-    try:
-        number_check = int(last_value)
-    except Exception:
-        raise ValueError(colorize(f"\n ERROR - Predicting not a number datatype. Maybe bad config['predicted_columns'] setup.\n Predicted datatype is {type(last_value[1])} \n\n"))
-
     if config['data_transform'] == 'difference':
+        last_undiff_value = data_for_predictions[-1, 0]
 
-        for i in range(len(data_for_predictions)):
-            data_for_predictions[i, 1:] = predictit.data_preprocessing.do_difference(data_for_predictions[i])
+        for i in range(data_for_predictions.shape[1]):
+            data_for_predictions[1:, i] = predictit.data_preprocessing.do_difference(data_for_predictions[:, i])
 
     if config['standardize']:
         data_for_predictions, final_scaler = predictit.data_preprocessing.standardize(data_for_predictions, used_scaler=config['standardize'])
 
-    column_for_predictions = data_for_predictions[predicted_column_index]
+    column_for_predictions = data_for_predictions[:, predicted_column_index]
 
     ############# Processed data analyze ############
 
     data_shape = np.shape(data_for_predictions)
     data_length = len(column_for_predictions)
 
-    data_std = np.std(data_for_predictions[0, -30:])
-    data_mean = np.mean(data_for_predictions[0, -30:])
+    data_std = np.std(column_for_predictions[-30:])
+    data_mean = np.mean(column_for_predictions[-30:])
     data_abs_max = max(abs(column_for_predictions.min()), abs(column_for_predictions.max()))
 
-    multicolumn = 0 if data_shape[0] == 1 else 1
+    multicolumn = 0 if data_shape[1] == 1 else 1
 
     if config['analyzeit'] == 2 or config['analyzeit'] == 3:
-        predictit.analyze.analyze_data(data_for_predictions.T, window=30)
-
-        # TODO repair decompose
-        #predictit.analyze.decompose(column_for_predictions_dataframe, freq=36, model='multiplicative')
+        print("\n\n Analyze of preprocessed data \n")
+        try:
+            predictit.analyze.analyze_data(column_for_predictions, pd.Series(column_for_predictions), window=30)
+        except Exception:
+            traceback_warning("Analyze failed")
 
     min_data_length = 3 * config['predicts'] + config['default_n_steps_in']
 
@@ -423,7 +426,7 @@ def predict(data=None, predicts=None, predicted_column=None, freq=None, models_p
                             one_reality_result = final_scaler.inverse_transform(one_reality_result.reshape(-1, 1)).ravel()
 
                         if config['data_transform'] == 'difference':
-                            one_reality_result = predictit.data_preprocessing.inverse_difference(one_reality_result, last_value)
+                            one_reality_result = predictit.data_preprocessing.inverse_difference(one_reality_result, last_undiff_value)
 
                         reality_results_matrix[iterated_model_index, data_length_index] = one_reality_result
 
@@ -473,20 +476,19 @@ def predict(data=None, predicts=None, predicted_column=None, freq=None, models_p
         if i == 0:
             best_model_name = this_model
 
-        if config['print_number_of_models'] is None or i < config['print_number_of_models']:
+        if not config['print_number_of_models'] or i < config['print_number_of_models']:
             predicted_models_for_table[this_model] = {'order': i + 1, 'error_criterion': model_results[j], 'predictions': reality_results_matrix[j, np.argmin(repeated_average[j])], 'data_length': np.argmin(repeated_average[j])}
 
-        if config['print_number_of_models'] is None or i < config['plot_number_of_models']:
+        if not config['print_number_of_models'] is None or i < config['plot_number_of_models']:
             predicted_models_for_plot[this_model] = {'order': i + 1, 'error_criterion': model_results[j], 'predictions': reality_results_matrix[j, np.argmin(repeated_average[j])], 'data_length': np.argmin(repeated_average[j])}
-
 
     best_model_predicts = predicted_models_for_table[best_model_name]['predictions'] if best_model_name in predicted_models_for_table else "Best model had an error"
 
-    complete_dataframe = column_for_plot.copy()
+    complete_dataframe = column_for_predictions_series[-config['plot_history_length']:].to_frame()
 
-    if config['confidence_interval'] == 'default':
+    if config['confidence_interval']:
         try:
-            lower_bound, upper_bound = predictit.misc.confidence_interval(column_for_plot, predicts=config['predicts'], confidence=config['confidence_interval'])
+            lower_bound, upper_bound = predictit.misc.confidence_interval(column_for_predictions_series, predicts=config['predicts'], confidence=config['confidence_interval'])
             complete_dataframe['Lower bound'] = complete_dataframe['Upper bound'] = None
             bounds = True
         except Exception:
@@ -496,10 +498,10 @@ def predict(data=None, predicts=None, predicted_column=None, freq=None, models_p
     else:
         bounds = False
 
-    last_date = column_for_plot.index[-1]
+    last_date = column_for_predictions_series.index[-1]
 
     if isinstance(last_date, (pd.core.indexes.datetimes.DatetimeIndex, pd._libs.tslibs.timestamps.Timestamp)):
-        date_index = pd.date_range(start=last_date, periods=config['predicts'] + 1, freq=column_for_plot.index.freq)[1:]
+        date_index = pd.date_range(start=last_date, periods=config['predicts'] + 1, freq=column_for_predictions_series.index.freq)[1:]
         date_index = pd.to_datetime(date_index)
 
     else:
@@ -518,7 +520,7 @@ def predict(data=None, predicts=None, predicted_column=None, freq=None, models_p
         best_model_name_plot = 'Test'
         results_dataframe['Test'] = test
 
-    last_value = float(column_for_plot.iloc[-1])
+    last_value = float(column_for_predictions_series.iloc[-1])
 
     complete_dataframe = pd.concat([complete_dataframe, results_dataframe], sort=False)
     complete_dataframe.iloc[-config['predicts'] - 1] = last_value
@@ -622,7 +624,9 @@ def predict(data=None, predicts=None, predicted_column=None, freq=None, models_p
             detailed_results_dictionary['plot'] = div
             detailed_results_dictionary['output'] = output
 
-        return detailed_results_dictionary
+    elif config['return_type'] == 'visual_check':
+        return {'data_for_predictions': data_for_predictions, 'model_train_input': model_train_input,
+                'model_predict_input': model_predict_input, 'model_test_inputs': model_test_inputs, 'models_test_outputs': models_test_outputs}
 
 
 def predict_multiple_columns(data=None, predicted_columns=None, freqs=None, database_deploy=None, predicts=None, models_parameters=None, data_source=None, error_criterion=None, print_number_of_models=None,
@@ -702,42 +706,58 @@ def compare_models(data_all=None, predicts=None, predicted_column=None, freq=Non
     # Edit config.py default values with arguments values if exist
     config.update({key: value for key, value in values.items() if key in args & values.keys() and value is not None})
 
-    config.update({'mode': 'validate', 'confidence_interval': 0})
+    config.update({'return_type': 'models_error_criterion', 'mode': 'validate', 'confidence_interval': 0})
 
     # If no data_all inserted, default will be used
-    if config['data_all'] is None:
-        config['data_all'] = {'sin': predictit.test_data.generate_test_data.gen_sin(config['datalength']), 'Sign': predictit.test_data.generate_test_data.gen_sign(config['datalength']),
-                              'Random data': predictit.test_data.generate_test_data.gen_random(config['datalength'])}
+    if not config['data_all']:
+        config['data_all'] = {'sin': [predictit.test_data.generate_test_data.gen_sin(), 0],
+                              'Sign': [predictit.test_data.generate_test_data.gen_sign(), 0],
+                              'Random data': [predictit.test_data.generate_test_data.gen_random(), 0]}
+        user_warning("Test data was used. Setup 'data_all' in config...")
 
     results = {}
+    unstardized_results = {}
 
     data_dict = config['data_all']
+    same_data = False
 
     if isinstance(data_dict, list):
-        data_dict = {f"Data {i}": j for i, j in enumerate(data_dict)}
+        same_data = True
+        data_dict = {f"Data {i}": [j] for i, j in enumerate(data_dict)}
 
     for i, j in data_dict.items():
-        config['plot_name'] = i
+
+        config['data'] = j[0]
+        if not same_data:
+            config['predicted_column'] = j[1]
+
         try:
-            result = predict(data=j, return_type="models_error_criterion")
+            result = predict()
             results[i] = (result - np.nanmin(result)) / (np.nanmax(result) - np.nanmin(result))
+            unstardized_results[i] = result
 
         except Exception:
             traceback_warning(f"Comparison for data {i} didn't finished.")
             results[i] = np.nan
 
     results_array = np.stack(list(results.values()), axis=0)
+    unstardized_results_array = np.stack(list(unstardized_results.values()), axis=0)
 
     # results_array[np.isnan(results_array)] = np.inf
 
     all_data_average = np.nanmean(results_array, axis=0)
+    unstardized_all_data_average = np.nanmean(unstardized_results_array, axis=0)
 
     models_best_results = []
-
+    unstardized_models_best_results = []
 
     for i in all_data_average:
         models_best_results.append(np.nan if np.isnan(i).all() else np.nanmin(i))
     models_best_results = np.array(models_best_results)
+
+    for i in unstardized_all_data_average:
+        unstardized_models_best_results.append(np.nan if np.isnan(i).all() else np.nanmin(i))
+    unstardized_models_best_results = np.array(unstardized_models_best_results)
 
     best_compared_model = int(np.nanargmin(models_best_results))
     best_compared_model_name = list(config['used_models'].keys())[best_compared_model]
@@ -747,11 +767,11 @@ def compare_models(data_all=None, predicts=None, predicted_column=None, freq=Non
 
     print("\n\nTable of complete results. Percentual standardized error is between 0 and 1. If 0, model was the best on all defined data, 1 means it was the worst.")
     models_table = PrettyTable()
-    models_table.field_names = ['Model', 'Percentual standardized error']
+    models_table.field_names = ['Model', 'Percentual standardized error', 'Error average']
 
     # Fill the table
     for i, j in enumerate(config['used_models']):
-        models_table.add_row([j, models_best_results[i]])
+        models_table.add_row([j, models_best_results[i], unstardized_models_best_results[i]])
 
     print(f'\n {models_table} \n')
 

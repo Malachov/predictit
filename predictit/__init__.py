@@ -56,22 +56,22 @@ More function examples is in tests/test_it.py for some more working examples.
 If you want to know how some parts works, check tests/visual where are displayed used function results on simple example.
 """
 
-from predictit import analyze
-from predictit import best_params
-from predictit import models
-from predictit import config
-from predictit import data_preprocessing
-from predictit import database
-from predictit import define_inputs
-from predictit import evaluate_predictions
-from predictit import misc
-from predictit import plot
-from predictit import test_data
+from . import analyze
+from . import best_params
+from . import models
+from . import config
+from . import data_preprocessing
+from . import database
+from . import define_inputs
+from . import evaluate_predictions
+from . import misc
+from . import plot
+from . import test_data
 
-from predictit import main
+from . import main
 
 
-__version__ = "1.31"
+__version__ = "1.33"
 __author__ = "Daniel Malachov"
 __license__ = "MIT"
 __email__ = "malachovd@seznam.cz"

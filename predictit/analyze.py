@@ -1,19 +1,20 @@
 """This is module for data analysis. It create plots of data, it's distribution, it's details, autocorrelation function etc.
 """
-import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 from statsmodels.graphics.tsaplots import plot_acf
 from statsmodels.graphics.tsaplots import plot_pacf
 from statsmodels.tsa.stattools import adfuller
-import pandas as pd
 from statsmodels.tsa.seasonal import seasonal_decompose
+from pandas.plotting import register_matplotlib_converters
+from IPython import get_ipython
 
-# TODO plotly on input data
-# def plot_input_data():
+from predictit import misc
+
+register_matplotlib_converters()
 
 
-def analyze_data(data, lags=5, window=5):
+def analyze_data(array, df, lags=5, window=5):
     """Function that plot data, it's distribution, some details like minimum, maximum, std, mean etc.
     It also create autocorrelation and partial autocorrelation (good for ARIMA models) and plot rolling mean and rolling std.
     It also tell if data are probably stationary or not.
@@ -25,17 +26,17 @@ def analyze_data(data, lags=5, window=5):
 
     """
 
-    if not isinstance(data, pd.DataFrame):
-        data_frame = pd.DataFrame(data=data)
+    if misc._JUPYTER:
+        get_ipython().run_line_magic('matplotlib', 'inline')
 
     plt.figure(figsize=(10, 5))
     plt.subplot(1, 2, 1)
-    plt.plot(data)
+    plt.plot(array)
     plt.xlabel('t')
     plt.ylabel("f(x)")
 
     plt.subplot(1, 2, 2)
-    sns.distplot(data, bins=100, kde=True, color='skyblue')
+    sns.distplot(df, bins=100, kde=True, color='skyblue')
     plt.xlabel('f(x)')
     plt.ylabel("Distribution")
 
@@ -48,23 +49,23 @@ def analyze_data(data, lags=5, window=5):
 
     try:
 
-        plot_acf(data, lags=lags, ax=ax)
+        plot_acf(df, lags=lags, ax=ax)
         ax.set_xlabel('Lag')
-        plot_pacf(data, lags=lags, ax=ax2)
+        plot_pacf(df, lags=lags, ax=ax2)
         ax2.set_xlabel('Lag')
         plt.show()
 
     except Exception as excp:
         print(f'\n Error: {excp} \n Maybe wrong datatype for more stats or more lags, than values')
 
-    print('\n Data description \n', data_frame.describe())
-    print('\n Data tail \n', data_frame.tail())
-    print('\n Nan values in columns \n', data_frame.isna().sum())  # Print??
+    print('\n Data description \n', df.describe())
+    print('\n Data tail \n', df.tail())
+    print('\n Nan values in columns \n', df.isna().sum())  # Print??
 
 
     # Moving average
-    rolling_mean = data_frame.rolling(window).mean()
-    rolling_std = data_frame.rolling(window).std()
+    rolling_mean = df.rolling(window).mean()
+    rolling_std = df.rolling(window).std()
 
     plt.figure(figsize=(10, 5))
     plt.subplot(1, 2, 1)
@@ -83,33 +84,38 @@ def analyze_data(data, lags=5, window=5):
     plt.show()
 
     # Dick Fuller test na stacionaritu
-    pvalue = adfuller(data)[1]
-    cutoff=0.01
+    pvalue = adfuller(array)[1]
+    cutoff=0.05
     if pvalue < cutoff:
-        print('p-value = {} : Data series is probably stationary'.format(pvalue))
+        print(f"\np-value = {pvalue} : Data series is probably stationary.\n")
     else:
-        print('p-value = {} : Data series is probably stationary'.format(pvalue))
+        print(f"\np-value = {pvalue} : Data series is probably not stationary \n")
 
 
-def analyze_correlation(data):
+def analyze_correlation(data_df):
     """Plot correlation graph.
-    
+
     Args:
         data (np.ndarray): Time series data
-    """    
-    sns.pairplot(data, diag_kind="kde")
+    """
+    # Pairplot unfortunately very slow
+    # sns.pairplot(data, diag_kind="kde")
+    corr = data_df.corr()
+    ax = sns.heatmap(corr, vmin=-1, vmax=1, center=0, cmap=sns.diverging_palette(20, 220, n=200), square=True)
+    ax.set_xticklabels(ax.get_xticklabels(), rotation=45, horizontalalignment='right')
+
     plt.show()
 
 
-def decompose(data, freq=365, model='additive'):
+def decompose(data, period=365, model='additive'):
     """Plot decomposition graph. Analze if data are seasonal.
-    
+
     Args:
         data (np.ndarray): Time series data
-        freq (int, optional): Seasonal interval. Defaults to 365.
+        period (int, optional): Seasonal interval. Defaults to 365.
         model (str, optional): Additive or multiplicative. Defaults to 'additive'.
-    """    
-    decomposition = seasonal_decompose(data, model=model, freq=freq)
+    """
+    decomposition = seasonal_decompose(data, model=model, period=period)
 
     plt.figure(figsize=(15, 8))
     plt.subplot(4, 1, 1)

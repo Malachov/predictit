@@ -35,7 +35,7 @@ def user_warning(message):
 def traceback_warning(message=''):
     import pygments
 
-    separated_traceback = pygments.highlight(traceback.format_exc(), pygments.lexers.PythonTracebackLexer(), pygments.formatters.Terminal256Formatter())
+    separated_traceback = pygments.highlight(traceback.format_exc(), pygments.lexers.PythonTracebackLexer(), pygments.formatters.Terminal256Formatter(style='friendly'))
     separated_traceback = textwrap.indent(text=f"\n\n{message}\n====================\n\n{separated_traceback}\n====================\n", prefix='    ')
 
     warnings.warn(f"\n\n\n{separated_traceback}\n\n")

@@ -1,4 +1,5 @@
-"""Module with main function optimize that find optimal input paramaters for function. Arguments are input model, initial function arguments and arguments limits.
+"""Module with main function optimize that find optimal input paramaters for function.
+Arguments are input model, initial function arguments and arguments limits.
 More info is in optimize function documentation"""
 
 import numpy as np
@@ -10,7 +11,8 @@ from . import evaluate_predictions
 from .misc import traceback_warning
 
 
-def optimize(model, kwargs, kwargs_limits, model_train_input, model_test_inputs, models_test_outputs, error_criterion='mape', multicolumn_source=0, fragments=10, iterations=3, details=0, time_limit=5, predicted_column_index=0, name='Your model'):
+def optimize(model, kwargs, kwargs_limits, model_train_input, model_test_inputs, models_test_outputs, error_criterion='mape',
+             multicolumn_source=0, fragments=10, iterations=3, details=0, time_limit=5, predicted_column_index=0, name='Your model'):
     """Function to find optimal parameters of function. For example if we want to find minimum of function x^2,
     we can use limits from -10 to 10. If we have 4 fragments and 3 iterations. it will separate interval on 4 parts,
     so we have aproximately points -10, -4, 4, 10. We evaluate the best one and make new interval to closest points,
@@ -24,7 +26,8 @@ def optimize(model, kwargs, kwargs_limits, model_train_input, model_test_inputs,
         model (func): Function to be optimized (eg: ridgeregression).
         kwargs (dict): Initial arguments (eg: {"alpha": 0.1, "n_steps_in": 10}).
         kwargs_limits (dict): Bounds of arguments (eg: {"alpha": [0.1, 1], "n_steps_in":[2, 30]}).
-        train_input (np.array or tuple(np.ndarray, np.ndarray, np.ndarray)): Data on which function is optimized. Use train data or sequentions (tuple with (X, y, x_input)) - depends on model. Defaults to None.
+        train_input (np.array or tuple(np.ndarray, np.ndarray, np.ndarray)): Data on which function is optimized.
+            Use train data or sequentions (tuple with (X, y, x_input)) - depends on model. Defaults to None.
         X (np.array): Input sequentions on which function is optimized. Use this or train_input - depends on model. Defaults to None.
         y (np.array): Output on which function is optimized. Use this or train_input - depends on model. Defaults to None.
         error_criterion (str, optional): Error criterion used in evaluation. 'rmse' or 'mape'. Defaults to 'mape'.
@@ -70,13 +73,14 @@ def optimize(model, kwargs, kwargs_limits, model_train_input, model_test_inputs,
         for repeat_iteration in range(n_test_samples):
 
             predictions = model.predict(model_test_inputs[repeat_iteration], trained_model, predicts=predicts)
-            modeleval[repeat_iteration] = evaluate_predictions.compare_predicted_to_test(predictions, models_test_outputs[repeat_iteration], error_criterion=error_criterion, plot=0)
+            modeleval[repeat_iteration] = evaluate_predictions.compare_predicted_to_test(predictions, models_test_outputs[repeat_iteration],
+                                                                                         error_criterion=error_criterion, plot=0)
 
         return np.mean(modeleval)
 
 
     def watchdog(timeout, code, *args, **kwargs):
-        """Time-limited execution for optimization function."""
+        """Time-limited execution for python function."""
         def tracer(frame, event, arg, start=time.time()):
             "Helper."
             now = time.time()

@@ -4,15 +4,36 @@ Library/framework for making predictions. Choose best of 20 models (ARIMA, regre
 ## Output
 Most common output is plotly interactive graph, numpy array of results or deploying to database.
 
-<p align="center">
+<center>
 <img src="https://raw.githubusercontent.com/Malachov/predictit/master/output_example.png" width="620" alt="Table of results"/>
-</p>
+</center>
 
-It will also print the table of models errors.
+It will also print the table of models errors. There is an example.
 
-<p align="center">
-<img src="https://raw.githubusercontent.com/Malachov/predictit/master/table_of_results.png" width="700" alt="Table of results"/>
-</p>
+<center>
+
+|                      Model                       | Average mape error |          Time         |
+|--------------------------------------------------|--------------------|-----------------------|
+|                Conjugate gradient                | 63.524174977250475 |  0.05654573440551758  |
+|              Bayes ridge regression              | 63.710155929156926 |   0.1469578742980957  |
+|          Passive aggressive regression           | 63.710155929156926 |  0.11465597152709961  |
+|                Gradient boosting                 | 63.710155929156926 |  0.13335371017456055  |
+|          Stochastic gradient regression          |  63.7440614924803  |  0.05531454086303711  |
+|        Autoregressive Linear neural unit         | 64.10576937765468  |   0.1627349853515625  |
+|                Sklearn regression                | 64.14795186243558  |  0.10858750343322754  |
+|             Extreme learning machine             |  67.2954353113517  |  0.20347213745117188  |
+|           Gen Extreme learning machine           |  67.7119926670532  |  0.11354947090148926  |
+| ARIMA (Autoregression integrated moving average) |  72.3343185006233  |  0.04496884346008301  |
+|                       ARMA                       | 72.33836164465275  |  0.13980531692504883  |
+|               AR (Autoregression)                | 81.37002844079231  |   0.2559630870819092  |
+|              KNeighbors regression               | 81.44464325916428  |   0.1639876365661621  |
+|               Compare with average               | 82.80799592765669  | 0.0021245479583740234 |
+|             Decision tree regression             | 88.78427790748702  |  0.14351654052734375  |
+|   Autoregressive Linear neural unit normalized   | 113.76306771909528 |  0.16782641410827637  |
+
+</center>
+
+Return type of main predict function depends on config. It can return best prediction as array or all predictions array or plot as div string or dictionary or detailed results.
 
 ## Oficial repo and documentation links
 
@@ -27,10 +48,10 @@ Sometime you can have issues with installing some libraries from requirements (e
 
 ## How to
 Software can be used in three ways. As a python library or with command line arguments or as normal python scripts.
-Main function is predict in main.py script.
+Main function is predict in `main.py` script.
 There is also predict_multiple_columns if you want to predict more at once (columns or time frequentions) and also compare_models function that evaluate test data and can tell you which models are best. Then you can use only such a models. It's recommended also to use arguments optimization just once, change initial parameters in config and turn optimization off for performance reasons.
 
-Command line arguments as well as functions arguments overwrite default config.py values. Not all the config options are in function arguments or command line arguments.
+Command line arguments as well as functions arguments overwrite default `config.py` values. Not all the config options are in function arguments or command line arguments.
 
 ### Simple example of predict function with Pypi and function arguments
 ```Python
@@ -40,17 +61,17 @@ import numpy as np
 predictions = predictit.main.predict(np.random.randn(1, 100), predicts=3, plot=1)
 ```
 
-### Simple example of using main.py script
-Open config.py (only script you need to edit (very simple)), do the setup. Mainly used_function and data or data_source and path. Then just run main.py.
+### Simple example of using `main.py` script
+Open `config.py` (only script you need to edit (very simple)), do the setup. Mainly used_function and data or data_source and path. Then just run `main.py`.
 
 ### Simple example of using command line arguments
-Run code below in terminal in predictit folder and change csv path (test data are not included in library because of size!). Use main.py --help for more parameters info.
+Run code below in terminal in predictit folder and change csv path (test data are not included in library because of size!). Use `main.py` --help for more parameters info.
 
 ```
 python main.py --function predict --data_source 'csv' --csv_full_path 'test_data/daily-minimum-temperatures.csv' --predicted_column 1
 ```
 
-### Example of using as a library as a pro with editting config.py
+### Example of using as a library as a pro with editting `config.py`
 ```Python
 
 import predictit
@@ -100,4 +121,10 @@ config.update({
 predictions = predictit.main.predict()
 ```
 
-Or if you downloaded it from github and not via pypi, just edit config as you need and run main.py
+To see all the possible values in `config.py` from your IDE, use
+
+```Python
+predictit.config.print_config()
+```
+
+Or if you downloaded it from github and not via pypi, just edit config as you need and run `main.py`

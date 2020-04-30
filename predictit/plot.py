@@ -3,6 +3,7 @@
 from predictit import misc
 from predictit.config import config
 import os
+from IPython import get_ipython
 
 
 def plotit(complete_dataframe, plot_type='plotly', show=1, save=0, save_path='', plot_return=None, bounds='default', predicted_column_name='', best_model_name=''):
@@ -22,21 +23,22 @@ def plotit(complete_dataframe, plot_type='plotly', show=1, save=0, save_path='',
         complete_dataframe = complete_dataframe.copy()
         graph_data = []
 
-        bounds = 1 if 'Upper Bound' in complete_dataframe and 'Lower Bound' in complete_dataframe else 0
+        bounds = 1 if 'Upper bound' in complete_dataframe and 'Lower bound' in complete_dataframe else 0
 
         if bounds:
             upper_bound = pl.graph_objs.Scatter(
-                name='Upper Bound',
+                name='Upper bound',
                 x=complete_dataframe.index,
                 y=complete_dataframe['Upper bound'],
                 #mode='lines',
                 marker=dict(color='#444'),
-                line=dict(width=0),
-                fillcolor='rgba(68, 68, 68, 0.3)',
-                fill='tonexty')
+                line=dict(width=0),)
+                # fillcolor='rgba(68, 68, 68, 0.3)',
+                # fill='tonexty')
 
-            complete_dataframe.drop('Upper Bound', axis=1, inplace=True)
+            complete_dataframe.drop('Upper bound', axis=1, inplace=True)
             graph_data.append(upper_bound)
+
 
         if best_model_name in complete_dataframe:
             best_prediction = pl.graph_objs.Scatter(
@@ -53,14 +55,17 @@ def plotit(complete_dataframe, plot_type='plotly', show=1, save=0, save_path='',
 
         if bounds:
             lower_bound = pl.graph_objs.Scatter(
-                name='Lower Bound',
+                name='Lower bound',
                 x=complete_dataframe.index,
                 y=complete_dataframe['Lower bound'],
                 marker=dict(color='#444'),
-                line=dict(width=0))
+                line=dict(width=0),
+                fillcolor='rgba(68, 68, 68, 0.3)',
+                fill='tonexty')
 
-            complete_dataframe.drop('Lower Bound', axis=1, inplace=True)
+            complete_dataframe.drop('Lower bound', axis=1, inplace=True)
             graph_data.append(lower_bound)
+
 
         if predicted_column_name in complete_dataframe:
 

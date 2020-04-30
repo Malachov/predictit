@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import predictit.misc
 
+
 def compare_predicted_to_test(predicted, test, train=None, error_criterion='mape', plot=0, modelname="Default model", dataname="default data", details=0):
     """Compare tested model with reality.
 

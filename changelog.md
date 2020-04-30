@@ -5,10 +5,12 @@
 - [x] Data smoothing - Savitzky-Golay filter in data preprocessing
 - [x] Many new models from sklearn - Decision trees, bagging, Gradient boosting...
 - [x] Publish script to generate documentation and push to pypi
+- [x] Data processed on 'standard' shape [n_samples, n_features] so in same shape as dataframe
+- [x] Config print_config function to print config file as help
 
 ## v1.2x. - 03/2020
 
-- [x] Validation mode in config. Results are evaluated on data that was not in train data.
+- [x] Validation mode in config. Results are evaluated on data that was not in train data - used in compare_models.
 - [x] Remove nan values - all column option was added
 - [x] User colored warnings in misc (not only traceback warnings) and colorized error raising
 
@@ -37,6 +39,6 @@
 - [x] New model similarity based error criterions (not exact point to point comparison)
         1) Imported time warping
         2) Own sliding window error
-- [x] One more level of debug - stop at first warning - add warning exceptions
+- [x] One more level of debug - stop at first warning - add warning exceptions to config to hide outer depracation etc. warnings
 - [x] More user friendly warnings (color syntax highlighted) + Error separated from error location 
 - [x] Some memory and time profiling in tests

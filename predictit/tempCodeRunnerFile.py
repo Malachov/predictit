@@ -1,1 +1,0 @@
-config["show_plot"]

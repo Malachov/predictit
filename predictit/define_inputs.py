@@ -30,14 +30,15 @@ def make_sequences(data, n_steps_in, n_steps_out=1, constant=None, predicted_col
 
     if n_steps_out > n_steps_in:
         n_steps_in = n_steps_out + 1
-        user_warning('n_steps_out was biggar than n_steps_in - n_steps_in changed during prediction!')
+        user_warning('n_steps_out was bigger than n_steps_in - n_steps_in changed during prediction!')
 
     if default_other_columns_length == 0:
-        data = data[0].reshape(1, -1)
+        data = data[:, 0].reshape(1, -1)
 
-    shape = data.shape[:-1] + (data.shape[-1] - n_steps_in + 1, n_steps_in)
-    strides = data.strides + (data.strides[-1],)
-    X = np.lib.stride_tricks.as_strided(data, shape=shape, strides=strides)
+    data_T = data.T
+    shape = data_T.shape[:-1] + (data_T.shape[-1] - n_steps_in + 1, n_steps_in)
+    strides = data_T.strides + (data_T.strides[-1],)
+    X = np.lib.stride_tricks.as_strided(data_T, shape=shape, strides=strides)
 
     if predicted_column_index != 0:
         X[[0, predicted_column_index], :] = X[[predicted_column_index, 0], :]
@@ -81,10 +82,10 @@ def create_inputs(input_name, data, predicted_column_index):
     used_sequentions = {}
 
     if input_name == 'data_one_column':
-        used_sequentions = data[predicted_column_index]
+        used_sequentions = data[:, predicted_column_index]
 
         if input_name in ['one_in_one_out_constant', 'one_in_one_out']:
-            used_sequentions = used_sequentions.reshape(1, -1)
+            used_sequentions = used_sequentions.reshape(-1, 1)
 
     elif input_name == 'data':
         used_sequentions = data

@@ -3,7 +3,7 @@
 import numpy as np
 
 
-def gen_sin(n, periods=220):
+def gen_sin(n=1000):
     """Generate test data of length n in sinus shape.
 
     Args:
@@ -13,15 +13,15 @@ def gen_sin(n, periods=220):
         np.ndarray: Sinus shaped data.
     """
 
-    if not n:
-        n = 1000
+    fs = 8000  # Sample rate
+    f = 50
+    x = np.arange(n)
+    y = np.sin(2 * np.pi * f * x / fs)
 
-    t = np.linspace(0, periods * np.pi, n)
-    data1 = np.sin(t)
-    return data1
+    return y
 
 
-def gen_sign(n, periods=220):
+def gen_sign(n=1000, periods=220):
     """Generate test data of length n in signum shape.
 
     Args:
@@ -31,16 +31,14 @@ def gen_sign(n, periods=220):
         np.ndarray: Signum shaped data.
     """
 
-    if not n:
-        n = 1000
+    sin = gen_sin(n=n)
+    data = np.sign(sin)
 
-    data1 = gen_sin(n, periods=periods)
-    data2 = np.sign(data1)
-    return data2
+    return data
 
 
 # Random
-def gen_random(n):
+def gen_random(n=1000):
     """Generate random test data of length.
 
     Args:
@@ -50,8 +48,22 @@ def gen_random(n):
         np.ndarray: Random test data.
     """
 
-    if not n:
-        n = 1000
+    data = np.random.randn(n) * 5 + 10
 
-    data3 = np.random.randn(n) * 5 + 10
-    return data3
+    return data
+
+
+# Range
+def gen_slope(n=1000):
+    """Generate random test data of length.
+
+    Args:
+        n (int): Length of data.
+
+    Returns:
+        np.ndarray: Slope test data.
+    """
+
+    data = np.array(range(n))
+
+    return data
