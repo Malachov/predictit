@@ -2,14 +2,15 @@
 
 cd ../docs/source
 
-rm -v !("conf.py"|"index.rst"|"tooc.rst")
+shopt -s extglob
 
-cd ..
+find . -type f -not \( -name "conf.py" -o -name "index.rst" -o -name "tooc.rst" \) -delete
 
-sphinx-apidoc -f -e -o source/ ../predictit
+sphinx-apidoc -f -e -o ../source/ ../../predictit
+
 rm predictit.tempCodeRunnerFile.rst
 
-cd ..
+cd ../..
 
 python setup.py sdist bdist_wheel
 twine upload dist/*
@@ -19,3 +20,5 @@ rm -r -f predictit.egg-info
 rm -r -f build
 
 echo 'Job done'
+
+$SHELL

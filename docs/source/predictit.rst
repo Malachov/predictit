@@ -26,7 +26,6 @@ Submodules
    predictit.main_for_develop
    predictit.misc
    predictit.plot
-   predictit.tempCodeRunnerFile
 
 Module contents
 ---------------
