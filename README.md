@@ -4,34 +4,10 @@ Library/framework for making predictions. Choose best of 20 models (ARIMA, regre
 ## Output
 Most common output is plotly interactive graph, numpy array of results or deploying to database.
 
-<center>
-<img src="https://raw.githubusercontent.com/Malachov/predictit/master/output_example.png" width="620" alt="Table of results"/>
-</center>
 
-It will also print the table of models errors. There is an example.
+<img src="https://raw.githubusercontent.com/Malachov/predictit/master/output_example.png" width="620" alt="Plot of results"/>
 
-<center>
-
-|                      Model                       | Average mape error |          Time         |
-|--------------------------------------------------|--------------------|-----------------------|
-|                Conjugate gradient                | 63.524174977250475 |  0.05654573440551758  |
-|              Bayes ridge regression              | 63.710155929156926 |   0.1469578742980957  |
-|          Passive aggressive regression           | 63.710155929156926 |  0.11465597152709961  |
-|                Gradient boosting                 | 63.710155929156926 |  0.13335371017456055  |
-|          Stochastic gradient regression          |  63.7440614924803  |  0.05531454086303711  |
-|        Autoregressive Linear neural unit         | 64.10576937765468  |   0.1627349853515625  |
-|                Sklearn regression                | 64.14795186243558  |  0.10858750343322754  |
-|             Extreme learning machine             |  67.2954353113517  |  0.20347213745117188  |
-|           Gen Extreme learning machine           |  67.7119926670532  |  0.11354947090148926  |
-| ARIMA (Autoregression integrated moving average) |  72.3343185006233  |  0.04496884346008301  |
-|                       ARMA                       | 72.33836164465275  |  0.13980531692504883  |
-|               AR (Autoregression)                | 81.37002844079231  |   0.2559630870819092  |
-|              KNeighbors regression               | 81.44464325916428  |   0.1639876365661621  |
-|               Compare with average               | 82.80799592765669  | 0.0021245479583740234 |
-|             Decision tree regression             | 88.78427790748702  |  0.14351654052734375  |
-|   Autoregressive Linear neural unit normalized   | 113.76306771909528 |  0.16782641410827637  |
-
-</center>
+<img src="https://raw.githubusercontent.com/Malachov/predictit/master/table_of_results.png" width="620" alt="Table of results"/>
 
 Return type of main predict function depends on config. It can return best prediction as array or all predictions array or plot as div string or dictionary or detailed results.
 
