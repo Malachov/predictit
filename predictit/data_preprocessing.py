@@ -46,7 +46,7 @@ def data_consolidation(data):
         data = pd.Dataframe(data)
 
     if isinstance(data, pd.DataFrame):
-        data_for_predictions_df = data
+        data_for_predictions_df = data.copy()
 
         if isinstance(config['predicted_column'], str):
 
@@ -64,12 +64,12 @@ def data_consolidation(data):
         try:
             int(data_for_predictions_df[predicted_column_name].iloc[0])
         except Exception:
-            user_warning("Predicted column is not number datatype. Setup correct 'predicted_column' in config.py")
+            raise KeyError(colorize(f"Predicted column is not number datatype. Setup correct 'predicted_column' in config.py"))
 
         if isinstance(data.index, (pd.core.indexes.datetimes.DatetimeIndex, pd._libs.tslibs.timestamps.Timestamp)):
             config['datetime_index'] = 'index'
 
-        if config['datetime_index'] is not None:
+        if config['datetime_index'] not in [None, '']:
 
             if config['datetime_index'] == 'index':
                 pass
@@ -99,7 +99,7 @@ def data_consolidation(data):
                     data_for_predictions_df.reset_index(inplace=True)
 
         # Make predicted column index 0
-            data_for_predictions_df.insert(0, predicted_column_name, data_for_predictions_df.pop(predicted_column_name))
+        data_for_predictions_df.insert(0, predicted_column_name, data_for_predictions_df.pop(predicted_column_name))
 
         data_for_predictions_df = data_for_predictions_df.iloc[-config['datalength']:, :]
 
@@ -118,7 +118,7 @@ def data_consolidation(data):
 
 
     elif isinstance(data, np.ndarray):
-        data_for_predictions = data
+        data_for_predictions = data.copy()
 
         if not isinstance(config['predicted_column'], int):
             raise TypeError(colorize("'predicted_column' in config is a string and data in numpy array format. Numpy does not allow string assignment"))
@@ -141,13 +141,16 @@ def data_consolidation(data):
             data_for_predictions = data_for_predictions[:, 0].reshape(-1, 1)
 
         data_for_predictions_df = pd.DataFrame(data_for_predictions)
-        data_for_predictions_df.rename(columns={0: predicted_column_name})
+        data_for_predictions_df.rename(columns={data_for_predictions_df.columns[0]: predicted_column_name}, inplace=True)
 
     else:
         raise TypeError(colorize("""Input data must be in pd.dataframe, pd.series or numpy array. If you use csv or sql data source, its converted automatically,
                                  but setup csv_full_path. Check config comments fore  more informations..."""))
 
-    data_for_predictions = data_for_predictions.astype(config['dtype'], copy=False)
+    try:
+        data_for_predictions = data_for_predictions.astype(config['dtype'], copy=False)
+    except Exception:
+        user_warning(f"Predicted column - {config['predicted_column']} is not a number. Check config")
 
     return data_for_predictions, data_for_predictions_df, predicted_column_name
 

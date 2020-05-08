@@ -8,17 +8,16 @@ from prettytable import PrettyTable
 import time
 import pandas as pd
 import argparse
-import inspect
 import warnings
+import inspect
+import os
 
-this_path = Path(__file__).resolve().parents[1]
-this_path_string = str(this_path)
 
-# try:
-#     import predictit
-# except Exception:
-#     If used not as a library but as standalone framework, add path to be able to import predictit if not opened in folder
+this_path = Path(os.path.abspath(inspect.getframeinfo(inspect.currentframe()).filename)).parents[1]
+this_path_string = this_path.as_posix()
+
 sys.path.insert(0, this_path_string)
+
 import predictit
 
 from predictit.config import config, presets
@@ -37,58 +36,46 @@ def update_gui(content, id):
         pass
 
 
-if config['debug'] == 1:
-    warnings.filterwarnings('once')
-elif config['debug'] == 2:
-    warnings.filterwarnings('error')
-else:
-    warnings.filterwarnings('ignore')
-
-for i in config['ignored_warnings']:
-    warnings.filterwarnings('ignore', message=fr"[\s\S]*{i}*")
-
 if __name__ == "__main__":
 
 
 
-
     config.update({
-        # 'data': predictit.test_data.generate_test_data.gen_sin(),
-        'data': predictit.test_data.generate_test_data.gen_slope(),
-        'data_source': 'test',
-        'predicted_column': '',
-        'datetime_index': '',
-        'datalength': 1000,
-        'error_criterion': 'rmse',
-        'last_row': 1,
+        'data_source': 'csv',
+        'csv_test_data_relative_path': '5000 Sales Records.csv',
+        'datetime_index': 5,
+        'freq': 'M',
+        'predicted_column': 'Units Sold',
+        'print_number_of_models': 10,
+        'last_row': 0,
         'correlation_threshold': 0.2,
-        'models_parameters': {"Bayes ridge regression": {"regressor": 'bayesianridge', "n_iter": 300, "alpha_1": 1.e-6, "alpha_2": 1.e-6, "lambda_1": 1.e-6, "lambda_2": 1.e-6}},
+        'optimizeit': 0,
+        'standardize': '01',
 
-        'models_parameters_limits': {"Bayes ridge regression": {"alpha_1": [0.1e-6, 3e-6], "alpha_2": [0.1e-6, 3e-6], 'lambda_1': [0.1e-6, 3e-6]}},
-
-        'predicts': 3,
-        'default_n_steps_in': 25,
-        'used_models': {"Sklearn regression": predictit.models.sklearn_regression},
-        'standardize': 0,
-        'remove_outliers': 0,
-    
-
-
-        # 'data_transform': 'difference',
-        # 'mode': 'validate',  # If 'validate', put apart last few ('predicts' + 'validation_gap') values and evaluate on test data that was not in train set. Do not setup - use compare_models function, it will use it automattically.
-
-
-
-
-
+        'used_models': {
+            "Hubber regression": predictit.models.sklearn_regression,
+        }
     })
 
 
 
 
+
+
+
+    if config['debug'] == 1:
+        warnings.filterwarnings('once')
+    elif config['debug'] == 2:
+        warnings.filterwarnings('error')
+    else:
+        warnings.filterwarnings('ignore')
+
+    for i in config['ignored_warnings']:
+        warnings.filterwarnings('ignore', message=fr"[\s\S]*{i}*")
+
     _GUI = predictit.misc._GUI
     # Add everything printed + warnings to variable to be able to print in GUI
-    if _GUI:
+    if _GUI or config['debug'] == -1:
         import io
 
         stdout = sys.stdout
@@ -134,15 +121,15 @@ if __name__ == "__main__":
 
     if config['data'] is None:
 
+
         ############# Load CSV data #############
         if config['data_source'] == 'csv':
             if config['csv_test_data_relative_path']:
                 try:
-                    data_location = this_path / 'predictit' / 'test_data'
-                    csv_path = data_location / config['csv_test_data_relative_path']
-                    config['csv_full_path'] = Path(csv_path).as_posix()
+                    config['csv_full_path'] = (this_path / 'predictit' / 'test_data' / config['csv_test_data_relative_path']).as_posix()
                 except Exception:
-                    raise FileNotFoundError(colorize(f"\n ERROR - Test data load failed - Setup CSV adress and column name in config \n\n"))
+                    raise FileNotFoundError(colorize(("\n ERROR - Test data load failed - Setup CSV adress and column name in config. "
+                                                      "Use relative and save to test_data folder or  \n\n")))
             try:
                 config['data'] = pd.read_csv(config['csv_full_path'], header=0).iloc[-config['max_imported_length']:, :]
             except Exception:
@@ -158,7 +145,8 @@ if __name__ == "__main__":
 
         elif config['data_source'] == 'test':
             config['data'] = predictit.test_data.generate_test_data.gen_random()
-            user_warning("Test data was used. Setup config.py where are possible options with comments. Data can be insert as function parameters, with editing config.py or with CLI.")
+            user_warning(("Test data was used. Setup config.py 'data_source'. Check official readme or do >>> predictit.config.print_config() "
+                          "to see all possible options with comments. Data can be insert as function parameters, with editing config.py or with CLI."))
 
     ##############################################
     ############ DATA PREPROCESSING ###### ANCHOR Preprocessing
@@ -197,7 +185,8 @@ if __name__ == "__main__":
             traceback_warning("Analyze failed")
 
     if config['remove_outliers']:
-        data_for_predictions = predictit.data_preprocessing.remove_outliers(data_for_predictions, predicted_column_index=predicted_column_index, threshold=config['remove_outliers'])
+        data_for_predictions = predictit.data_preprocessing.remove_outliers(data_for_predictions, predicted_column_index=predicted_column_index,
+                                                                            threshold=config['remove_outliers'])
 
     if config['smooth']:
         data_for_predictions = predictit.data_preprocessing.smooth(data_for_predictions, config['smooth'][0], config['smooth'][1])
@@ -340,10 +329,11 @@ if __name__ == "__main__":
                             try:
                                 start_optimization = time.time()
 
-                                best_kwargs = predictit.best_params.optimize(iterated_model, config['models_parameters'][iterated_model_name], config['models_parameters_limits'][iterated_model_name],
-                                                                             model_train_input=model_train_input, model_test_inputs=model_test_inputs, models_test_outputs=models_test_outputs,
-                                                                             fragments=config['fragments'], iterations=config['iterations'], time_limit=config['optimizeit_limit'],
-                                                                             error_criterion=config['error_criterion'], name=iterated_model_name, details=config['optimizeit_details'])
+                                best_kwargs = predictit.best_params.optimize(
+                                    iterated_model, config['models_parameters'][iterated_model_name], config['models_parameters_limits'][iterated_model_name],
+                                    model_train_input=model_train_input, model_test_inputs=model_test_inputs, models_test_outputs=models_test_outputs,
+                                    fragments=config['fragments'], iterations=config['iterations'], time_limit=config['optimizeit_limit'],
+                                    error_criterion=config['error_criterion'], name=iterated_model_name, details=config['optimizeit_details'])
 
                                 for k, l in best_kwargs.items():
 
@@ -389,13 +379,16 @@ if __name__ == "__main__":
 
                             # Create in-sample predictions to evaluate if model is good or not
 
-                            test_results_matrix[repeat_iteration, iterated_model_index, data_length_index] = iterated_model.predict(model_test_inputs[repeat_iteration], trained_models[iterated_model_name], predicts=config['predicts'])
+                            test_results_matrix[repeat_iteration, iterated_model_index, data_length_index] = iterated_model.predict(
+                                model_test_inputs[repeat_iteration],trained_models[iterated_model_name], predicts=config['predicts'])
 
                             if config['power_transformed'] == 2:
-                                test_results_matrix[repeat_iteration, iterated_model_index, data_length_index] = predictit.data_preprocessing.fitted_power_transform(test_results_matrix[repeat_iteration, iterated_model_index, data_length_index], data_std, data_mean)
+                                test_results_matrix[repeat_iteration, iterated_model_index, data_length_index] = predictit.data_preprocessing.fitted_power_transform(
+                                    test_results_matrix[repeat_iteration, iterated_model_index, data_length_index], data_std, data_mean)
 
-                            evaluated_matrix[repeat_iteration, iterated_model_index, data_length_index] = predictit.evaluate_predictions.compare_predicted_to_test(test_results_matrix[repeat_iteration, iterated_model_index, data_length_index],
-                                                                                                                                                                   models_test_outputs[repeat_iteration], error_criterion=config['error_criterion'])
+                            evaluated_matrix[repeat_iteration, iterated_model_index, data_length_index] = predictit.evaluate_predictions.compare_predicted_to_test(
+                                test_results_matrix[repeat_iteration, iterated_model_index, data_length_index],
+                                models_test_outputs[repeat_iteration], error_criterion=config['error_criterion'])
 
                     except Exception:
                         traceback_warning(f"Error in {iterated_model_name} model on data length {data_length_iteration}")
@@ -431,10 +424,14 @@ if __name__ == "__main__":
             best_model_name = this_model
 
         if not config['print_number_of_models'] or i < config['print_number_of_models']:
-            predicted_models_for_table[this_model] = {'order': i + 1, 'error_criterion': model_results[j], 'predictions': reality_results_matrix[j, np.argmin(repeated_average[j])], 'data_length': np.argmin(repeated_average[j])}
+            predicted_models_for_table[this_model] = {
+                'order': i + 1, 'error_criterion': model_results[j],'predictions': reality_results_matrix[j, np.argmin(repeated_average[j])],
+                'data_length': np.argmin(repeated_average[j])}
 
         if not config['print_number_of_models'] is None or i < config['plot_number_of_models']:
-            predicted_models_for_plot[this_model] = {'order': i + 1, 'error_criterion': model_results[j], 'predictions': reality_results_matrix[j, np.argmin(repeated_average[j])], 'data_length': np.argmin(repeated_average[j])}
+            predicted_models_for_plot[this_model] = {
+                'order': i + 1, 'error_criterion': model_results[j], 'predictions': reality_results_matrix[j, np.argmin(repeated_average[j])],
+                'data_length': np.argmin(repeated_average[j])}
 
     best_model_predicts = predicted_models_for_table[best_model_name]['predictions'] if best_model_name in predicted_models_for_table else "Best model had an error"
 
@@ -490,8 +487,9 @@ if __name__ == "__main__":
     if config['plot']:
 
         plot_return = 'div' if _GUI else ''
-        div = predictit.plot.plotit(complete_dataframe, plot_type=config['plot_type'], show=config['show_plot'], save=config['save_plot'], save_path=config['save_plot_path'],
-                                    plot_return=plot_return, best_model_name=best_model_name_plot, predicted_column_name=predicted_column_name)
+        div = predictit.plot.plotit(complete_dataframe, plot_type=config['plot_type'], show=config['show_plot'], save=config['save_plot'],
+                                    save_path=config['save_plot_path'], plot_return=plot_return, best_model_name=best_model_name_plot,
+                                    predicted_column_name=predicted_column_name)
 
     time_point = update_time_table(time_point)
     progress_phase = "Completed"
@@ -503,8 +501,10 @@ if __name__ == "__main__":
 
     if config['print']:
         if config['print_result']:
-            print(f"\n Best model is {best_model_name} \n\t with results {best_model_predicts} \n\t with model error {config['error_criterion']} = {predicted_models_for_table[best_model_name]['error_criterion']}")
-            print(f"\n\t with data length {data_lengths[predicted_models_for_table[best_model_name]['data_length']]} \n\t with paramters {config['models_parameters'][best_model_name]} \n")
+            print((f"\n Best model is {best_model_name} \n\t with results {best_model_predicts} \n\t with model error {config['error_criterion']} = "
+                   f"{predicted_models_for_table[best_model_name]['error_criterion']}"))
+            print((f"\n\t with data length {data_lengths[predicted_models_for_table[best_model_name]['data_length']]} \n\t with paramters "
+                   f"{config['models_parameters'][best_model_name]} \n"))
 
 
         # Table of results
@@ -547,3 +547,4 @@ if __name__ == "__main__":
         sys.stdout = stdout
 
         print(output)
+

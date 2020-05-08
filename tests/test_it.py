@@ -1,16 +1,19 @@
-""" Test module. Auto pytest that can be started ide.
-Also in jupyter cell in VS Code and debug
+""" Test module. Auto pytest that can be started in IDE or with
 
+    >>> python -m pytest
+
+in terminal in tests folder.
 """
 
 #%%
 import sys
-import pathlib
 import numpy as np
 import pandas as pd
+from pathlib import Path
+import inspect
+import os
 
-sys.path.insert(0, pathlib.Path(__file__).resolve().parents[1].as_posix())
-
+sys.path.insert(0, Path(os.path.abspath(inspect.getframeinfo(inspect.currentframe()).filename)).parents[1].as_posix())
 import predictit
 from predictit.config import config
 
@@ -20,6 +23,8 @@ config.update({
     'plot': 0,
     'show_plot': 0,
     'data': None,
+    'lengths': 0,
+    'datalength': 500,
     'used_models': {
         "AR (Autoregression)": predictit.models.statsmodels_autoregressive,
         "Conjugate gradient": predictit.models.conjugate_gradient,
@@ -173,7 +178,7 @@ if __name__ == "__main__":
     # print("\n\ntest_main_from_config\n")
     # result_1 = test_main_from_config()
     # print("\n\ntest_main_optimize_and_args\n")
-    result_2 = test_main_optimize_and_args()
+    # result_2 = test_main_optimize_and_args()
     # print("\n\ntest_main_dataframe\n")
     # result_3 = test_main_dataframe()
     # print("\n\ntest_main_multiple\n")

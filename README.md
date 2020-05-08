@@ -4,10 +4,12 @@ Library/framework for making predictions. Choose best of 20 models (ARIMA, regre
 ## Output
 Most common output is plotly interactive graph, numpy array of results or deploying to database.
 
-
+<p align="center">
 <img src="https://raw.githubusercontent.com/Malachov/predictit/master/output_example.png" width="620" alt="Plot of results"/>
-
+</p>
+<p align="center">
 <img src="https://raw.githubusercontent.com/Malachov/predictit/master/table_of_results.png" width="620" alt="Table of results"/>
+</p>
 
 Return type of main predict function depends on config. It can return best prediction as array or all predictions array or plot as div string or dictionary or detailed results.
 
@@ -44,7 +46,7 @@ Open `config.py` (only script you need to edit (very simple)), do the setup. Mai
 Run code below in terminal in predictit folder and change csv path (test data are not included in library because of size!). Use `main.py` --help for more parameters info.
 
 ```
-python main.py --function predict --data_source 'csv' --csv_full_path 'test_data/daily-minimum-temperatures.csv' --predicted_column 1
+python main.py --used_function predict --data_source 'csv' --csv_full_path 'test_data/daily-minimum-temperatures.csv' --predicted_column 1
 ```
 
 ### Example of using as a library as a pro with editting `config.py`

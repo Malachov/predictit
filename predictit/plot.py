@@ -17,8 +17,9 @@ def plotit(complete_dataframe, plot_type='plotly', show=1, save=0, save_path='',
         import plotly as pl
 
         if not misc._JUPYTER:
-            import plotly.io as pio
-            pio.renderers.default = "browser"
+            pl.io.renderers.default = "browser"
+        else:
+            pl.io.renderers.default = "notebook_connected"
 
         complete_dataframe = complete_dataframe.copy()
         graph_data = []
@@ -30,11 +31,9 @@ def plotit(complete_dataframe, plot_type='plotly', show=1, save=0, save_path='',
                 name='Upper bound',
                 x=complete_dataframe.index,
                 y=complete_dataframe['Upper bound'],
-                #mode='lines',
-                marker=dict(color='#444'),
-                line=dict(width=0),)
-                # fillcolor='rgba(68, 68, 68, 0.3)',
-                # fill='tonexty')
+                line={'width': 0}
+            )
+
 
             complete_dataframe.drop('Upper bound', axis=1, inplace=True)
             graph_data.append(upper_bound)
@@ -45,8 +44,7 @@ def plotit(complete_dataframe, plot_type='plotly', show=1, save=0, save_path='',
                 name=f'1. {best_model_name}',
                 x=complete_dataframe.index,
                 y=complete_dataframe[best_model_name],
-                #mode='lines',
-                line=dict(color='rgb(51, 19, 10)', width=4),
+                line={'color': 'rgb(51, 19, 10)', 'width': 4},
                 fillcolor='rgba(68, 68, 68, 0.3)',
                 fill='tonexty' if bounds else None)
 
@@ -58,8 +56,7 @@ def plotit(complete_dataframe, plot_type='plotly', show=1, save=0, save_path='',
                 name='Lower bound',
                 x=complete_dataframe.index,
                 y=complete_dataframe['Lower bound'],
-                marker=dict(color='#444'),
-                line=dict(width=0),
+                line={'width': 0},
                 fillcolor='rgba(68, 68, 68, 0.3)',
                 fill='tonexty')
 
@@ -73,9 +70,7 @@ def plotit(complete_dataframe, plot_type='plotly', show=1, save=0, save_path='',
                 name=predicted_column_name,
                 x=complete_dataframe.index,
                 y=complete_dataframe[predicted_column_name],
-                line=dict(color='rgb(31, 119, 180)', width=3),
-                fillcolor='rgba(68, 68, 68, 0.3)',
-                fill=None)
+                line={'color': 'rgb(31, 119, 180)', 'width': 2})
 
             complete_dataframe.drop(predicted_column_name, axis=1, inplace=True)
             graph_data.append(history_ax)
@@ -92,11 +87,8 @@ def plotit(complete_dataframe, plot_type='plotly', show=1, save=0, save_path='',
 
         fig.layout.update(
             yaxis=dict(title='Values'),
-            title={'text': config['plot_name'],
-                   'y': 0.9 if misc._JUPYTER else 0.95,
-                   'x': 0.5,
-                   'xanchor': 'center',
-                   'yanchor': 'top'},
+            title={'text': config['plot_name'], 'x': 0.5, 'xanchor': 'center', 'yanchor': 'top',
+                   'y': 0.9 if misc._JUPYTER else 0.95},
             titlefont={'size': 28},
             showlegend=False,
             paper_bgcolor='#d9f0e8'
@@ -113,10 +105,7 @@ def plotit(complete_dataframe, plot_type='plotly', show=1, save=0, save_path='',
             fig.layout.update(
                 title=None,
                 height=290,
-                margin={
-                    'b': 35,
-                    't': 35,
-                    'pad': 4},
+                margin={'b': 35, 't': 35, 'pad': 4},
             )
 
             div = pl.offline.plot(fig, include_plotlyjs=False, output_type='div')

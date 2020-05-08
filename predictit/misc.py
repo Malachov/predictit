@@ -41,6 +41,17 @@ def traceback_warning(message=''):
     warnings.warn(f"\n\n\n{separated_traceback}\n\n")
 
 
+def remove_ansi(string):
+
+    # if not isinstance(string, str):
+    #     string = str(string)
+
+    string = string.replace('\033[93m', '<b>')
+    string = string.replace('\033[0m', '</b>')
+
+    return string
+
+
 def confidence_interval(data, predicts=7, confidence=0.1, p=1, d=0, q=0):
     """Function to find confidence interval of prediction for graph.
 
@@ -76,18 +87,18 @@ def confidence_interval(data, predicts=7, confidence=0.1, p=1, d=0, q=0):
 
     except Exception:
 
-        from predictit import data_preparation
+        from predictit import data_preprocessing
 
         last_value = data[-1]
-        data = data_preparation.do_difference(data)
+        data = data_preprocessing.do_difference(data)
 
         model = statsmodels.tsa.arima_model.ARIMA(data, order=order)
         model_fit = model.fit(disp=0)
         predictions = model_fit.forecast(steps=predicts, alpha=confidence)
 
         bounds = predictions[2].T
-        lower_bound = data_preparation.inverse_difference(bounds[0], last_value)
-        upper_bound = data_preparation.inverse_difference(bounds[1], last_value)
+        lower_bound = data_preprocessing.inverse_difference(bounds[0], last_value)
+        upper_bound = data_preprocessing.inverse_difference(bounds[1], last_value)
 
 
     return lower_bound, upper_bound

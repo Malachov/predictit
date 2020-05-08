@@ -1,10 +1,15 @@
 @ECHO OFF
 
-cd ..\docs
 
-sphinx-apidoc -f -e -o source/ ../predictit
+cd ..\docs\source
 
-cd ..
+for %%i in (*.*) do if not "%%i"=="doc1.txt" if not "%%i"=="doc2.txt" del /q "%%i"
+
+sphinx-apidoc -f -e -o ../source/ ../../predictit
+
+rm predictit.tempCodeRunnerFile.rst
+
+cd ../..
 
 python setup.py sdist bdist_wheel
 twine upload dist/*

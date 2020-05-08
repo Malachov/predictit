@@ -1,10 +1,10 @@
-#!/bin/sh
+#!/bin/bash
 
 cd ../docs/source
 
 shopt -s extglob
 
-find . -type f -not \( -name "conf.py" -o -name "index.rst" -o -name "tooc.rst" \) -delete
+rm -v !("conf.py"|"index.rst"|"tooc.rst") 
 
 sphinx-apidoc -f -e -o ../source/ ../../predictit
 

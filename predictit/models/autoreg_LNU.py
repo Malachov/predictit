@@ -39,6 +39,8 @@ def train(sequentions, predicts=30, mi=1, mi_multiple=1, mi_linspace=(1e-8, 10, 
     w_last = np.zeros((miwidelen, features))
     mi_error = np.zeros(miwidelen)
 
+    bound = 100 * np.amax(X)
+
     if rand_seed != 0:
         random.seed(rand_seed)
 
@@ -53,7 +55,7 @@ def train(sequentions, predicts=30, mi=1, mi_multiple=1, mi_linspace=(1e-8, 10, 
 
                 y[i, j] = np.dot(w, X[j])
 
-                if y[i, j] > 100 * np.amax(X):
+                if y[i, j] > bound:
                     mi_error[i] = np.inf
                     break
 

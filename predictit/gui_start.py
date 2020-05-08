@@ -44,7 +44,17 @@ if __name__ == "__main__":
 
         for i, j in configured.items():
             if j != "" and i in config:
-                config[i] = j
+
+                try:
+                    val = int(j)
+                except ValueError:
+                    try:
+                        val = float(j)
+                    except ValueError:
+                        val = j
+
+                config[i] = val
+
             else:
                 warnings.warn(f"\n \t Inserted option with command line --{i} not found in config.py use --help for more information.\n")
 
@@ -70,11 +80,13 @@ if __name__ == "__main__":
             eel.add_delete_button("content")
 
             if config["debug"]:
+
                 eel.add_HTML_element(results["time_table"], False, "content", "time_parts_table", "Time schema of prediction", "table")
-                eel.add_HTML_element(str(results["output"]), True, "content", "printed_output", "Everything printed", "pre-wrapped")
+                eel.add_HTML_element(predictit.misc.remove_ansi(results['output']), True, "content", "printed_output", "Everything printed", "pre-wrapped")
 
         except Exception:
-            eel.add_HTML_element(f"\n Error in making predictions - {traceback.format_exc()} \n", True, "progress_phase", "error-log", "Error log", "pre-wrapped")
+
+            eel.add_HTML_element(f"\n Error in making predictions - {predictit.misc.remove_ansi(traceback.format_exc())} \n", True, "progress_phase", "error-log", "Error log", "pre-wrapped")
             #eel.edit_gui_js(f"\n Error in making predictions - {traceback.format_exc()} \n", "progress_phase")
 
     eel.start('index.html', port=0)  # mode='chrome-app'
