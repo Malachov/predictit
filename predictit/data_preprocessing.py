@@ -109,7 +109,7 @@ def data_consolidation(data):
                 data_for_predictions_df.dropna(how='any', inplace=True, axis=1)
 
             data_for_predictions_df = data_for_predictions_df.select_dtypes(include='number')
-            data_for_predictions = data_for_predictions_df.values.reshape(-1, 1)
+            data_for_predictions = data_for_predictions_df.values
 
         else:
             data_for_predictions = data_for_predictions_df[predicted_column_name].values.reshape(-1, 1)
