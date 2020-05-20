@@ -4,6 +4,7 @@
 
 ## Big Deals
 
+- [ ] Add big models dictionary with all results - Not each value separately (best_kwargs, results, error_criterion, queue etc...)
 - [ ] Option to unstandardized error criterion to be able to compare absolute results of configuration
 - [ ] Remove lengths loop and do some common way to find optimal data length, smooting, segmentation etc...
 - [ ] Analyze output (residuals - mean, std etc. in comparison with original data)

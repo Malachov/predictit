@@ -2,11 +2,17 @@
 
 ## v1.3x. - 04.2020
 
-- [x] Data smoothing - Savitzky-Golay filter in data preprocessing
 - [x] Many new models from sklearn - Decision trees, bagging, Gradient boosting...
+- [x] Multiprocessing applied. Two options - 'pool' or 'process'
+- [x] Data smoothing - Savitzky-Golay filter in data preprocessing
 - [x] Publish script to generate documentation and push to pypi
 - [x] Data processed on 'standard' shape [n_samples, n_features] so in same shape as dataframe
 - [x] Config print_config function to print config file as help
+- [x] Updated config values confirmation. If value misspelled (not in list) then error.
+- [x] Detailed results in table (not printed)
+- [x] Config how many results to plot and print
+- [x] Line time and memory profiling
+
 
 ## v1.2x. - 03/2020
 
@@ -41,4 +47,3 @@
         2) Own sliding window error
 - [x] One more level of debug - stop at first warning - add warning exceptions to config to hide outer depracation etc. warnings
 - [x] More user friendly warnings (color syntax highlighted) + Error separated from error location 
-- [x] Some memory and time profiling in tests

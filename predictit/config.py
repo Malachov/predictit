@@ -51,7 +51,7 @@ config = {
 
     'csv_full_path': r'',  # Full CSV path with suffix.
     'csv_test_data_relative_path': '',  # CSV name with suffix in test_data folder (5000 Sales Records.csv or daily-minimum-temperatures.csv)
-                                        # !!! Turn it off if not testing to not break csv full path !!! Test data are gitignored... use your own.
+    # !!! Turn it off if not testing to not break csv full path !!! Test data are gitignored... use your own.
 
     'predicted_column': '',  # Name of predicted column (for dataframe data) or it's index - string or int.
     'predicted_columns': [],  # For predict_multiple function only! List of names of predicted columns or it's indexes. If 'data' is dataframe or numpy, then you can use '*' to predict all the columns.
@@ -94,22 +94,23 @@ config = {
 
     # Prediction parameters settings
 
+    'multiprocessing': 'process',  # 'pool' or 'process' or 0
     'default_n_steps_in': 30,  # How many lagged values are in vector input to model.
     'other_columns': 1,  # If use other columns. Bool.
     'default_other_columns_length': 2,  # Other columns vector length used for predictions. If None, lengths same as predicted columnd. If 0, other columns are not used for prediction.
     'remove_nans': 'any_columns',  # 'any_columns' will remove all the columns where is at least one nan column.
     'dtype': 'float32',  # Main dtype used in prediction. 'float32' or 'float64'.
     'repeatit': 50,  # How many times is computation repeated for error criterion evaluation.
-    'lengths': 0,  # Compute on various length of data (1, 1/2, 1/4...). Automatically choose the best length. If 0, use only full length.
+    'lengths': 0,  # If 1, compute on various length of data (1, 1/2, 1/4...). Automatically choose the best length. If 0, use only full length.
 
     'data_transform': 0,  # 'difference' or 0 - Transform the data on differences between two neighbor values.
-    'analyzeit': 0,  # Analyze input data - Statistical distribution, autocorrelation, seasonal decomposition etc. If 1, analyze original data, if 2 analyze preprocessed data, if 3, then both.
+    'analyzeit': 0,  # If 1, analyze original data, if 2 analyze preprocessed data, if 3, then both. Statistical distribution, autocorrelation, seasonal decomposition etc.
     'analyze_seasonal_decompose': {'period': 365, 'model': 'additive'},  # Parameters for seasonal decompose in analyze. Find if there are periodically repeating patterns in data.
     'standardize': 'standardize',  # One from None, 'standardize', '-11', '01', 'robust'.
 
     'optimizeit': 0,  # Find optimal parameters of models.
     'optimizeit_details': 2,  # 1 print best parameters of models, 2 print every new best parameters achieved, 3 prints all results.
-    'optimizeit_limit': 1,  # How many seconds can take one model optimization.
+    'optimizeit_limit': 10,  # How many seconds can take one model optimization.
 
     'smooth': (11, 2),  # Smoothing data with Savitzky-Golay filter. First argument is window and second is polynomial order. If 0, not smoothing.
     'power_transformed': 0,  # Whether transform results to have same standard deviation and mean as train data. 0 no power transform, 1 on output and 2 on output and before evaluating.
@@ -149,9 +150,11 @@ config = {
         # 'tensorflow_lstm': predictit.models.tensorflow,
         # 'tensorflow_mlp': predictit.models.tensorflow,
 
-        **{model_name: predictit.models.sklearn_regression for model_name in [  # 'Extra trees regression', 'Random forest regression', 'Bagging regression', 'Hubber regression', 'Stochastic gradient regression'
-            'Sklearn regression', 'Bayes ridge regression', 'Decision tree regression', 'KNeighbors regression',
-            'Passive aggressive regression', 'Extreme learning machine', 'Gen Extreme learning machine', 'Gradient boosting']},
+        **{model_name: predictit.models.sklearn_regression for model_name in [
+            'Sklearn regression', 'Bayes ridge regression', 'Passive aggressive regression', 'Gradient boosting',
+            'KNeighbors regression', 'Decision tree regression',
+            # 'Bagging regression', 'Hubber regression', 'Stochastic gradient regression', 'Extreme learning machine', 'Gen Extreme learning machine',  'Extra trees regression', 'Random forest regression'
+        ]},
 
         'Compare with average': predictit.models.compare_with_average
     },
@@ -268,7 +271,7 @@ def update_references_2():
             'AR (Autoregression)': {'ic': ['aic', 'bic', 'hqic', 't-stat'], 'trend': ['c', 'nc']},
 
             'ARMA': {'p': [1, config['maxorder']], 'q': config['order'], 'trend': ['c', 'nc']},
-            'ARIMA (Autoregression integrated moving average)': {'p': [1, config['maxorder']], 'd': [0, 2], 'q': [0, 4], 'trend': ['c', 'nc']},
+            # 'ARIMA (Autoregression integrated moving average)': {'p': [1, config['maxorder']], 'd': [0, 2], 'q': [0, 4], 'trend': ['c', 'nc']},
             # 'SARIMAX (Seasonal ARIMA)': {'p': [1, config['maxorder']], 'd': config['order'], 'q': config['order'], 'pp': config['order'], 'dd': config['order'], 'qq': config['order'],
             # 'season': config['order'], 'method': ['lbfgs', 'bfgs', 'newton', 'nm', 'cg', 'ncg', 'powell'], 'trend': ['n', 'c', 't', 'ct'], 'enforce_invertibility': [True, False], 'enforce_stationarity': [True, False], 'forecast_type': ['in_sample', 'out_of_sample']},
 
@@ -281,12 +284,12 @@ def update_references_2():
             ### 'tensorflow_mlp': {'loses':["mean_squared_error", "mean_absolute_error", "mean_absolute_percentage_error", "mean_squared_logarithmic_error", "squared_hinge", "logcosh",
             ### "kullback_leibler_divergence"], 'activations':['softmax', 'elu', 'selu', 'softplus', 'tanh', 'sigmoid', 'exponential', 'linear']},
 
-            'Sklearn regression': {'regressor': config['regressors']},  # 'alpha': config['alpha'], 'n_iter': [100, 500], 'epsilon': [1.01, 5.0], 'alphas': [[0.1, 0.1, 0.1], [0.5, 0.5, 0.5], [0.9, 0.9, 0.9]], 'gcv_mode': ['auto', 'svd', 'eigen'], 'solver': ['auto', 'svd', 'eigen']},
+            # 'Sklearn regression': {'regressor': config['regressors']},  # 'alpha': config['alpha'], 'n_iter': [100, 500], 'epsilon': [1.01, 5.0], 'alphas': [[0.1, 0.1, 0.1], [0.5, 0.5, 0.5], [0.9, 0.9, 0.9]], 'gcv_mode': ['auto', 'svd', 'eigen'], 'solver': ['auto', 'svd', 'eigen']},
             'Extra trees': {'n_estimators': [1., 500.]},
             'Bayes ridge regression': {'alpha_1': [0.1e-6, 3e-6], 'alpha_2': [0.1e-6, 3e-6], 'lambda_1': [0.1e-6, 3e-6], 'lambda_2': [0.1e-7, 3e-6]},
             'Hubber regression': {'epsilon': [1.01, 5.0], 'alpha': config['alpha']},
 
-            'Extreme learning machine': {'n_hidden': [2, 300], 'alpha': config['alpha'], 'rbf_width': [0.0, 10.0], 'activation_func': ['tanh', 'sine', 'tribas', 'inv_tribase', 'sigmoid', 'hardlim', 'softlim', 'gaussian', 'multiquadric', 'inv_multiquadric']},
+            # 'Extreme learning machine': {'n_hidden': [2, 300], 'alpha': config['alpha'], 'rbf_width': [0.0, 10.0], 'activation_func': ['tanh', 'sine', 'tribas', 'inv_tribase', 'sigmoid', 'hardlim', 'softlim', 'gaussian', 'multiquadric', 'inv_multiquadric']},
             'Gen Extreme learning machine': {'alpha': config['alpha']}
 
         },
@@ -303,6 +306,7 @@ config.update({
                          "unclosed file <_io.TextIOWrapper name",
                          "Mean of empty slice",
                          "Check mle_retvals",
+                         "overflow encountered in multiply",
                          "The default value of n_estimators will change",
                          "statsmodels.tsa.AR has been deprecated "],
 

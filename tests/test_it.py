@@ -25,6 +25,7 @@ config.update({
     'data': None,
     'lengths': 0,
     'datalength': 500,
+    'analyzeit': 0,
     'used_models': {
         "AR (Autoregression)": predictit.models.statsmodels_autoregressive,
         "Conjugate gradient": predictit.models.conjugate_gradient,
@@ -39,7 +40,8 @@ config_original = config.copy()
 
 def test_own_data():
     config.update({
-        'other_columns': 0})
+        'other_columns': 0,
+        'multiprocessing': 0})
     result = predictit.main.predict(np.random.randn(5, 100), predicts=3, plot=config["show_plot"])
     assert result[0]
     return result
@@ -59,6 +61,8 @@ def test_main_from_config():
         'correlation_threshold': 0.2,
         'optimizeit': 0,
         'standardize': '01',
+        'multiprocessing': 'process',
+        'smooth': (19, 2),
 
         'used_models': {
             "Hubber regression": predictit.models.sklearn_regression,
@@ -119,14 +123,16 @@ def test_main_dataframe():
             'datalength': 300,
             'default_other_columns_length': 5,
             'data_transform': None,
+            'mode': 'predict',
             'repeatit': 1,
-            'lengths': 3,
+            'lengths': 1,
             'error_criterion': 'dtw',
             'remove_outliers': 0,
             'last_row': 0,
             'correlation_threshold': 0.4,
             'standardize': 'standardize',
             'predicts': 7,
+            'smooth': 0,
             'default_n_steps_in': 40,
             'power_transformed': 2,
 

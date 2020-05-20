@@ -11,7 +11,7 @@ from . import evaluate_predictions
 from .misc import traceback_warning
 
 
-def optimize(model, kwargs, kwargs_limits, model_train_input, model_test_inputs, models_test_outputs, error_criterion='mape',
+def optimize(model_train, model_predict, kwargs, kwargs_limits, model_train_input, model_test_inputs, models_test_outputs, error_criterion='mape',
              multicolumn_source=0, fragments=10, iterations=3, details=0, time_limit=5, predicted_column_index=0, name='Your model'):
     """Function to find optimal parameters of function. For example if we want to find minimum of function x^2,
     we can use limits from -10 to 10. If we have 4 fragments and 3 iterations. it will separate interval on 4 parts,
@@ -23,7 +23,8 @@ def optimize(model, kwargs, kwargs_limits, model_train_input, model_test_inputs,
     If we have many arguments, it will create many combinations of parameters, so beware...
 
     Args:
-        model (func): Function to be optimized (eg: ridgeregression).
+        model_train (func): Model train function (eg: ridgeregression.train).
+        model_predict (func): Model predict function (eg: ridgeregression.predict).
         kwargs (dict): Initial arguments (eg: {"alpha": 0.1, "n_steps_in": 10}).
         kwargs_limits (dict): Bounds of arguments (eg: {"alpha": [0.1, 1], "n_steps_in":[2, 30]}).
         train_input (np.array or tuple(np.ndarray, np.ndarray, np.ndarray)): Data on which function is optimized.
@@ -68,11 +69,11 @@ def optimize(model, kwargs, kwargs_limits, model_train_input, model_test_inputs,
 
         modeleval = np.zeros(n_test_samples)
 
-        trained_model = model.train(model_train_input, **constant_kwargs, **kwargs)
+        trained_model = model_train(model_train_input, **constant_kwargs, **kwargs)
 
         for repeat_iteration in range(n_test_samples):
 
-            predictions = model.predict(model_test_inputs[repeat_iteration], trained_model, predicts=predicts)
+            predictions = model_predict(model_test_inputs[repeat_iteration], trained_model, predicts=predicts)
             modeleval[repeat_iteration] = evaluate_predictions.compare_predicted_to_test(predictions, models_test_outputs[repeat_iteration],
                                                                                          error_criterion=error_criterion, plot=0)
 
@@ -194,5 +195,3 @@ def optimize(model, kwargs, kwargs_limits, model_train_input, model_test_inputs,
                 kwargs_fragments[i] = np.unique(kwargs_fragments[i])
                 if isinstance(j[0], int):
                     kwargs_fragments[i] = list(set([int(round(k)) for k in kwargs_fragments[i]]))
-
-

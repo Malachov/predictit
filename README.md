@@ -99,10 +99,11 @@ config.update({
 predictions = predictit.main.predict()
 ```
 
+
+Or if you downloaded it from github and not via pypi, just edit config as you need and run `main.py`
+
 To see all the possible values in `config.py` from your IDE, use
 
 ```Python
 predictit.config.print_config()
 ```
-
-Or if you downloaded it from github and not via pypi, just edit config as you need and run `main.py`

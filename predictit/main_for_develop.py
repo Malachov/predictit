@@ -11,7 +11,13 @@ import argparse
 import warnings
 import inspect
 import os
+# import multiprocessing_on_dill as multiprocessing
+import multiprocessing
 
+# multiprocessing.set_start_method("fork")
+
+# import ctypes
+# from multiprocessing import sharedctypes
 
 this_path = Path(os.path.abspath(inspect.getframeinfo(inspect.currentframe()).filename)).parents[1]
 this_path_string = this_path.as_posix()
@@ -22,6 +28,8 @@ import predictit
 
 from predictit.config import config, presets
 from predictit.misc import traceback_warning, user_warning, colorize
+
+# import moo
 
 try:
     import gui_start  # Not included in predictit if used as python library
@@ -36,26 +44,178 @@ def update_gui(content, id):
         pass
 
 
+# This is core function... It should be sequentionally in the middle of main script in predict function, but it has to be 1st level function to be able to use in multiprocessing.
+# To understand content, see code below function
+def train_and_predict(
+        iterated_model_train, iterated_model_predict, iterated_model_name, iterated_model_index, data_length_index,
+        data_length_iteration, data_lengths, model_train_input, model_predict_input, model_test_inputs,
+        data_abs_max, data_mean, data_std, models_test_outputs, last_undiff_value=None, final_scaler=None, pipe=None):
+
+    model_results = {}
+
+    if config['optimizeit'] and data_length_index == 0:
+        if iterated_model_name in config['models_parameters_limits']:
+
+            try:
+                start_optimization = time.time()
+
+                model_results['best_kwargs'] = predictit.best_params.optimize(
+                    iterated_model_train, iterated_model_predict, config['models_parameters'][iterated_model_name], config['models_parameters_limits'][iterated_model_name],
+                    model_train_input=model_train_input, model_test_inputs=model_test_inputs, models_test_outputs=models_test_outputs,
+                    fragments=config['fragments'], iterations=config['iterations'], time_limit=config['optimizeit_limit'],
+                    error_criterion=config['error_criterion'], name=iterated_model_name, details=config['optimizeit_details'])
+
+                for k, l in model_results['best_kwargs'].items():
+
+                    config['models_parameters'][iterated_model_name][k] = l
+
+            except Exception:
+                traceback_warning("Optimization didn't finished")
+
+            finally:
+                stop_optimization = time.time()
+
+                model_results['optimization_time'] = stop_optimization - start_optimization
+
+    try:
+        start = time.time()
+
+        model_results['name'] = iterated_model_name
+        model_results['index'] = (iterated_model_index, data_length_index)
+        model_results['data_length_index'] = data_length_index
+        model_results['data_length_iteration'] = data_length_iteration
+
+        # If no parameters or parameters details, add it so no index errors later
+        if iterated_model_name not in config['models_parameters']:
+            config['models_parameters'][iterated_model_name] = {}
+
+        # Train all models
+        model_results['trained_model'] = iterated_model_train(model_train_input, **config['models_parameters'][iterated_model_name])
+
+        # Create predictions - out of sample
+        one_reality_result = iterated_model_predict(model_predict_input, model_results['trained_model'], config['predicts'])
+
+        if np.isnan(np.sum(one_reality_result)) or one_reality_result is None:
+            return
+
+        # Remove wrong values out of scope to not be plotted
+        one_reality_result[abs(one_reality_result) > 3 * data_abs_max] = np.nan
+
+        # Do inverse data preprocessing
+        if config['power_transformed'] == 1:
+            one_reality_result = predictit.data_preprocessing.fitted_power_transform(one_reality_result, data_std, data_mean)
+
+        if config['standardize']:
+            one_reality_result = final_scaler.inverse_transform(one_reality_result.reshape(-1, 1)).ravel()
+
+        if config['data_transform'] == 'difference':
+            one_reality_result = predictit.data_preprocessing.inverse_difference(one_reality_result, last_undiff_value)
+
+        model_results['results'] = one_reality_result
+
+        process_repeated_matrix = np.zeros((config['repeatit'], config['predicts']))
+        process_evaluated_matrix = np.zeros(config['repeatit'])
+
+        # Predict many values in test inputs to evaluate which models are best - do not inverse data preprocessing, because test data are processed
+        for repeat_iteration in range(config['repeatit']):
+
+            # Create in-sample predictions to evaluate if model is good or not
+
+            process_repeated_matrix[repeat_iteration] = iterated_model_predict(model_test_inputs[repeat_iteration], model_results['trained_model'], predicts=config['predicts'])
+
+            if config['power_transformed'] == 2:
+                process_repeated_matrix[repeat_iteration] = predictit.data_preprocessing.fitted_power_transform(process_repeated_matrix[repeat_iteration], data_std, data_mean)
+
+            process_evaluated_matrix[repeat_iteration] = predictit.evaluate_predictions.compare_predicted_to_test(
+                process_repeated_matrix[repeat_iteration], models_test_outputs[repeat_iteration], error_criterion=config['error_criterion'])
+
+        model_results['repeated_matrix'] = process_repeated_matrix
+        model_results['evaluated_matrix'] = process_evaluated_matrix
+        model_results['model_error'] = process_evaluated_matrix.mean()
+
+    except Exception:
+
+        traceback_warning(f"Error in {iterated_model_name} model on data length {data_length_iteration}")
+
+    finally:
+        model_results['model_time'] = time.time() - start
+
+        if config['multiprocessing'] == 'process':
+            pipe.send(model_results)
+            pipe.close()
+        else:
+            return model_results
+
+
 if __name__ == "__main__":
 
 
 
+
+
     config.update({
+
+        'multiprocessing': 'pool',
         'data_source': 'csv',
         'csv_test_data_relative_path': '5000 Sales Records.csv',
         'datetime_index': 5,
-        'freq': 'M',
-        'predicted_column': 'Units Sold',
+        'datalength': 100,
+        'freq': 'D',
+        'predicted_column': '',
         'print_number_of_models': 10,
         'last_row': 0,
         'correlation_threshold': 0.2,
         'optimizeit': 0,
-        'standardize': '01',
+        'standardize': 0,
+        'lengths': 0,
+        'data': np.array(range(1000)),
+        'repeatit': 3,
 
-        'used_models': {
-            "Hubber regression": predictit.models.sklearn_regression,
-        }
+    'used_models': {
+
+        # **{model_name: predictit.models.statsmodels_autoregressive for model_name in [
+        #     'AR (Autoregression)', 'ARMA', 'ARIMA (Autoregression integrated moving average)']},  # 'SARIMAX (Seasonal ARIMA)'
+
+        # **{model_name: predictit.models.autoreg_LNU for model_name in [
+        #     'Autoregressive Linear neural unit', 'Autoregressive Linear neural unit normalized']},  # , 'Linear neural unit with weigths predict'
+
+        # 'Conjugate gradient': predictit.models.conjugate_gradient,
+
+        # 'tensorflow_lstm': predictit.models.tensorflow,
+        # 'tensorflow_mlp': predictit.models.tensorflow,
+
+        # **{model_name: predictit.models.sklearn_regression for model_name in [  # 'Extra trees regression', 'Random forest regression', 'Bagging regression', 'Hubber regression', 'Stochastic gradient regression', 'Extreme learning machine', 'Gen Extreme learning machine'
+        #     'Sklearn regression', 'Bayes ridge regression', 'Decision tree regression', 'KNeighbors regression',
+        #     'Passive aggressive regression', 'Gradient boosting']},
+
+        'Compare with average': predictit.models.compare_with_average
+    }
     })
+
+
+
+
+
+
+    results = []
+
+    if config['multiprocessing'] == 'process':
+        processes = []
+        pipes = []
+        # queues_dict = config['used_models'].copy()
+        # for i in queues_dict:
+        #     queues_dict[i] = multiprocessing.Pipe()  # TODO duplex=False
+
+    if config['multiprocessing'] == 'pool':
+        pool = multiprocessing.Pool()
+
+        # It is not possible easy share data in multiprocessing, so results are resulted via callback function
+        def return_result(result):
+            results.append(result)
+
+
+
+
 
 
 
@@ -108,7 +268,7 @@ if __name__ == "__main__":
     time_parts_table.field_names = ["Part", "Time"]
 
     def update_time_table(time_last):
-        time_parts_table.add_row([progress_phase, time.time() - time_last])
+        time_parts_table.add_row([progress_phase, round((time.time() - time_last), 3)])
         return time.time()
     time_point = time_begin = time.time()
 
@@ -173,7 +333,7 @@ if __name__ == "__main__":
 
     ########################################
     ############# Data analyze ###### ANCHOR Analyze
-    ########################################
+    ########################################data_abs_max
 
     if config['analyzeit'] == 1 or config['analyzeit'] == 3:
         print("Analyze of unprocessed data")
@@ -196,12 +356,15 @@ if __name__ == "__main__":
 
     if config['data_transform'] == 'difference':
         last_undiff_value = data_for_predictions[-1, 0]
-
         for i in range(data_for_predictions.shape[1]):
             data_for_predictions[1:, i] = predictit.data_preprocessing.do_difference(data_for_predictions[:, i])
+    else:
+        last_undiff_value = None
 
     if config['standardize']:
         data_for_predictions, final_scaler = predictit.data_preprocessing.standardize(data_for_predictions, used_scaler=config['standardize'])
+    else:
+        final_scaler = None
 
     column_for_predictions = data_for_predictions[:, predicted_column_index]
 
@@ -242,12 +405,6 @@ if __name__ == "__main__":
     models_names = list(config['used_models'].keys())
     models_number = len(models_names)
 
-    for i in models_names:
-
-        # If no parameters or parameters details, add it so no index errors later
-        if i not in config['models_parameters']:
-            config['models_parameters'][i] = {}
-
     # Empty boxes for results definition
     # The final result is - [repeated, model, data, results]
     test_results_matrix = np.zeros((config['repeatit'], models_number, data_number, config['predicts']))
@@ -257,14 +414,9 @@ if __name__ == "__main__":
     evaluated_matrix.fill(np.nan)
     reality_results_matrix.fill(np.nan)
 
-    models_time = {}
-    models_optimizations_time = {}
-
     time_point = update_time_table(time_point)
     progress_phase = "Predict"
     update_gui(progress_phase, 'progress_phase')
-
-    trained_models = {}
 
     models_test_outputs = np.zeros((config['repeatit'], config['predicts']))
 
@@ -323,78 +475,50 @@ if __name__ == "__main__":
                         for i in range(config['repeatit']):
                             model_test_inputs.append(used_sequention[:, data_length - data_length_iteration: - config['predicts'] - config['repeatit'] + i + 1])
 
-                    if config['optimizeit'] and data_length_index == 0:
-                        if iterated_model_name in config['models_parameters_limits']:
+                    predict_parameters = {
+                        'iterated_model_train': iterated_model.train, 'iterated_model_predict': iterated_model.predict, 'iterated_model_name': iterated_model_name,
+                        'iterated_model_index': iterated_model_index, 'data_length_index': data_length_index, 'data_length_iteration': data_length_iteration,
+                        'data_lengths': data_lengths, 'model_train_input': model_train_input, 'model_predict_input': model_predict_input,
+                        'model_test_inputs': model_test_inputs, 'data_abs_max': data_abs_max, 'data_mean': data_mean, 'data_std': data_std,
+                        'last_undiff_value': last_undiff_value, 'models_test_outputs': models_test_outputs, 'final_scaler': final_scaler
+                    }
 
-                            try:
-                                start_optimization = time.time()
+                    if config['multiprocessing'] == 'process':
+                        pipes.append(multiprocessing.Pipe())
+                        p = multiprocessing.Process(target=train_and_predict, kwargs={**predict_parameters, **{'pipe': pipes[-1][1]}})
 
-                                best_kwargs = predictit.best_params.optimize(
-                                    iterated_model, config['models_parameters'][iterated_model_name], config['models_parameters_limits'][iterated_model_name],
-                                    model_train_input=model_train_input, model_test_inputs=model_test_inputs, models_test_outputs=models_test_outputs,
-                                    fragments=config['fragments'], iterations=config['iterations'], time_limit=config['optimizeit_limit'],
-                                    error_criterion=config['error_criterion'], name=iterated_model_name, details=config['optimizeit_details'])
+                        processes.append(p)
+                        p.start()
 
-                                for k, l in best_kwargs.items():
+                    elif config['multiprocessing'] == 'pool':
 
-                                    config['models_parameters'][iterated_model_name][k] = l
+                        pool.apply_async(train_and_predict, (), predict_parameters, callback=return_result)
 
-                            except Exception:
-                                traceback_warning("Optimization didn't finished")
+                    else:
+                        results.append(train_and_predict(**predict_parameters))
 
-                            finally:
-                                stop_optimization = time.time()
-                                models_optimizations_time[iterated_model_name] = (stop_optimization - start_optimization)
+    if config['multiprocessing']:
+        if config['multiprocessing'] == 'process':
+            for i in pipes:
+                try:
+                    results.append(i[0].recv())
+                except Exception:
+                    pass
 
-                    try:
-                        start = time.time()
+        if config['multiprocessing'] == 'pool':
+            pool.close()
+            pool.join()
 
-                        # Train all models
-                        trained_models[iterated_model_name] = iterated_model.train(model_train_input, **config['models_parameters'][iterated_model_name])
+    for i in results:
+        try:
+            if 'results' and 'evaluated_matrix' in i:
+                reality_results_matrix[i['index'][0], i['index'][1], :] = i['results']
+                evaluated_matrix[:, i['index'][0], i['index'][1]] = i['evaluated_matrix']
+        except Exception:
+            pass
 
-                        # Create predictions - out of sample
-                        one_reality_result = iterated_model.predict(model_predict_input, trained_models[iterated_model_name], predicts=config['predicts'])
-
-                        if np.isnan(np.sum(one_reality_result)) or one_reality_result is None:
-                            continue
-
-                        # Remove wrong values out of scope to not be plotted
-
-                        one_reality_result[abs(one_reality_result) > 3 * data_abs_max] = np.nan
-
-                        # Do inverse data preprocessing
-                        if config['power_transformed'] == 1:
-                            one_reality_result = predictit.data_preprocessing.fitted_power_transform(one_reality_result, data_std, data_mean)
-
-                        if config['standardize']:
-                            one_reality_result = final_scaler.inverse_transform(one_reality_result.reshape(-1, 1)).ravel()
-
-                        if config['data_transform'] == 'difference':
-                            one_reality_result = predictit.data_preprocessing.inverse_difference(one_reality_result, last_undiff_value)
-
-                        reality_results_matrix[iterated_model_index, data_length_index] = one_reality_result
-
-                        # Predict many values in test inputs to evaluate which models are best - do not inverse data preprocessing, because test data are processed
-                        for repeat_iteration in range(config['repeatit']):
-
-                            # Create in-sample predictions to evaluate if model is good or not
-
-                            test_results_matrix[repeat_iteration, iterated_model_index, data_length_index] = iterated_model.predict(
-                                model_test_inputs[repeat_iteration],trained_models[iterated_model_name], predicts=config['predicts'])
-
-                            if config['power_transformed'] == 2:
-                                test_results_matrix[repeat_iteration, iterated_model_index, data_length_index] = predictit.data_preprocessing.fitted_power_transform(
-                                    test_results_matrix[repeat_iteration, iterated_model_index, data_length_index], data_std, data_mean)
-
-                            evaluated_matrix[repeat_iteration, iterated_model_index, data_length_index] = predictit.evaluate_predictions.compare_predicted_to_test(
-                                test_results_matrix[repeat_iteration, iterated_model_index, data_length_index],
-                                models_test_outputs[repeat_iteration], error_criterion=config['error_criterion'])
-
-                    except Exception:
-                        traceback_warning(f"Error in {iterated_model_name} model on data length {data_length_iteration}")
-
-                    finally:
-                        models_time[iterated_model_name] = (time.time() - start)
+    # TODO Do repeate average and more from evaluate in multiprocessing loop and then use sorting as
+    # a = {k: v for k, v in sorted(x.items(), key=lambda item: item[1]['a'])} then use just slicing for plot and print results
 
     #############################################
     ############# Evaluate models ######## ANCHOR Evaluate
@@ -425,10 +549,10 @@ if __name__ == "__main__":
 
         if not config['print_number_of_models'] or i < config['print_number_of_models']:
             predicted_models_for_table[this_model] = {
-                'order': i + 1, 'error_criterion': model_results[j],'predictions': reality_results_matrix[j, np.argmin(repeated_average[j])],
+                'order': i + 1, 'error_criterion': model_results[j], 'predictions': reality_results_matrix[j, np.argmin(repeated_average[j])],
                 'data_length': np.argmin(repeated_average[j])}
 
-        if not config['print_number_of_models'] is None or i < config['plot_number_of_models']:
+        if not config['plot_number_of_models'] is None or i < config['plot_number_of_models']:
             predicted_models_for_plot[this_model] = {
                 'order': i + 1, 'error_criterion': model_results[j], 'predictions': reality_results_matrix[j, np.argmin(repeated_average[j])],
                 'data_length': np.argmin(repeated_average[j])}
@@ -503,22 +627,23 @@ if __name__ == "__main__":
         if config['print_result']:
             print((f"\n Best model is {best_model_name} \n\t with results {best_model_predicts} \n\t with model error {config['error_criterion']} = "
                    f"{predicted_models_for_table[best_model_name]['error_criterion']}"))
-            print((f"\n\t with data length {data_lengths[predicted_models_for_table[best_model_name]['data_length']]} \n\t with paramters "
-                   f"{config['models_parameters'][best_model_name]} \n"))
+
+            # TODO
+            # print((f"\n\t with data length {data_lengths[predicted_models_for_table[best_model_name]['data_length']]} \n\t with paramters "
+            #        f"{config['models_parameters'][best_model_name]} \n"))
 
 
         # Table of results
         models_table = PrettyTable()
-        models_table.field_names = ['Model', f"Average {config['error_criterion']} error", "Time"]
+        models_table.field_names = ['Model', f"Average {config['error_criterion']} error"]
         # Fill the table
         for i, j in predicted_models_for_table.items():
-            if i in models_time:
-                models_table.add_row([i, j['error_criterion'], models_time[i]])
+            models_table.add_row([i, round(j['error_criterion'], 3)])
 
         if config['print_table']:
             print(f'\n {models_table} \n')
 
-        time_parts_table.add_row(['Complete time', time.time() - time_begin])
+        time_parts_table.add_row(['Complete time', round((time.time() - time_begin), 3)])
 
         if config['print_time_table']:
             print(f'\n {time_parts_table} \n')
@@ -526,16 +651,19 @@ if __name__ == "__main__":
         ### Print detailed resuts ###
         if config['print_detailed_result']:
 
-            for i, j in enumerate(models_names):
-                print(models_names[i])
+            detailed_table = PrettyTable()
+            detailed_table.field_names = ['Name', f"Average {config['error_criterion']} error", 'Time', 'Iteration', 'Iteration value']
+            for i in results:
+                try:
+                    detailed_table.add_row([i['name'], round(i['model_error'], 3), round(i['model_time']), round(i['data_length_iteration'], 3), i['data_length_index']])
+                except Exception:
+                    pass
 
-                for k in range(data_number):
-                    print(f"\t With data length: {data_lengths[k]}  {config['error_criterion']} = {repeated_average[i, k]}")
+                # if config['optimizeit']:
+                #     print(f"\t Time to optimize {i['optimization_time']} \n")
+                #     print("Best models parameters", config['models_parameters'][j])
 
-                if config['optimizeit']:
-                    if j in models_optimizations_time:
-                        print(f"\t Time to optimize {models_optimizations_time[j]} \n")
-                    print("Best models parameters", config['models_parameters'][j])
+            print(detailed_table)
 
     time_point = update_time_table(time_point)
     progress_phase = 'finished'
@@ -547,4 +675,3 @@ if __name__ == "__main__":
         sys.stdout = stdout
 
         print(output)
-
