@@ -4,8 +4,10 @@
 
 ## Big Deals
 
-- [ ] Add big models dictionary with all results - Not each value separately (best_kwargs, results, error_criterion, queue etc...)
+- [ ] Do repeate average and more from evaluate in multiprocessing loop and then use sorting as `a = {k: v for k, v in sorted(x.items(), key=lambda item: item[1]['a'])}` then use just slicing for plot and print results and Remove predicted_models_for_table and predicted_models_for_plot
+
 - [ ] Option to unstandardized error criterion to be able to compare absolute results of configuration
+
 - [ ] Remove lengths loop and do some common way to find optimal data length, smooting, segmentation etc...
 - [ ] Analyze output (residuals - mean, std etc. in comparison with original data)
 - [ ] Feature extraction - E.G. autoencoder to shrink input multivariate data to small vectors
@@ -42,7 +44,6 @@
 
 ## Deals
 
-- [ ] Print table sorted - always same option
 - [ ] To compare models add second table - summ of error
 - [ ] Full config to readthedocs documentation
 - [ ] Ability to load and save config to json to folder

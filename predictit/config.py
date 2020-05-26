@@ -45,7 +45,7 @@ config = {
     'data': None,  # Use numpy array, or pandas dataframe. This will overwrite data_source. If you use csv, set up to None. Data shape is (n_samples, n_feature)
                    # - that means rows are samples and columns are features.
     'data_all': None,  # Just for compare_models function. Dictionary of data names and list of it's values and predicted columns or list of data parts.
-    # data_all examples: {'data_1': [my_dataframe, 'column_name']} or [my_data[-2000:], my_data[-1000:]] and 'predicted_column' from config as column name.
+    # data_all examples: {'data_1': (my_dataframe, 'column_name_or_index')} or (my_data[-2000:], my_data[-1000:]) and 'predicted_column' as usually in config.
 
     'data_source': 'test',  # Data source. ('csv', 'txt', 'sql' or 'test') - If sql, you have to edit the query to fit your database.
 
@@ -72,7 +72,7 @@ config = {
     'validation_gap': 10,  # If 'mode' == 'validate', then describe how many samples are between train and test set. The bigger gap is, the bigger knowledge generalization is necesssary.
     'return_type': 'best',  # 'best', 'all', 'dict', 'models_error_criterion', 'results_dataframe' or 'detailed_results_dictionary'. 'best' return array of predictions, 'all' return more models
                             # results sorted by how efficient they are. 'results_dataframe' return results and models names in columns. 'detailed_results_dictionary' is used for GUI
-                            # and return results as best result, all results, string div with plot and more. 'models_error_criterion' returns MAPE,
+                            # and return results as best result, all results, string div with plot and more. 'dict' return models dictionary with al the results. 'models_error_criterion' returns MAPE,
                             # RMSE (based on config) or dynamic warping criterion of all models in array.
     'debug': 1,  # Debug - If 1, print all results and all the warnings and errors on the way, if 2, stop on first warning, if -1 do not print anything, just return result.
 
@@ -83,11 +83,11 @@ config = {
     'save_plot_path': '',  # Path where to save the plot (String), if empty string or 0 - saved to desktop.
     'plot_name': 'Predictions',
     'plot_history_length': 100,  # How many historic values will be plotted
-    'plot_number_of_models': 12,  # confiNumber of plotted models. If none or 0, than all models will be evaluated. 1 if only the best one.
+    'plot_number_of_models': 12,  # Number of plotted models. If -1, than all models will be evaluated. 1 if only the best one.
 
     'print': 1,  # Turn on and off all printed details at once.
     'print_table': 1,  # Whether print table with models errors and time to compute.
-    'print_number_of_models': None,  # How many models will be evaluated and printed in results table. If none or 0, than all models will be evaluated. 1 if only the best one.
+    'print_number_of_models': -1,  # How many models will be evaluated and printed in results table. If -1, than all models will be evaluated. 1 if only the best one.
     'print_time_table': 1,  # Whether print table with models errors and time to compute.
     'print_result': 1,  # Whether print best model results and model details.
     'print_detailed_result': 0,  # Whether print detailed results.
@@ -162,7 +162,7 @@ config = {
 
 
 # Config is made by parts, because some values are reused...
-def update_references_1():
+def update_references_input_types():
     config.update({
         'input_types': {
 
@@ -235,6 +235,15 @@ config.update({
         'Gen Extreme learning machine': {'regressor': 'elm_gen', 'alpha': 0.5}
     },
 
+})
+
+
+# !! Every parameters here have to be in models_parameters, or error.
+# Some models can be very computationaly hard - use optimizeit_limit or already_trained!
+# If models here are commented, they are not optimized !
+# You can optmimize as much parameters as you want - for example just one (much faster).
+config.update({
+
     ########################################
     ### Models parameters optimizations ###
     ########################################
@@ -254,18 +263,12 @@ config.update({
     'epochs': [1, 300],
     'units': [1, 100],
     'order': [0, 20],
-
     'maxorder': 20,
-
-    'regressors': predictit.models.sklearn_regression.get_regressors()
+    'regressors': 'linear'  # predictit.models.sklearn_regression.get_regressors()
 })
 
 
-# !! Every parameters here have to be in models_parameters, or error.
-# Some models can be very computationaly hard - use optimizeit_limit or already_trained!
-# If models here are commented, they are not optimized !
-# You can optmimize as much parameters as you want - for example just one (much faster).
-def update_references_2():
+def update_references_optimize():
     config.update({
         'models_parameters_limits': {
             'AR (Autoregression)': {'ic': ['aic', 'bic', 'hqic', 't-stat'], 'trend': ['c', 'nc']},
@@ -373,8 +376,12 @@ presets['normal'] = {
 }
 
 
-update_references_1()
-update_references_2()
+update_references_input_types()
+if config['optimizeit']:
+    update_references_optimize()
+else:
+    config['models_parameters_limits'] = {}
+
 
 config_check_set = set(config.keys())
 

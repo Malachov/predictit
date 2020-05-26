@@ -1,8 +1,9 @@
 import sklearn
+import sklearn.ensemble
+import sklearn.multioutput
 from sklearn import linear_model
 import numpy as np
 import sklearn_extensions.extreme_learning_machines.elm as elm
-
 
 def get_regressors():
     """ Create list of all regressors from sklearn (classes, that can be called). E.g. [bayes_ridge_regressor, linear_regressor]"""
@@ -49,32 +50,40 @@ def train(sequentions, regressor='bayesianridge', predicts=7, n_estimators=100,
     Returns:
         np.ndarray: Predictions of input time series.
     """
+    if regressor == 'bayesianridge':
+        regressor_model = linear_model.BayesianRidge(n_iter=n_iter, alpha_1=alpha_1, alpha_2=alpha_2, lambda_1=lambda_1, lambda_2=lambda_2)
+    elif regressor == 'huber':
+        regressor_model = linear_model.HuberRegressor(epsilon=epsilon, max_iter=200, alpha=alpha)
+    elif regressor == 'lasso':
+        regressor_model = linear_model.Lasso(alpha=alpha)
+    elif regressor == 'linear':
+        regressor_model = linear_model.LinearRegression()
+    elif regressor == 'ridgecv':
+        regressor_model = linear_model.RidgeCV(alphas=alphas, gcv_mode=gcv_mode)
+    elif regressor == 'ridge':
+        regressor_model = linear_model.Ridge(alpha=alpha, solver=solver)
+    elif regressor == 'Extra trees':
+        regressor_model = sklearn.ensemble.ExtraTreesRegressor(n_estimators=n_estimators)
+    elif regressor == 'elm':
+        regressor_model = elm.ELMRegressor(n_hidden=n_hidden, alpha=alpha, rbf_width=rbf_width, activation_func=activation_func)
+    elif regressor == 'elm_gen':
+        regressor_model = elm.GenELMRegressor()
+    elif regressor == 'Random forest':
+        regressor_model = sklearn.ensemble.forest.RandomForestRegressor()
+    elif regressor == 'Decision tree':
+        regressor_model = sklearn.tree.tree.DecisionTreeRegressor()
+    elif regressor == 'Gradient boosting':
+        regressor_model = sklearn.ensemble.gradient_boosting.GradientBoostingRegressor()
+    elif regressor == 'KNeighbors':
+        regressor_model = sklearn.neighbors.regression.KNeighborsRegressor()
+    elif regressor == 'Bagging':
+        regressor_model = sklearn.ensemble.bagging.BaggingRegressor()
+    elif regressor == 'Stochastic gradient':
+        regressor_model = sklearn.linear_model.stochastic_gradient.SGDRegressor()
+    elif regressor == 'Passive aggressive regression':
+        regressor_model = sklearn.linear_model.PassiveAggressiveRegressor()
 
-    regressor_dict = {
-        'bayesianridge': linear_model.BayesianRidge(n_iter=n_iter, alpha_1=alpha_1, alpha_2=alpha_2, lambda_1=lambda_1, lambda_2=lambda_2),
-        'huber': linear_model.HuberRegressor(epsilon=epsilon, max_iter=200, alpha=alpha),
-        'lasso': linear_model.Lasso(alpha=alpha),
-        'linear': linear_model.LinearRegression(),
-        'ridgecv': linear_model.RidgeCV(alphas=alphas, gcv_mode=gcv_mode),
-        'ridge': linear_model.Ridge(alpha=alpha, solver=solver),
-        'Extra trees': sklearn.ensemble.ExtraTreesRegressor(n_estimators=n_estimators),
-        'elm': elm.ELMRegressor(n_hidden=n_hidden, alpha=alpha, rbf_width=rbf_width, activation_func=activation_func),
-        'elm_gen': elm.GenELMRegressor(),
-        'Random forest': sklearn.ensemble.forest.RandomForestRegressor(),
-        'Decision tree': sklearn.tree.tree.DecisionTreeRegressor(),
-        'Gradient boosting': sklearn.ensemble.gradient_boosting.GradientBoostingRegressor(),
-        'KNeighbors': sklearn.neighbors.regression.KNeighborsRegressor(),
-        'Bagging': sklearn.ensemble.bagging.BaggingRegressor(),
-        'Stochastic gradient': sklearn.linear_model.stochastic_gradient.SGDRegressor(),
-        'Passive aggressive regression': sklearn.linear_model.PassiveAggressiveRegressor(),
-    }
-
-    if regressor in regressor_dict.keys():
-        model = regressor_dict[regressor]
-    else:
-        model= regressor()
-
-    model= sklearn.multioutput.MultiOutputRegressor(model)
+    model= sklearn.multioutput.MultiOutputRegressor(regressor_model)
 
     model.fit(sequentions[0], sequentions[1])
 

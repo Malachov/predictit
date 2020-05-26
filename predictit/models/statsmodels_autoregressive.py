@@ -19,24 +19,25 @@ def train(data, model='ar', p=3, d=1, q=0, method='cmle', ic='aic', trend='nc', 
         np.ndarray: Predictions of input time series.
     """
 
-    if model == 'ar':
+    params = {'model': 'ar', 'p': 3, 'd': 1, 'q': 0, 'method': 'cmle', 'ic': 'aic', 'trend': 'nc', 'solver': 'lbfgs'}
+
+    return params
+
+
+def predict(data, params, predicts=7):
+
+    if params['model'] == 'ar':
         model = statsmodels.tsa.ar_model.AR(data)
 
     if model == 'arma':
-        order = (p, q)
+        order = (params['p'], params['q'])
         model = statsmodels.tsa.arima_model.ARMA(data, order=order)
 
     if model == 'arima':
-        order = (p, d, q)
+        order = (params['p'], params['d'], params['q'])
         model = statsmodels.tsa.arima_model.ARIMA(data, order=order)
 
-    fitted_model = model.fit(method=method, ic=ic, trend=trend, solver=solver, disp=0)
-
-    return fitted_model
-
-
-def predict(data, fitted_model, predicts=7):
-
+    fitted_model = model.fit(method=params['method'], ic=params['ic'], solver=params['solver'], disp=0)
     try:
         predictions = fitted_model.forecast(steps=predicts)[0]
 

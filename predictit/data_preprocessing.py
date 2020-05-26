@@ -171,7 +171,7 @@ def keep_corelated_data(data, predicted_column_index=0, threshold=0.5):
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", RuntimeWarning)
 
-        corr = np.corrcoef(data)
+        corr = np.corrcoef(data.T)
         corr = np.nan_to_num(corr, 0)
 
         range_array = np.array(range(corr.shape[0]))
@@ -284,12 +284,14 @@ def standardize(data, used_scaler='standardize', predicted_column=0):
         ndarray: Standardized data.
     """
 
-    scaler = {
-        '01': preprocessing.MinMaxScaler(feature_range=(0, 1)),
-        '-11': preprocessing.MinMaxScaler(feature_range=(-1, 1)),
-        'robust': preprocessing.RobustScaler(),
-        'standardize': preprocessing.StandardScaler()
-    }[used_scaler]
+    if used_scaler == '01':
+        scaler = preprocessing.MinMaxScaler(feature_range=(0, 1))
+    elif used_scaler == '-11':
+        scaler = preprocessing.MinMaxScaler(feature_range=(-1, 1))
+    elif used_scaler == 'robust':
+        scaler = preprocessing.RobustScaler()
+    elif used_scaler == 'standardize':
+        scaler = preprocessing.StandardScaler()
 
     normalized = scaler.fit_transform(data)
 

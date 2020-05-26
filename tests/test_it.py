@@ -21,7 +21,7 @@ config.update({
     'return_type': 'best',
     'debug': 1,
     'plot': 0,
-    'show_plot': 0,
+    'show_plot': 1,
     'data': None,
     'lengths': 0,
     'datalength': 500,
@@ -170,7 +170,7 @@ def test_main_multiple():
 
 def test_compare_models():
     config.update(config_original.copy())
-    data_all = {'sin': [predictit.test_data.generate_test_data.gen_sin(), 0]}#, 'Sign': predictit.test_data.generate_test_data.gen_sign(), 'Random data': predictit.test_data.generate_test_data.gen_random()}
+    data_all = {'sin': [predictit.test_data.generate_test_data.gen_sin(), 0], 'Sign': [predictit.test_data.generate_test_data.gen_sign(), 0], 'Random data': [predictit.test_data.generate_test_data.gen_random(), 0]}
     try:
         predictit.main.compare_models(data_all)
         ok = 'fine'
@@ -184,7 +184,7 @@ if __name__ == "__main__":
     # print("\n\ntest_main_from_config\n")
     # result_1 = test_main_from_config()
     # print("\n\ntest_main_optimize_and_args\n")
-    # result_2 = test_main_optimize_and_args()
+    result_2 = test_main_optimize_and_args()
     # print("\n\ntest_main_dataframe\n")
     # result_3 = test_main_dataframe()
     # print("\n\ntest_main_multiple\n")

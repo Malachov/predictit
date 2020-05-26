@@ -71,7 +71,7 @@ from . import test_data
 from . import main
 
 
-__version__ = "1.33"
+__version__ = "1.35"
 __author__ = "Daniel Malachov"
 __license__ = "MIT"
 __email__ = "malachovd@seznam.cz"

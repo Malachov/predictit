@@ -102,6 +102,7 @@ if __name__ == "__main__":
     ############# Train and predict function ######## ANCHOR Train and predict function
     #################################################
 
+
 # This is core function... It should be sequentionally in the middle of main script in predict function, but it has to be 1st level function to be able to use in multiprocessing.
 # To understand content, see code below function
 def train_and_predict(
@@ -263,8 +264,9 @@ def predict(data=None, predicts=None, predicted_column=None, freq=None, models_p
         config['repeatit'] = 1
 
     # Some config values are derived from other values. If it has been changed, it has to be updated.
-    predictit.config.update_references_1()
-    predictit.config.update_references_2()
+    predictit.config.update_references_input_types()
+    if config['optimizeit']:
+        predictit.config.update_references_optimize()
 
     # Find difference between original config and set values and if there are any differences, raise error
     config_errors = set(config.keys()) - predictit.config.config_check_set
@@ -571,12 +573,12 @@ def predict(data=None, predicts=None, predicted_column=None, freq=None, models_p
         if i == 0:
             best_model_name = this_model
 
-        if not config['print_number_of_models'] or i < config['print_number_of_models']:
+        if config['print_number_of_models'] == -1 or i < config['print_number_of_models']:
             predicted_models_for_table[this_model] = {
                 'order': i + 1, 'error_criterion': model_results[j], 'predictions': reality_results_matrix[j, np.argmin(repeated_average[j])],
                 'data_length': np.argmin(repeated_average[j])}
 
-        if not config['plot_number_of_models'] is None or i < config['plot_number_of_models']:
+        if config['plot_number_of_models'] == -1 or i < config['plot_number_of_models']:
             predicted_models_for_plot[this_model] = {
                 'order': i + 1, 'error_criterion': model_results[j], 'predictions': reality_results_matrix[j, np.argmin(repeated_average[j])],
                 'data_length': np.argmin(repeated_average[j])}
@@ -818,9 +820,9 @@ def compare_models(data_all=None, predicts=None, predicted_column=None, freq=Non
 
     # If no data_all inserted, default will be used
     if not config['data_all']:
-        config['data_all'] = {'sin': [predictit.test_data.generate_test_data.gen_sin(), 0],
-                              'Sign': [predictit.test_data.generate_test_data.gen_sign(), 0],
-                              'Random data': [predictit.test_data.generate_test_data.gen_random(), 0]}
+        config['data_all'] = {'sin': (predictit.test_data.generate_test_data.gen_sin(), 0),
+                              'Sign': (predictit.test_data.generate_test_data.gen_sign(), 0),
+                              'Random data': (predictit.test_data.generate_test_data.gen_random(), 0)}
         user_warning("Test data was used. Setup 'data_all' in config...")
 
     results = {}
@@ -831,7 +833,7 @@ def compare_models(data_all=None, predicts=None, predicted_column=None, freq=Non
 
     if isinstance(data_dict, list):
         same_data = True
-        data_dict = {f"Data {i}": [j] for i, j in enumerate(data_dict)}
+        data_dict = {f"Data {i}": (j, config['predicted_column']) for i, j in enumerate(data_dict)}
 
     for i, j in data_dict.items():
 

@@ -19,6 +19,7 @@
 - [x] Validation mode in config. Results are evaluated on data that was not in train data - used in compare_models.
 - [x] Remove nan values - all column option was added
 - [x] User colored warnings in misc (not only traceback warnings) and colorized error raising
+- [x] Two options / modes of analyze - Originall data and preprocessed data
 
 ## v1.1. - 03/2020
 
