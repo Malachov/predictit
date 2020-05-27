@@ -58,6 +58,7 @@ config = {
 
     'freq': 0,  # Interval for predictions 'M' - months, 'D' - Days, 'H' - Hours.
     'freqs': [],  # For predict_multiple function only! List of intervals of predictions 'M' - months, 'D' - Days, 'H' - Hours. Default use [].
+    'resample_function': 'sum',  # 'sum' or 'mean' depends of data. For example if current in technological process - mean, if units sold, then sum.
 
     'datetime_index': '',  # Index of dataframe datetime column or it's name if it has datetime column. If there already is index in input data, it will be used automatically. Data are sorted by time.
 
@@ -175,6 +176,7 @@ def update_references_input_types():
             'batch': {'n_steps_in': config['default_n_steps_in'], 'n_steps_out': config['predicts'], 'default_other_columns_length': config['default_other_columns_length'], 'constant': 0},
             'one_in_one_out_constant': {'n_steps_in': config['default_n_steps_in'], 'n_steps_out': 1, 'constant': 1},
             'one_in_one_out': {'n_steps_in': config['default_n_steps_in'], 'n_steps_out': 1, 'constant': 0},
+            'one_in_batch_out': {'n_steps_in': config['default_n_steps_in'], 'n_steps_out': config['predicts'], 'default_other_columns_length': config['default_other_columns_length'], 'constant': 0},
             'not_serialized': {'n_steps_in': config['default_n_steps_in'], 'n_steps_out': config['predicts'], 'constant': 0, 'serialize_columns': 0},
         },
     })
@@ -192,8 +194,9 @@ config.update({
 
         **{model_name: 'batch' for model_name in [
             'Sklearn regression', 'Bayes ridge regression', 'Hubber regression', 'Extra trees regression', 'Decision tree regression', 'KNeighbors regression', 'Random forest regression',
-            'Bagging regression', 'Stochastic gradient regression', 'Passive aggressive regression', 'Extreme learning machine', 'Gen Extreme learning machine', 'Gradient boosting']},
+            'Bagging regression', 'Passive aggressive regression', 'Extreme learning machine', 'Gen Extreme learning machine', 'Gradient boosting']},
 
+        'Stochastic gradient regression': 'one_in_batch_out',
         'tensorflow_lstm': 'not_serialized',
         'tensorflow_mlp': 'one_step',
 
@@ -369,7 +372,8 @@ presets['normal'] = {
         **{model_name: predictit.models.sklearn_regression for model_name in [
             'Sklearn regression', 'Bayes ridge regression', 'Hubber regression', 'Decision tree regression',
             'KNeighbors regression', 'Random forest regression', 'Bagging regression',
-            'Passive aggressive regression', 'Extreme learning machine', 'Gen Extreme learning machine', 'Gradient boosting']},
+            # 'Passive aggressive regression', 'Extreme learning machine', 'Gen Extreme learning machine', 'Gradient boosting'
+        ]},
 
         'Compare with average': predictit.models.compare_with_average
     },

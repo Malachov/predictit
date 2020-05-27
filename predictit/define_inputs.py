@@ -81,16 +81,18 @@ def create_inputs(input_name, data, predicted_column_index):
     # Take one input type, make all derivated inputs (save memory, because only slices) and create dictionary of inputs for one iteration
     used_sequentions = {}
 
-    if input_name == 'data_one_column':
-        used_sequentions = data[:, predicted_column_index]
-
-        if input_name in ['one_in_one_out_constant', 'one_in_one_out']:
-            used_sequentions = used_sequentions.reshape(-1, 1)
-
-    elif input_name == 'data':
+    if input_name == 'data':
         used_sequentions = data
 
+    elif input_name == 'data_one_column':
+        used_sequentions = data[:, predicted_column_index]
+
     else:
-        used_sequentions = make_sequences(data, **config['input_types'][input_name])
+        if input_name in ['one_in_one_out_constant', 'one_in_one_out', 'one_in_batch_out']:
+            used_sequentions = data[:, predicted_column_index: predicted_column_index + 1]
+        else:
+            used_sequentions = data
+
+        used_sequentions = make_sequences(used_sequentions, **config['input_types'][input_name])
 
     return used_sequentions

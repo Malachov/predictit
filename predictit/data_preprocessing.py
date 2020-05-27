@@ -66,28 +66,29 @@ def data_consolidation(data):
         except Exception:
             raise KeyError(colorize(f"Predicted column is not number datatype. Setup correct 'predicted_column' in config.py"))
 
-        if isinstance(data.index, (pd.core.indexes.datetimes.DatetimeIndex, pd._libs.tslibs.timestamps.Timestamp)):
-            config['datetime_index'] = 'index'
-
         if config['datetime_index'] not in [None, '']:
 
-            if config['datetime_index'] == 'index':
-                pass
+            try:
+                if isinstance(data_for_predictions_df.index, (pd.core.indexes.datetimes.DatetimeIndex, pd._libs.tslibs.timestamps.Timestamp)):
+                    pass
+                else:
+                    if isinstance(config['datetime_index'], str):
+                        data_for_predictions_df.set_index(config['datetime_index'], drop=True, inplace=True)
 
-            elif isinstance(config['datetime_index'], str):
-                try:
-                    data_for_predictions_df.set_index(config['datetime_index'], drop=True, inplace=True)
-                except Exception:
-                    raise KeyError(colorize(f"Datetime name / index from config - '{config['datetime_index']}' not found in data. Change in config - 'datetime_index'"))
+                    else:
+                        data_for_predictions_df.set_index(data_for_predictions_df.columns[config['datetime_index']], drop=True, inplace=True)
 
-            else:
-                data_for_predictions_df.set_index(data_for_predictions_df.columns[config['datetime_index']], drop=True, inplace=True)
+                    data_for_predictions_df.index = pd.to_datetime(data_for_predictions_df.index)
 
-            data_for_predictions_df.index = pd.to_datetime(data_for_predictions_df.index)
+            except Exception:
+                raise KeyError(colorize(f"Datetime name / index from config - '{config['datetime_index']}' not found in data or not datetime format. Change in config - 'datetime_index'"))
 
             if config['freq']:
                 data_for_predictions_df.sort_index(inplace=True)
-                data_for_predictions_df = data_for_predictions_df.resample(config['freq']).sum()
+                if config['resample_function'] == 'sum':
+                    data_for_predictions_df = data_for_predictions_df.resample(config['freq']).sum()
+                if config['resample_function'] == 'mean':
+                    data_for_predictions_df = data_for_predictions_df.resample(config['freq']).mean()
                 data_for_predictions_df = data_for_predictions_df.asfreq(config['freq'], fill_value=0)
 
             else:
@@ -95,7 +96,7 @@ def data_consolidation(data):
                 data_for_predictions_df.index.freq = pd.infer_freq(data_for_predictions_df.index)
 
                 if data_for_predictions_df.index.freq is None:
-                    user_warning("Datetime index was provided from config, but frequency guess failed. Specify 'freq' in config to resample and have equal sampling.")
+                    user_warning("Datetime index was provided from config, but frequency guess failed. Specify 'freq' in config to resample and have equal sampling if you want.")
                     data_for_predictions_df.reset_index(inplace=True)
 
         # Make predicted column index 0

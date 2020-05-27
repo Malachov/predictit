@@ -44,108 +44,7 @@ def update_gui(content, id):
         pass
 
 
-# This is core function... It should be sequentionally in the middle of main script in predict function, but it has to be 1st level function to be able to use in multiprocessing.
-# To understand content, see code below function
-def train_and_predict(
-        iterated_model_train, iterated_model_predict, iterated_model_name, iterated_model_index, data_length_index,
-        data_length_iteration, data_lengths, model_train_input, model_predict_input, model_test_inputs,
-        data_abs_max, data_mean, data_std, models_test_outputs, last_undiff_value=None, final_scaler=None, pipe=None):
-
-    model_results = {}
-
-    if config['optimizeit'] and data_length_index == 0:
-        if iterated_model_name in config['models_parameters_limits']:
-
-            try:
-                start_optimization = time.time()
-
-                model_results['best_kwargs'] = predictit.best_params.optimize(
-                    iterated_model_train, iterated_model_predict, config['models_parameters'][iterated_model_name], config['models_parameters_limits'][iterated_model_name],
-                    model_train_input=model_train_input, model_test_inputs=model_test_inputs, models_test_outputs=models_test_outputs,
-                    fragments=config['fragments'], iterations=config['iterations'], time_limit=config['optimizeit_limit'],
-                    error_criterion=config['error_criterion'], name=iterated_model_name, details=config['optimizeit_details'])
-
-                for k, l in model_results['best_kwargs'].items():
-
-                    config['models_parameters'][iterated_model_name][k] = l
-
-            except Exception:
-                traceback_warning("Optimization didn't finished")
-
-            finally:
-                stop_optimization = time.time()
-
-                model_results['optimization_time'] = stop_optimization - start_optimization
-
-    try:
-        start = time.time()
-
-        model_results['name'] = iterated_model_name
-        model_results['index'] = (iterated_model_index, data_length_index)
-        model_results['data_length_index'] = data_length_index
-        model_results['data_length_iteration'] = data_length_iteration
-
-        # If no parameters or parameters details, add it so no index errors later
-        if iterated_model_name not in config['models_parameters']:
-            config['models_parameters'][iterated_model_name] = {}
-
-        # Train all models
-        model_results['trained_model'] = iterated_model_train(model_train_input, **config['models_parameters'][iterated_model_name])
-
-        # Create predictions - out of sample
-        one_reality_result = iterated_model_predict(model_predict_input, model_results['trained_model'], config['predicts'])
-
-        if np.isnan(np.sum(one_reality_result)) or one_reality_result is None:
-            return
-
-        # Remove wrong values out of scope to not be plotted
-        one_reality_result[abs(one_reality_result) > 3 * data_abs_max] = np.nan
-
-        # Do inverse data preprocessing
-        if config['power_transformed'] == 1:
-            one_reality_result = predictit.data_preprocessing.fitted_power_transform(one_reality_result, data_std, data_mean)
-
-        if config['standardize']:
-            one_reality_result = final_scaler.inverse_transform(one_reality_result.reshape(-1, 1)).ravel()
-
-        if config['data_transform'] == 'difference':
-            one_reality_result = predictit.data_preprocessing.inverse_difference(one_reality_result, last_undiff_value)
-
-        model_results['results'] = one_reality_result
-
-        process_repeated_matrix = np.zeros((config['repeatit'], config['predicts']))
-        process_evaluated_matrix = np.zeros(config['repeatit'])
-
-        # Predict many values in test inputs to evaluate which models are best - do not inverse data preprocessing, because test data are processed
-        for repeat_iteration in range(config['repeatit']):
-
-            # Create in-sample predictions to evaluate if model is good or not
-
-            process_repeated_matrix[repeat_iteration] = iterated_model_predict(model_test_inputs[repeat_iteration], model_results['trained_model'], predicts=config['predicts'])
-
-            if config['power_transformed'] == 2:
-                process_repeated_matrix[repeat_iteration] = predictit.data_preprocessing.fitted_power_transform(process_repeated_matrix[repeat_iteration], data_std, data_mean)
-
-            process_evaluated_matrix[repeat_iteration] = predictit.evaluate_predictions.compare_predicted_to_test(
-                process_repeated_matrix[repeat_iteration], models_test_outputs[repeat_iteration], error_criterion=config['error_criterion'])
-
-        model_results['repeated_matrix'] = process_repeated_matrix
-        model_results['evaluated_matrix'] = process_evaluated_matrix
-        model_results['model_error'] = process_evaluated_matrix.mean()
-
-    except Exception:
-
-        traceback_warning(f"Error in {iterated_model_name} model on data length {data_length_iteration}")
-
-    finally:
-        model_results['model_time'] = time.time() - start
-
-        if config['multiprocessing'] == 'process':
-            pipe.send(model_results)
-            pipe.close()
-        else:
-            return model_results
-
+train_and_predict = predictit.main.train_and_predict
 
 if __name__ == "__main__":
 
@@ -155,65 +54,46 @@ if __name__ == "__main__":
 
     config.update({
 
+        'data': pd.read_csv('/home/dan/ownCloud/Github/Oxy_data/Dan/data/20160303.txt', index_col=False, sep='\t', decimal=',', encoding='cp1250')[20: -20],
         'multiprocessing': 'pool',
         'data_source': 'csv',
         'csv_test_data_relative_path': '5000 Sales Records.csv',
-        'datetime_index': 5,
-        'datalength': 100,
-        'freq': 'D',
-        'predicted_column': '',
+        'datetime_index': 'čas',
+        'datalength': 1000,
+        'predicted_column': 'CO (ppm)',
         'print_number_of_models': 10,
         'last_row': 0,
         'correlation_threshold': 0.2,
         'optimizeit': 0,
-        'standardize': 0,
+        'standardize': 'standardize',
         'lengths': 0,
-        'data': np.array(range(1000)),
         'repeatit': 3,
+        'plot_history_length': 1000,
+        'predicts': 20,
+        'print_detailed_result': 1,
+
 
     'used_models': {
 
-        # **{model_name: predictit.models.statsmodels_autoregressive for model_name in [
-        #     'AR (Autoregression)', 'ARMA', 'ARIMA (Autoregression integrated moving average)']},  # 'SARIMAX (Seasonal ARIMA)'
+        **{model_name: predictit.models.statsmodels_autoregressive for model_name in [
+            'AR (Autoregression)'#, 'ARMA', 'ARIMA (Autoregression integrated moving average)'
+            ]},  # 'SARIMAX (Seasonal ARIMA)'
 
-        # **{model_name: predictit.models.autoreg_LNU for model_name in [
-        #     'Autoregressive Linear neural unit', 'Autoregressive Linear neural unit normalized']},  # , 'Linear neural unit with weigths predict'
+        **{model_name: predictit.models.autoreg_LNU for model_name in [
+            'Autoregressive Linear neural unit', 'Autoregressive Linear neural unit normalized']},  # , 'Linear neural unit with weigths predict'
 
-        # 'Conjugate gradient': predictit.models.conjugate_gradient,
+        'Conjugate gradient': predictit.models.conjugate_gradient,
 
         # 'tensorflow_lstm': predictit.models.tensorflow,
         # 'tensorflow_mlp': predictit.models.tensorflow,
-
-        # **{model_name: predictit.models.sklearn_regression for model_name in [  # 'Extra trees regression', 'Random forest regression', 'Bagging regression', 'Hubber regression', 'Stochastic gradient regression', 'Extreme learning machine', 'Gen Extreme learning machine'
-        #     'Sklearn regression', 'Bayes ridge regression', 'Decision tree regression', 'KNeighbors regression',
-        #     'Passive aggressive regression', 'Gradient boosting']},
+        **{model_name: predictit.models.sklearn_regression for model_name in [  # 
+        'Extra trees regression', 'Random forest regression', 'Bagging regression', 'Hubber regression', 'Stochastic gradient regression', 'Extreme learning machine', 'Gen Extreme learning machine',
+            'Sklearn regression', 'Bayes ridge regression', 'Decision tree regression', 'KNeighbors regression',
+            'Passive aggressive regression', 'Gradient boosting']},
 
         'Compare with average': predictit.models.compare_with_average
     }
     })
-
-
-
-
-
-
-    results = []
-
-    if config['multiprocessing'] == 'process':
-        processes = []
-        pipes = []
-        # queues_dict = config['used_models'].copy()
-        # for i in queues_dict:
-        #     queues_dict[i] = multiprocessing.Pipe()  # TODO duplex=False
-
-    if config['multiprocessing'] == 'pool':
-        pool = multiprocessing.Pool()
-
-        # It is not possible easy share data in multiprocessing, so results are resulted via callback function
-        def return_result(result):
-            results.append(result)
-
-
 
 
 
@@ -255,8 +135,9 @@ if __name__ == "__main__":
         config['repeatit'] = 1
 
     # Some config values are derived from other values. If it has been changed, it has to be updated.
-    predictit.config.update_references_1()
-    predictit.config.update_references_2()
+    predictit.config.update_references_input_types()
+    if config['optimizeit']:
+        predictit.config.update_references_optimize()
 
     # Find difference between original config and set values and if there are any differences, raise error
     config_errors = set(config.keys()) - predictit.config.config_check_set
@@ -430,8 +311,24 @@ if __name__ == "__main__":
 
     used_input_types = []
     for i in models_names:
-        used_input_types.append(config['models_input'][i])
-    used_input_types = set(used_input_types)
+        if config['models_input'][i] not in used_input_types:
+            used_input_types.append(config['models_input'][i])
+
+    results = []
+
+    if config['multiprocessing'] == 'process':
+        processes = []
+        pipes = []
+        # queues_dict = config['used_models'].copy()
+        # for i in queues_dict:
+        #     queues_dict[i] = multiprocessing.Pipe()  # TODO duplex=False
+
+    if config['multiprocessing'] == 'pool':
+        pool = multiprocessing.Pool()
+
+        # It is not possible easy share data in multiprocessing, so results are resulted via callback function
+        def return_result(result):
+            results.append(result)
 
     #######################################
     ############# Main loop ######## ANCHOR Main loop
@@ -547,12 +444,12 @@ if __name__ == "__main__":
         if i == 0:
             best_model_name = this_model
 
-        if not config['print_number_of_models'] or i < config['print_number_of_models']:
+        if config['print_number_of_models'] == -1 or i < config['print_number_of_models']:
             predicted_models_for_table[this_model] = {
                 'order': i + 1, 'error_criterion': model_results[j], 'predictions': reality_results_matrix[j, np.argmin(repeated_average[j])],
                 'data_length': np.argmin(repeated_average[j])}
 
-        if not config['plot_number_of_models'] is None or i < config['plot_number_of_models']:
+        if config['plot_number_of_models'] == -1 or i < config['plot_number_of_models']:
             predicted_models_for_plot[this_model] = {
                 'order': i + 1, 'error_criterion': model_results[j], 'predictions': reality_results_matrix[j, np.argmin(repeated_average[j])],
                 'data_length': np.argmin(repeated_average[j])}
@@ -655,7 +552,7 @@ if __name__ == "__main__":
             detailed_table.field_names = ['Name', f"Average {config['error_criterion']} error", 'Time', 'Iteration', 'Iteration value']
             for i in results:
                 try:
-                    detailed_table.add_row([i['name'], round(i['model_error'], 3), round(i['model_time']), round(i['data_length_iteration'], 3), i['data_length_index']])
+                    detailed_table.add_row([i['name'], round(i['model_error'], 3), round(i['model_time'], 3), round(i['data_length_iteration'], 3), i['data_length_index']])
                 except Exception:
                     pass
 

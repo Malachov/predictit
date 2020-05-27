@@ -5,6 +5,7 @@ from sklearn import linear_model
 import numpy as np
 import sklearn_extensions.extreme_learning_machines.elm as elm
 
+
 def get_regressors():
     """ Create list of all regressors from sklearn (classes, that can be called). E.g. [bayes_ridge_regressor, linear_regressor]"""
 
