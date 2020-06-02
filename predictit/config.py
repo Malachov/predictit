@@ -50,10 +50,10 @@ config = {
     'data_source': 'test',  # Data source. ('csv', 'txt', 'sql' or 'test') - If sql, you have to edit the query to fit your database.
 
     'csv_full_path': r'',  # Full CSV path with suffix.
-    'csv_test_data_relative_path': '',  # CSV name with suffix in test_data folder (5000 Sales Records.csv or daily-minimum-temperatures.csv)
+    'csv_test_data_relative_path': '',  # CSV name with suffix in test_data folder ('5000 Sales Records.csv' or 'daily-minimum-temperatures.csv')
     # !!! Turn it off if not testing to not break csv full path !!! Test data are gitignored... use your own.
 
-    'predicted_column': '',  # Name of predicted column (for dataframe data) or it's index - string or int.
+    'predicted_column': 'Temp',  # Name of predicted column (for dataframe data) or it's index - string or int.
     'predicted_columns': [],  # For predict_multiple function only! List of names of predicted columns or it's indexes. If 'data' is dataframe or numpy, then you can use '*' to predict all the columns.
 
     'freq': 0,  # Interval for predictions 'M' - months, 'D' - Days, 'H' - Hours.
@@ -67,7 +67,7 @@ config = {
 
     # Output settings
 
-    'predicts': 7,  # Number of predicted values - 7 by default.
+    'predicts': 30,  # Number of predicted values - 7 by default.
 
     'mode': 'predict',  # If 'validate', put apart last few ('predicts' + 'validation_gap') values and evaluate on test data that was not in train set. Do not setup - use compare_models function, it will use it automattically.
     'validation_gap': 10,  # If 'mode' == 'validate', then describe how many samples are between train and test set. The bigger gap is, the bigger knowledge generalization is necesssary.
@@ -83,7 +83,7 @@ config = {
     'save_plot': 0,  # (bool) - Html if plotly type, png if matplotlibtype.
     'save_plot_path': '',  # Path where to save the plot (String), if empty string or 0 - saved to desktop.
     'plot_name': 'Predictions',
-    'plot_history_length': 100,  # How many historic values will be plotted
+    'plot_history_length': 200,  # How many historic values will be plotted
     'plot_number_of_models': 12,  # Number of plotted models. If -1, than all models will be evaluated. 1 if only the best one.
 
     'print': 1,  # Turn on and off all printed details at once.
@@ -91,9 +91,20 @@ config = {
     'print_number_of_models': -1,  # How many models will be evaluated and printed in results table. If -1, than all models will be evaluated. 1 if only the best one.
     'print_time_table': 1,  # Whether print table with models errors and time to compute.
     'print_result': 1,  # Whether print best model results and model details.
-    'print_detailed_result': 0,  # Whether print detailed results.
+    'print_detailed_result': 1,  # Whether print detailed results.
 
     # Prediction parameters settings
+
+    # Optimization of some outer config value e.g. datalength
+    'optimization': 0,  # If 0 do not optimize. If 1, compute on various option defined values. Automatically choose the best length for each model separately. Can be time consuming (every models are computed several times)
+    'optimization_variable': 'data_transform',  # Some value from config that will be optimized. Unlike hyperparameters only defined values will be computed.
+    'optimization_values': [0, 'difference'],  # List of evaluatedconfig values. Results of each value are only in detailed table.
+
+    # Optimization of inner model hyperparameter e.g. number of lags
+    'optimizeit': 0,  # Find optimal parameters of models.
+    'optimizeit_details': 2,  # 1 print best parameters of models, 2 print every new best parameters achieved, 3 prints all results.
+    'optimizeit_limit': 10,  # How many seconds can take one model optimization.
+    'optimizeit_plot': 0,  # Plot every optimized combinations (plot only if have few parameters, otherwise hundreds of plots!!!)
 
     'multiprocessing': 'process',  # 'pool' or 'process' or 0
     'default_n_steps_in': 30,  # How many lagged values are in vector input to model.
@@ -102,21 +113,17 @@ config = {
     'remove_nans': 'any_columns',  # 'any_columns' will remove all the columns where is at least one nan column.
     'dtype': 'float32',  # Main dtype used in prediction. 'float32' or 'float64'.
     'repeatit': 50,  # How many times is computation repeated for error criterion evaluation.
-    'lengths': 0,  # If 1, compute on various length of data (1, 1/2, 1/4...). Automatically choose the best length. If 0, use only full length.
 
     'data_transform': 0,  # 'difference' or 0 - Transform the data on differences between two neighbor values.
     'analyzeit': 0,  # If 1, analyze original data, if 2 analyze preprocessed data, if 3, then both. Statistical distribution, autocorrelation, seasonal decomposition etc.
     'analyze_seasonal_decompose': {'period': 365, 'model': 'additive'},  # Parameters for seasonal decompose in analyze. Find if there are periodically repeating patterns in data.
     'standardize': 'standardize',  # One from None, 'standardize', '-11', '01', 'robust'.
 
-    'optimizeit': 0,  # Find optimal parameters of models.
-    'optimizeit_details': 2,  # 1 print best parameters of models, 2 print every new best parameters achieved, 3 prints all results.
-    'optimizeit_limit': 10,  # How many seconds can take one model optimization.
 
     'smooth': (11, 2),  # Smoothing data with Savitzky-Golay filter. First argument is window and second is polynomial order. If 0, not smoothing.
     'power_transformed': 0,  # Whether transform results to have same standard deviation and mean as train data. 0 no power transform, 1 on output and 2 on output and before evaluating.
     'remove_outliers': 0,  # Remove extraordinary values. Value is threshold for ignored values. Value means how many times standard deviation from the average threshold is far (have to be > 3, else delete most of data). If predicting anomalies, use 0.
-    'error_criterion': 'mape',  # 'mape' or 'rmse' or 'dtw' (dynamic time warping).
+    'error_criterion': 'mse_sklearn',  # 'mse_sklearn', 'mape' or 'rmse' or 'dtw' (dynamic time warping).
     'last_row': 0,  # If 0, erase last row (for example in day frequency, day is not complete yet).
     'correlation_threshold': 0.5,  # If evaluating from more collumns, use only collumns that are correlated. From 0 (All columns included) to 1 (only column itself).Z
     'confidence_interval': 0.6,  # Area of confidence in result plot (grey area where we suppose values) - Bigger value, narrower area - maximum 1. If 0 - not plotted.
@@ -141,23 +148,23 @@ config = {
     'used_models': {
 
         **{model_name: predictit.models.statsmodels_autoregressive for model_name in [
-            'AR (Autoregression)', 'ARMA', 'ARIMA (Autoregression integrated moving average)']},  # 'SARIMAX (Seasonal ARIMA)'
+            'AR (Autoregression)', 'ARMA', 'ARIMA (Autoregression integrated moving average)', 'autoreg', 'SARIMAX (Seasonal ARIMA)']},
 
-        **{model_name: predictit.models.autoreg_LNU for model_name in [
-            'Autoregressive Linear neural unit', 'Autoregressive Linear neural unit normalized']},  # , 'Linear neural unit with weigths predict'
+        # **{model_name: predictit.models.autoreg_LNU for model_name in [
+        #     'Autoregressive Linear neural unit', 'Autoregressive Linear neural unit normalized']},  # , 'Linear neural unit with weigths predict'
 
-        'Conjugate gradient': predictit.models.conjugate_gradient,
+        # 'Conjugate gradient': predictit.models.conjugate_gradient,
 
-        # 'tensorflow_lstm': predictit.models.tensorflow,
-        # 'tensorflow_mlp': predictit.models.tensorflow,
+        # # # 'tensorflow_lstm': predictit.models.tensorflow,
+        # # # 'tensorflow_mlp': predictit.models.tensorflow,
 
-        **{model_name: predictit.models.sklearn_regression for model_name in [
-            'Sklearn regression', 'Bayes ridge regression', 'Passive aggressive regression', 'Gradient boosting',
-            'KNeighbors regression', 'Decision tree regression',
-            # 'Bagging regression', 'Hubber regression', 'Stochastic gradient regression', 'Extreme learning machine', 'Gen Extreme learning machine',  'Extra trees regression', 'Random forest regression'
-        ]},
+        # **{model_name: predictit.models.sklearn_regression for model_name in [
+        #     'Sklearn regression', 'Bayes ridge regression', 'Passive aggressive regression', 'Gradient boosting',
+        #     'KNeighbors regression', 'Decision tree regression',
+        #     # 'Bagging regression', 'Hubber regression', 'Stochastic gradient regression', 'Extreme learning machine', 'Gen Extreme learning machine',  'Extra trees regression', 'Random forest regression'
+        # ]},
 
-        'Compare with average': predictit.models.compare_with_average
+        # 'Compare with average': predictit.models.compare_with_average
     },
 }
 
@@ -187,7 +194,7 @@ config.update({
     'models_input': {
 
         **{model_name: 'data_one_column' for model_name in [
-            'AR (Autoregression)', 'ARMA', 'ARIMA (Autoregression integrated moving average)', 'SARIMAX (Seasonal ARIMA)']},
+            'AR (Autoregression)', 'ARMA', 'ARIMA (Autoregression integrated moving average)', 'autoreg', 'SARIMAX (Seasonal ARIMA)']},
 
         **{model_name: 'one_in_one_out_constant' for model_name in [
             'Autoregressive Linear neural unit', 'Autoregressive Linear neural unit normalized', 'Linear neural unit with weigths predict', 'Conjugate gradient']},
@@ -207,10 +214,11 @@ config.update({
     # If commented - default parameters will be used.
     'models_parameters': {
 
-        'AR (Autoregression)': {'model': 'ar', 'method': 'cmle', 'ic': 'aic', 'trend': 'nc', 'solver': 'lbfgs'},
-        'ARMA': {'model': 'arma', 'p': 3, 'q': 0, 'method': 'mle', 'ic': 'aic', 'trend': 'nc', 'solver': 'lbfgs'},
-        'ARIMA (Autoregression integrated moving average)': {'model': 'arima', 'p': 3, 'd': 0, 'q': 0, 'method': 'css', 'ic': 'aic', 'trend': 'nc', 'solver': 'nm'},
-        # 'SARIMAX (Seasonal ARIMA)': {'p': 4, 'd': 0, 'q': 0, 'pp': 1, 'dd': 0, 'qq': 0, 'season': 12, 'method': 'lbfgs', 'trend': 'nc', 'enforce_invertibility': False, 'enforce_stationarity': False},
+        'AR (Autoregression)': {'used_model': 'ar', 'method': 'cmle', 'ic': 'aic', 'trend': 'nc', 'solver': 'lbfgs'},
+        'ARMA': {'used_model': 'arma', 'p': 4, 'q': 0, 'method': 'mle', 'ic': 'aic', 'trend': 'nc', 'solver': 'lbfgs'},
+        'ARIMA (Autoregression integrated moving average)': {'used_model': 'arima', 'p': 6, 'd': 0, 'q': 0, 'method': 'css', 'ic': 'aic', 'trend': 'nc', 'solver': 'nm'},
+        'autoreg': {'used_model': 'autoreg', 'cov_type': 'nonrobust'},
+        'SARIMAX (Seasonal ARIMA)': {'used_model': 'sarimax', 'p': 3, 'd': 0, 'q': 0, 'seasonal': (1, 0, 0, 4), 'method': 'lbfgs', 'trend': 'nc', 'enforce_invertibility': False, 'enforce_stationarity': False},
 
         'Autoregressive Linear neural unit': {'mi_multiple': 1, 'mi_linspace': (1e-5, 1e-4, 3), 'epochs': 10, 'w_predict': 0, 'minormit': 0},
         'Autoregressive Linear neural unit normalized': {'mi': 1, 'mi_multiple': 0, 'epochs': 10, 'w_predict': 0, 'minormit': 1},
@@ -255,11 +263,14 @@ config.update({
     # If param1 limits are [0, 10], and 'fragments': 5, it will be evaluated for [0, 2, 4, 6, 8, 10].
     # Then it finds best value and make new interval that is again divided in 5 parts...
     # This is done as many times as iteration value is.
+    # If you need integers, type just number, if you need float, type dot, e.g. [2.0, 6.0].
+    # If you use list of strings or more than 2 values (e.g. [5, 4, 7]), then only this defined values will be executed
+    #   ana no new generated
+
+
     'fragments': 4,
     'iterations': 2,
 
-    # Threshold values.
-    # If you need integers, type just number, if you need float, type dot (e.g. 2.0).
 
     # This boundaries repeat across models.
     'alpha': [0.0, 1.0],
@@ -275,9 +286,9 @@ def update_references_optimize():
     config.update({
         'models_parameters_limits': {
             'AR (Autoregression)': {'ic': ['aic', 'bic', 'hqic', 't-stat'], 'trend': ['c', 'nc']},
-
             'ARMA': {'p': [1, config['maxorder']], 'q': config['order'], 'trend': ['c', 'nc']},
-            # 'ARIMA (Autoregression integrated moving average)': {'p': [1, config['maxorder']], 'd': [0, 2], 'q': [0, 4], 'trend': ['c', 'nc']},
+            # 'ARIMA (Autoregression integrated moving average)': {'p': [1, 3, 9], 'd': [0, 1, 2], 'q': [0, 1, 2], 'trend': ['c', 'nc']},
+            'autoreg': {'cov_type': ['nonrobust', 'HC0', 'HC1', 'HC3']},
             # 'SARIMAX (Seasonal ARIMA)': {'p': [1, config['maxorder']], 'd': config['order'], 'q': config['order'], 'pp': config['order'], 'dd': config['order'], 'qq': config['order'],
             # 'season': config['order'], 'method': ['lbfgs', 'bfgs', 'newton', 'nm', 'cg', 'ncg', 'powell'], 'trend': ['n', 'c', 't', 'ct'], 'enforce_invertibility': [True, False], 'enforce_stationarity': [True, False], 'forecast_type': ['in_sample', 'out_of_sample']},
 
@@ -339,7 +350,7 @@ config.update({
 ###!!! overwrite defined settings !!!###
 presets = {
     'fast': {
-        'optimizeit': 0, 'default_n_steps_in': config['default_n_steps_in'] + 3, 'repeatit': 20, 'lengths': 0, 'datalength': 1000,
+        'optimizeit': 0, 'default_n_steps_in': config['default_n_steps_in'] + 3, 'repeatit': 20, 'optimization': 0, 'datalength': 1000,
         'other_columns': 0, 'data_transform': 0, 'remove_outliers': 0, 'analyzeit': 0, 'standardize': None,
 
         # If editting or adding new models, name of the models have to be the same as in models module
@@ -354,13 +365,13 @@ presets = {
 
 
 presets['normal'] = {
-    'optimizeit': 0, 'default_n_steps_in': 15, 'repeatit': 50, 'lengths': 0, 'datalength': 3000,
-    'other_columns': 1, 'remove_outliers': 0, 'analyzeit': 0, 'standardize': None,
+    'optimizeit': 0, 'default_n_steps_in': 15, 'repeatit': 50, 'optimization': 0, 'datalength': 3000,
+    'other_columns': 1, 'remove_outliers': 0, 'analyzeit': 0, 'standardize': 'standardize',
 
     'used_models': {
 
         **{model_name: predictit.models.statsmodels_autoregressive for model_name in [
-            'AR (Autoregression)', 'ARIMA (Autoregression integrated moving average)']},  # 'SARIMAX (Seasonal ARIMA)'
+            'AR (Autoregression)', 'ARIMA (Autoregression integrated moving average)', 'autoreg', 'SARIMAX (Seasonal ARIMA)']},
 
         'Autoregressive Linear neural unit': predictit.models.autoreg_LNU,
         # 'Linear neural unit with weigths predict': predictit.models.autoreg_LNU,

@@ -67,6 +67,7 @@ from . import evaluate_predictions
 from . import misc
 from . import plot
 from . import test_data
+from . import main_loop
 
 from . import main
 
@@ -76,4 +77,4 @@ __author__ = "Daniel Malachov"
 __license__ = "MIT"
 __email__ = "malachovd@seznam.cz"
 
-__all__ = ['analyze', 'best_params', 'config', 'data_preprocessing', 'database', 'define_inputs', 'evaluate_predictions', 'main', 'misc', 'models', 'plot', 'test_data']
+__all__ = ['analyze', 'best_params', 'config', 'data_preprocessing', 'database', 'define_inputs', 'evaluate_predictions', 'main', 'misc', 'models', 'plot', 'test_data', 'main_loop']

@@ -1,8 +1,7 @@
 """Module with function compare_predicted_to_test that Compare tested model with reality. It return some error criterion based on config.py"""
 
-import matplotlib.pyplot as plt
 import numpy as np
-import predictit.misc
+from predictit import misc
 
 
 def compare_predicted_to_test(predicted, test, train=None, error_criterion='mape', plot=0, modelname="Default model", dataname="default data", details=0):
@@ -32,6 +31,11 @@ def compare_predicted_to_test(predicted, test, train=None, error_criterion='mape
 
     if predicted is not None:
         if plot:
+            if misc._JUPYTER:
+                get_ipython().run_line_magic('matplotlib', 'inline')
+
+            import matplotlib.pyplot as plt
+
             plt.figure(figsize=(10, 6))
             plt.plot(test, label='Reality')
             plt.plot(predicted, label='Prediction')
@@ -61,7 +65,11 @@ def compare_predicted_to_test(predicted, test, train=None, error_criterion='mape
         mae = sumabserror / predicts
         '''
 
-        if error_criterion == 'rmse':
+        if error_criterion == 'mse_sklearn':
+            from sklearn.metrics import mean_squared_error
+            criterion_value = mean_squared_error(test, predicted)
+
+        elif error_criterion == 'rmse':
             rmseerror = error ** 2
             criterion_value = (sum(rmseerror) / predicts) ** (1 / 2)
 
@@ -76,9 +84,9 @@ def compare_predicted_to_test(predicted, test, train=None, error_criterion='mape
             criterion_value = dtw.distance_fast(predicted_double, test_double)
 
         else:
-            raise KeyError(predictit.misc.colorize(f"bad 'error_criterion' config - '{error_criterion}'. Use some from options from config comment..."))
+            raise KeyError(misc.colorize(f"bad 'error_criterion' config - '{error_criterion}'. Use some from options from config comment..."))
 
         if details == 1:
-            print(f"Error of model {modelname} on data {dataname}: {error_criterion}={criterion_value}")
+            print(f"Error of model {modelname} on data {dataname}: {error_criterion} = {criterion_value}")
 
         return criterion_value

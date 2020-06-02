@@ -2,19 +2,19 @@ import warnings
 import traceback
 import textwrap
 import os
+from IPython import get_ipython
 
-_JUPYTER = 0
 _GUI = 0
-try:
-    __IPYTHON__
-    from IPython import get_ipython
-    ipython = get_ipython()
+
+ipython = get_ipython()
+
+if ipython is not None:
+    _JUPYTER = 1
     ipython.magic('%load_ext autoreload')
     ipython.magic('%autoreload 2')
-    _JUPYTER = 1
 
-except Exception:
-    pass
+else:
+    _JUPYTER = 0
 
 # To enable colors in cmd...
 os.system('')

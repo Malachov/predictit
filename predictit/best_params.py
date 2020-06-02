@@ -12,7 +12,7 @@ from .misc import traceback_warning
 
 
 def optimize(model_train, model_predict, kwargs, kwargs_limits, model_train_input, model_test_inputs, models_test_outputs, error_criterion='mape',
-             multicolumn_source=0, fragments=10, iterations=3, details=0, time_limit=5, predicted_column_index=0, name='Your model'):
+             multicolumn_source=0, fragments=10, iterations=3, details=0, time_limit=5, predicted_column_index=0, name='Your model', plot=0):
     """Function to find optimal parameters of function. For example if we want to find minimum of function x^2,
     we can use limits from -10 to 10. If we have 4 fragments and 3 iterations. it will separate interval on 4 parts,
     so we have aproximately points -10, -4, 4, 10. We evaluate the best one and make new interval to closest points,
@@ -73,9 +73,12 @@ def optimize(model_train, model_predict, kwargs, kwargs_limits, model_train_inpu
 
         for repeat_iteration in range(n_test_samples):
 
+            create_plot = 1 if plot and repeat_iteration == n_test_samples - 1 else 0
+
             predictions = model_predict(model_test_inputs[repeat_iteration], trained_model, predicts=predicts)
-            modeleval[repeat_iteration] = evaluate_predictions.compare_predicted_to_test(predictions, models_test_outputs[repeat_iteration],
-                                                                                         error_criterion=error_criterion, plot=0)
+            modeleval[repeat_iteration] = evaluate_predictions.compare_predicted_to_test(
+                predictions, models_test_outputs[repeat_iteration], error_criterion=error_criterion,
+                modelname=f"{name} - {kwargs}", plot=create_plot)
 
         return np.mean(modeleval)
 
@@ -120,7 +123,7 @@ def optimize(model_train, model_predict, kwargs, kwargs_limits, model_train_inpu
 
     for i, j in kwargs_limits.items():
 
-        if not isinstance(j[0], (int, float, np.ndarray, np.generic)):
+        if not isinstance(j[0], (int, float, np.ndarray, np.generic)) or len(j) != 2:
             kwargs_fragments[i] = j
         elif isinstance(j[0], int):
             pomoc = np.linspace(j[0], j[1], fragments, dtype=int)

@@ -1,9 +1,10 @@
 import statsmodels
 
 
-def train(data, model='ar', p=3, d=1, q=0, method='cmle', ic='aic', trend='nc', solver='lbfgs'):
+def train(data, used_model='autoreg', p=5, d=1, q=0, cov_type='nonrobust', method='cmle', ic='aic', trend='nc', solver='lbfgs',
+          # SARIMAX args
+          seasonal=(1, 1, 1, 24), enforce_invertibility=False, enforce_stationarity=False):
     """Autoregressive model from statsmodels library. Only univariate data.
-
     Args:
         data (np.ndarray): Time series data.
         predicts (int, optional): Number of predicted values. Defaults to 7.
@@ -14,35 +15,47 @@ def train(data, model='ar', p=3, d=1, q=0, method='cmle', ic='aic', trend='nc', 
         trend (str, optional): Parameter of statsmodels fit function. Defaults to 'nc'.
         solver (str, optional):ort statsmodels.api as sm
       File "/home/dan/.local/lib/pyt Parameter of statsmodels fit function. Defaults to 'lbfgs'.
-
     Returns:
         np.ndarray: Predictions of input time series.
     """
 
-    params = {'model': 'ar', 'p': 3, 'd': 1, 'q': 0, 'method': 'cmle', 'ic': 'aic', 'trend': 'nc', 'solver': 'lbfgs'}
-
-    return params
-
-
-def predict(data, params, predicts=7):
-
-    if params['model'] == 'ar':
+    if used_model == 'ar':
         model = statsmodels.tsa.ar_model.AR(data)
 
-    if model == 'arma':
-        order = (params['p'], params['q'])
+    elif used_model == 'arma':
+        order = (p, q)
         model = statsmodels.tsa.arima_model.ARMA(data, order=order)
 
-    if model == 'arima':
-        order = (params['p'], params['d'], params['q'])
+    elif used_model == 'arima':
+        order = (p, d, q)
         model = statsmodels.tsa.arima_model.ARIMA(data, order=order)
 
-    fitted_model = model.fit(method=params['method'], ic=params['ic'], solver=params['solver'], disp=0)
-    try:
-        predictions = fitted_model.forecast(steps=predicts)[0]
+    elif used_model == 'sarimax':
+        from statsmodels.tsa.statespace.sarimax import SARIMAX
+        order = (p, d, q)
+        model = SARIMAX(data, order=order, seasonal_order=seasonal)
 
-    except Exception:
-        # Function AR have no forecast, so use predict. n_totobs is length of data for first predicted index
-        predictions = fitted_model.predict(start=fitted_model.n_totobs, end=fitted_model.n_totobs - 1 + predicts)
+    if used_model in ('ar', 'arma', 'arima', 'sarimax'):
+        fitted_model = model.fit(method=method, ic=ic, trend=trend, solver=solver, disp=0)
+
+    elif used_model == 'autoreg':
+        auto = statsmodels.tsa.ar_model.ar_select_order(data, maxlag=40)
+        model = statsmodels.tsa.ar_model.AutoReg(data, lags=auto.ar_lags, trend=auto.trend, seasonal=auto.seasonal, period=auto.period)
+        fitted_model = model.fit(cov_type=cov_type)
+
+    fitted_model.my_name = used_model
+    fitted_model.data_len = len(data)
+
+    return fitted_model
+
+
+def predict(data, fitted_model, predicts=7):
+
+    # Input data must have same starting point as data in train so the starting point be correct
+    if fitted_model.my_name == 'arima':
+        predictions = fitted_model.predict(start=fitted_model.data_len, end=fitted_model.data_len - 1 + predicts, typ='levels')[-predicts:]
+
+    else:
+        predictions = fitted_model.predict(start=fitted_model.data_len, end=fitted_model.data_len - 1 + predicts)[-predicts:]
 
     return predictions

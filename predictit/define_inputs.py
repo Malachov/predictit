@@ -95,4 +95,9 @@ def create_inputs(input_name, data, predicted_column_index):
 
         used_sequentions = make_sequences(used_sequentions, **config['input_types'][input_name])
 
+
+
+
+
+
     return used_sequentions

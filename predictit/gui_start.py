@@ -6,21 +6,19 @@ import sys
 import warnings
 import traceback
 
-web_path = str(Path(__file__).resolve().parents[0] / "files_for_GUI")
-
-eel.init(web_path)
-
 
 # If some information from inside main(), define function here
 def edit_gui_py(content, id):
     eel.edit_gui_js(content, id)
 
 
-if __name__ == "__main__":
+def run_gui():
+    web_path = str(Path(__file__).resolve().parents[0] / "files_for_GUI")
+
+    eel.init(web_path)
 
     this_path = Path(__file__).resolve().parents[1]
     this_path_string = str(this_path)
-    save_plot_path = str(this_path / "files_for_GUI" / "plot.html")
 
     # If used not as a library but as standalone framework, add path to be able to import predictit if not opened in folder
     sys.path.insert(0, this_path_string)
@@ -90,3 +88,7 @@ if __name__ == "__main__":
             #eel.edit_gui_js(f"\n Error in making predictions - {traceback.format_exc()} \n", "progress_phase")
 
     eel.start('index.html', port=0)  # mode='chrome-app'
+
+
+if __name__ == "__main__":
+    run_gui()

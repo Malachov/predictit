@@ -1,6 +1,8 @@
 import sklearn
 import sklearn.ensemble
 import sklearn.multioutput
+import sklearn.tree
+import sklearn.neighbors
 from sklearn import linear_model
 import numpy as np
 import sklearn_extensions.extreme_learning_machines.elm as elm
@@ -65,24 +67,24 @@ def train(sequentions, regressor='bayesianridge', predicts=7, n_estimators=100,
         regressor_model = linear_model.Ridge(alpha=alpha, solver=solver)
     elif regressor == 'Extra trees':
         regressor_model = sklearn.ensemble.ExtraTreesRegressor(n_estimators=n_estimators)
+    elif regressor == 'Random forest':
+        regressor_model = sklearn.ensemble.RandomForestRegressor()
+    elif regressor == 'Decision tree':
+        regressor_model = sklearn.tree.DecisionTreeRegressor()
+    elif regressor == 'Gradient boosting':
+        regressor_model = sklearn.ensemble.GradientBoostingRegressor()
+    elif regressor == 'KNeighbors':
+        regressor_model = sklearn.neighbors.KNeighborsRegressor()
+    elif regressor == 'Bagging':
+        regressor_model = sklearn.ensemble.BaggingRegressor()
+    elif regressor == 'Stochastic gradient':
+        regressor_model = sklearn.linear_model.SGDRegressor()
+    elif regressor == 'Passive aggressive regression':
+        regressor_model = sklearn.linear_model.PassiveAggressiveRegressor()
     elif regressor == 'elm':
         regressor_model = elm.ELMRegressor(n_hidden=n_hidden, alpha=alpha, rbf_width=rbf_width, activation_func=activation_func)
     elif regressor == 'elm_gen':
         regressor_model = elm.GenELMRegressor()
-    elif regressor == 'Random forest':
-        regressor_model = sklearn.ensemble.forest.RandomForestRegressor()
-    elif regressor == 'Decision tree':
-        regressor_model = sklearn.tree.tree.DecisionTreeRegressor()
-    elif regressor == 'Gradient boosting':
-        regressor_model = sklearn.ensemble.gradient_boosting.GradientBoostingRegressor()
-    elif regressor == 'KNeighbors':
-        regressor_model = sklearn.neighbors.regression.KNeighborsRegressor()
-    elif regressor == 'Bagging':
-        regressor_model = sklearn.ensemble.bagging.BaggingRegressor()
-    elif regressor == 'Stochastic gradient':
-        regressor_model = sklearn.linear_model.stochastic_gradient.SGDRegressor()
-    elif regressor == 'Passive aggressive regression':
-        regressor_model = sklearn.linear_model.PassiveAggressiveRegressor()
 
     model= sklearn.multioutput.MultiOutputRegressor(regressor_model)
 

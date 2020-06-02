@@ -19,19 +19,21 @@ from predictit.config import config
 
 config.update({
     'return_type': 'best',
+    'predicted_column': 0,
     'debug': 1,
+    'print': 0,
     'plot': 0,
     'show_plot': 1,
     'data': None,
-    'lengths': 0,
     'datalength': 500,
     'analyzeit': 0,
+    'optimization': 0,
     'used_models': {
         "AR (Autoregression)": predictit.models.statsmodels_autoregressive,
         "Conjugate gradient": predictit.models.conjugate_gradient,
-        "Extreme learning machine": predictit.models.sklearn_regression,
+        # "Extreme learning machine": predictit.models.sklearn_regression,
         "Sklearn regression": predictit.models.sklearn_regression,
-        "Compare with average": predictit.models.compare_with_average
+        # "Compare with average": predictit.models.compare_with_average
     }
 })
 
@@ -41,9 +43,10 @@ config_original = config.copy()
 def test_own_data():
     config.update({
         'other_columns': 0,
-        'multiprocessing': 0})
-    result = predictit.main.predict(np.random.randn(5, 100), predicts=3, plot=config["show_plot"])
-    assert result[0]
+        'multiprocessing': 0,
+        'return_type': 'all'})
+    result = predictit.main.predict(np.random.randn(5, 100), predicts=3, plot=config["plot"])
+    assert result[0][0][0]
     return result
 
 
@@ -54,24 +57,29 @@ def test_main_from_config():
         'data_source': 'csv',
         'csv_test_data_relative_path': '5000 Sales Records.csv',
         'datetime_index': 5,
-        'freq': 'M',
+        'freq': 'D',
         'predicted_column': 'Units Sold',
+        'return_type': 'results_dataframe',
+        'optimization': 1,
+        'optimization_variable': 'data_transform',
+        'optimization_values': [0, 'difference'],
         'print_number_of_models': 10,
         'last_row': 0,
         'correlation_threshold': 0.2,
         'optimizeit': 0,
+        'optimization': 1,
         'standardize': '01',
         'multiprocessing': 'process',
         'smooth': (19, 2),
 
         'used_models': {
-            "Hubber regression": predictit.models.sklearn_regression,
+            "Bayes ridge regression": predictit.models.sklearn_regression,
         }
     })
 
-    result_1 = predictit.main.predict()
-    assert result_1[0]
-    return result_1
+    result = predictit.main.predict()
+    assert result.iloc[0][0]
+    return result
 
 
 def test_main_optimize_and_args():
@@ -95,17 +103,18 @@ def test_main_optimize_and_args():
             'optimizeit': 1,
             'optimizeit_limit': 0.1,
             'optimizeit_details': 1,
+            'optimizeit_plot': 0,
             'standardize': 0,
             'used_models': {"Bayes ridge regression": predictit.models.sklearn_regression},
             'models_parameters': {"Bayes ridge regression": {"regressor": 'bayesianridge', "n_iter": 300, "alpha_1": 1.e-6, "alpha_2": 1.e-6, "lambda_1": 1.e-6, "lambda_2": 1.e-6}},
             'fragments': 4,
             'iterations': 2,
-            'models_parameters_limits': {"Bayes ridge regression": {"alpha_1": [0.1e-6, 3e-6], "alpha_2": [0.1e-6, 3e-6], 'lambda_1': [0.1e-6, 3e-6]}},
+            'models_parameters_limits': {"Bayes ridge regression": {"alpha_1": [0.1e-6, 3e-6], "alpha_2": [0.1e-6, 3e-6]}},
         })
 
-    result_2 = predictit.main.predict(debug=config["debug"], data_source='test', predicted_column=[], repeatit=20, lengths=0)
-    assert result_2[0]
-    return result_2
+    result = predictit.main.predict(debug=config["debug"], data_source='test', predicted_column=[], repeatit=20)
+    assert result[0]
+    return result
 
 
 def test_main_dataframe():
@@ -125,7 +134,6 @@ def test_main_dataframe():
             'data_transform': None,
             'mode': 'predict',
             'repeatit': 1,
-            'lengths': 1,
             'error_criterion': 'dtw',
             'remove_outliers': 0,
             'last_row': 0,
@@ -143,9 +151,30 @@ def test_main_dataframe():
             }
         })
 
-    result_1 = predictit.main.predict()
-    assert result_1[0]
-    return result_1
+    result = predictit.main.predict()
+    assert result[0]
+    return result
+
+
+def test_presets():
+    config.update(config_original.copy())
+    config.update({
+        'data_source': 'test',
+        'datalength': 500,
+        'use_config_preset': 'fast'
+    })
+
+    result = predictit.main.predict()
+    assert result[0]
+
+    config.update(config_original.copy())
+    config.update({
+        'use_config_preset': 'normal'
+    })
+
+    result = predictit.main.predict()
+    assert result[0]
+    return result
 
 
 def test_main_multiple():
@@ -156,11 +185,11 @@ def test_main_multiple():
             'data_source': 'csv',
             'datetime_index': 5,
             'freqs': ['D', 'M'],
+            'error_criterion': 'mse_sklearn',
             'csv_test_data_relative_path': '5000 Sales Records.csv',
             'predicted_columns': ['Units Sold', 'Total Profit'],
             'optimizeit': 0,
             'repeatit': 0,
-            'lengths': 0
         })
 
     result_multiple = predictit.main.predict_multiple_columns()
@@ -182,11 +211,13 @@ def test_compare_models():
 if __name__ == "__main__":
     # result = test_own_data()
     # print("\n\ntest_main_from_config\n")
-    # result_1 = test_main_from_config()
-    # print("\n\ntest_main_optimize_and_args\n")
-    result_2 = test_main_optimize_and_args()
+    # result1 = test_main_from_config()
+    # print("\n\ntest_main_optimize_and_args\n")get_master
+    # result_2 = test_main_optimize_and_args()
     # print("\n\ntest_main_dataframe\n")
     # result_3 = test_main_dataframe()
+    # print("\n\ntest_fast_preset\n")
+    result_4 = test_presets()
     # print("\n\ntest_main_multiple\n")
     # result_multiple = test_main_multiple()
     # print("\n\ntest_main_multiple\n")
