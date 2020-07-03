@@ -41,6 +41,19 @@ def traceback_warning(message=''):
     warnings.warn(f"\n\n\n{separated_traceback}\n\n")
 
 
+def set_warnings(debug, ignored_warnings):
+    # Define debug type. Can print warnings, ignore them or stop as error
+    if debug == 1:
+        warnings.filterwarnings('once')
+    elif debug == 2:
+        warnings.filterwarnings('error')
+    else:
+        warnings.filterwarnings('ignore')
+
+    for i in ignored_warnings:
+        warnings.filterwarnings('ignore', message=fr"[\s\S]*{i}*")
+
+
 def remove_ansi(string):
 
     # if not isinstance(string, str):

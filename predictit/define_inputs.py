@@ -1,10 +1,9 @@
 import numpy as np
 
 from predictit.misc import user_warning
-from predictit.config import config
 
 
-def make_sequences(data, n_steps_in, n_steps_out=1, constant=None, predicted_column_index=0, serialize_columns=1, default_other_columns_length=None):
+def make_sequences(data, config, n_steps_in, n_steps_out=1, constant=None, predicted_column_index=0, serialize_columns=1, default_other_columns_length=None):
     """Function that create inputs and outputs to models.
 
     Example for n_steps_in = 3 and n_steps_out = 1
@@ -59,7 +58,7 @@ def make_sequences(data, n_steps_in, n_steps_out=1, constant=None, predicted_col
             X = np.hstack([np.ones((len(X), 1)), X])
 
         x_input = X[-1].reshape(1, X.shape[1], X.shape[2])
-        x_test_inputs = X[-config['predicts'] - config['repeatit']: -config['predicts'], :, :]
+        x_test_inputs = X[-config.predicts - config.repeatit: -config.predicts, :, :]
         x_test_inputs = x_test_inputs.reshape(x_test_inputs.shape[0], 1, x_test_inputs.shape[1], x_test_inputs.shape[2])
 
     else:
@@ -68,7 +67,7 @@ def make_sequences(data, n_steps_in, n_steps_out=1, constant=None, predicted_col
 
         x_input = X[-1].reshape(1, -1)
 
-        x_test_inputs = X[-config['predicts'] - config['repeatit']: -config['predicts'], :]
+        x_test_inputs = X[-config.predicts - config.repeatit: -config.predicts, :]
         x_test_inputs = x_test_inputs.reshape(x_test_inputs.shape[0], 1, x_test_inputs.shape[1])
 
     X = X[: -n_steps_out]
@@ -76,7 +75,7 @@ def make_sequences(data, n_steps_in, n_steps_out=1, constant=None, predicted_col
     return X, y, x_input, x_test_inputs
 
 
-def create_inputs(input_name, data, predicted_column_index):
+def create_inputs(input_name, data, config, predicted_column_index):
 
     # Take one input type, make all derivated inputs (save memory, because only slices) and create dictionary of inputs for one iteration
     used_sequentions = {}
@@ -93,11 +92,29 @@ def create_inputs(input_name, data, predicted_column_index):
         else:
             used_sequentions = data
 
-        used_sequentions = make_sequences(used_sequentions, **config['input_types'][input_name])
+        used_sequentions = make_sequences(used_sequentions, config, **config.input_types[input_name])
 
+    # data_end = -config.predicts - config.repeatit - config.validation_gap if config.mode == 'validate' else None
 
+    if isinstance(used_sequentions, tuple):
+        model_train_input = (used_sequentions[0], used_sequentions[1])
+        model_predict_input = used_sequentions[2]
+        if config.mode == 'validate':
+            model_test_inputs = [model_predict_input]
+        else:
+            model_test_inputs = used_sequentions[3]
 
+    else:
+        model_train_input = model_predict_input = used_sequentions
+        if config.mode == 'validate':
+            model_test_inputs = [model_predict_input]
+        else:
+            model_test_inputs = []
+            if used_sequentions.ndim == 1:
+                for i in range(config.repeatit):
+                    model_test_inputs.append(used_sequentions[: - config.predicts - config.repeatit + i + 1])
+            else:
+                for i in range(config.repeatit):
+                    model_test_inputs.append(used_sequentions[:, : - config.predicts - config.repeatit + i + 1])
 
-
-
-    return used_sequentions
+    return model_train_input, model_predict_input, model_test_inputs

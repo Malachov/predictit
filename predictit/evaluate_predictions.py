@@ -2,6 +2,7 @@
 
 import numpy as np
 from predictit import misc
+from IPython import get_ipython
 
 
 def compare_predicted_to_test(predicted, test, train=None, error_criterion='mape', plot=0, modelname="Default model", dataname="default data", details=0):

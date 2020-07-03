@@ -15,12 +15,48 @@ import scipy
 import warnings
 from sklearn import preprocessing
 
-from predictit.config import config
+import predictit
 from predictit.misc import user_warning, colorize
 
 
+def load_data(config):
 
-def data_consolidation(data):
+    ############# Load CSV data #############
+    if config.data_source == 'csv':
+        if config.csv_test_data_relative_path:
+            try:
+                combined_path = config.this_path / 'predictit' / 'test_data' / config.csv_test_data_relative_path
+                config.csv_full_path = combined_path.as_posix()
+            except Exception:
+                raise FileNotFoundError(colorize(
+                    "\n\nERROR - Test data load failed - You are using relative path. This continue from folder test_data"
+                    "in predictit. If you want to use other folder, keep relative_path empty and use absolute csv_full_path.\n\n"))
+        try:
+            data = pd.read_csv(config.csv_full_path, header=0).iloc[-config.max_imported_length:, :]
+        except Exception:
+            raise FileNotFoundError(colorize(f"\n ERROR - Test data load failed - Setup CSV adress and column name in config \n\n"))
+
+    ############# Load SQL data #############
+    elif config.data_source == 'sql':
+        try:
+            data = predictit.database.database_load(
+                server=config.server, database=config.database, freq=config.freq,
+                data_limit=config.max_imported_length, last=config.last_row)
+
+        except Exception:
+            raise RuntimeError(colorize(f"ERROR - Data load from SQL server failed - "
+                                        "Setup server, database and predicted column name in config"))
+
+    elif config.data_source == 'test':
+        data = predictit.test_data.generate_test_data.gen_random()
+        user_warning(("Test data was used. Setup config.py 'data_source'. Check official readme or do"
+                      " >>> predictit.configuration.print_config() to see all possible options with comments. "
+                      "Data can be insert as function parameters, with editing config.py or with CLI."))
+
+    return data
+
+
+def data_consolidation(data, config):
     """Input data in various formats and shapes and return data in defined shape,
     that other functions rely on.
 
@@ -28,7 +64,7 @@ def data_consolidation(data):
         data (np.ndarray, pd.DataFrame): Input data in well standardized format.
 
     Raises:
-        KeyError, TypeError: If wrong configuration in config.py.
+        KeyError, TypeError: If wrong configuration in configuration.py.
             E.g. if predicted column name not found in dataframe.
 
 
@@ -39,6 +75,7 @@ def data_consolidation(data):
         and column for ploting as pandas dataframe.
 
     """
+
     ### Pandas dataframe and series ###
 
     if isinstance(data, pd.Series):
@@ -48,17 +85,17 @@ def data_consolidation(data):
     if isinstance(data, pd.DataFrame):
         data_for_predictions_df = data.copy()
 
-        if isinstance(config['predicted_column'], str):
+        if isinstance(config.predicted_column, str):
 
-            predicted_column_name = config['predicted_column']
+            predicted_column_name = config.predicted_column
 
             try:
                 predicted_column_index = data_for_predictions_df.columns.get_loc(predicted_column_name)
             except Exception:
-                raise KeyError(colorize(f"Predicted column name - '{config['predicted_column']}' not found in data. Change in config - 'predicted_column'"))
+                raise KeyError(colorize(f"Predicted column name - '{config.predicted_column}' not found in data. Change in config - 'predicted_column'. Available columns: {list(data_for_predictions_df.columns)}"))
 
         else:
-            predicted_column_index = config['predicted_column']
+            predicted_column_index = config.predicted_column
             predicted_column_name = data_for_predictions_df.columns[predicted_column_index]
 
         try:
@@ -66,30 +103,30 @@ def data_consolidation(data):
         except Exception:
             raise KeyError(colorize(f"Predicted column is not number datatype. Setup correct 'predicted_column' in config.py"))
 
-        if config['datetime_index'] not in [None, '']:
+        if config.datetime_index not in [None, '']:
 
             try:
                 if isinstance(data_for_predictions_df.index, (pd.core.indexes.datetimes.DatetimeIndex, pd._libs.tslibs.timestamps.Timestamp)):
                     pass
                 else:
-                    if isinstance(config['datetime_index'], str):
-                        data_for_predictions_df.set_index(config['datetime_index'], drop=True, inplace=True)
+                    if isinstance(config.datetime_index, str):
+                        data_for_predictions_df.set_index(config.datetime_index, drop=True, inplace=True)
 
                     else:
-                        data_for_predictions_df.set_index(data_for_predictions_df.columns[config['datetime_index']], drop=True, inplace=True)
+                        data_for_predictions_df.set_index(data_for_predictions_df.columns[config.datetime_index], drop=True, inplace=True)
 
                     data_for_predictions_df.index = pd.to_datetime(data_for_predictions_df.index)
 
             except Exception:
-                raise KeyError(colorize(f"Datetime name / index from config - '{config['datetime_index']}' not found in data or not datetime format. Change in config - 'datetime_index'"))
+                raise KeyError(colorize(f"Datetime name / index from config - '{config.datetime_index}' not found in data or not datetime format. Change in config - 'datetime_index'. Available columns: {list(data_for_predictions_df.columns)}"))
 
-            if config['freq']:
+            if config.freq:
                 data_for_predictions_df.sort_index(inplace=True)
-                if config['resample_function'] == 'sum':
-                    data_for_predictions_df = data_for_predictions_df.resample(config['freq']).sum()
-                if config['resample_function'] == 'mean':
-                    data_for_predictions_df = data_for_predictions_df.resample(config['freq']).mean()
-                data_for_predictions_df = data_for_predictions_df.asfreq(config['freq'], fill_value=0)
+                if config.resample_function == 'sum':
+                    data_for_predictions_df = data_for_predictions_df.resample(config.freq).sum()
+                if config.resample_function == 'mean':
+                    data_for_predictions_df = data_for_predictions_df.resample(config.freq).mean()
+                data_for_predictions_df = data_for_predictions_df.asfreq(config.freq, fill_value=0)
 
             else:
 
@@ -102,12 +139,17 @@ def data_consolidation(data):
         # Make predicted column index 0
         data_for_predictions_df.insert(0, predicted_column_name, data_for_predictions_df.pop(predicted_column_name))
 
-        data_for_predictions_df = data_for_predictions_df.iloc[-config['datalength']:, :]
+        data_for_predictions_df = data_for_predictions_df.iloc[-config.datalength:, :]
 
-        if config['other_columns'] and data_for_predictions_df.ndim > 1:
+        if config.other_columns and data_for_predictions_df.ndim > 1:
 
-            if config['remove_nans'] == 'any_columns':
-                data_for_predictions_df.dropna(how='any', inplace=True, axis=1)
+            if config.remove_nans:
+                if config.remove_nans == 'any_columns':
+                    axis = 1
+                if config.remove_nans == 'any_rows':
+                    axis = 0
+
+                data_for_predictions_df.dropna(how='any', inplace=True, axis=axis)
 
             data_for_predictions_df = data_for_predictions_df.select_dtypes(include='number')
             data_for_predictions = data_for_predictions_df.values
@@ -121,7 +163,7 @@ def data_consolidation(data):
     elif isinstance(data, np.ndarray):
         data_for_predictions = data.copy()
 
-        if not isinstance(config['predicted_column'], int):
+        if not isinstance(config.predicted_column, int):
             raise TypeError(colorize("'predicted_column' in config is a string and data in numpy array format. Numpy does not allow string assignment"))
 
         predicted_column_name = 'Predicted column'
@@ -132,13 +174,13 @@ def data_consolidation(data):
         if data_for_predictions.shape[0] < data_for_predictions.shape[1]:
             data_for_predictions = data_for_predictions.T
 
-        data_for_predictions = data_for_predictions[-config['datalength']:, :]
+        data_for_predictions = data_for_predictions[-config.datalength:, :]
 
         # Make predicted column on index 0
-        if config['other_columns'] and config['predicted_column'] != 0 and data_for_predictions.shape[1] != 1:
-            data_for_predictions[:, [0, config['predicted_column']]] = data_for_predictions[:, [config['predicted_column'], 0]]
+        if config.other_columns and config.predicted_column != 0 and data_for_predictions.shape[1] != 1:
+            data_for_predictions[:, [0, config.predicted_column]] = data_for_predictions[:, [config.predicted_column, 0]]
 
-        if not config['other_columns']:
+        if not config.other_columns:
             data_for_predictions = data_for_predictions[:, 0].reshape(-1, 1)
 
         data_for_predictions_df = pd.DataFrame(data_for_predictions)
@@ -149,9 +191,9 @@ def data_consolidation(data):
                                  but setup csv_full_path. Check config comments fore  more informations..."""))
 
     try:
-        data_for_predictions = data_for_predictions.astype(config['dtype'], copy=False)
+        data_for_predictions = data_for_predictions.astype(config.dtype, copy=False)
     except Exception:
-        user_warning(f"Predicted column - {config['predicted_column']} is not a number. Check config")
+        user_warning(f"Predicted column - {config.predicted_column} is not a number. Check config")
 
     return data_for_predictions, data_for_predictions_df, predicted_column_name
 
@@ -188,7 +230,7 @@ def keep_corelated_data(data, predicted_column_index=0, threshold=0.5):
     #     data.drop(columns=columns_to_del, inplace=True)
 
 
-def remove_outliers(data, predicted_column_index=0, threshold=3):
+def remove_the_outliers(data, predicted_column_index=0, threshold=3):
     """Remove values far from mean - probably errors.
 
     Args:
@@ -202,7 +244,7 @@ def remove_outliers(data, predicted_column_index=0, threshold=3):
     Examples:
 
         >>> data = np.array([[1, 3, 5, 2, 3, 4, 5, 66, 3]])
-        >>> print(remove_outliers(data))
+        >>> print(remove_the_outliers(data))
         [1, 3, 5, 2, 3, 4, 5, 3]
     """
 
@@ -240,7 +282,7 @@ def do_difference(data):
     Examples:
 
         >>> data = np.array([1, 3, 5, 2])
-        >>> print(remove_outliers(data))
+        >>> print(do_difference(data))
         [2, 2, -3]
     """
 
@@ -389,3 +431,42 @@ def fitted_power_transform(data, fitted_stdev, mean=None, fragments=10, iteratio
         transformed_results = transformed_results - mean_difference
 
     return transformed_results
+
+
+def preprocess_data(data_for_predictions, predicted_column_index=0, multicolumn=0, remove_outliers=False, smoothit=False,
+                    correlation_threshold=False, data_transform=False, standardizeit=False):
+    if remove_outliers:
+        data_for_predictions = remove_the_outliers(
+            data_for_predictions, predicted_column_index=predicted_column_index, threshold=remove_outliers)
+
+    if smoothit:
+        data_for_predictions = smooth(data_for_predictions, smoothit[0], smoothit[1])
+
+    if correlation_threshold and multicolumn:
+        data_for_predictions = keep_corelated_data(data_for_predictions, threshold=correlation_threshold)
+
+    if data_transform == 'difference':
+        last_undiff_value = data_for_predictions[-1, 0]
+        for i in range(data_for_predictions.shape[1]):
+            data_for_predictions[1:, i] = do_difference(data_for_predictions[:, i])
+    else:
+        last_undiff_value = None
+
+    if standardizeit:
+        data_for_predictions, final_scaler = standardize(data_for_predictions, used_scaler=standardizeit)
+    else:
+        final_scaler = None
+
+    return data_for_predictions, last_undiff_value, final_scaler
+
+
+def preprocess_data_inverse(
+        data, final_scaler=None, last_undiff_value=None,
+        standardizeit=False, data_transform=False):
+    if standardizeit:
+        data = final_scaler.inverse_transform(data.reshape(-1, 1)).ravel()
+
+    if data_transform == 'difference':
+        data = inverse_difference(data, last_undiff_value)
+
+    return data

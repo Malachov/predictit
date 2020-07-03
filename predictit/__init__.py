@@ -59,7 +59,7 @@ If you want to know how some parts works, check tests/visual where are displayed
 from . import analyze
 from . import best_params
 from . import models
-from . import config
+from . import configuration
 from . import data_preprocessing
 from . import database
 from . import define_inputs
@@ -72,9 +72,9 @@ from . import main_loop
 from . import main
 
 
-__version__ = "1.35"
+__version__ = "1.36"
 __author__ = "Daniel Malachov"
 __license__ = "MIT"
 __email__ = "malachovd@seznam.cz"
 
-__all__ = ['analyze', 'best_params', 'config', 'data_preprocessing', 'database', 'define_inputs', 'evaluate_predictions', 'main', 'misc', 'models', 'plot', 'test_data', 'main_loop']
+__all__ = ['analyze', 'best_params', 'configuration', 'data_preprocessing', 'database', 'define_inputs', 'evaluate_predictions', 'main', 'misc', 'models', 'plot', 'test_data', 'main_loop']

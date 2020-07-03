@@ -1,5 +1,7 @@
 # predictit
-Library/framework for making predictions. Choose best of 20 models (ARIMA, regressions, LSTM...) from libraries like statsmodels, sci-kit, tensorflow and some own models. Library also automatically preprocess data and chose optimal parameters of predictions.
+Library/framework for making predictions. Choose best of 20 models (ARIMA, regressions, LSTM...) from libraries like statsmodels, scikit-learn, tensorflow and some own models. There are hundreds of customizable options (it's not necessary of course) as well as some config presets. 
+
+Library contain model hyperparameters optimization as well as option variable optimization. That means, that library can find optimal preprocessing (smoothing, dropping non correlated columns, standardization) and on top of that it can find optimal models inner parameters such as number of neuron layers.
 
 ## Output
 Most common output is plotly interactive graph, numpy array of results or deploying to database.
@@ -11,7 +13,7 @@ Most common output is plotly interactive graph, numpy array of results or deploy
 <img src="https://raw.githubusercontent.com/Malachov/predictit/master/table_of_results.png" width="620" alt="Table of results"/>
 </p>
 
-Return type of main predict function depends on config. It can return best prediction as array or all predictions array or plot as div string or dictionary or detailed results.
+Return type of main predict function depends on `configation.py`. It can return best prediction as array or all predictions array or plot as div string or dictionary or detailed results.
 
 ## Oficial repo and documentation links
 
@@ -27,42 +29,123 @@ Sometime you can have issues with installing some libraries from requirements (e
 ## How to
 Software can be used in three ways. As a python library or with command line arguments or as normal python scripts.
 Main function is predict in `main.py` script.
-There is also predict_multiple_columns if you want to predict more at once (columns or time frequentions) and also compare_models function that evaluate test data and can tell you which models are best. Then you can use only such a models. It's recommended also to use arguments optimization just once, change initial parameters in config and turn optimization off for performance reasons.
+There is also predict_multiple_columns if you want to predict more at once (columns or time frequentions) and also compare_models function that evaluate defined test data and can tell you which models are best. Then you can use only such a models. 
 
-Command line arguments as well as functions arguments overwrite default `config.py` values. Not all the config options are in function arguments or command line arguments.
-
-### Simple example of predict function with Pypi and function arguments
+### Simple example of using predictit as a python library and function arguments
 ```Python
 import predictit
 import numpy as np
 
-predictions = predictit.main.predict(np.random.randn(1, 100), predicts=3, plot=1)
+predictions = predictit.main.predict(data=np.random.randn(1, 100), predicts=3, plot=1)
 ```
 
-### Simple example of using `main.py` script
-Open `config.py` (only script you need to edit (very simple)), do the setup. Mainly used_function and data or data_source and path. Then just run `main.py`.
+### Simple example of using as a python library and editing config
+
+```Python
+import predictit
+from predictit.configuration import config
+
+# You can edit config in two ways
+config.data_source = 'csv'
+config.csv_full_path = 'https://datahub.io/core/global-temp/r/monthly.csv'  # You can use local path on pc as well... "/home/dan/..."
+config.predicted_column = 'Mean'
+config.datetime_index = 'Date'
+
+# Or
+config.update({
+    'predicts': 3,
+    'default_n_steps_in': 15
+})
+
+predictions = predictit.main.predict()
+```
+
+### Simple example of using `main.py` as a script
+Open `configuration.py` (only script you need to edit (very simple)), do the setup. Mainly used_function and data or data_source and path. Then just run `main.py`.
 
 ### Simple example of using command line arguments
-Run code below in terminal in predictit folder and change csv path (test data are not included in library because of size!). Use `main.py` --help for more parameters info.
+Run code below in terminal in predictit folder.
+Use `python main.py --help` for more parameters info.
 
 ```
-python main.py --used_function predict --data_source 'csv' --csv_full_path 'test_data/daily-minimum-temperatures.csv' --predicted_column 1
+python main.py --used_function predict --data_source 'csv' --csv_full_path 'https://datahub.io/core/global-temp/r/monthly.csv' --predicted_column "'Mean'"
+
 ```
 
-### Example of using as a library as a pro with editting `config.py`
+### Explore config
+
+To see all the possible values in `configuration.py` from your IDE, use
+
+```Python
+predictit.configuration.print_config()
+```
+
+### Example of compare_models function
+```Python
+import predictit
+from predictit.configuration import config
+
+my_data_array = np.random.randn(2000, 4)  # Define your data here
+
+# You can compare it on same data in various parts or on different data (check configuration on how to insert dictionary with data names)
+config.update({
+    'data_all': (my_data_array[-2000:], my_data_array[-1500:], my_data_array[-1000:])
+})
+
+predictit.main.compare_models()
+```
+
+### Example of predict_multiple function
+```Python
+import predictit
+from predictit.configuration import config
+
+config.data = pd.read_csv("https://datahub.io/core/global-temp/r/monthly.csv")
+
+# Define list of columns or '*' for predicting all of the columns
+config.predicted_columns = '*'
+
+predictit.main.predict_multiple_columns()
+```
+
+### Example of config variable optimization
+```Python
+
+config.update({
+    'data_source': 'csv',
+    'csv_full_path': "https://datahub.io/core/global-temp/r/monthly.csv",
+    'predicted_column': 'Mean',
+    'optimization': 1,
+    'optimization_variable': 'default_n_steps_in',
+    'optimization_values': [12, 20, 40],
+    'plot_all_optimized_models': 1,
+    'print_detailed_result': 1
+})
+
+predictions = predictit.main.predict()
+```
+
+### Hyperparameters tuning
+
+To optmize hyperparameters, just set `optimizeit: 1,` and model parameters limits. It is commented in `config.py` how to use it. It's not grid bruteforce. Heuristic method based on halving interval is used, but still it can be time consuming. It is recomend only to tune parameters worth of it. Or tune it by parts.
+
+## GUI
+
+It is possible to use basic GUI. But only with CSV data source.
+Just run `gui_start.py` if you have downloaded software or call `predictit.gui_start.run_gui()` if you are importing via PyPI.
+
+## Example of using library as a pro with deeper editting config
 ```Python
 
 import predictit
-
-config = predictit.config.config
+from predictit.configuration import config
 
 config.update({
-    'data_source': 'csv',  # Data source. ('csv' or 'sql' or 'test')
+    'data_source': 'test',  # Data source. ('csv' or 'sql' or 'test')
     'csv_full_path': r'C:\Users\truton\ownCloud\Github\predictit_library\predictit\test_data\5000 Sales Records.csv',  # Full CSV path with suffix
-    'predicted_column': 'Temp',  # Column name that we want to predict
+    'predicted_column': '',  # Column name that we want to predict
 
     'predicts': 7,  # Number of predicted values - 7 by default
-    'datalength': 1000,  # The length of the data used for prediction
     'print_number_of_models': 6,  # Visualize 6 best models
     'repeatit': 50,  # Repeat calculation times on shifted data to evaluate error criterion
     'other_columns': 0,  # Whether use other columns or not
@@ -84,26 +167,18 @@ config.update({
 
     'models_parameters': {
 
-        'AR (Autoregression)': {'model': 'ar', 'method': 'cmle', 'ic': 'aic', 'trend': 'nc', 'solver': 'lbfgs'},
-        'ARIMA (Autoregression integrated moving average)': {'model': 'arima', 'p': 3, 'd': 0, 'q': 0, 'method': 'css', 'ic': 'aic', 'trend': 'nc', 'solver': 'nm'},
+        'AR (Autoregression)': {'used_model': 'ar', 'method': 'cmle', 'ic': 'aic', 'trend': 'nc', 'solver': 'lbfgs'},
+        'ARIMA (Autoregression integrated moving average)': {'used_model': 'arima', 'p': 6, 'd': 0, 'q': 0, 'method': 'css', 'ic': 'aic', 'trend': 'nc', 'solver': 'nm'},
 
-        'Autoregressive Linear neural unit': {'mi_multiple': 1, 'mi_linspace': (1e-7, 1e-2, 200), 'epochs': 100, 'w_predict': 0, 'minormit': 0},
+        'Autoregressive Linear neural unit': {'mi_multiple': 1, 'mi_linspace': (1e-5, 1e-4, 3), 'epochs': 10, 'w_predict': 0, 'minormit': 0},
         'Conjugate gradient': {'epochs': 200},
 
         'Bayes ridge regression': {'regressor': 'bayesianridge', 'n_iter': 300, 'alpha_1': 1.e-6, 'alpha_2': 1.e-6, 'lambda_1': 1.e-6, 'lambda_2': 1.e-6},
-        'Sklearn regression': {'regressor': 'linear', 'alpha': 0.0001, 'n_iter': 100, 'epsilon': 1.35, 'alphas': [0.1, 0.5, 1], 'gcv_mode': 'auto', 'solver': 'auto', 'alpha_1': 1.e-6, 'alpha_2': 1.e-6, 'lambda_1': 1.e-6, 'lambda_2': 1.e-6, 'n_hidden': 20, 'rbf_width': 0, 'activation_func': 'selu'},
-    }
+        'Sklearn regression': {'regressor': 'linear', 'alpha': 0.0001, 'n_iter': 100, 'epsilon': 1.35, 'alphas': [0.1, 0.5, 1], 'gcv_mode': 'auto', 'solver': 'auto', 'alpha_1': 1.e-6,
+                               'alpha_2': 1.e-6, 'lambda_1': 1.e-6, 'lambda_2': 1.e-6, 'n_hidden': 20, 'rbf_width': 0, 'activation_func': 'selu'},    }
 
 })
 
 predictions = predictit.main.predict()
-```
 
-
-Or if you downloaded it from github and not via pypi, just edit config as you need and run `main.py`
-
-To see all the possible values in `config.py` from your IDE, use
-
-```Python
-predictit.config.print_config()
 ```

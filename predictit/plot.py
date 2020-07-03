@@ -1,7 +1,7 @@
 """Plot predicted data. Input data are divided on data history and results. Youi can choose between plotly (interactive) and matplotlib (faster)"""
 
 from predictit import misc
-from predictit.config import config
+from predictit.configuration import config
 import os
 from IPython import get_ipython
 
@@ -87,11 +87,12 @@ def plotit(complete_dataframe, plot_type='plotly', show=1, save=0, save_path='',
 
         fig.layout.update(
             yaxis=dict(title='Values'),
-            title={'text': config['plot_name'], 'x': 0.5, 'xanchor': 'center', 'yanchor': 'top',
+            title={'text': config.plot_name, 'x': 0.5, 'xanchor': 'center', 'yanchor': 'top',
                    'y': 0.9 if misc._JUPYTER else 0.95},
             titlefont={'size': 28},
             showlegend=False,
-            paper_bgcolor='#d9f0e8'
+            paper_bgcolor='#d9f0e8',
+            hoverlabel={'namelength': -1}
         )
 
         if show:

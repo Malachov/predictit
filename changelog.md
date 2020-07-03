@@ -1,6 +1,23 @@
 # List of what have been done in new versions
 
-## v1.3x. - 04.2020
+## 1.4x - 06/2020
+
+- [x] Config redefined to class and so enabling intellisense in IDE. 
+
+    - API change!!! instead of config['value'] use config.value. But config.update({'variable': 'value'}) still works !!!
+- [x] Creating inputs defined in visual test
+
+
+## v1.3x. - 05/2020
+
+- [x] Config value optimization. Some config variable can be optimized on defined values. For each model the best option will be used
+- [x] Plot results of all models versions (optmimized)
+- [x] Option whether to evalueate error criterion on preprocessed data or on original data
+- [x] Option to sort detailed result table by error or by name
+- [x] Compare models redefined. More fair for all types of models, but repeatit = 1, so more samples necessary.
+
+
+## v1.3x. - 04/2020
 
 - [x] Many new models from sklearn - Decision trees, bagging, Gradient boosting...
 - [x] Multiprocessing applied. Two options - 'pool' or 'process'
@@ -21,9 +38,8 @@
 - [x] User colored warnings in misc (not only traceback warnings) and colorized error raising
 - [x] Two options / modes of analyze - Originall data and preprocessed data
 
-## v1.1. - 03/2020
 
-### Big Deals
+## v1.1. - 03/2020
 
 - [x] Simple GUI (just config and output)
 - [x] Added customizable config presets (fast, normal, optimize)
@@ -37,6 +53,8 @@
          1) On train data (change error criterion)
          2) Only on output
 
+
+## v1.0 - 03/2020 (first no in development version)
 
 ### Small Deals
 - [x] Tensorflow models architecture configurable with arguments - layers and its parameters in list.

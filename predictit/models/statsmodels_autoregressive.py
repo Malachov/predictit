@@ -51,11 +51,13 @@ def train(data, used_model='autoreg', p=5, d=1, q=0, cov_type='nonrobust', metho
 
 def predict(data, fitted_model, predicts=7):
 
+    start = fitted_model.data_len if len(data) > fitted_model.data_len else len(data)
+
     # Input data must have same starting point as data in train so the starting point be correct
     if fitted_model.my_name == 'arima':
-        predictions = fitted_model.predict(start=fitted_model.data_len, end=fitted_model.data_len - 1 + predicts, typ='levels')[-predicts:]
+        predictions = fitted_model.predict(start=start, end=start - 1 + predicts, typ='levels')[-predicts:]
 
     else:
-        predictions = fitted_model.predict(start=fitted_model.data_len, end=fitted_model.data_len - 1 + predicts)[-predicts:]
+        predictions = fitted_model.predict(start=start, end=start - 1 + predicts)[-predicts:]
 
     return predictions

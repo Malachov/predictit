@@ -4,6 +4,7 @@
 
 ## Big Deals
 
+- Optionally save and load trained models. .npy format for numpy.By default save to trained models folder, as parameter save or load model elsewhere
 - [ ] Do repeate average and more from evaluate in multiprocessing loop and then use sorting as `a = {k: v for k, v in sorted(x.items(), key=lambda item: item[1]['a'])}` then use just slicing for plot and print results and Remove predicted_models_for_table and predicted_models_for_plot
 
 - [ ] Option to unstandardized error criterion to be able to compare absolute results of configuration
@@ -44,6 +45,7 @@
 
 ## Deals
 
+- [] Change  config comments https://www.sphinx-doc.org/en/1.4.8/ext/autodoc.html#directive-autoattribute
 - [ ] To compare models add second table - summ of error
 - [ ] Full config to readthedocs documentation
 - [ ] Ability to load and save config to json to folder

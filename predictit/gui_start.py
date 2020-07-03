@@ -25,7 +25,7 @@ def run_gui():
 
     import predictit
 
-    config = predictit.config.config
+    config = predictit.configuration.config
 
     predictit.misc._GUI = 1
     config.update({
