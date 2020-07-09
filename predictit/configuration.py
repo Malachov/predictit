@@ -48,8 +48,8 @@ class config():
 
     data_source = 'test'  # Data source. ('csv', 'txt', 'sql' or 'test') - If sql, you have to edit the query to fit your database.
 
-    csv_full_path = r''  # Full CSV path with suffix or web url. Examples: "https://datahub.io/core/global-temp/r/monthly.csv" or "/home/dan/ownCloud/Github/predictit_library/predictit/test_data/daily-minimum-temperatures.csv"
-    csv_test_data_relative_path = ''  # CSV name with suffix in test_data folder ('5000 Sales Records.csv' or 'daily-minimum-temperatures.csv')
+    csv_full_path = r'https://www.stats.govt.nz/assets/Uploads/Effects-of-COVID-19-on-trade/Effects-of-COVID-19-on-trade-1-February-1-July-2020-provisional/Download-data/Effects-of-COVID-19-on-trade-1-February-1-July-2020-provisional.csv'  # Full CSV path with suffix or web url. Examples: "https://raw.githubusercontent.com/jbrownlee/Datasets/master/daily-min-temperatures.csv" or "/home/dan/ownCloud/Github/predictit_library/predictit/test_data/daily-minimum-temperatures.csv"
+    csv_test_data_relative_path = ''  # CSV name with suffix in test_data folder (E.g. '5000 Sales Records.csv' or 'daily-minimum-temperatures.csv' - !!! gitignored because of size. Download own.)
     # !!! Turn it off if not testing to not break csv full path !!! Test data are gitignored... use your own.
 
     predicted_column = ''  # Name of predicted column (for dataframe data) or it's index - string or int.
@@ -59,7 +59,7 @@ class config():
     freqs = []  # For predict_multiple function only! List of intervals of predictions 'M' - months, 'D' - Days, 'H' - Hours. Default use [].
     resample_function = 'sum'  # 'sum' or 'mean' depends of data. For example if current in technological process - mean, if units sold, then sum.
 
-    datetime_index = ''  # Index of dataframe datetime column or it's name if it has datetime column. If there already is index in input data, it will be used automatically. Data are sorted by time.
+    datetime_index = 'Date'  # Index of dataframe datetime column or it's name if it has datetime column. If there already is index in input data, it will be used automatically. Data are sorted by time.
 
     datalength = 0  # The length of the data used for prediction (after resampling). If 0, than full length.
     max_imported_length = 0  # Max length of imported samples (before resampling). If 0, than full length.

@@ -97,7 +97,7 @@ def data_consolidation(data, config):
         try:
             int(data_for_predictions_df[predicted_column_name].iloc[0])
         except Exception:
-            raise KeyError(colorize(f"Predicted column is not number datatype. Setup correct 'predicted_column' in config.py"))
+            raise KeyError(colorize(f"Predicted column is not number datatype. Setup correct 'predicted_column' in config.py. Available columns: {list(data_for_predictions_df.columns)}"))
 
         if config.datetime_index not in [None, '']:
 

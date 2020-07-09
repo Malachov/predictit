@@ -3,6 +3,7 @@ import traceback
 import textwrap
 import os
 from IPython import get_ipython
+import pygments
 
 _GUI = 0
 
@@ -16,6 +17,8 @@ if ipython is not None:
 else:
     _JUPYTER = 0
 
+_COLORIZE = 1
+
 # To enable colors in cmd...
 os.system('')
 
@@ -23,19 +26,25 @@ os.system('')
 def colorize(message):
     class X(str):
         def __repr__(self):
-            return f"\033[93m {message} \033[0m"
+            return f"\033[93m {message} \033[0m" if _COLORIZE else message
 
     return X(message)
 
 
 def user_warning(message):
-    warnings.warn(f"\033[93m \n\n\t{message}\n\n \033[0m", stacklevel=2)
+    if _COLORIZE:
+        warnings.warn(f"\033[93m \n\n\t{message}\n\n \033[0m", stacklevel=2)
+    else:
+        warnings.warn(f"\n\n\t{message}\n\n", stacklevel=2)
 
 
 def traceback_warning(message=''):
-    import pygments
 
-    separated_traceback = pygments.highlight(traceback.format_exc(), pygments.lexers.PythonTracebackLexer(), pygments.formatters.Terminal256Formatter(style='friendly'))
+    if _COLORIZE:
+        separated_traceback = pygments.highlight(traceback.format_exc(), pygments.lexers.PythonTracebackLexer(), pygments.formatters.Terminal256Formatter(style='friendly'))
+    else:
+        separated_traceback = traceback.format_exc()
+
     separated_traceback = textwrap.indent(text=f"\n\n{message}\n====================\n\n{separated_traceback}\n====================\n", prefix='    ')
 
     warnings.warn(f"\n\n\n{separated_traceback}\n\n")

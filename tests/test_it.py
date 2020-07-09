@@ -15,7 +15,9 @@ import os
 
 sys.path.insert(0, Path(os.path.abspath(inspect.getframeinfo(inspect.currentframe()).filename)).parents[1].as_posix())
 import predictit
-from predictit.configuration import config
+
+config = predictit.configuration.config
+predictit.misc._COLORIZE = 0
 
 config.update({
     'return_type': 'best',
@@ -56,17 +58,16 @@ def test_main_from_config():
     config.update(config_original)
     config.update({
         'data_source': 'csv',
-        'csv_test_data_relative_path': '5000 Sales Records.csv',
-        'datetime_index': 5,
+        'csv_full_path': 'https://datahub.io/core/global-temp/r/monthly.csv',
+        'predicted_column': 'Mean',
+        'datetime_index': 'Date',
         'freq': 'D',
-        'predicted_column': 'Units Sold',
         'return_type': 'results_dataframe',
         'optimization': 1,
         'optimization_variable': 'data_transform',
         'optimization_values': [0, 'difference'],
         'print_number_of_models': 10,
 
-        
         'last_row': 0,
         'correlation_threshold': 0.2,
         'optimizeit': 0,
@@ -164,8 +165,8 @@ def test_presets():
     config.update(config_original)
     config.update({
         'data_source': 'csv',
-        'csv_full_path': "https://datahub.io/core/global-temp/r/monthly.csv",
-        'predicted_column': 'Mean',
+        'csv_full_path': "https://raw.githubusercontent.com/jbrownlee/Datasets/master/daily-min-temperatures.csv",
+        'predicted_column': 'Temp',
         'datalength': 500,
         'use_config_preset': 'fast'
     })
@@ -188,11 +189,10 @@ def test_main_multiple():
     config.update(config_original)
     config.update({
         'data_source': 'csv',
-        'datetime_index': 5,
         'freqs': ['D', 'M'],
         'error_criterion': 'mse_sklearn',
-        'csv_test_data_relative_path': '5000 Sales Records.csv',
-        'predicted_columns': ['Units Sold', 'Total Profit'],
+        'csv_full_path': 'https://www.stats.govt.nz/assets/Uploads/Effects-of-COVID-19-on-trade/Effects-of-COVID-19-on-trade-1-February-1-July-2020-provisional/Download-data/Effects-of-COVID-19-on-trade-1-February-1-July-2020-provisional.csv',
+        'predicted_columns': ['Cumulative', 'Value'],
     })
 
     result_multiple = predictit.main.predict_multiple_columns()
@@ -207,9 +207,9 @@ def test_main_multiple_all_columns():
     config.update({
         'use_config_preset': 'fast',
         'data_source': 'csv',
-        'datetime_index': 5,
+        'datetime_index': 'Date',
         'freqs': ['D'],
-        'csv_test_data_relative_path': '5000 Sales Records.csv',
+        'csv_full_path': 'https://www.stats.govt.nz/assets/Uploads/Effects-of-COVID-19-on-trade/Effects-of-COVID-19-on-trade-1-February-1-July-2020-provisional/Download-data/Effects-of-COVID-19-on-trade-1-February-1-July-2020-provisional.csv',
         'predicted_columns': '*',
         'optimization': 0,
         'optimization_variable': 'default_n_steps_in',
@@ -267,7 +267,7 @@ if __name__ == "__main__":
     # print("\n\ntest_main_multiple\n")
     # test_main_multiple_all_columns()
     # print("\n\ntest_compare_models_with_optimization\n")
-    test_compare_models()
+    # test_compare_models()
     # print("\n\ntest_compare_models_with_optimization\n")
     # test_compare_models_with_optimization()
 
