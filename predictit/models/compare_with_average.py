@@ -21,6 +21,5 @@ def predict(data, model, predicts=7):
     summed = sum(data)
     average = summed / len(data)
     predictions_list = [average] * predicts
-    predictions = np.array(predictions_list)
 
-    return predictions
+    return np.array(predictions_list)

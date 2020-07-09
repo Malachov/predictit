@@ -96,6 +96,16 @@ def train(sequentions, regressor='bayesianridge', predicts=7, n_estimators=100,
 
 
 def predict(x_input, model, predicts=7):
+    """Function that creates predictions from trained model and input data.
+
+    Args:
+        data (np.ndarray): Time series data
+        fitted_model (list, class): Trained model. It can be list of neural weigths or it can be fitted model class from imported library.
+        predicts (int, optional): Number of predicted values. Defaults to 7.
+
+    Returns:
+        np.ndarray: Array of predicted results
+    """
 
     if model.output_shape == 1:
 

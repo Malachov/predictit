@@ -10,7 +10,11 @@ sphinx-apidoc -f -e -o ../source/ ../../predictit
 
 rm predictit.tempCodeRunnerFile.rst
 
-cd ../..
+cd ..
+
+make html
+
+cd ..
 
 python setup.py sdist bdist_wheel
 twine upload dist/*

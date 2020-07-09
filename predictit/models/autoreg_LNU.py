@@ -141,7 +141,16 @@ def train(sequentions, predicts=30, mi=1, mi_multiple=1, mi_linspace=(1e-8, 10, 
 
 
 def predict(x_input, w, predicts=7):
+    """Function that creates predictions from trained model and input data.
 
+    Args:
+        data (np.ndarray): Time series data
+        fitted_model (list, class): Trained model. It can be list of neural weigths or it can be fitted model class from imported library.
+        predicts (int, optional): Number of predicted values. Defaults to 7.
+
+    Returns:
+        np.ndarray: Array of predicted results
+    """
 
     x_input = x_input.ravel()
 

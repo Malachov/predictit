@@ -50,6 +50,16 @@ def train(data, used_model='autoreg', p=5, d=1, q=0, cov_type='nonrobust', metho
 
 
 def predict(data, fitted_model, predicts=7):
+    """Function that creates predictions from trained model and input data.
+
+    Args:
+        data (np.ndarray): Time series data
+        fitted_model (list, class): Trained model. It can be list of neural weigths or it can be fitted model class from imported library.
+        predicts (int, optional): Number of predicted values. Defaults to 7.
+
+    Returns:
+        np.ndarray: Array of predicted results
+    """
 
     start = fitted_model.data_len if len(data) > fitted_model.data_len else len(data)
 

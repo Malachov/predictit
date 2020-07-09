@@ -3,8 +3,8 @@
 Submodules
 ==========
 
-`config <predictit.configuration>`_
----------------------------------
+`configuration <predictit.configuration>`_
+-------------------------------------------
 
 .. automodule:: predictit.configuration
 
@@ -32,8 +32,8 @@ Submodules
 .. automodule:: predictit.database
 
 
-`data_prep <predictit.data_preprocessing>`_
----------------------------------------
+`data_preprocessing <predictit.data_preprocessing>`_
+-----------------------------------------------------
 
 .. automodule:: predictit.data_preprocessing
 

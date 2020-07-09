@@ -2,7 +2,8 @@ import numpy as np
 from pathlib import Path
 
 
-def train(sequentions, layers='default', predicts=7, epochs=200, already_trained=0, train_next=1, save=1, saved_model_path_string='stored_models', optimizer='adam', loss='mse', verbose=0, metrics='accuracy', timedistributed=0, batch_size=64):
+def train(sequentions, layers='default', predicts=7, epochs=200, already_trained=0, train_next=1, save=1,
+          saved_model_path_string='stored_models', optimizer='adam', loss='mse', verbose=0, metrics='accuracy', timedistributed=0, batch_size=64):
     """Tensorflow LSTM model.
 
     Args:
@@ -93,6 +94,16 @@ def train(sequentions, layers='default', predicts=7, epochs=200, already_trained
 
 
 def predict(x_input, model, predicts=7):
+    """Function that creates predictions from trained model and input data.
+
+    Args:
+        data (np.ndarray): Time series data
+        fitted_model (list, class): Trained model. It can be list of neural weigths or it can be fitted model class from imported library.
+        predicts (int, optional): Number of predicted values. Defaults to 7.
+
+    Returns:
+        np.ndarray: Array of predicted results
+    """
 
     if model.X_ndim == 2 and model.layers_0_0 == 'lstm':
         x_input = x_input.reshape(1, x_input.shape[1], x_input.shape[0])
