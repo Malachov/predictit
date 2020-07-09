@@ -5,13 +5,19 @@
 
 eel.expose(edit_gui_js);
 function edit_gui_js(content, id) {
-    var elem = document.getElementById(id).innerHTML = content;
+    var elem = (document.getElementById(id).innerHTML = content);
 }
 
-
 eel.expose(add_HTML_element);
-function add_HTML_element(content, into_paragraph, id_parent, id_created, label, added_class="added") {
-    var new_div = document.createElement('div');
+function add_HTML_element(
+    content,
+    into_paragraph,
+    id_parent,
+    id_created,
+    label,
+    added_class = "added"
+) {
+    var new_div = document.createElement("div");
     new_div.id = id_created;
     if (typeof added_class == "string") {
         new_div.classList.add(added_class);
@@ -20,7 +26,7 @@ function add_HTML_element(content, into_paragraph, id_parent, id_created, label,
     }
 
     if (into_paragraph) {
-        var new_p = document.createElement('p');
+        var new_p = document.createElement("p");
         new_p.innerHTML = content;
         new_div.appendChild(new_p);
     } else {
@@ -28,7 +34,7 @@ function add_HTML_element(content, into_paragraph, id_parent, id_created, label,
     }
 
     if (label) {
-        var new_label = document.createElement('p');
+        var new_label = document.createElement("p");
         new_label.innerHTML = label;
         new_label.classList.add("label");
         document.getElementById(id_parent).appendChild(new_label);
@@ -39,13 +45,11 @@ function add_HTML_element(content, into_paragraph, id_parent, id_created, label,
 
 eel.expose(execute);
 function execute(id) {
-    var codes = document.getElementById(id).getElementsByTagName("script");   
-    for(var i=0;i<codes.length;i++)  
-    {  
-        eval(codes[i].text);  
+    var codes = document.getElementById(id).getElementsByTagName("script");
+    for (var i = 0; i < codes.length; i++) {
+        eval(codes[i].text);
     }
 }
-
 
 // function make_visible() {
 
@@ -54,31 +58,39 @@ function execute(id) {
 
 // }
 
-
 function predict() {
     var configurated = {};
 
     configurated["csv_full_path"] = document.getElementById("csv_path").value;
-    configurated["predicted_column"] = document.getElementById("column_name").value;
+    configurated["predicted_column"] = document.getElementById(
+        "column_name"
+    ).value;
     configurated["debug"] = document.getElementById("debug-config").checked;
     configurated["print_table"] = document.getElementById("table-config").checked;
-    configurated["print_result"] = document.getElementById("results-config").checked;
+    configurated["print_result"] = document.getElementById(
+        "results-config"
+    ).checked;
 
-    configurated["use_config_preset"] = document.getElementById("config-preset").value;
+    configurated["use_config_preset"] = document.getElementById(
+        "config-preset"
+    ).value;
 
-    eel.make_predictions(configurated)(function(ret) {console.log(ret)});
+    eel.make_predictions(configurated)(function (ret) {
+        console.log(ret);
+    });
 }
 
-function clearcontent(id)
-{
+function clearcontent(id) {
     document.getElementById(id).innerHTML = "";
 }
 
 eel.expose(add_delete_button);
 function add_delete_button(id) {
-    var new_button = document.createElement('button');
+    var new_button = document.createElement("button");
     new_button.innerHTML = "Delete results";
     new_button.classList.add("button", "option-section");
-    new_button.onclick = function() {clearcontent(id)};
+    new_button.onclick = function () {
+        clearcontent(id);
+    };
     document.getElementById(id).appendChild(new_button);
 }

@@ -6,14 +6,13 @@ The database_deploy than use predicted values and deploy it to database server.
 import pandas as pd
 
 
-def database_load(server, database, freq='D', index_col='DateBK', data_limit=2000):
+def database_load(server, database, freq='D', data_limit=2000):
     """Load database into dataframe and create datetime index. !!! This function have to be change for every particular database !!!
 
     Args:
         server (string, optional): Name of server.
         database (str, optional): Name of database.
         freq (str, optional): For example days 'D' or hours 'H'. Defaults to 'D'.
-        index_col (str, optional): Index of predicted column. Defaults to 'DateBK'.
         data_limit (int, optional): Max lengt of data. Defaults to 2000.
 
     Returns:
@@ -31,37 +30,41 @@ def database_load(server, database, freq='D', index_col='DateBK', data_limit=200
 
     columns = '''   D.[DateBK],
                     D.[IsoWeekYear]'''
-    if freq == 'M':
-        columns = columns + ''',
-                    D.[MonthNumberOfYear]'''
-
     if freq == 'D':
-        columns = columns + ''',
+        columns += ''',
                     D.[MonthNumberOfYear],
                     D.[DayNumberOfMonth]'''
 
-    if freq == 'H':
-        columns = columns + ''',
+
+    elif freq == 'H':
+        columns += ''',
                     D.[MonthNumberOfYear],
                     D.[DayNumberOfMonth],
                     D.[HourOfDay]'''
 
+
+    elif freq == 'M':
+        columns += ''',
+                    D.[MonthNumberOfYear]'''
+
     columns_desc = '''   D.[DateBK] DESC,
                         D.[IsoWeekYear] DESC'''
-    if freq == 'M':
-        columns_desc = columns_desc + ''',
-                    D.[MonthNumberOfYear] DESC'''
-
     if freq == 'D':
-        columns_desc = columns_desc + ''',
+        columns_desc += ''',
                     D.[MonthNumberOfYear] DESC,
                     D.[DayNumberOfMonth] DESC'''
 
-    if freq == 'H':
-        columns_desc = columns_desc + ''',
+
+    elif freq == 'H':
+        columns_desc += ''',
                     D.[MonthNumberOfYear] DESC,
                     D.[DayNumberOfMonth] DESC,
                     D.[HourOfDay] DESC'''
+
+
+    elif freq == 'M':
+        columns_desc += ''',
+                    D.[MonthNumberOfYear] DESC'''
 
     query = '''
 

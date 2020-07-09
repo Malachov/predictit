@@ -39,9 +39,8 @@ def load_data(config):
     ############# Load SQL data #############
     elif config.data_source == 'sql':
         try:
-            data = predictit.database.database_load(
-                server=config.server, database=config.database, freq=config.freq,
-                data_limit=config.max_imported_length, last=config.last_row)
+            data = predictit.database.database_load(server=config.server, database=config.database, freq=config.freq,
+                                                    data_limit=config.max_imported_length)
 
         except Exception:
             raise RuntimeError(colorize(f"ERROR - Data load from SQL server failed - "
@@ -89,14 +88,11 @@ def data_consolidation(data, config):
 
             predicted_column_name = config.predicted_column
 
-            try:
-                predicted_column_index = data_for_predictions_df.columns.get_loc(predicted_column_name)
-            except Exception:
+            if predicted_column_name not in data_for_predictions_df.columns:
                 raise KeyError(colorize(f"Predicted column name - '{config.predicted_column}' not found in data. Change in config - 'predicted_column'. Available columns: {list(data_for_predictions_df.columns)}"))
 
         else:
-            predicted_column_index = config.predicted_column
-            predicted_column_name = data_for_predictions_df.columns[predicted_column_index]
+            predicted_column_name = data_for_predictions_df.columns[config.predicted_column]
 
         try:
             int(data_for_predictions_df[predicted_column_name].iloc[0])
@@ -286,9 +282,7 @@ def do_difference(data):
         [2, 2, -3]
     """
 
-    diff = np.diff(data.T).T
-
-    return diff
+    return np.diff(data.T).T
 
 
 def inverse_difference(differenced_predictions, last_undiff_value):
@@ -310,9 +304,7 @@ def inverse_difference(differenced_predictions, last_undiff_value):
 
     assert differenced_predictions.ndim == 1, 'Data input must be one-dimensional.'
 
-    undiff = np.insert(differenced_predictions, 0, last_undiff_value).cumsum()[1:]
-
-    return undiff
+    return np.insert(differenced_predictions, 0, last_undiff_value).cumsum()[1:]
 
 
 def standardize(data, used_scaler='standardize', predicted_column=0):
@@ -409,7 +401,7 @@ def fitted_power_transform(data, fitted_stdev, mean=None, fragments=10, iteratio
     lmbd_arr = np.linspace(lmbda_low, lmbda_high, fragments)
     lbmda_best_stdv_error = 1000000
 
-    for i in range(iterations):
+    for _ in range(iterations):
         for j in range(len(lmbd_arr)):
 
             power_transformed = scipy.stats.yeojohnson(data, lmbda=lmbd_arr[j])

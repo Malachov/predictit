@@ -41,13 +41,12 @@ class config():
 
     # Input settings
 
-    data = None  # Use numpy array, or pandas dataframe. This will overwrite data_source. If you use csv, set up to None. Data shape is (n_samples, n_feature)
-                 # - that means rows are samples and columns are features.
+    data = None  # Use numpy array, or pandas dataframe. This will overwrite data_source. If you use csv, set up to None. Data shape is (n_samples, n_feature). Rows are samples and columns are features.
     data_all = None  # [np.array(range(1000)), np.array(range(500))]  # Just for compare_models function. Dictionary of data names and list of it's values and predicted columns or list of data parts.
     # data_allexample = {data_1 = (my_dataframe, 'column_name_or_index')} or (my_data[-2000:], my_data[-1000:]) and 'predicted_column' as usually in config.
     compare_mode = 'train_everytime'  # Some models have to be retrained to have predictions different from original data. Repeatit is just 1, so there have to be more member in data_all to reduce chance
 
-    data_source = 'csv'  # Data source. ('csv', 'txt', 'sql' or 'test') - If sql, you have to edit the query to fit your database.
+    data_source = 'test'  # Data source. ('csv', 'txt', 'sql' or 'test') - If sql, you have to edit the query to fit your database.
 
     csv_full_path = r''  # Full CSV path with suffix or web url. Examples: "https://datahub.io/core/global-temp/r/monthly.csv" or "/home/dan/ownCloud/Github/predictit_library/predictit/test_data/daily-minimum-temperatures.csv"
     csv_test_data_relative_path = ''  # CSV name with suffix in test_data folder ('5000 Sales Records.csv' or 'daily-minimum-temperatures.csv')
@@ -71,10 +70,13 @@ class config():
 
     mode = 'predict'  # If 'validate', put apart last few ('predicts' + 'validation_gap') values and evaluate on test data that was not in train set. Do not setup - use compare_models function, it will use it automattically.
     validation_gap = 10  # If 'mode' == 'validate', then describe how many samples are between train and test set. The bigger gap is, the bigger knowledge generalization is necesssary.
-    return_type = 'best'  # 'best', 'all', 'dict', 'models_error_criterion', 'results_dataframe' or 'detailed_results_dictionary'. 'best' return array of predictions, 'all' return more models
-                            # results sorted by how efficient they are. 'results_dataframe' return results and models names in columns. 'detailed_results_dictionary' is used for GUI
-                            # and return results as best result, all results, string div with plot and more. 'dict' return models dictionary with al the results. 'models_error_criterion' returns MAPE,
-                            # RMSE (based on config) or dynamic warping criterion of all models in array.
+
+    return_type = 'best'  # 'best', 'all', 'dict', 'models_error_criterion', 'results_dataframe' or 'detailed_results_dictionary'.
+    # 'best' return array of predictions, 'all' return more models
+    # results sorted by how efficient they are. 'results_dataframe' return results and models names in columns. 'detailed_results_dictionary' is used for GUI
+    # and return results as best result, all results, string div with plot and more. 'dict' return models dictionary with al the results. 'models_error_criterion' returns MAPE,
+    # RMSE (based on config) or dynamic warping criterion of all models in array.
+
     debug = 1  # Debug - If 1, print all results and all the warnings and errors on the way, if 2, stop on first warning, if -1 do not print anything, just return result.
 
     plot = 1  # If 1, plot interactive graph.
@@ -166,7 +168,7 @@ class config():
         **{model_name: predictit.models.sklearn_regression for model_name in [
             'Sklearn regression', 'Bayes ridge regression', 'Passive aggressive regression', 'Gradient boosting',
             'KNeighbors regression', 'Decision tree regression', 'Hubber regression',
-            # 'Bagging regression', 'Stochastic gradient regression', 'Gen Extreme learning machine', 'Extreme learning machine', 'Extra trees regression', 'Random forest regression'
+            # 'Bagging regression', 'Stochastic gradient regression', 'Extreme learning machine', 'Gen Extreme learning machine',  'Extra trees regression', 'Random forest regression'
         ]},
 
         'Compare with average': predictit.models.compare_with_average
@@ -320,6 +322,7 @@ class config():
         "AR coefficients are not stationary.",
         "statsmodels.tsa.AR has been deprecated",
         "divide by zero encountered in true_divide",
+        "pandas.util.testing is deprecated",
         # Tensorflow
         "numpy.ufunc size changed, may indicate binary incompatibility",
         # Autoregressive neuron

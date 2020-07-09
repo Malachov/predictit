@@ -29,6 +29,8 @@ def analyze_data(array, df, lags=5, window=5):
     if misc._JUPYTER:
         get_ipython().run_line_magic('matplotlib', 'inline')
 
+    # Data and it's distribution
+
     plt.figure(figsize=(10, 5))
     plt.subplot(1, 2, 1)
     plt.plot(array)
@@ -46,6 +48,7 @@ def analyze_data(array, df, lags=5, window=5):
     plt.show()
 
     fig, (ax, ax2) = plt.subplots(ncols=2, figsize=(10, 5))
+    fig.suptitle('Repeating patterns - autocorrelation')
 
     try:
 
@@ -79,7 +82,7 @@ def analyze_data(array, df, lags=5, window=5):
     plt.ylabel("Rolling standard deviation x")
 
     plt.tight_layout()
-    plt.suptitle("Function and it's distribution plotting", fontsize=20)
+    plt.suptitle("Rolling average and rolling mean", fontsize=20)
     plt.subplots_adjust(top=0.88)
     plt.show()
 

@@ -16,14 +16,14 @@ if __name__ == "__main__":
 
     import predictit
     import predictit.data_preprocessing as dp
-    from predictit.config import config
+    from predictit.configuration import config
 
     ### Config ###
 
-    print_analyze = 0
-    print_preprocessing = 0
+    print_analyze = 1
+    print_preprocessing = 1
     print_data_flow = 1  # Show what are data inputing for train, for prediction, for testing etc.
-    print_postprocessing = 0
+    print_postprocessing = 1
 
     np.set_printoptions(suppress=True, precision=1)
 
@@ -41,10 +41,10 @@ if __name__ == "__main__":
 
     # Some calculations, that are to long to do in f-strings - Just ignore...
 
-    seqs, Y, x_input, test_inputs = predictit.define_inputs.make_sequences(data, n_steps_in=6, n_steps_out=1, constant=1)
-    seqs_2, Y_2, x_input2, test_inputs2 = predictit.define_inputs.make_sequences(data, n_steps_in=4, n_steps_out=2, constant=0)
-    seqs_m, Y_m, x_input_m, test_inputs_m = predictit.define_inputs.make_sequences(data_multi_col, n_steps_in=4, n_steps_out=1, default_other_columns_length=None, constant=1)
-    seqs_2_m, Y_2_m, x_input2_m, test_inputs2_m = predictit.define_inputs.make_sequences(data_multi_col, n_steps_in=3, n_steps_out=2, default_other_columns_length=1, constant=0)
+    seqs, Y, x_input, test_inputs = predictit.define_inputs.make_sequences(data, config, n_steps_in=6, n_steps_out=1, constant=1)
+    seqs_2, Y_2, x_input2, test_inputs2 = predictit.define_inputs.make_sequences(data, config, n_steps_in=4, n_steps_out=2, constant=0)
+    seqs_m, Y_m, x_input_m, test_inputs_m = predictit.define_inputs.make_sequences(data_multi_col, config, n_steps_in=4, n_steps_out=1, default_other_columns_length=None, constant=1)
+    seqs_2_m, Y_2_m, x_input2_m, test_inputs2_m = predictit.define_inputs.make_sequences(data_multi_col, config, n_steps_in=3, n_steps_out=2, default_other_columns_length=1, constant=0)
 
     normalized, scaler = dp.standardize(data)
     normalized_multi, scaler_multi = dp.standardize(data_multi_col)
@@ -56,7 +56,7 @@ if __name__ == "__main__":
                 ### Analyze ###
                 ###############\n
         """)
-        predictit.analyze.analyze_data(data, column_for_prediction)
+        predictit.analyze.analyze_data(data.ravel(), column_for_prediction)
 
 
     if print_preprocessing:
@@ -73,7 +73,7 @@ if __name__ == "__main__":
 
         ### Remove outliers ###\n
 
-        With outliers: \n {data} \n\nWith no outliers: \n{dp.remove_outliers(data, threshold = 3)} \n
+        With outliers: \n {data} \n\nWith no outliers: \n{dp.remove_the_outliers(data, threshold = 3)} \n
 
         ### Difference transform ### \n
         Original data: \n {data} \n\nDifferenced data: \n{dp.do_difference(data[:, 0])} \n\n
@@ -98,7 +98,7 @@ if __name__ == "__main__":
             ####################\n
 
         ### Remove outliers ### \n
-        With outliers: \n {data_multi_col} \n\nWith no outliers: \n{dp.remove_outliers(data_multi_col, predicted_column_index=predicted_column_index, threshold = 1)} \n
+        With outliers: \n {data_multi_col} \n\nWith no outliers: \n{dp.remove_the_outliers(data_multi_col, predicted_column_index=predicted_column_index, threshold = 1)} \n
 
         ### Standardize ### \n
         Original: \n {data_multi_col} \n\nStandardized: \n{normalized_multi} \n
@@ -123,10 +123,10 @@ if __name__ == "__main__":
             'return_type': 'visual_check',
             'predicts': 3,
             'default_n_steps_in': 5,
-            'standardize': 0,
+            'standardizeit': 0,
             'remove_outliers': 0,
             'plot': 0,
-            'print': 0,
+            'printit': 0,
             'repeatit': 3,
             'optimization': 0,
             'mode': 'predict',
@@ -148,7 +148,7 @@ if __name__ == "__main__":
                 #######################\n
 
         Input data = [0, 1, 2, 3... 48, 49, 50]
-        Config values: 'predicts': 3, 'default_n_steps_in': 5, 'repeatit': 3, 'standardize': 0,
+        Config values: 'predicts': 3, 'default_n_steps_in': 5, 'repeatit': 3, 'standardizeit': 0,
             'remove_outliers': 0
 
         In function compare_models with compare_mode train_everytime, it is automatically set up 'repeatit': 1, and 'validation_gap': 0\n

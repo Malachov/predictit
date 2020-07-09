@@ -8,19 +8,27 @@ from IPython import get_ipython
 
 def plotit(complete_dataframe, plot_type='plotly', show=1, save=0, save_path='', plot_return=None, bounds='default', predicted_column_name='', best_model_name=''):
 
-    if save:
-        if not save_path:
-            save_path = os.path.normpath(os.path.expanduser('~/Desktop') + '/plot.html')
+    if save and not save_path:
+        save_path = os.path.normpath(os.path.expanduser('~/Desktop') + '/plot.html')
 
-    if plot_type == 'plotly':
+    if plot_type == 'matplotlib':
+        if misc._JUPYTER:
+            get_ipython().run_line_magic('matplotlib', 'inline')
 
+        import matplotlib.pyplot as plt
+        plt.rcParams["figure.figsize"] = (12, 8)
+
+        complete_dataframe.plot()
+        plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.05), ncol=3, fancybox=True, shadow=True)
+        if save:
+            plt.savefig(save_path)
+        if show:
+            plt.show()
+
+    elif plot_type == 'plotly':
         import plotly as pl
 
-        if not misc._JUPYTER:
-            pl.io.renderers.default = "browser"
-        else:
-            pl.io.renderers.default = "notebook_connected"
-
+        pl.io.renderers.default = "notebook_connected" if misc._JUPYTER else "browser"
         complete_dataframe = complete_dataframe.copy()
         graph_data = []
 
@@ -109,21 +117,4 @@ def plotit(complete_dataframe, plot_type='plotly', show=1, save=0, save_path='',
                 margin={'b': 35, 't': 35, 'pad': 4},
             )
 
-            div = pl.offline.plot(fig, include_plotlyjs=False, output_type='div')
-
-            return div
-
-
-    if plot_type == 'matplotlib':
-        if misc._JUPYTER:
-            get_ipython().run_line_magic('matplotlib', 'inline')
-
-        import matplotlib.pyplot as plt
-        plt.rcParams["figure.figsize"] = (12, 8)
-
-        complete_dataframe.plot()
-        plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.05), ncol=3, fancybox=True, shadow=True)
-        if save:
-            plt.savefig(save_path)
-        if show:
-            plt.show()
+            return pl.offline.plot(fig, include_plotlyjs=False, output_type='div')

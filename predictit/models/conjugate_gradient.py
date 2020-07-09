@@ -22,11 +22,12 @@ def train(sequentions, epochs=100):
 
     w = np.zeros(X.shape[1])
 
-    for i in range(epochs):
-        b = np.dot(X.T, y)
-        A = np.dot(X.T, X)
-        re = b - np.dot(A, w)
-        p = re.copy()
+    b = np.dot(X.T, y)
+    A = np.dot(X.T, X)
+    re = b - np.dot(A, w)
+    p = re.copy()
+
+    for _ in range(epochs):
 
         alpha = np.dot(re.T, re) / (np.dot(np.dot(p.T, A), p))
         w = w + alpha * p
@@ -43,7 +44,7 @@ def predict(x_input, model, predicts=7):
     x_input = x_input.ravel()
     predictions = []
 
-    for i in range(predicts):
+    for _ in range(predicts):
 
         ypre = np.dot(model, x_input)
         predictions.append(ypre)

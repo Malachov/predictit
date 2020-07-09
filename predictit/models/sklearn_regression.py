@@ -101,7 +101,7 @@ def predict(x_input, model, predicts=7):
 
         predictions = []
 
-        for i in range(predicts):
+        for _ in range(predicts):
 
             yhat = model.predict(x_input)
             x_input = np.insert(x_input, x_input.shape[1], yhat[0], axis=1)

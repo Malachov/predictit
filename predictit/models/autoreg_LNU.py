@@ -49,29 +49,29 @@ def train(sequentions, predicts=30, mi=1, mi_multiple=1, mi_linspace=(1e-8, 10, 
     else:
         w = np.zeros(X.shape[1])
 
-        for i in range(miwidelen):
+    for i in range(miwidelen):
 
-            for j in range(length):
+        for j in range(length):
 
-                y[i, j] = np.dot(w, X[j])
+            y[i, j] = np.dot(w, X[j])
 
-                if y[i, j] > bound:
-                    mi_error[i] = np.inf
-                    break
+            if y[i, j] > bound:
+                mi_error[i] = np.inf
+                break
 
-                e[j] = y_hat[j] - y[i, j]
-                dydw = X[j]  # TODO i + 1
-                if minormit == 1:
-                    minorm = miwide[i] / (damping + np.dot(X[j], X[j].T))
-                    dw = minorm * e[j] * dydw
-                else:
-                    dw = miwide[i] * e[j] * dydw
-                w = w + dw
+            e[j] = y_hat[j] - y[i, j]
+            dydw = X[j]  # TODO i + 1
+            if minormit == 1:
+                minorm = miwide[i] / (damping + np.dot(X[j], X[j].T))
+                dw = minorm * e[j] * dydw
+            else:
+                dw = miwide[i] * e[j] * dydw
+            w = w + dw
 
-            mi_error[i] = np.sum(abs(e[-predicts * 3:]))
-            w_last[i] = w
+        mi_error[i] = np.sum(abs(e[-predicts * 3:]))
+        w_last[i] = w
 
-        bestmiindex = np.argmin(mi_error)
+    bestmiindex = np.argmin(mi_error)
 
     if epochs:
 
@@ -81,7 +81,7 @@ def train(sequentions, predicts=30, mi=1, mi_multiple=1, mi_linspace=(1e-8, 10, 
         wall = np.zeros((features, length))
         w_best_mi = w_last[bestmiindex]
 
-        for i in range(epochs):
+        for _ in range(epochs):
             for j in range(length):
 
                 y_best_mi[j] = np.dot(w_best_mi, X[j])
@@ -103,10 +103,10 @@ def train(sequentions, predicts=30, mi=1, mi_multiple=1, mi_linspace=(1e-8, 10, 
         for i in range(features):
             wwt[i] = statsmodels_autoregressive.predict(wall[i], statsmodels_autoregressive.train(wall[i]), predicts=predicts)
 
-        w = wwt.T
+        w_final = wwt.T
 
     else:
-        w = w_best_mi
+        w_final = w_best_mi
 
     if plot == 1:
 
@@ -137,7 +137,7 @@ def train(sequentions, predicts=30, mi=1, mi_multiple=1, mi_linspace=(1e-8, 10, 
 
         plt.show()
 
-    return w
+    return w_final
 
 
 def predict(x_input, w, predicts=7):

@@ -121,40 +121,39 @@ def test_main_optimize_and_args():
 
 def test_main_dataframe():
 
-    if 1:
-        config.update(config_original)
-        df = pd.DataFrame([range(200), range(1200, 1200)]).T
-        df['time'] = pd.date_range('2018-01-01', periods=len(df), freq='H')
+    config.update(config_original)
+    df = pd.DataFrame([range(200), range(1200, 1200)]).T
+    df['time'] = pd.date_range('2018-01-01', periods=len(df), freq='H')
 
-        config.update({
-            'data': df,
-            'datetime_index': 'time',
-            'freq': '',
-            'predicted_column': 0,
-            'datalength': 300,
-            'default_other_columns_length': 5,
-            'data_transform': None,
-            'mode': 'predict',
-            'repeatit': 1,
-            'error_criterion': 'dtw',
-            'remove_outliers': 0,
-            'optimization': 1,
-            'optimization_variable': 'default_n_steps_in',
-            'optimization_values': [12, 20, 40],
-            'last_row': 0,
-            'correlation_threshold': 0.4,
-            'standardizeit': 'standardize',
-            'predicts': 7,
-            'smoothit': 0,
-            'default_n_steps_in': 40,
-            'power_transformed': 2,
+    config.update({
+        'data': df,
+        'datetime_index': 'time',
+        'freq': '',
+        'predicted_column': 0,
+        'datalength': 300,
+        'default_other_columns_length': 5,
+        'data_transform': None,
+        'mode': 'predict',
+        'repeatit': 1,
+        'error_criterion': 'dtw',
+        'remove_outliers': 0,
+        'optimization': 1,
+        'optimization_variable': 'default_n_steps_in',
+        'optimization_values': [12, 20, 40],
+        'last_row': 0,
+        'correlation_threshold': 0.4,
+        'standardizeit': 'standardize',
+        'predicts': 7,
+        'smoothit': 0,
+        'default_n_steps_in': 40,
+        'power_transformed': 2,
 
-            'used_models': {
-                "AR (Autoregression)": predictit.models.statsmodels_autoregressive,
-                "Autoregressive Linear neural unit": predictit.models.autoreg_LNU,
-                "Compare with average": predictit.models.compare_with_average
-            }
-        })
+        'used_models': {
+            "AR (Autoregression)": predictit.models.statsmodels_autoregressive,
+            "Autoregressive Linear neural unit": predictit.models.autoreg_LNU,
+            "Compare with average": predictit.models.compare_with_average
+        }
+    })
 
     result = predictit.main.predict()
     assert result[0]
@@ -254,7 +253,7 @@ def test_compare_models_with_optimization():
 
 
 if __name__ == "__main__":
-    result = test_own_data()
+    # result = test_own_data()
     # print("\n\ntest_main_from_config\n")
     # result1 = test_main_from_config()
     # print("\n\ntest_main_optimize_and_args\n")get_master
@@ -268,7 +267,7 @@ if __name__ == "__main__":
     # print("\n\ntest_main_multiple\n")
     # test_main_multiple_all_columns()
     # print("\n\ntest_compare_models_with_optimization\n")
-    # test_compare_models()
+    test_compare_models()
     # print("\n\ntest_compare_models_with_optimization\n")
     # test_compare_models_with_optimization()
 

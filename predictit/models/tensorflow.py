@@ -1,6 +1,5 @@
 import numpy as np
 from pathlib import Path
-from predictit.misc import traceback_warning
 
 
 def train(sequentions, layers='default', predicts=7, epochs=200, already_trained=0, train_next=1, save=1, saved_model_path_string='stored_models', optimizer='adam', loss='mse', verbose=0, metrics='accuracy', timedistributed=0, batch_size=64):
@@ -127,6 +126,4 @@ def get_optimizers_loses_activations():
     adamax = optimizers.Adamax(lr=0.002, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0.0)
     nadam = optimizers.Nadam(lr=0.002, beta_1=0.9, beta_2=0.999, epsilon=None, schedule_decay=0.004)
 
-    lstm_optimizers = [sgd, rmsprop, adagrad, adadelta, adam, adamax, nadam]
-
-    return lstm_optimizers
+    return [sgd, rmsprop, adagrad, adadelta, adam, adamax, nadam]

@@ -53,18 +53,15 @@ def make_sequences(data, config, n_steps_in, n_steps_out=1, constant=None, predi
     else:
         X = X.transpose(1, 2, 0)
 
-    if X.ndim == 3:
-        if constant:
-            X = np.hstack([np.ones((len(X), 1)), X])
+    if constant:
+        X = np.hstack([np.ones((len(X), 1)), X])
 
+    if X.ndim == 3:
         x_input = X[-1].reshape(1, X.shape[1], X.shape[2])
         x_test_inputs = X[-config.predicts - config.repeatit: -config.predicts, :, :]
         x_test_inputs = x_test_inputs.reshape(x_test_inputs.shape[0], 1, x_test_inputs.shape[1], x_test_inputs.shape[2])
 
     else:
-        if constant:
-            X = np.hstack([np.ones((len(X), 1)), X])
-
         x_input = X[-1].reshape(1, -1)
 
         x_test_inputs = X[-config.predicts - config.repeatit: -config.predicts, :]

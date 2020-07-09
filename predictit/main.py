@@ -37,13 +37,13 @@ sys.path.insert(0, this_path_string)
 import predictit
 
 import predictit.configuration
-from predictit.configuration import config
-from predictit.misc import traceback_warning, user_warning, colorize, set_warnings
-import predictit.gui_start
-from predictit import main_loop
+
+
+# Frequently used modules save as variables for shorter notation
+config = predictit.configuration.config
+traceback_warning = predictit.misc.traceback_warning
 
 config.this_path = this_path
-
 
 if __name__ == "__main__":
 
@@ -116,7 +116,7 @@ def predict(**function_kwargs):
     config_freezed = config.freeze()
 
     # Define whether to print warnings or not or stop on warnings as on error
-    set_warnings(config.debug, config.ignored_warnings)
+    predictit.misc.set_warnings(config.debug, config.ignored_warnings)
 
     _GUI = predictit.misc._GUI
     # Add everything printed + warnings to variable to be able to print in GUI
@@ -151,7 +151,7 @@ def predict(**function_kwargs):
     # Find difference between original config and set values and if there are any differences, raise error
     config_errors = set({key: value for key, value in config.__dict__.items() if not key.startswith('__') and not callable(key)}.keys()) - set(predictit.configuration.orig_config)
     if config_errors:
-        raise KeyError(colorize(f"Some config values: {config_errors} was named incorrectly. "
+        raise KeyError(predictit.misc.colorize(f"Some config values: {config_errors} was named incorrectly. "
                                 "Check config.py for more informations"))
 
     # Definition of the table for spent time on code parts
@@ -181,7 +181,7 @@ def predict(**function_kwargs):
         config.predicted_column = 0
 
     if config.data is None:
-        raise TypeError(colorize("Data not loaded. Check config.py and use 'data_source' - csv and path or assign data to 'data'"))
+        raise TypeError(predictit.misc.colorize("Data not loaded. Check config.py and use 'data_source' - csv and path or assign data to 'data'"))
 
     data_for_predictions_orig, data_for_predictions_df, predicted_column_name = predictit.data_preprocessing.data_consolidation(config.data, config)
 
@@ -214,7 +214,7 @@ def predict(**function_kwargs):
     if config.analyzeit == 1 or config.analyzeit == 3:
         print("Analyze of unprocessed data")
         try:
-            predictit.analyze.analyze_data(data_for_predictions_orig[:, 0], column_for_predictions_series, window=30)
+            predictit.analyze.analyze_data(data_for_predictions_orig[:, 0].ravel(), column_for_predictions_series, window=30)
             predictit.analyze.analyze_correlation(data_for_predictions_df)
             predictit.analyze.decompose(data_for_predictions_orig[:, 0], **config.analyze_seasonal_decompose)
         except Exception:
@@ -341,7 +341,7 @@ def predict(**function_kwargs):
                     if config.models_input[iterated_model_name] in ['one_step', 'one_step_constant']:
                         if multicolumn and config.predicts > 1:
 
-                            user_warning(f"""Warning in model {iterated_model_name} \n\nOne-step prediction on multivariate data (more columns).
+                            predictit.misc.user_warning(f"""Warning in model {iterated_model_name} \n\nOne-step prediction on multivariate data (more columns).
                                              Use batch (y lengt equals to predict) or do use some one column data input in config models_input or predict just one value.""")
                             continue
 
@@ -355,17 +355,17 @@ def predict(**function_kwargs):
 
                     if config.multiprocessing == 'process':
                         pipes.append(multiprocessing.Pipe())
-                        p = multiprocessing.Process(target=main_loop.train_and_predict, kwargs={**predict_parameters, **{'pipe': pipes[-1][1]}})
+                        p = multiprocessing.Process(target=predictit.main_loop.train_and_predict, kwargs={**predict_parameters, **{'pipe': pipes[-1][1]}})
 
                         processes.append(p)
                         p.start()
 
                     elif config.multiprocessing == 'pool':
 
-                        pool.apply_async(main_loop.train_and_predict, (), predict_parameters, callback=return_result)
+                        pool.apply_async(predictit.main_loop.train_and_predict, (), predict_parameters, callback=return_result)
 
                     else:
-                        results.append(main_loop.train_and_predict(**predict_parameters))
+                        results.append(predictit.main_loop.train_and_predict(**predict_parameters))
 
     if config.multiprocessing:
         if config.multiprocessing == 'process':
@@ -685,7 +685,7 @@ def compare_models(**function_kwargs):
         config.data_all = {'sin': (predictit.test_data.generate_test_data.gen_sin(), 0),
                            'Sign': (predictit.test_data.generate_test_data.gen_sign(), 0),
                            'Random data': (predictit.test_data.generate_test_data.gen_random(), 0)}
-        user_warning("Test data was used. Setup 'data_all' in config...")
+        predictit.misc.user_warning("Test data was used. Setup 'data_all' in config...")
 
     results = {}
     unstardized_results = {}

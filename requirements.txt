@@ -1,8 +1,7 @@
 numpy
 pandas
+eel
 matplotlib
-SQLAlchemy
-sklearn_extensions
 cufflinks
 plotly
 prettytable

@@ -2,8 +2,6 @@ import time
 import numpy as np
 
 import predictit
-from predictit.misc import traceback_warning
-from predictit import best_params
 
 
 # This is core function... It should be sequentionally in the middle of main script in predict function, but it has to be 1st level function to be able to use in multiprocessing.
@@ -15,29 +13,28 @@ def train_and_predict(
 
     model_results = {}
 
-    if config.optimizeit and optimization_index == 0:
-        if iterated_model_name in config.models_parameters_limits:
+    if (config.optimizeit and optimization_index == 0 and iterated_model_name in config.models_parameters_limits):
 
-            try:
-                start_optimization = time.time()
+        try:
+            start_optimization = time.time()
 
-                model_results['best_kwargs'] = best_params.optimize(
-                    iterated_model_train, iterated_model_predict, config.models_parameters[iterated_model_name], config.models_parameters_limits[iterated_model_name],
-                    model_train_input=model_train_input, model_test_inputs=model_test_inputs, models_test_outputs=models_test_outputs,
-                    fragments=config.fragments, iterations=config.iterations, time_limit=config.optimizeit_limit,
-                    error_criterion=config.error_criterion, name=iterated_model_name, details=config.optimizeit_details, plot=config.optimizeit_plot)
+            model_results['best_kwargs'] = predictit.best_params.optimize(
+                iterated_model_train, iterated_model_predict, config.models_parameters[iterated_model_name], config.models_parameters_limits[iterated_model_name],
+                model_train_input=model_train_input, model_test_inputs=model_test_inputs, models_test_outputs=models_test_outputs,
+                fragments=config.fragments, iterations=config.iterations, time_limit=config.optimizeit_limit,
+                error_criterion=config.error_criterion, name=iterated_model_name, details=config.optimizeit_details, plot=config.optimizeit_plot)
 
-                for k, l in model_results['best_kwargs'].items():
+            for k, l in model_results['best_kwargs'].items():
 
-                    config.models_parameters[iterated_model_name][k] = l
+                config.models_parameters[iterated_model_name][k] = l
 
-            except Exception:
-                traceback_warning("Optimization didn't finished")
+        except Exception:
+            predictit.misc.traceback_warning("Optimization didn't finished")
 
-            finally:
-                stop_optimization = time.time()
+        finally:
+            stop_optimization = time.time()
 
-                model_results['optimization_time'] = stop_optimization - start_optimization
+            model_results['optimization_time'] = stop_optimization - start_optimization
 
     try:
         start = time.time()
@@ -99,7 +96,7 @@ def train_and_predict(
 
     except Exception:
 
-        traceback_warning(f"Error in {iterated_model_name} model on data length {optimization_value}")
+        predictit.misc.traceback_warning(f"Error in {iterated_model_name} model on data length {optimization_value}")
 
     finally:
         model_results['model_time'] = time.time() - start
