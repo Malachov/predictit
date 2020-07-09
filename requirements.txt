@@ -10,3 +10,4 @@ seaborn
 statsmodels
 scikit_learn
 m2r
+sklearn_extensions

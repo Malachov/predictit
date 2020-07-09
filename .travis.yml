@@ -2,7 +2,9 @@ language: python
 cache: pip
 python:
 
+  - "3.6"
   - "3.7"
+  - "3.8"
 
 branches:
   only:
@@ -30,3 +32,7 @@ deploy:
   file: '*'
   on:
     tags: true
+
+git:
+  depth: 25
+  quiet: true
