@@ -1,0 +1,580 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>predictit.data_preprocessing &#8212; predictit 09-07-2020 documentation</title>
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for predictit.data_preprocessing</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Module for data preprocessing. Contain functions for removing outliers,</span>
+<span class="sd">NaN columns or data smoothing. If you want to see how functions work -</span>
+<span class="sd">working examples with printed results are in tests - visual.py.</span>
+
+<span class="sd">Default output data shape is (n_samples, n_features)</span>
+
+<span class="sd">All processing funtions after data_consolidation use numpy.ndarray with ndim == 2,</span>
+<span class="sd">so reshape(1, -1) if necessary.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">scipy</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">from</span> <span class="nn">sklearn</span> <span class="k">import</span> <span class="n">preprocessing</span>
+
+<span class="kn">import</span> <span class="nn">predictit</span>
+<span class="kn">from</span> <span class="nn">predictit.misc</span> <span class="k">import</span> <span class="n">user_warning</span><span class="p">,</span> <span class="n">colorize</span>
+
+
+<div class="viewcode-block" id="load_data"><a class="viewcode-back" href="../../predictit.data_preprocessing.html#predictit.data_preprocessing.load_data">[docs]</a><span class="k">def</span> <span class="nf">load_data</span><span class="p">(</span><span class="n">config</span><span class="p">):</span>
+
+    <span class="c1">############# Load CSV data #############</span>
+    <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">data_source</span> <span class="o">==</span> <span class="s1">&#39;csv&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">csv_test_data_relative_path</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">combined_path</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">this_path</span> <span class="o">/</span> <span class="s1">&#39;predictit&#39;</span> <span class="o">/</span> <span class="s1">&#39;test_data&#39;</span> <span class="o">/</span> <span class="n">config</span><span class="o">.</span><span class="n">csv_test_data_relative_path</span>
+                <span class="n">config</span><span class="o">.</span><span class="n">csv_full_path</span> <span class="o">=</span> <span class="n">combined_path</span><span class="o">.</span><span class="n">as_posix</span><span class="p">()</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="n">colorize</span><span class="p">(</span>
+                    <span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">ERROR - Test data load failed - You are using relative path. This continue from folder test_data&quot;</span>
+                    <span class="s2">&quot;in predictit. If you want to use other folder, keep relative_path empty and use absolute csv_full_path.</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">))</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">csv_full_path</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="o">-</span><span class="n">config</span><span class="o">.</span><span class="n">max_imported_length</span><span class="p">:,</span> <span class="p">:]</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="n">colorize</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2"> ERROR - Test data load failed - Setup CSV adress and column name in config </span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">))</span>
+
+    <span class="c1">############# Load SQL data #############</span>
+    <span class="k">elif</span> <span class="n">config</span><span class="o">.</span><span class="n">data_source</span> <span class="o">==</span> <span class="s1">&#39;sql&#39;</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">predictit</span><span class="o">.</span><span class="n">database</span><span class="o">.</span><span class="n">database_load</span><span class="p">(</span><span class="n">server</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">server</span><span class="p">,</span> <span class="n">database</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">database</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">freq</span><span class="p">,</span>
+                                                    <span class="n">data_limit</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">max_imported_length</span><span class="p">)</span>
+
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">colorize</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;ERROR - Data load from SQL server failed - &quot;</span>
+                                        <span class="s2">&quot;Setup server, database and predicted column name in config&quot;</span><span class="p">))</span>
+
+    <span class="k">elif</span> <span class="n">config</span><span class="o">.</span><span class="n">data_source</span> <span class="o">==</span> <span class="s1">&#39;test&#39;</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">predictit</span><span class="o">.</span><span class="n">test_data</span><span class="o">.</span><span class="n">generate_test_data</span><span class="o">.</span><span class="n">gen_random</span><span class="p">()</span>
+        <span class="n">user_warning</span><span class="p">((</span><span class="s2">&quot;Test data was used. Setup config.py &#39;data_source&#39;. Check official readme or do&quot;</span>
+                      <span class="s2">&quot; &gt;&gt;&gt; predictit.configuration.print_config() to see all possible options with comments. &quot;</span>
+                      <span class="s2">&quot;Data can be insert as function parameters, with editing config.py or with CLI.&quot;</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">data</span></div>
+
+
+<div class="viewcode-block" id="data_consolidation"><a class="viewcode-back" href="../../predictit.data_preprocessing.html#predictit.data_preprocessing.data_consolidation">[docs]</a><span class="k">def</span> <span class="nf">data_consolidation</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Input data in various formats and shapes and return data in defined shape,</span>
+<span class="sd">    that other functions rely on.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        data (np.ndarray, pd.DataFrame): Input data in well standardized format.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        KeyError, TypeError: If wrong configuration in configuration.py.</span>
+<span class="sd">            E.g. if predicted column name not found in dataframe.</span>
+
+
+<span class="sd">    Returns:</span>
+<span class="sd">        np.ndarray, pd.DataFrame, str: Data in standardized form.</span>
+
+<span class="sd">        Data array for prediction - predicted column on index 1,</span>
+<span class="sd">        and column for ploting as pandas dataframe.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1">### Pandas dataframe and series ###</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">):</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Dataframe</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
+        <span class="n">data_for_predictions_df</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">predicted_column</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+
+            <span class="n">predicted_column_name</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">predicted_column</span>
+
+            <span class="k">if</span> <span class="n">predicted_column_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">data_for_predictions_df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="n">colorize</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;Predicted column name - &#39;</span><span class="si">{config.predicted_column}</span><span class="s2">&#39; not found in data. Change in config - &#39;predicted_column&#39;. Available columns: {list(data_for_predictions_df.columns)}&quot;</span><span class="p">))</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">predicted_column_name</span> <span class="o">=</span> <span class="n">data_for_predictions_df</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="n">config</span><span class="o">.</span><span class="n">predicted_column</span><span class="p">]</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="nb">int</span><span class="p">(</span><span class="n">data_for_predictions_df</span><span class="p">[</span><span class="n">predicted_column_name</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="n">colorize</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;Predicted column is not number datatype. Setup correct &#39;predicted_column&#39; in config.py. Available columns: {list(data_for_predictions_df.columns)}&quot;</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">datetime_index</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">]:</span>
+
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data_for_predictions_df</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">indexes</span><span class="o">.</span><span class="n">datetimes</span><span class="o">.</span><span class="n">DatetimeIndex</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">_libs</span><span class="o">.</span><span class="n">tslibs</span><span class="o">.</span><span class="n">timestamps</span><span class="o">.</span><span class="n">Timestamp</span><span class="p">)):</span>
+                    <span class="k">pass</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">datetime_index</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                        <span class="n">data_for_predictions_df</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">datetime_index</span><span class="p">,</span> <span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">data_for_predictions_df</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="n">data_for_predictions_df</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="n">config</span><span class="o">.</span><span class="n">datetime_index</span><span class="p">],</span> <span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+                    <span class="n">data_for_predictions_df</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">data_for_predictions_df</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="n">colorize</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;Datetime name / index from config - &#39;</span><span class="si">{config.datetime_index}</span><span class="s2">&#39; not found in data or not datetime format. Change in config - &#39;datetime_index&#39;. Available columns: {list(data_for_predictions_df.columns)}&quot;</span><span class="p">))</span>
+
+            <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">freq</span><span class="p">:</span>
+                <span class="n">data_for_predictions_df</span><span class="o">.</span><span class="n">sort_index</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">resample_function</span> <span class="o">==</span> <span class="s1">&#39;sum&#39;</span><span class="p">:</span>
+                    <span class="n">data_for_predictions_df</span> <span class="o">=</span> <span class="n">data_for_predictions_df</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">freq</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">resample_function</span> <span class="o">==</span> <span class="s1">&#39;mean&#39;</span><span class="p">:</span>
+                    <span class="n">data_for_predictions_df</span> <span class="o">=</span> <span class="n">data_for_predictions_df</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">freq</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+                <span class="n">data_for_predictions_df</span> <span class="o">=</span> <span class="n">data_for_predictions_df</span><span class="o">.</span><span class="n">asfreq</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">freq</span><span class="p">,</span> <span class="n">fill_value</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+            <span class="k">else</span><span class="p">:</span>
+
+                <span class="n">data_for_predictions_df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">freq</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">infer_freq</span><span class="p">(</span><span class="n">data_for_predictions_df</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">data_for_predictions_df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">freq</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">user_warning</span><span class="p">(</span><span class="s2">&quot;Datetime index was provided from config, but frequency guess failed. Specify &#39;freq&#39; in config to resample and have equal sampling if you want.&quot;</span><span class="p">)</span>
+                    <span class="n">data_for_predictions_df</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="c1"># Make predicted column index 0</span>
+        <span class="n">data_for_predictions_df</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">predicted_column_name</span><span class="p">,</span> <span class="n">data_for_predictions_df</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">predicted_column_name</span><span class="p">))</span>
+
+        <span class="n">data_for_predictions_df</span> <span class="o">=</span> <span class="n">data_for_predictions_df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="o">-</span><span class="n">config</span><span class="o">.</span><span class="n">datalength</span><span class="p">:,</span> <span class="p">:]</span>
+
+        <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">other_columns</span> <span class="ow">and</span> <span class="n">data_for_predictions_df</span><span class="o">.</span><span class="n">ndim</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+
+            <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">remove_nans</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">remove_nans</span> <span class="o">==</span> <span class="s1">&#39;any_columns&#39;</span><span class="p">:</span>
+                    <span class="n">axis</span> <span class="o">=</span> <span class="mi">1</span>
+                <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">remove_nans</span> <span class="o">==</span> <span class="s1">&#39;any_rows&#39;</span><span class="p">:</span>
+                    <span class="n">axis</span> <span class="o">=</span> <span class="mi">0</span>
+
+                <span class="n">data_for_predictions_df</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">how</span><span class="o">=</span><span class="s1">&#39;any&#39;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span>
+
+            <span class="n">data_for_predictions_df</span> <span class="o">=</span> <span class="n">data_for_predictions_df</span><span class="o">.</span><span class="n">select_dtypes</span><span class="p">(</span><span class="n">include</span><span class="o">=</span><span class="s1">&#39;number&#39;</span><span class="p">)</span>
+            <span class="n">data_for_predictions</span> <span class="o">=</span> <span class="n">data_for_predictions_df</span><span class="o">.</span><span class="n">values</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">data_for_predictions</span> <span class="o">=</span> <span class="n">data_for_predictions_df</span><span class="p">[</span><span class="n">predicted_column_name</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="c1">### np.ndarray ###</span>
+
+
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+        <span class="n">data_for_predictions</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">predicted_column</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">colorize</span><span class="p">(</span><span class="s2">&quot;&#39;predicted_column&#39; in config is a string and data in numpy array format. Numpy does not allow string assignment&quot;</span><span class="p">))</span>
+
+        <span class="n">predicted_column_name</span> <span class="o">=</span> <span class="s1">&#39;Predicted column&#39;</span>
+
+        <span class="k">if</span> <span class="n">data_for_predictions</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">data_for_predictions</span> <span class="o">=</span> <span class="n">data_for_predictions</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">data_for_predictions</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">data_for_predictions</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+            <span class="n">data_for_predictions</span> <span class="o">=</span> <span class="n">data_for_predictions</span><span class="o">.</span><span class="n">T</span>
+
+        <span class="n">data_for_predictions</span> <span class="o">=</span> <span class="n">data_for_predictions</span><span class="p">[</span><span class="o">-</span><span class="n">config</span><span class="o">.</span><span class="n">datalength</span><span class="p">:,</span> <span class="p">:]</span>
+
+        <span class="c1"># Make predicted column on index 0</span>
+        <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">other_columns</span> <span class="ow">and</span> <span class="n">config</span><span class="o">.</span><span class="n">predicted_column</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">data_for_predictions</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">data_for_predictions</span><span class="p">[:,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">config</span><span class="o">.</span><span class="n">predicted_column</span><span class="p">]]</span> <span class="o">=</span> <span class="n">data_for_predictions</span><span class="p">[:,</span> <span class="p">[</span><span class="n">config</span><span class="o">.</span><span class="n">predicted_column</span><span class="p">,</span> <span class="mi">0</span><span class="p">]]</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">config</span><span class="o">.</span><span class="n">other_columns</span><span class="p">:</span>
+            <span class="n">data_for_predictions</span> <span class="o">=</span> <span class="n">data_for_predictions</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">data_for_predictions_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data_for_predictions</span><span class="p">)</span>
+        <span class="n">data_for_predictions_df</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="n">data_for_predictions_df</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span> <span class="n">predicted_column_name</span><span class="p">},</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">colorize</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;Input data must be in pd.dataframe, pd.series or numpy array. If you use csv or sql data source, its converted automatically,</span>
+<span class="s2">                                 but setup csv_full_path. Check config comments fore  more informations...&quot;&quot;&quot;</span><span class="p">))</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">data_for_predictions</span> <span class="o">=</span> <span class="n">data_for_predictions</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+        <span class="n">user_warning</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;Predicted column - </span><span class="si">{config.predicted_column}</span><span class="s2"> is not a number. Check config&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">data_for_predictions</span><span class="p">,</span> <span class="n">data_for_predictions_df</span><span class="p">,</span> <span class="n">predicted_column_name</span></div>
+
+
+<div class="viewcode-block" id="keep_corelated_data"><a class="viewcode-back" href="../../predictit.data_preprocessing.html#predictit.data_preprocessing.keep_corelated_data">[docs]</a><span class="k">def</span> <span class="nf">keep_corelated_data</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">predicted_column_index</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mf">0.5</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Remove columns that are not corelated enough to predicted columns.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        data (np.array): Time series data.</span>
+<span class="sd">        predicted_column_index (int, optional): Column that is predicted. Defaults to 0.</span>
+<span class="sd">        threshold (float, optional): After correlation matrix is evaluated, all columns that are correlated less than threshold are deleted. Defaults to 0.2.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        np.array: Data with no columns that are not corelated with predicted column.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># If some row have no variance - RuntimeWarning warning in correlation matrix computing and then in comparing</span>
+    <span class="k">with</span> <span class="n">warnings</span><span class="o">.</span><span class="n">catch_warnings</span><span class="p">():</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">simplefilter</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">,</span> <span class="ne">RuntimeWarning</span><span class="p">)</span>
+
+        <span class="n">corr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">corrcoef</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+        <span class="n">corr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">(</span><span class="n">corr</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+        <span class="n">range_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">corr</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+        <span class="n">columns_to_del</span> <span class="o">=</span> <span class="n">range_array</span><span class="p">[</span><span class="nb">abs</span><span class="p">(</span><span class="n">corr</span><span class="p">[</span><span class="n">predicted_column_index</span><span class="p">])</span> <span class="o">&lt;=</span> <span class="n">threshold</span><span class="p">]</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">columns_to_del</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">data</span></div>
+
+    <span class="c1"># if isinstance(data, pd.DataFrame):</span>
+    <span class="c1">#     corr = data.corr()</span>
+    <span class="c1">#     columns_to_del = list(corr[corr[corr.columns[predicted_column_index]] &lt;= abs(0.6)].index)</span>
+    <span class="c1">#     data.drop(columns=columns_to_del, inplace=True)</span>
+
+
+<div class="viewcode-block" id="remove_the_outliers"><a class="viewcode-back" href="../../predictit.data_preprocessing.html#predictit.data_preprocessing.remove_the_outliers">[docs]</a><span class="k">def</span> <span class="nf">remove_the_outliers</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">predicted_column_index</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Remove values far from mean - probably errors.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        data (np.array): Time series data.</span>
+<span class="sd">        predicted_column_index (int, optional): Column that is predicted. Defaults to 0.</span>
+<span class="sd">        threshold (int, optional): How many times must be standard deviation from mean to be ignored. Defaults to 3.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        np.array: Cleaned data.</span>
+
+<span class="sd">    Examples:</span>
+
+<span class="sd">        &gt;&gt;&gt; data = np.array([[1, 3, 5, 2, 3, 4, 5, 66, 3]])</span>
+<span class="sd">        &gt;&gt;&gt; print(remove_the_outliers(data))</span>
+<span class="sd">        [1, 3, 5, 2, 3, 4, 5, 3]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># if isinstance(data, pd.DataFrame):</span>
+
+    <span class="c1">#     data_mean = data.iloc[:, predicted_column_index].mean()</span>
+    <span class="c1">#     data_std = data.iloc[:, predicted_column_index].std()</span>
+
+    <span class="c1">#     data = data[abs(data[data.columns[0]] - data_mean) &lt; threshold * data_std]</span>
+
+
+    <span class="c1"># if data.ndim == 1:</span>
+    <span class="c1">#     data = data[abs(data - data.mean()) &lt; threshold * data.std()]</span>
+    <span class="c1">#     return data</span>
+
+    <span class="n">data_mean</span> <span class="o">=</span> <span class="n">data</span><span class="p">[:,</span> <span class="n">predicted_column_index</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+    <span class="n">data_std</span> <span class="o">=</span> <span class="n">data</span><span class="p">[:,</span> <span class="n">predicted_column_index</span><span class="p">]</span><span class="o">.</span><span class="n">std</span><span class="p">()</span>
+
+    <span class="n">range_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+    <span class="n">names_to_del</span> <span class="o">=</span> <span class="n">range_array</span><span class="p">[</span><span class="nb">abs</span><span class="p">(</span><span class="n">data</span><span class="p">[:,</span> <span class="n">predicted_column_index</span><span class="p">]</span> <span class="o">-</span> <span class="n">data_mean</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">threshold</span> <span class="o">*</span> <span class="n">data_std</span><span class="p">]</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">names_to_del</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">data</span></div>
+
+
+<div class="viewcode-block" id="do_difference"><a class="viewcode-back" href="../../predictit.data_preprocessing.html#predictit.data_preprocessing.do_difference">[docs]</a><span class="k">def</span> <span class="nf">do_difference</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Transform data into neighbor difference. For example from [1, 2, 4] into [1, 2].</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        dataset (ndarray): Numpy on or multi dimensional array.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        ndarray: Differenced data.</span>
+
+<span class="sd">    Examples:</span>
+
+<span class="sd">        &gt;&gt;&gt; data = np.array([1, 3, 5, 2])</span>
+<span class="sd">        &gt;&gt;&gt; print(do_difference(data))</span>
+<span class="sd">        [2, 2, -3]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">T</span><span class="p">)</span><span class="o">.</span><span class="n">T</span></div>
+
+
+<div class="viewcode-block" id="inverse_difference"><a class="viewcode-back" href="../../predictit.data_preprocessing.html#predictit.data_preprocessing.inverse_difference">[docs]</a><span class="k">def</span> <span class="nf">inverse_difference</span><span class="p">(</span><span class="n">differenced_predictions</span><span class="p">,</span> <span class="n">last_undiff_value</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Transform do_difference transform back.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        differenced_predictions (ndarray): One dimensional!! differenced data from do_difference function.</span>
+<span class="sd">        last_undiff_value (float): First value to computer the rest.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        ndarray: Normal data, not the additive series.</span>
+
+<span class="sd">    Examples:</span>
+
+<span class="sd">        &gt;&gt;&gt; data = np.array([1, 1, 1, 1])</span>
+<span class="sd">        &gt;&gt;&gt; print(inverse_difference(data, 1))</span>
+<span class="sd">        [2, 3, 4, 5]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">assert</span> <span class="n">differenced_predictions</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;Data input must be one-dimensional.&#39;</span>
+
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">differenced_predictions</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">last_undiff_value</span><span class="p">)</span><span class="o">.</span><span class="n">cumsum</span><span class="p">()[</span><span class="mi">1</span><span class="p">:]</span></div>
+
+
+<div class="viewcode-block" id="standardize"><a class="viewcode-back" href="../../predictit.data_preprocessing.html#predictit.data_preprocessing.standardize">[docs]</a><span class="k">def</span> <span class="nf">standardize</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">used_scaler</span><span class="o">=</span><span class="s1">&#39;standardize&#39;</span><span class="p">,</span> <span class="n">predicted_column</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Standardize or normalize data. More standardize methods available.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        data (ndarray): Time series data.</span>
+<span class="sd">        used_scaler (str, optional): &#39;01&#39; and &#39;-11&#39; means scope from to for normalization.</span>
+<span class="sd">            &#39;robust&#39; use RobustScaler and &#39;standard&#39; use StandardScaler - mean is 0 and std is 1. Defaults to &#39;standardize&#39;.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        ndarray: Standardized data.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">used_scaler</span> <span class="o">==</span> <span class="s1">&#39;01&#39;</span><span class="p">:</span>
+        <span class="n">scaler</span> <span class="o">=</span> <span class="n">preprocessing</span><span class="o">.</span><span class="n">MinMaxScaler</span><span class="p">(</span><span class="n">feature_range</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="k">elif</span> <span class="n">used_scaler</span> <span class="o">==</span> <span class="s1">&#39;-11&#39;</span><span class="p">:</span>
+        <span class="n">scaler</span> <span class="o">=</span> <span class="n">preprocessing</span><span class="o">.</span><span class="n">MinMaxScaler</span><span class="p">(</span><span class="n">feature_range</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="k">elif</span> <span class="n">used_scaler</span> <span class="o">==</span> <span class="s1">&#39;robust&#39;</span><span class="p">:</span>
+        <span class="n">scaler</span> <span class="o">=</span> <span class="n">preprocessing</span><span class="o">.</span><span class="n">RobustScaler</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="n">used_scaler</span> <span class="o">==</span> <span class="s1">&#39;standardize&#39;</span><span class="p">:</span>
+        <span class="n">scaler</span> <span class="o">=</span> <span class="n">preprocessing</span><span class="o">.</span><span class="n">StandardScaler</span><span class="p">()</span>
+
+    <span class="n">normalized</span> <span class="o">=</span> <span class="n">scaler</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="n">final_scaler</span> <span class="o">=</span> <span class="n">scaler</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">data</span><span class="p">[:,</span> <span class="n">predicted_column</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">normalized</span><span class="p">,</span> <span class="n">final_scaler</span></div>
+
+
+<div class="viewcode-block" id="split"><a class="viewcode-back" href="../../predictit.data_preprocessing.html#predictit.data_preprocessing.split">[docs]</a><span class="k">def</span> <span class="nf">split</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">predicts</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">predicted_column_index</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Divide data set on train and test set.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        data (pandas.DataFrame, ndarray): Time series data.</span>
+<span class="sd">        predicts (int, optional): Number of predicted values. Defaults to 7.</span>
+<span class="sd">        predicted_column_index (int, optional): Index of column that is predicted. Defaults to 0.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        ndarray, ndarray: Train set and test set.</span>
+
+<span class="sd">    Examples:</span>
+
+<span class="sd">        &gt;&gt;&gt; data = np.array([1, 2, 3, 4])</span>
+<span class="sd">        &gt;&gt;&gt; train, test = (split(data, predicts=2))</span>
+<span class="sd">        &gt;&gt;&gt; print(train, test)</span>
+<span class="sd">        [2, 3]</span>
+<span class="sd">        [4, 5]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
+        <span class="n">train</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:</span><span class="o">-</span><span class="n">predicts</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="n">test</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="o">-</span><span class="n">predicts</span><span class="p">:,</span> <span class="n">predicted_column_index</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">train</span> <span class="o">=</span> <span class="n">data</span><span class="p">[:</span><span class="o">-</span><span class="n">predicts</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="n">test</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="o">-</span><span class="n">predicts</span><span class="p">:,</span> <span class="n">predicted_column_index</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">train</span><span class="p">,</span> <span class="n">test</span></div>
+
+
+<div class="viewcode-block" id="smooth"><a class="viewcode-back" href="../../predictit.data_preprocessing.html#predictit.data_preprocessing.smooth">[docs]</a><span class="k">def</span> <span class="nf">smooth</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">window</span><span class="o">=</span><span class="mi">101</span><span class="p">,</span> <span class="n">polynom_order</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Smooth data (reduce noise) with Savitzky-Golay filter. For more info on filter check scipy docs.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        data (ndarray): Input data.</span>
+<span class="sd">        window (tuple, optional): Length of sliding window. Must be odd.</span>
+<span class="sd">        polynom_order - Must be smaller than window.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        ndarray: Cleaned data with less noise.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+        <span class="n">data</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">signal</span><span class="o">.</span><span class="n">savgol_filter</span><span class="p">(</span><span class="n">data</span><span class="p">[:,</span> <span class="n">i</span><span class="p">],</span> <span class="n">window</span><span class="p">,</span> <span class="n">polynom_order</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">data</span></div>
+
+
+<div class="viewcode-block" id="fitted_power_transform"><a class="viewcode-back" href="../../predictit.data_preprocessing.html#predictit.data_preprocessing.fitted_power_transform">[docs]</a><span class="k">def</span> <span class="nf">fitted_power_transform</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">fitted_stdev</span><span class="p">,</span> <span class="n">mean</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fragments</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">iterations</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Function mostly for data postprocessing. Function transforms data, so it will have</span>
+<span class="sd">    similiar standar deviation, similiar mean if specified. It use Box-Cox power transform in SciPy lib.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        data (np.array): Array of data that should be transformed.</span>
+<span class="sd">        fitted_stdev (float): Standard deviation that we want to have.</span>
+<span class="sd">        mean (float, optional): Mean of transformed data. Defaults to None.</span>
+<span class="sd">        fragments (int, optional): How many lambdas will be used in one iteration. Defaults to 9.</span>
+<span class="sd">        iterations (int, optional): How many iterations will be used to find best transform. Defaults to 4.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        np.array: Transformed data with demanded standard deviation and mean.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">lmbda_low</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">lmbda_high</span> <span class="o">=</span> <span class="mi">3</span>
+    <span class="n">lmbd_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">lmbda_low</span><span class="p">,</span> <span class="n">lmbda_high</span><span class="p">,</span> <span class="n">fragments</span><span class="p">)</span>
+    <span class="n">lbmda_best_stdv_error</span> <span class="o">=</span> <span class="mi">1000000</span>
+
+    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">iterations</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">lmbd_arr</span><span class="p">)):</span>
+
+            <span class="n">power_transformed</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">yeojohnson</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">lmbda</span><span class="o">=</span><span class="n">lmbd_arr</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
+            <span class="n">transformed_stdev</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">power_transformed</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">transformed_stdev</span> <span class="o">-</span> <span class="n">fitted_stdev</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">lbmda_best_stdv_error</span><span class="p">:</span>
+                <span class="n">lbmda_best_stdv_error</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">transformed_stdev</span> <span class="o">-</span> <span class="n">fitted_stdev</span><span class="p">)</span>
+                <span class="n">lmbda_best_id</span> <span class="o">=</span> <span class="n">j</span>
+
+        <span class="k">if</span> <span class="n">lmbda_best_id</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">lmbda_low</span> <span class="o">=</span> <span class="n">lmbd_arr</span><span class="p">[</span><span class="n">lmbda_best_id</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">lmbda_best_id</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">lmbd_arr</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">lmbda_high</span> <span class="o">=</span> <span class="n">lmbd_arr</span><span class="p">[</span><span class="n">lmbda_best_id</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="n">lmbd_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">lmbda_low</span><span class="p">,</span> <span class="n">lmbda_high</span><span class="p">,</span> <span class="n">fragments</span><span class="p">)</span>
+
+    <span class="n">transformed_results</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">yeojohnson</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">lmbda</span><span class="o">=</span><span class="n">lmbd_arr</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
+
+    <span class="k">if</span> <span class="n">mean</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">mean_difference</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">transformed_results</span><span class="p">)</span> <span class="o">-</span> <span class="n">mean</span>
+        <span class="n">transformed_results</span> <span class="o">=</span> <span class="n">transformed_results</span> <span class="o">-</span> <span class="n">mean_difference</span>
+
+    <span class="k">return</span> <span class="n">transformed_results</span></div>
+
+
+<div class="viewcode-block" id="preprocess_data"><a class="viewcode-back" href="../../predictit.data_preprocessing.html#predictit.data_preprocessing.preprocess_data">[docs]</a><span class="k">def</span> <span class="nf">preprocess_data</span><span class="p">(</span><span class="n">data_for_predictions</span><span class="p">,</span> <span class="n">predicted_column_index</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">multicolumn</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">remove_outliers</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">smoothit</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                    <span class="n">correlation_threshold</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">data_transform</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">standardizeit</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">remove_outliers</span><span class="p">:</span>
+        <span class="n">data_for_predictions</span> <span class="o">=</span> <span class="n">remove_the_outliers</span><span class="p">(</span>
+            <span class="n">data_for_predictions</span><span class="p">,</span> <span class="n">predicted_column_index</span><span class="o">=</span><span class="n">predicted_column_index</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="n">remove_outliers</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">smoothit</span><span class="p">:</span>
+        <span class="n">data_for_predictions</span> <span class="o">=</span> <span class="n">smooth</span><span class="p">(</span><span class="n">data_for_predictions</span><span class="p">,</span> <span class="n">smoothit</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">smoothit</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="k">if</span> <span class="n">correlation_threshold</span> <span class="ow">and</span> <span class="n">multicolumn</span><span class="p">:</span>
+        <span class="n">data_for_predictions</span> <span class="o">=</span> <span class="n">keep_corelated_data</span><span class="p">(</span><span class="n">data_for_predictions</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="n">correlation_threshold</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">data_transform</span> <span class="o">==</span> <span class="s1">&#39;difference&#39;</span><span class="p">:</span>
+        <span class="n">last_undiff_value</span> <span class="o">=</span> <span class="n">data_for_predictions</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">data_for_predictions</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+            <span class="n">data_for_predictions</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">do_difference</span><span class="p">(</span><span class="n">data_for_predictions</span><span class="p">[:,</span> <span class="n">i</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">last_undiff_value</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">if</span> <span class="n">standardizeit</span><span class="p">:</span>
+        <span class="n">data_for_predictions</span><span class="p">,</span> <span class="n">final_scaler</span> <span class="o">=</span> <span class="n">standardize</span><span class="p">(</span><span class="n">data_for_predictions</span><span class="p">,</span> <span class="n">used_scaler</span><span class="o">=</span><span class="n">standardizeit</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">final_scaler</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">return</span> <span class="n">data_for_predictions</span><span class="p">,</span> <span class="n">last_undiff_value</span><span class="p">,</span> <span class="n">final_scaler</span></div>
+
+
+<div class="viewcode-block" id="preprocess_data_inverse"><a class="viewcode-back" href="../../predictit.data_preprocessing.html#predictit.data_preprocessing.preprocess_data_inverse">[docs]</a><span class="k">def</span> <span class="nf">preprocess_data_inverse</span><span class="p">(</span>
+        <span class="n">data</span><span class="p">,</span> <span class="n">final_scaler</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">last_undiff_value</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">standardizeit</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">data_transform</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">standardizeit</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">final_scaler</span><span class="o">.</span><span class="n">inverse_transform</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">data_transform</span> <span class="o">==</span> <span class="s1">&#39;difference&#39;</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">inverse_difference</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">last_undiff_value</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">data</span></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div id="logo">
+<a href="https://predictit.readthedocs.io/">
+    <img logo" src="https://predictit.readthedocs.io/en/master/_static/logo.png" alt="Logo">
+</a>
+
+<div class="section" id="table-of-contents">
+<h3>Table of contents</h3>
+<div class="toctree-wrapper compound">
+<ul>
+
+    <li class="toctree-l1"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/">predictit</a>
+    <ul>
+        <li class="toctree-l2"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/#output">Output</a></li>
+        <li class="toctree-l2"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/#installation">Installation</a></li>
+        <li class="toctree-l2"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/#how-to">How to</a>
+        <ul>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/#simple-example-with-pypi">Simple example with Pypi</a></li>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/#example-with-own-data-from-csv-and-config">Example with own data from CSV and config</a></li>
+        </ul></li>
+
+        <li class="toctree-l2"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/#submodules">Submodules</a>
+        <ul>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.config/">configuration</a></li>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.main/">main</a></li>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.analyze">analyze</a></li>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.best_params/">best_params</a></li>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.confidence_interval/">confidence_interval</a></li>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.database/">database</a></li>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.data_prep/">data_prep</a></li>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.evaluate_predictions/">evaluate_predictions</a></li>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.main_for_develop/">main_for_develop</a></li>
+        </ul></li>
+
+        <li class="toctree-l2"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/#subpackages">Subpackages</a>
+        <ul>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.models/">models</a></li>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.test_data/">test_data</a></li>
+        </ul></li>
+        <li class="toctree-l2"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/genindex/">Index</a></li>
+    </ul></li>
+
+</ul>
+</div>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Daniel Malachov.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+    <a href="https://github.com/Malachov/predictit" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>

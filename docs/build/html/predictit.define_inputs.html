@@ -1,0 +1,159 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>predictit.define_inputs module &#8212; predictit 09-07-2020 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="module-predictit.define_inputs">
+<span id="predictit-define-inputs-module"></span><h1>predictit.define_inputs module<a class="headerlink" href="#module-predictit.define_inputs" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="predictit.define_inputs.create_inputs">
+<code class="sig-prename descclassname">predictit.define_inputs.</code><code class="sig-name descname">create_inputs</code><span class="sig-paren">(</span><em class="sig-param">input_name</em>, <em class="sig-param">data</em>, <em class="sig-param">config</em>, <em class="sig-param">predicted_column_index</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/predictit/define_inputs.html#create_inputs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#predictit.define_inputs.create_inputs" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="predictit.define_inputs.make_sequences">
+<code class="sig-prename descclassname">predictit.define_inputs.</code><code class="sig-name descname">make_sequences</code><span class="sig-paren">(</span><em class="sig-param">data</em>, <em class="sig-param">config</em>, <em class="sig-param">n_steps_in</em>, <em class="sig-param">n_steps_out=1</em>, <em class="sig-param">constant=None</em>, <em class="sig-param">predicted_column_index=0</em>, <em class="sig-param">serialize_columns=1</em>, <em class="sig-param">default_other_columns_length=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/predictit/define_inputs.html#make_sequences"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#predictit.define_inputs.make_sequences" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function that create inputs and outputs to models.</p>
+<p>Example for n_steps_in = 3 and n_steps_out = 1</p>
+<p>From [[1, 2, 3, 4, 5, 6, 7, 8]]</p>
+<blockquote>
+<div><dl class="simple">
+<dt>Creates [1, 2, 3]  [4]</dt><dd><p>[5, 6, 7]  [8]</p>
+</dd>
+</dl>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>np.array</em>) – Time series data.</p></li>
+<li><p><strong>n_steps_in</strong> (<em>int</em>) – Number of input members.</p></li>
+<li><p><strong>n_steps_out</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of output members. For one-step models use 1. Defaults to 1.</p></li>
+<li><p><strong>constant</strong> (<em>bool</em><em>, </em><em>optional</em>) – If use bias (add 1 to first place to every member). Defaults to None.</p></li>
+<li><p><strong>predicted_column_index</strong> (<em>int</em><em>, </em><em>optional</em>) – If multiavriate data, index of predicted column. Defaults to 0.</p></li>
+<li><p><strong>serialize_columns</strong> (<em>bool</em><em>, </em><em>optional</em>) – If multivariate data, serialize columns sequentions into one row.</p></li>
+<li><p><strong>default_other_columns_length</strong> (<em>int</em><em>, </em><em>optional</em>) – Length of non-predicted columns that are evaluated in inputs. If None, than same length as predicted column. Defaults to None.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>X and y. Inputs and outputs (that can be used for example in sklearn models).</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>np.array, np.array</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div id="logo">
+<a href="https://predictit.readthedocs.io/">
+    <img logo" src="https://predictit.readthedocs.io/en/master/_static/logo.png" alt="Logo">
+</a>
+
+<div class="section" id="table-of-contents">
+<h3>Table of contents</h3>
+<div class="toctree-wrapper compound">
+<ul>
+
+    <li class="toctree-l1"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/">predictit</a>
+    <ul>
+        <li class="toctree-l2"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/#output">Output</a></li>
+        <li class="toctree-l2"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/#installation">Installation</a></li>
+        <li class="toctree-l2"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/#how-to">How to</a>
+        <ul>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/#simple-example-with-pypi">Simple example with Pypi</a></li>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/#example-with-own-data-from-csv-and-config">Example with own data from CSV and config</a></li>
+        </ul></li>
+
+        <li class="toctree-l2"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/#submodules">Submodules</a>
+        <ul>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.config/">configuration</a></li>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.main/">main</a></li>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.analyze">analyze</a></li>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.best_params/">best_params</a></li>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.confidence_interval/">confidence_interval</a></li>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.database/">database</a></li>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.data_prep/">data_prep</a></li>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.evaluate_predictions/">evaluate_predictions</a></li>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.main_for_develop/">main_for_develop</a></li>
+        </ul></li>
+
+        <li class="toctree-l2"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/#subpackages">Subpackages</a>
+        <ul>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.models/">models</a></li>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.test_data/">test_data</a></li>
+        </ul></li>
+        <li class="toctree-l2"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/genindex/">Index</a></li>
+    </ul></li>
+
+</ul>
+</div>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Daniel Malachov.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/predictit.define_inputs.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+    <a href="https://github.com/Malachov/predictit" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>
