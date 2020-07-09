@@ -3,10 +3,10 @@
 Submodules
 ==========
 
-`config <predictit.config>`_
+`config <predictit.configuration>`_
 ---------------------------------
 
-.. automodule:: predictit.config
+.. automodule:: predictit.configuration
 
 `main <predictit.main>`_
 -----------------------------
@@ -26,34 +26,22 @@ Submodules
 .. automodule:: predictit.best_params
 
 
-`confidence_interval <predictit.confidence_interval>`_
------------------------------------------------------------
-
-.. automodule:: predictit.confidence_interval
-
-
 `database <predictit.database>`_
 -------------------------------------
 
 .. automodule:: predictit.database
 
 
-`data_prep <predictit.data_prep>`_
+`data_prep <predictit.data_preprocessing>`_
 ---------------------------------------
 
-.. automodule:: predictit.data_prep
+.. automodule:: predictit.data_preprocessing
 
 
 `evaluate_predictions <predictit.evaluate_predictions>`_
 -------------------------------------------------------------
 
 .. automodule:: predictit.evaluate_predictions
-
-
-`main_for_develop <predictit.main_for_develop>`_
----------------------------------------------------------
-
-.. automodule:: predictit.main_for_develop
 
 
 Subpackages

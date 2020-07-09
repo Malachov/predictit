@@ -45,6 +45,7 @@
 
 ## Deals
 
+- [] CI - set github actions to publish.sh script - recreate documentation and publish on pypi
 - [] Change  config comments https://www.sphinx-doc.org/en/1.4.8/ext/autodoc.html#directive-autoattribute
 - [ ] To compare models add second table - summ of error
 - [ ] Full config to readthedocs documentation
