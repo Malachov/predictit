@@ -1,0 +1,310 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>predictit.best_params &#8212; predictit 15-08-2020 documentation</title>
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for predictit.best_params</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Module with main function optimize that find optimal input paramaters for function.</span>
+<span class="sd">Arguments are input model, initial function arguments and arguments limits.</span>
+<span class="sd">More info is in optimize function documentation&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">itertools</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+
+<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">evaluate_predictions</span>
+<span class="kn">from</span> <span class="nn">.misc</span> <span class="k">import</span> <span class="n">traceback_warning</span>
+
+
+<div class="viewcode-block" id="optimize"><a class="viewcode-back" href="../../predictit.best_params.html#predictit.best_params.optimize">[docs]</a><span class="k">def</span> <span class="nf">optimize</span><span class="p">(</span><span class="n">model_train</span><span class="p">,</span> <span class="n">model_predict</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">,</span> <span class="n">kwargs_limits</span><span class="p">,</span> <span class="n">model_train_input</span><span class="p">,</span> <span class="n">model_test_inputs</span><span class="p">,</span> <span class="n">models_test_outputs</span><span class="p">,</span> <span class="n">error_criterion</span><span class="o">=</span><span class="s1">&#39;mape&#39;</span><span class="p">,</span>
+             <span class="n">multicolumn_source</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">fragments</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">iterations</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">details</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">time_limit</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">predicted_column_index</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Your model&#39;</span><span class="p">,</span> <span class="n">plot</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Function to find optimal parameters of function. For example if we want to find minimum of function x^2,</span>
+<span class="sd">    we can use limits from -10 to 10. If we have 4 fragments and 3 iterations. it will separate interval on 4 parts,</span>
+<span class="sd">    so we have aproximately points -10, -4, 4, 10. We evaluate the best one and make new interval to closest points,</span>
+<span class="sd">    so new interval will ber -4 and 4. We divide again into 4 points. We repeat as many times as iterations variable defined.</span>
+
+<span class="sd">    If limits are written as int, it will be used only as int, so if you want to use float, write -10.0, 10.0 etc...</span>
+
+<span class="sd">    If we have many arguments, it will create many combinations of parameters, so beware...</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        model_train (func): Model train function (eg: ridgeregression.train).</span>
+<span class="sd">        model_predict (func): Model predict function (eg: ridgeregression.predict).</span>
+<span class="sd">        kwargs (dict): Initial arguments (eg: {&quot;alpha&quot;: 0.1, &quot;n_steps_in&quot;: 10}).</span>
+<span class="sd">        kwargs_limits (dict): Bounds of arguments (eg: {&quot;alpha&quot;: [0.1, 1], &quot;n_steps_in&quot;:[2, 30]}).</span>
+<span class="sd">        train_input (np.array or tuple(np.ndarray, np.ndarray, np.ndarray)): Data on which function is optimized.</span>
+<span class="sd">            Use train data or sequentions (tuple with (X, y, x_input)) - depends on model. Defaults to None.</span>
+<span class="sd">        X (np.array): Input sequentions on which function is optimized. Use this or train_input - depends on model. Defaults to None.</span>
+<span class="sd">        y (np.array): Output on which function is optimized. Use this or train_input - depends on model. Defaults to None.</span>
+<span class="sd">        error_criterion (str, optional): Error criterion used in evaluation. &#39;rmse&#39; or &#39;mape&#39;. Defaults to &#39;mape&#39;.</span>
+<span class="sd">        fragments (int, optional): Number of optimized intervals. Defaults to 10.</span>
+<span class="sd">        iterations (int, optional): How many times will be initial interval divided into fragments. Defaults to 3.</span>
+<span class="sd">        details (int, optional): 0 print nothing, 1 print best parameters of models, 2 print every new best parameters achieved,</span>
+<span class="sd">            3 prints all results. Bigger than 0 print precents of progress. Defaults to 0.</span>
+<span class="sd">        time_limit (int, optional): How many seconds can one evaluation last. Defaults to 5.</span>
+<span class="sd">        predicted_column_index (int, optional): If predicted data havbe more columns, which is predicted. Defaults to 0.</span>
+<span class="sd">        name (str, optional): Name of model to be displayed in details. Defaults to &#39;your model&#39;.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        TimeoutError: If evaluation take more time than defined limit.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: Optimized parameters of model.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">kwargs_fragments</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">constant_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">value</span> <span class="k">for</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs_limits</span><span class="p">}</span>
+    <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">value</span> <span class="k">for</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">constant_kwargs</span><span class="p">}</span>
+
+    <span class="n">n_test_samples</span> <span class="o">=</span> <span class="n">models_test_outputs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">predicts</span> <span class="o">=</span> <span class="n">models_test_outputs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+
+    <span class="k">def</span> <span class="nf">evaluatemodel</span><span class="p">(</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Evaluate error function for optimize function.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            kwargs (**kwargs): Arguments of model</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            float: MAPE or RMSE depends on optimize function argument</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">modeleval</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_test_samples</span><span class="p">)</span>
+
+        <span class="n">trained_model</span> <span class="o">=</span> <span class="n">model_train</span><span class="p">(</span><span class="n">model_train_input</span><span class="p">,</span> <span class="o">**</span><span class="n">constant_kwargs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">repeat_iteration</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_test_samples</span><span class="p">):</span>
+
+            <span class="n">create_plot</span> <span class="o">=</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">plot</span> <span class="ow">and</span> <span class="n">repeat_iteration</span> <span class="o">==</span> <span class="n">n_test_samples</span> <span class="o">-</span> <span class="mi">1</span> <span class="k">else</span> <span class="mi">0</span>
+
+            <span class="n">predictions</span> <span class="o">=</span> <span class="n">model_predict</span><span class="p">(</span><span class="n">model_test_inputs</span><span class="p">[</span><span class="n">repeat_iteration</span><span class="p">],</span> <span class="n">trained_model</span><span class="p">,</span> <span class="n">predicts</span><span class="o">=</span><span class="n">predicts</span><span class="p">)</span>
+            <span class="n">modeleval</span><span class="p">[</span><span class="n">repeat_iteration</span><span class="p">]</span> <span class="o">=</span> <span class="n">evaluate_predictions</span><span class="o">.</span><span class="n">compare_predicted_to_test</span><span class="p">(</span>
+                <span class="n">predictions</span><span class="p">,</span> <span class="n">models_test_outputs</span><span class="p">[</span><span class="n">repeat_iteration</span><span class="p">],</span> <span class="n">error_criterion</span><span class="o">=</span><span class="n">error_criterion</span><span class="p">,</span>
+                <span class="n">modelname</span><span class="o">=</span><span class="n">f</span><span class="s2">&quot;</span><span class="si">{name}</span><span class="s2"> - </span><span class="si">{kwargs}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">plot</span><span class="o">=</span><span class="n">create_plot</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">modeleval</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">watchdog</span><span class="p">(</span><span class="n">timeout</span><span class="p">,</span> <span class="n">code</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Time-limited execution for python function.&quot;&quot;&quot;</span>
+        <span class="k">def</span> <span class="nf">tracer</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">event</span><span class="p">,</span> <span class="n">arg</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()):</span>
+            <span class="s2">&quot;Helper.&quot;</span>
+            <span class="n">now</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">now</span> <span class="o">&gt;</span> <span class="n">start</span> <span class="o">+</span> <span class="n">timeout</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">TimeoutError</span><span class="p">(</span><span class="s1">&#39;Time exceeded&#39;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">tracer</span> <span class="k">if</span> <span class="n">event</span> <span class="o">==</span> <span class="s2">&quot;call&quot;</span> <span class="k">else</span> <span class="kc">None</span>
+
+        <span class="n">old_tracer</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">gettrace</span><span class="p">()</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">settrace</span><span class="p">(</span><span class="n">tracer</span><span class="p">)</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">code</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">result</span>
+
+        <span class="k">except</span> <span class="ne">TimeoutError</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">details</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Time exceeded&#39;</span><span class="p">)</span>
+
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">settrace</span><span class="p">(</span><span class="n">old_tracer</span><span class="p">)</span>
+
+
+    <span class="c1"># Test default parameters (can be the best)</span>
+    <span class="n">best_result</span> <span class="o">=</span> <span class="n">evaluatemodel</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">details</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">Optimization of model </span><span class="si">{name}</span><span class="s2">:</span><span class="se">\n\n\t</span><span class="s2">Default parameters result: </span><span class="si">{best_result}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="n">best_params</span> <span class="o">=</span> <span class="n">kwargs</span>
+
+    <span class="c1"># If result isn&#39;t better during iteration, return results</span>
+    <span class="n">memory_result</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="c1"># If such a warning occur, parameters combination skipped</span>
+    <span class="c1"># warnings.filterwarnings(&#39;error&#39;, category=RuntimeWarning)</span>
+    <span class="c1"># warnings.filterwarnings(&#39;error&#39;, message=r&quot;.*ambiguous*&quot;)</span>
+
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">kwargs_limits</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">j</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">generic</span><span class="p">))</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">j</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">kwargs_fragments</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">j</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">j</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="n">pomoc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">j</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">j</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">fragments</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+            <span class="n">kwargs_fragments</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">j</span><span class="p">))</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">pomoc</span><span class="p">]))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">kwargs_fragments</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">j</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">j</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">fragments</span><span class="p">))</span>
+
+    <span class="k">for</span> <span class="n">iteration</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">iterations</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">details</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;Iteration {iteration + 1} / </span><span class="si">{iterations}</span><span class="s2"> results: </span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="n">combinations</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">itertools</span><span class="o">.</span><span class="n">product</span><span class="p">(</span><span class="o">*</span><span class="n">kwargs_fragments</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span>
+
+        <span class="n">combi_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">combinations</span><span class="p">)</span>
+        <span class="n">percent</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">combi_len</span> <span class="o">/</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">kombi</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">combinations</span><span class="p">:</span>
+            <span class="n">combination_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">value</span> <span class="k">for</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">kwargs_limits</span><span class="o">.</span><span class="n">keys</span><span class="p">(),</span> <span class="n">j</span><span class="p">)}</span>
+            <span class="n">kombi</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">combination_dict</span><span class="p">)</span>
+
+        <span class="n">counter</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">combinations</span><span class="p">)):</span>
+            <span class="n">counter</span> <span class="o">+=</span><span class="mi">1</span>
+
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">res</span> <span class="o">=</span> <span class="n">watchdog</span><span class="p">(</span><span class="n">time_limit</span><span class="p">,</span> <span class="n">evaluatemodel</span><span class="p">,</span> <span class="n">kombi</span><span class="p">[</span><span class="n">k</span><span class="p">])</span>
+
+                <span class="k">if</span> <span class="n">res</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">res</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span> <span class="ow">and</span> <span class="n">res</span> <span class="o">&lt;</span> <span class="n">best_result</span><span class="p">:</span>
+                    <span class="n">best_result</span> <span class="o">=</span> <span class="n">res</span>
+                    <span class="n">best_params</span> <span class="o">=</span> <span class="n">kombi</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
+
+                    <span class="k">if</span> <span class="n">details</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;</span><span class="se">\n\t\t</span><span class="s2">New best result </span><span class="si">{best_result}</span><span class="s2"> with parameters: </span><span class="se">\t</span><span class="s2"> </span><span class="si">{best_params}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">details</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">traceback_warning</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;Error on model </span><span class="si">{name}</span><span class="s2">: with params </span><span class="si">{kombi[k]}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="n">res</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+
+            <span class="k">finally</span><span class="p">:</span>
+
+                <span class="k">if</span> <span class="n">details</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;    </span><span class="si">{res}</span><span class="s2">  with parameters:  </span><span class="si">{kombi[k]}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">counter</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">best_params</span>
+
+                <span class="k">if</span> <span class="n">details</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">percent</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">counter</span> <span class="o">%</span> <span class="mi">10</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;Optimization is in {counter / percent} %&quot;</span><span class="p">)</span>
+
+        <span class="c1"># If result not getting better through iteration, not worth of continuing. If last iteration, do not create intervals</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">memory_result</span> <span class="o">!=</span><span class="mi">0</span> <span class="ow">and</span> <span class="nb">round</span><span class="p">(</span><span class="n">memory_result</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span> <span class="o">==</span> <span class="nb">round</span><span class="p">(</span><span class="n">best_result</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span> <span class="ow">or</span> <span class="n">iteration</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">==</span> <span class="n">iterations</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">best_params</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">details</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;Best result </span><span class="si">{best_result}</span><span class="s2"> with parameters </span><span class="si">{best_params}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">best_params</span>
+
+        <span class="n">memory_result</span> <span class="o">=</span> <span class="n">best_result</span>
+
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">kwargs_limits</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">j</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">generic</span><span class="p">)):</span>
+                <span class="n">kwargs_fragments</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">best_params</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">step</span> <span class="o">=</span> <span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">kwargs_fragments</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">-</span> <span class="nb">min</span><span class="p">(</span><span class="n">kwargs_fragments</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span> <span class="o">/</span> <span class="n">fragments</span>
+                <span class="k">if</span> <span class="n">best_params</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">step</span> <span class="o">&lt;</span> <span class="n">j</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                    <span class="n">kwargs_fragments</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">best_params</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">best_params</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">step</span><span class="p">,</span> <span class="n">fragments</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="n">best_params</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">step</span> <span class="o">&gt;</span> <span class="n">j</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                    <span class="n">kwargs_fragments</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">best_params</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">step</span><span class="p">,</span> <span class="n">best_params</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">fragments</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">kwargs_fragments</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">best_params</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">step</span><span class="p">,</span> <span class="n">best_params</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">step</span><span class="p">,</span> <span class="n">fragments</span><span class="p">)</span>
+                <span class="n">kwargs_fragments</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">kwargs_fragments</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">j</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">int</span><span class="p">):</span>
+                    <span class="n">kwargs_fragments</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">k</span><span class="p">))</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">kwargs_fragments</span><span class="p">[</span><span class="n">i</span><span class="p">]]))</span></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div id="logo">
+<a href="https://predictit.readthedocs.io/">
+    <img logo" src="https://predictit.readthedocs.io/en/master/_static/logo.png" alt="Logo">
+</a>
+
+<div class="section" id="table-of-contents">
+<h3>Table of contents</h3>
+<div class="toctree-wrapper compound">
+<ul>
+
+    <li class="toctree-l1"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/">predictit</a>
+    <ul>
+        <li class="toctree-l2"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/#output">Output</a></li>
+        <li class="toctree-l2"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/#installation">Installation</a></li>
+        <li class="toctree-l2"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/#how-to">How to</a></li>
+
+        <li class="toctree-l2"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/#submodules">Submodules</a>
+        <ul>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.configuration/">configuration</a></li>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.main/">main</a></li>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.analyze">analyze</a></li>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.best_params/">best_params</a></li>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.database/">database</a></li>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.data_preprocessing/">data_preprocessing</a></li>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.evaluate_predictions/">evaluate_predictions</a></li>
+        </ul></li>
+
+        <li class="toctree-l2"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/#subpackages">Subpackages</a>
+        <ul>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.models/">models</a></li>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.test_data/">test_data</a></li>
+        </ul></li>
+        <li class="toctree-l2"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/genindex/">Index</a></li>
+    </ul></li>
+
+</ul>
+</div>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Daniel Malachov.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+    <a href="https://github.com/Malachov/predictit" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>

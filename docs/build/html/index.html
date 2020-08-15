@@ -1,0 +1,425 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>predictit &#8212; predictit 15-08-2020 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="predictit">
+<h1>predictit<a class="headerlink" href="#predictit" title="Permalink to this headline">¶</a></h1>
+<a class="reference external image-reference" href="https://pypi.python.org/pypi/predictit/"><img alt="PyPI pyversions" src="https://img.shields.io/pypi/pyversions/predictit.svg" /></a>
+<a class="reference external image-reference" href="https://badge.fury.io/py/predictit"><img alt="PyPI version" src="https://badge.fury.io/py/predictit.svg" /></a>
+<a class="reference external image-reference" href="https://lgtm.com/projects/g/Malachov/predictit/context:python"><img alt="Language grade: Python" src="https://img.shields.io/lgtm/grade/python/g/Malachov/predictit.svg?logo=lgtm&amp;logoWidth=18" /></a>
+<a class="reference external image-reference" href="https://travis-ci.com/Malachov/predictit"><img alt="Build Status" src="https://travis-ci.com/Malachov/predictit.svg?branch=master" /></a>
+<a class="reference external image-reference" href="https://predictit.readthedocs.io/en/master/?badge=master"><img alt="Documentation Status" src="https://readthedocs.org/projects/predictit/badge/?version=master" /></a>
+<a class="reference external image-reference" href="https://opensource.org/licenses/MIT"><img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-yellow.svg" /></a>
+<p>Library/framework for making predictions. Choose best of 20 models (ARIMA, regressions, LSTM…) from libraries like statsmodels, scikit-learn, tensorflow and some own models. There are hundreds of customizable options (it’s not necessary of course) as well as some config presets.</p>
+<p>Library contain model hyperparameters optimization as well as option variable optimization. That means, that library can find optimal preprocessing (smoothing, dropping non correlated columns, standardization) and on top of that it can find optimal models inner parameters such as number of neuron layers.</p>
+<div class="section" id="output">
+<h2>Output<a class="headerlink" href="#output" title="Permalink to this headline">¶</a></h2>
+<p>Most common output is plotly interactive graph, numpy array of results or deploying to database.</p>
+<p align="center">
+<img src="https://raw.githubusercontent.com/Malachov/predictit/master/output_example.png" width="620" alt="Plot of results"/>
+</p>
+<p align="center">
+<img src="https://raw.githubusercontent.com/Malachov/predictit/master/table_of_results.png" width="620" alt="Table of results"/>
+</p><p>Return type of main predict function depends on <code class="docutils literal notranslate"><span class="pre">configation.py</span></code>. It can return best prediction as array or all predictions as dataframe. Interactive html plot is also created.</p>
+</div>
+<div class="section" id="oficial-repo-and-documentation-links">
+<h2>Oficial repo and documentation links<a class="headerlink" href="#oficial-repo-and-documentation-links" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="https://github.com/Malachov/predictit">Repo on github</a></p>
+<p><a class="reference external" href="https://predictit.readthedocs.io">Official readthedocs documentation</a></p>
+</div>
+<div class="section" id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
+<p>Python &gt;=3.6. Python 2 is not supported. Install just with</p>
+<div class="highlight-guess notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">predictit</span>
+</pre></div>
+</div>
+<p>Sometime you can have issues with installing some libraries from requirements (e.g. numpy because not BLAS / LAPACK). There are also two libraries - Tensorflow and pyodbc not in requirements, because not necessary, but troublesome. If library not installed with pip, check which library don’t work, install manually with stackoverflow and repeat…</p>
+</div>
+<div class="section" id="how-to">
+<h2>How to<a class="headerlink" href="#how-to" title="Permalink to this headline">¶</a></h2>
+<p>Software can be used in three ways. As a python library or with command line arguments or as normal python scripts.
+Main function is predict in <code class="docutils literal notranslate"><span class="pre">main.py</span></code> script.
+There is also predict_multiple_columns if you want to predict more at once (columns or time frequentions) and also compare_models function that evaluate defined test data and can tell you which models are best. Then you can use only such a models.</p>
+<div class="section" id="simple-example-of-using-predictit-as-a-python-library-and-function-arguments">
+<h3>Simple example of using predictit as a python library and function arguments<a class="headerlink" href="#simple-example-of-using-predictit-as-a-python-library-and-function-arguments" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">predictit</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+
+<span class="n">predictions</span> <span class="o">=</span> <span class="n">predictit</span><span class="o">.</span><span class="n">main</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">100</span><span class="p">),</span> <span class="n">predicts</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">plotit</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="simple-example-of-using-as-a-python-library-and-editing-config">
+<h3>Simple example of using as a python library and editing config<a class="headerlink" href="#simple-example-of-using-as-a-python-library-and-editing-config" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">predictit</span>
+<span class="kn">from</span> <span class="nn">predictit.configuration</span> <span class="kn">import</span> <span class="n">config</span>
+
+<span class="c1"># You can edit config in two ways</span>
+<span class="n">config</span><span class="o">.</span><span class="n">data_source</span> <span class="o">=</span> <span class="s1">&#39;csv&#39;</span>
+<span class="n">config</span><span class="o">.</span><span class="n">csv_full_path</span> <span class="o">=</span> <span class="s1">&#39;https://datahub.io/core/global-temp/r/monthly.csv&#39;</span>  <span class="c1"># You can use local path on pc as well... &quot;/home/dan/...&quot;</span>
+<span class="n">config</span><span class="o">.</span><span class="n">predicted_column</span> <span class="o">=</span> <span class="s1">&#39;Mean&#39;</span>
+<span class="n">config</span><span class="o">.</span><span class="n">datetime_index</span> <span class="o">=</span> <span class="s1">&#39;Date&#39;</span>
+
+<span class="c1"># Or</span>
+<span class="n">config</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+    <span class="s1">&#39;predicts&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+    <span class="s1">&#39;default_n_steps_in&#39;</span><span class="p">:</span> <span class="mi">15</span>
+<span class="p">})</span>
+
+<span class="n">predictions</span> <span class="o">=</span> <span class="n">predictit</span><span class="o">.</span><span class="n">main</span><span class="o">.</span><span class="n">predict</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="simple-example-of-using-main-py-as-a-script">
+<h3>Simple example of using <code class="docutils literal notranslate"><span class="pre">main.py</span></code> as a script<a class="headerlink" href="#simple-example-of-using-main-py-as-a-script" title="Permalink to this headline">¶</a></h3>
+<p>Open <code class="docutils literal notranslate"><span class="pre">configuration.py</span></code> (only script you need to edit (very simple)), do the setup. Mainly used_function and data or data_source and path. Then just run <code class="docutils literal notranslate"><span class="pre">main.py</span></code>.</p>
+</div>
+<div class="section" id="simple-example-of-using-command-line-arguments">
+<h3>Simple example of using command line arguments<a class="headerlink" href="#simple-example-of-using-command-line-arguments" title="Permalink to this headline">¶</a></h3>
+<p>Run code below in terminal in predictit folder.
+Use <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">main.py</span> <span class="pre">--help</span></code> for more parameters info.</p>
+<div class="highlight-guess notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">main</span><span class="p">.</span><span class="n">py</span> <span class="c1">--used_function predict --data_source &#39;csv&#39; --csv_full_path &#39;https://datahub.io/core/global-temp/r/monthly.csv&#39; --predicted_column &quot;&#39;Mean&#39;&quot;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="explore-config">
+<h3>Explore config<a class="headerlink" href="#explore-config" title="Permalink to this headline">¶</a></h3>
+<p>To see all the possible values in <code class="docutils literal notranslate"><span class="pre">configuration.py</span></code> from your IDE, use</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">predictit</span><span class="o">.</span><span class="n">configuration</span><span class="o">.</span><span class="n">print_config</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="example-of-compare-models-function">
+<h3>Example of compare_models function<a class="headerlink" href="#example-of-compare-models-function" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">predictit</span>
+<span class="kn">from</span> <span class="nn">predictit.configuration</span> <span class="kn">import</span> <span class="n">config</span>
+
+<span class="n">my_data_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">2000</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>  <span class="c1"># Define your data here</span>
+
+<span class="c1"># You can compare it on same data in various parts or on different data (check configuration on how to insert dictionary with data names)</span>
+<span class="n">config</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+    <span class="s1">&#39;data_all&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">my_data_array</span><span class="p">[</span><span class="o">-</span><span class="mi">2000</span><span class="p">:],</span> <span class="n">my_data_array</span><span class="p">[</span><span class="o">-</span><span class="mi">1500</span><span class="p">:],</span> <span class="n">my_data_array</span><span class="p">[</span><span class="o">-</span><span class="mi">1000</span><span class="p">:])</span>
+<span class="p">})</span>
+
+<span class="n">predictit</span><span class="o">.</span><span class="n">main</span><span class="o">.</span><span class="n">compare_models</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="example-of-predict-multiple-function">
+<h3>Example of predict_multiple function<a class="headerlink" href="#example-of-predict-multiple-function" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">predictit</span>
+<span class="kn">from</span> <span class="nn">predictit.configuration</span> <span class="kn">import</span> <span class="n">config</span>
+
+<span class="n">config</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">&quot;https://datahub.io/core/global-temp/r/monthly.csv&quot;</span><span class="p">)</span>
+
+<span class="c1"># Define list of columns or &#39;*&#39; for predicting all of the columns</span>
+<span class="n">config</span><span class="o">.</span><span class="n">predicted_columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;*&#39;</span><span class="p">]</span>
+
+<span class="n">predictit</span><span class="o">.</span><span class="n">main</span><span class="o">.</span><span class="n">predict_multiple_columns</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="example-of-config-variable-optimization">
+<h3>Example of config variable optimization<a class="headerlink" href="#example-of-config-variable-optimization" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">config</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+    <span class="s1">&#39;data_source&#39;</span><span class="p">:</span> <span class="s1">&#39;csv&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;csv_full_path&#39;</span><span class="p">:</span> <span class="s2">&quot;https://datahub.io/core/global-temp/r/monthly.csv&quot;</span><span class="p">,</span>
+    <span class="s1">&#39;predicted_column&#39;</span><span class="p">:</span> <span class="s1">&#39;Mean&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;return_type&#39;</span><span class="p">:</span> <span class="s1">&#39;all_dataframe&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;optimization&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="s1">&#39;optimization_variable&#39;</span><span class="p">:</span> <span class="s1">&#39;default_n_steps_in&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;optimization_values&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">12</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">40</span><span class="p">],</span>
+    <span class="s1">&#39;plot_all_optimized_models&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="s1">&#39;print_detailed_result&#39;</span><span class="p">:</span> <span class="mi">1</span>
+<span class="p">})</span>
+
+<span class="n">predictions</span> <span class="o">=</span> <span class="n">predictit</span><span class="o">.</span><span class="n">main</span><span class="o">.</span><span class="n">predict</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="hyperparameters-tuning">
+<h3>Hyperparameters tuning<a class="headerlink" href="#hyperparameters-tuning" title="Permalink to this headline">¶</a></h3>
+<p>To optmize hyperparameters, just set <code class="docutils literal notranslate"><span class="pre">optimizeit:</span> <span class="pre">1,</span></code> and model parameters limits. It is commented in <code class="docutils literal notranslate"><span class="pre">config.py</span></code> how to use it. It’s not grid bruteforce. Heuristic method based on halving interval is used, but still it can be time consuming. It is recomend only to tune parameters worth of it. Or tune it by parts.</p>
+</div>
+</div>
+<div class="section" id="gui">
+<h2>GUI<a class="headerlink" href="#gui" title="Permalink to this headline">¶</a></h2>
+<p>It is possible to use basic GUI. But only with CSV data source.
+Just run <code class="docutils literal notranslate"><span class="pre">gui_start.py</span></code> if you have downloaded software or call <code class="docutils literal notranslate"><span class="pre">predictit.gui_start.run_gui()</span></code> if you are importing via PyPI.</p>
+</div>
+<div class="section" id="example-of-using-library-as-a-pro-with-deeper-editting-config">
+<h2>Example of using library as a pro with deeper editting config<a class="headerlink" href="#example-of-using-library-as-a-pro-with-deeper-editting-config" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">predictit</span>
+<span class="kn">from</span> <span class="nn">predictit.configuration</span> <span class="kn">import</span> <span class="n">config</span>
+
+<span class="n">config</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+    <span class="s1">&#39;data_source&#39;</span><span class="p">:</span> <span class="s1">&#39;test&#39;</span><span class="p">,</span>  <span class="c1"># Data source. (&#39;csv&#39; or &#39;sql&#39; or &#39;test&#39;)</span>
+    <span class="s1">&#39;csv_full_path&#39;</span><span class="p">:</span> <span class="sa">r</span><span class="s1">&#39;C:\Users\truton\ownCloud\Github\predictit_library\predictit\test_data\5000 Sales Records.csv&#39;</span><span class="p">,</span>  <span class="c1"># Full CSV path with suffix</span>
+    <span class="s1">&#39;predicted_column&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>  <span class="c1"># Column name that we want to predict</span>
+
+    <span class="s1">&#39;predicts&#39;</span><span class="p">:</span> <span class="mi">7</span><span class="p">,</span>  <span class="c1"># Number of predicted values - 7 by default</span>
+    <span class="s1">&#39;print_number_of_models&#39;</span><span class="p">:</span> <span class="mi">6</span><span class="p">,</span>  <span class="c1"># Visualize 6 best models</span>
+    <span class="s1">&#39;repeatit&#39;</span><span class="p">:</span> <span class="mi">50</span><span class="p">,</span>  <span class="c1"># Repeat calculation times on shifted data to evaluate error criterion</span>
+    <span class="s1">&#39;other_columns&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>  <span class="c1"># Whether use other columns or not</span>
+    <span class="s1">&#39;debug&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>  <span class="c1"># Whether print details and warnings</span>
+
+    <span class="c1"># Chose models that will be computed - remove if you want to use all the models</span>
+    <span class="s1">&#39;used_models&#39;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="s2">&quot;AR (Autoregression)&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ARIMA (Autoregression integrated moving average)&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Autoregressive Linear neural unit&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Conjugate gradient&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Sklearn regression&quot;</span><span class="p">,</span>
+        <span class="s1">&#39;Bayes ridge regression one step&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;Decision tree regression&#39;</span><span class="p">,</span>
+    <span class="p">],</span>
+
+    <span class="c1"># Define parameters of models</span>
+
+    <span class="s1">&#39;models_parameters&#39;</span><span class="p">:</span> <span class="p">{</span>
+
+        <span class="s1">&#39;AR (Autoregression)&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;used_model&#39;</span><span class="p">:</span> <span class="s1">&#39;ar&#39;</span><span class="p">,</span> <span class="s1">&#39;method&#39;</span><span class="p">:</span> <span class="s1">&#39;cmle&#39;</span><span class="p">,</span> <span class="s1">&#39;ic&#39;</span><span class="p">:</span> <span class="s1">&#39;aic&#39;</span><span class="p">,</span> <span class="s1">&#39;trend&#39;</span><span class="p">:</span> <span class="s1">&#39;nc&#39;</span><span class="p">,</span> <span class="s1">&#39;solver&#39;</span><span class="p">:</span> <span class="s1">&#39;lbfgs&#39;</span><span class="p">},</span>
+        <span class="s1">&#39;ARIMA (Autoregression integrated moving average)&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;used_model&#39;</span><span class="p">:</span> <span class="s1">&#39;arima&#39;</span><span class="p">,</span> <span class="s1">&#39;p&#39;</span><span class="p">:</span> <span class="mi">6</span><span class="p">,</span> <span class="s1">&#39;d&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;q&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;method&#39;</span><span class="p">:</span> <span class="s1">&#39;css&#39;</span><span class="p">,</span> <span class="s1">&#39;ic&#39;</span><span class="p">:</span> <span class="s1">&#39;aic&#39;</span><span class="p">,</span> <span class="s1">&#39;trend&#39;</span><span class="p">:</span> <span class="s1">&#39;nc&#39;</span><span class="p">,</span> <span class="s1">&#39;solver&#39;</span><span class="p">:</span> <span class="s1">&#39;nm&#39;</span><span class="p">},</span>
+
+        <span class="s1">&#39;Autoregressive Linear neural unit&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;mi_multiple&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;mi_linspace&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mf">1e-5</span><span class="p">,</span> <span class="mf">1e-4</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="s1">&#39;epochs&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> <span class="s1">&#39;w_predict&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;minormit&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">},</span>
+        <span class="s1">&#39;Conjugate gradient&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;epochs&#39;</span><span class="p">:</span> <span class="mi">200</span><span class="p">},</span>
+
+        <span class="s1">&#39;Bayes ridge regression&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;regressor&#39;</span><span class="p">:</span> <span class="s1">&#39;bayesianridge&#39;</span><span class="p">,</span> <span class="s1">&#39;n_iter&#39;</span><span class="p">:</span> <span class="mi">300</span><span class="p">,</span> <span class="s1">&#39;alpha_1&#39;</span><span class="p">:</span> <span class="mf">1.e-6</span><span class="p">,</span> <span class="s1">&#39;alpha_2&#39;</span><span class="p">:</span> <span class="mf">1.e-6</span><span class="p">,</span> <span class="s1">&#39;lambda_1&#39;</span><span class="p">:</span> <span class="mf">1.e-6</span><span class="p">,</span> <span class="s1">&#39;lambda_2&#39;</span><span class="p">:</span> <span class="mf">1.e-6</span><span class="p">},</span>
+
+<span class="p">})</span>
+
+<span class="n">predictions</span> <span class="o">=</span> <span class="n">predictit</span><span class="o">.</span><span class="n">main</span><span class="o">.</span><span class="n">predict</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="submodules">
+<h1>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="id1">
+<h2><a class="reference external" href="predictit.configuration">configuration</a><a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-predictit.configuration"></span><p>All config for main file. Most of values are boolean 1 or 0. You can setup data source, models to use,
+whether you want find optimal parameters etc. Some setting can be inserted as function parameters, then it has higher priority.
+All values are commented and easy to understand.</p>
+<p>If you downloaded the script, edit, save and run function from main, if you use library, import config and edit values…
+.. rubric:: Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">predictit</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">predictit.configuration</span> <span class="k">import</span> <span class="n">config</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">config</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="s1">&#39;data_source&#39;</span><span class="p">:</span> <span class="s1">&#39;csv&#39;</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="s1">&#39;csv_full_path&#39;</span><span class="p">:</span> <span class="s1">&#39;my/path/to.csv&#39;</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="s1">&#39;plot&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="s1">&#39;debug&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="s1">&#39;used_models&#39;</span><span class="p">:</span> <span class="p">{</span>
+<span class="gp">&gt;&gt;&gt; </span>           <span class="s1">&#39;AR (Autoregression)&#39;</span><span class="p">:</span> <span class="n">predictit</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">ar</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>           <span class="s1">&#39;Autoregressive Linear neural unit&#39;</span><span class="p">:</span> <span class="n">predictit</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">autoreg_LNU</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>           <span class="s1">&#39;Sklearn regression&#39;</span><span class="p">:</span> <span class="n">predictit</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">regression</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="p">}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="p">}</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># You can alse use this syntax</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">config</span><span class="o">.</span><span class="n">datalength</span> <span class="o">=</span> <span class="mi">2000</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Config work for predict() function as well as for predict_multiple_columns() and compare_models</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">predictions</span> <span class="o">=</span> <span class="n">predictit</span><span class="o">.</span><span class="n">main</span><span class="o">.</span><span class="n">predict</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># You can pass configuration as dict kwargs...</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">predictions</span> <span class="o">=</span> <span class="n">predictit</span><span class="o">.</span><span class="n">main</span><span class="o">.</span><span class="n">predict</span><span class="p">({})</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">You</span> <span class="n">can</span> <span class="n">also</span> <span class="n">apply</span> <span class="n">config</span>
+</pre></div>
+</div>
+<p>To see all the possible values, use</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">predictit</span><span class="o">.</span><span class="n">configuration</span><span class="o">.</span><span class="n">print_config</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id2">
+<h2><a class="reference external" href="predictit.main">main</a><a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-predictit.main"></span><p>This is main module for making predictions.</p>
+<dl>
+<dt>It contain functions - predict() - More return types - Depends on config</dt><dd><blockquote>
+<div><ul class="simple">
+<li><p>predict_multiple() - Predict multiple columns at once</p></li>
+<li><p>compare_models() - Test on data that was not in test set and compare models errors</p></li>
+</ul>
+</div></blockquote>
+<p>Examples:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">predictit</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">predictions</span> <span class="o">=</span> <span class="n">predictit</span><span class="o">.</span><span class="n">main</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">100</span><span class="p">),</span> <span class="n">predicts</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">plotit</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+<p>Do not edit this file if you are user, it’s not necassary! Only call function from here. The only file to edit is configuration.py. If you are developer, edit as you need.</p>
+<p>There are working examples in main readme and also in test_it module. Particular modules functionality is vissible in visual.py in tests.</p>
+</div>
+<div class="section" id="id3">
+<h2><a class="reference external" href="predictit.analyze">analyze</a><a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-predictit.analyze"></span><p>This is module for data analysis. It create plots of data, it’s distribution, it’s details, autocorrelation function etc.
+Matplotlib lazyload because not using in gui.</p>
+</div>
+<div class="section" id="id4">
+<h2><a class="reference external" href="predictit.best_params">best_params</a><a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-predictit.best_params"></span><p>Module with main function optimize that find optimal input paramaters for function.
+Arguments are input model, initial function arguments and arguments limits.
+More info is in optimize function documentation</p>
+</div>
+<div class="section" id="id5">
+<h2><a class="reference external" href="predictit.database">database</a><a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-predictit.database"></span><p>Module include two functions: database_load and database_deploy. First download data from database - it’s necessary to set up connect credentials in config and edit query!
+The database_deploy than use predicted values and deploy it to database server.</p>
+</div>
+<div class="section" id="id6">
+<h2><a class="reference external" href="predictit.data_preprocessing">data_preprocessing</a><a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-predictit.data_preprocessing"></span><p>Module for data preprocessing. Contain functions for removing outliers,
+NaN columns or data smoothing. If you want to see how functions work -
+working examples with printed results are in tests - visual.py.</p>
+<p>Default output data shape is (n_samples, n_features)</p>
+<p>All processing funtions after data_consolidation use numpy.ndarray with ndim == 2,
+so reshape(1, -1) if necessary.</p>
+</div>
+<div class="section" id="id7">
+<h2><a class="reference external" href="predictit.evaluate_predictions">evaluate_predictions</a><a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-predictit.evaluate_predictions"></span><p>Module with function compare_predicted_to_test that Compare tested model with reality. It return some error criterion based on config.py</p>
+</div>
+</div>
+<div class="section" id="subpackages">
+<h1>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="id8">
+<h2><a class="reference external" href="predictit.models">models</a><a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-predictit.models"></span><p>Subpackage include models from libraries such as Tensorflow, Statsmodels, Sklearn and some own simple models.
+Various models are included autoregressive model, ARIMA, LSTM, various regressions such as linear or ridge
+and finally some neural units and conjugate gradient. You can use compare_models function to compare models on test data.
+You can see results of all models in interactive plot.</p>
+<p>All models are described in docstrings in it’s modules.</p>
+</div>
+<div class="section" id="id9">
+<h2><a class="reference external" href="predictit.test_data">test_data</a><a class="headerlink" href="#id9" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-predictit.test_data"></span><p>Module with test data that can be use as data for development of framework.</p>
+</div>
+</div>
+<div class="section" id="index">
+<h1>Index<a class="headerlink" href="#index" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
+</ul>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div id="logo">
+<a href="https://predictit.readthedocs.io/">
+    <img logo" src="https://predictit.readthedocs.io/en/master/_static/logo.png" alt="Logo">
+</a>
+
+<div class="section" id="table-of-contents">
+<h3>Table of contents</h3>
+<div class="toctree-wrapper compound">
+<ul>
+
+    <li class="toctree-l1"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/">predictit</a>
+    <ul>
+        <li class="toctree-l2"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/#output">Output</a></li>
+        <li class="toctree-l2"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/#installation">Installation</a></li>
+        <li class="toctree-l2"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/#how-to">How to</a></li>
+
+        <li class="toctree-l2"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/#submodules">Submodules</a>
+        <ul>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.configuration/">configuration</a></li>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.main/">main</a></li>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.analyze">analyze</a></li>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.best_params/">best_params</a></li>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.database/">database</a></li>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.data_preprocessing/">data_preprocessing</a></li>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.evaluate_predictions/">evaluate_predictions</a></li>
+        </ul></li>
+
+        <li class="toctree-l2"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/#subpackages">Subpackages</a>
+        <ul>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.models/">models</a></li>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.test_data/">test_data</a></li>
+        </ul></li>
+        <li class="toctree-l2"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/genindex/">Index</a></li>
+    </ul></li>
+
+</ul>
+</div>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Daniel Malachov.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/index.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+    <a href="https://github.com/Malachov/predictit" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>

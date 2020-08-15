@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="description" content="">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Predictit</title>
+    <link href="css/my.css" rel="stylesheet">
+    <script type="text/javascript" src="/eel.js"></script>
+    <script type="text/javascript" src="main.js"></script>
+    
+
+
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
+
+</head>
+
+<body>
+
+    <div class="main-container">
+        <div class="half left">
+            <div class="wellcome-heading">
+                <h2>CSV prediction</h2>
+                <div class="subtitle">
+                    <p>Just input CSV path, predicted column and click predict.</p>
+                </div>
+            </div>
+
+
+            <div class="config">
+                <form class="form-group">
+
+                    <div class="option-section">
+                        <div class="input-div-text">
+                            <label class="label-text" for="csv_path">CSV path</label>
+                            <input type="text" id="csv_path" class="input-text" placeholder="csv_path" onkeypress="return event.keyCode!=13">
+                        </div>
+
+                        <div class="input-div-text">
+                            <label class="label-text" for="column_name">Column name or index</label>
+                            <input type="text" id="column_name" class="input-text" placeholder="Column name or index" onkeypress="return event.keyCode!=13">
+                        </div>
+                    </div>
+
+                    <div class="option-section">
+
+                        <div class="flex-row option">
+                            <div class="switch-box">
+                                <label class="switch-name" for="debug-config">
+                                    Debug
+                                    <div class=" switch">
+                                        <input type="checkbox" id="debug-config">
+                                        <span class="slider round"></span>
+                                    </div>
+                                </label>
+                            </div>
+
+                            <div class="switch-box">
+                                <label class="switch-name" for="table-config">
+                                    Table
+                                    <div class=" switch">
+                                        <input type="checkbox" id="table-config" checked>
+                                        <span class="slider round"></span>
+                                    </div>
+                                </label>
+                            </div>
+
+                            <div class="switch-box">
+                                <label class="switch-name" for="results-config">
+                                    Results
+                                    <div class=" switch">
+                                        <input type="checkbox" id="results-config" checked>
+                                        <span class="slider round"></span>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="option-section">
+
+                        <div class="flex-row option">
+                            <div class="select-box">
+                                <label for="config-preset">Config preset:</label>
+                                <select class="button-select" id="config-preset", selected="fast">
+                                    <option value="fast">Fast</option>
+                                    <option value="normal">Normal</option>
+                                    <option value='none'>None</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex-row submit-section">
+                        <input type="button" class="option button" value="Predictit" onclick="predict()">
+                    </div>
+
+                </form>
+
+            </div>
+
+            <div>
+                <p id="remain_phase" ></p>
+            </div>
+
+            <div>
+                <p id="progress_phase" ></p>
+            </div>
+
+        </div>
+
+
+        <div class="half right">
+
+            <div id="content" class="flex-column">
+            </div>
+
+        </div>
+
+    </div>
+
+</body>
+</html>

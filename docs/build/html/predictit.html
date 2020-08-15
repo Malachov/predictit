@@ -1,0 +1,224 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>predictit package &#8212; predictit 15-08-2020 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="predictit-package">
+<h1>predictit package<a class="headerlink" href="#predictit-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="predictit.models.html">predictit.models package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="predictit.models.html#submodules">Submodules</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="predictit.models.autoreg_LNU.html">predictit.models.autoreg_LNU module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="predictit.models.compare_with_average.html">predictit.models.compare_with_average module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="predictit.models.conjugate_gradient.html">predictit.models.conjugate_gradient module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="predictit.models.sklearn_regression.html">predictit.models.sklearn_regression module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="predictit.models.statsmodels_autoregressive.html">predictit.models.statsmodels_autoregressive module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="predictit.models.tensorflow.html">predictit.models.tensorflow module</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="predictit.models.html#module-predictit.models">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="predictit.test_data.html">predictit.test_data package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="predictit.test_data.html#submodules">Submodules</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="predictit.test_data.generate_test_data.html">predictit.test_data.generate_test_data module</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="predictit.test_data.html#module-predictit.test_data">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="predictit.analyze.html">predictit.analyze module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="predictit.best_params.html">predictit.best_params module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="predictit.configuration.html">predictit.configuration module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="predictit.data_preprocessing.html">predictit.data_preprocessing module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="predictit.database.html">predictit.database module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="predictit.define_inputs.html">predictit.define_inputs module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="predictit.evaluate_predictions.html">predictit.evaluate_predictions module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="predictit.gui_start.html">predictit.gui_start module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="predictit.main.html">predictit.main module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="predictit.main_loop.html">predictit.main_loop module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="predictit.misc.html">predictit.misc module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="predictit.plots.html">predictit.plots module</a></li>
+</ul>
+</div>
+</div>
+<div class="section" id="module-predictit">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-predictit" title="Permalink to this headline">¶</a></h2>
+<p>Library/framework for making predictions. Choose best of more than models
+(AR, ARIMA, many regressions, nerual nets like MLP or LSTM…). Preprocess data and chose optimal parameters
+of predictions. Output is plotly HTML interactive plot, numpy array of results or database deploying.</p>
+<p>How to use it:</p>
+<ol class="arabic">
+<li><p>As downloded framework.</p>
+<blockquote>
+<div><p>Setup config[‘py’] (mainly data source), save and run main.py</p>
+<p>Examples (in terminal):</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">python</span> <span class="n">main</span><span class="o">.</span><span class="n">py</span>
+</pre></div>
+</div>
+</div></blockquote>
+</li>
+<li><p>Import from library</p>
+<blockquote>
+<div><p>Examples:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">predictit</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">config</span> <span class="o">=</span> <span class="n">predictit</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">config</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">config</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="s1">&#39;data_source&#39;</span><span class="p">:</span> <span class="s1">&#39;test&#39;</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="s1">&#39;csv_full_path&#39;</span><span class="p">:</span> <span class="sa">r</span><span class="s1">&#39;path/to/csv&#39;</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="s1">&#39;predicted_column&#39;</span><span class="p">:</span> <span class="s1">&#39;CO2 (%)&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="s1">&#39;datetime_index&#39;</span><span class="p">:</span> <span class="s1">&#39;Time&#39;</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="s1">&#39;freq&#39;</span><span class="p">:</span> <span class="s1">&#39;2S&#39;</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="p">})</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">predictions</span> <span class="o">=</span> <span class="n">predictit</span><span class="o">.</span><span class="n">main</span><span class="o">.</span><span class="n">predict</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>You can setup config also via function arguments.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">predictions</span> <span class="o">=</span> <span class="n">predictit</span><span class="o">.</span><span class="n">main</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">100</span><span class="p">),</span> <span class="n">predicts</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">plot</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+</div></blockquote>
+</li>
+<li><p>Via CLI</p>
+<blockquote>
+<div><p>Examples (in terminal):</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">python</span> <span class="n">main</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">function</span> <span class="n">predict</span> <span class="o">--</span><span class="n">data_source</span> <span class="s1">&#39;csv&#39;</span> <span class="o">--</span><span class="n">csv_full_path</span> <span class="s1">&#39;test_data/daily-minimum-temperatures.csv&#39;</span> <span class="o">--</span><span class="n">predicted_column</span> <span class="mi">1</span>
+</pre></div>
+</div>
+</div></blockquote>
+</li>
+</ol>
+<p>For more informations and some use cases check predictit readme or official docs on</p>
+<blockquote>
+<div><p><a class="reference external" href="https://predictit.readthedocs.io">https://predictit.readthedocs.io</a></p>
+</div></blockquote>
+<p>Feel free to contribute on</p>
+<blockquote>
+<div><p><a class="reference external" href="https://github.com/Malachov/predictit">https://github.com/Malachov/predictit</a></p>
+</div></blockquote>
+<p>More function examples is in tests/test_it.py for some more working examples.</p>
+<p>If you want to know how some parts works, check tests/visual where are displayed used function results on simple example.</p>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div id="logo">
+<a href="https://predictit.readthedocs.io/">
+    <img logo" src="https://predictit.readthedocs.io/en/master/_static/logo.png" alt="Logo">
+</a>
+
+<div class="section" id="table-of-contents">
+<h3>Table of contents</h3>
+<div class="toctree-wrapper compound">
+<ul>
+
+    <li class="toctree-l1"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/">predictit</a>
+    <ul>
+        <li class="toctree-l2"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/#output">Output</a></li>
+        <li class="toctree-l2"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/#installation">Installation</a></li>
+        <li class="toctree-l2"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/#how-to">How to</a></li>
+
+        <li class="toctree-l2"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/#submodules">Submodules</a>
+        <ul>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.configuration/">configuration</a></li>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.main/">main</a></li>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.analyze">analyze</a></li>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.best_params/">best_params</a></li>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.database/">database</a></li>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.data_preprocessing/">data_preprocessing</a></li>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.evaluate_predictions/">evaluate_predictions</a></li>
+        </ul></li>
+
+        <li class="toctree-l2"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/#subpackages">Subpackages</a>
+        <ul>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.models/">models</a></li>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.test_data/">test_data</a></li>
+        </ul></li>
+        <li class="toctree-l2"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/genindex/">Index</a></li>
+    </ul></li>
+
+</ul>
+</div>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Daniel Malachov.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/predictit.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+    <a href="https://github.com/Malachov/predictit" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>
