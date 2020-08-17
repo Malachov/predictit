@@ -3,7 +3,6 @@ predictit/test_data/*.pickle
 predictit/test_data/*.txt
 .pytest_cache/
 __pycache__/
-__init__.py
 egg-info/
 venv/
 node_modules/
