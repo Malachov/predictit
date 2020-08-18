@@ -1,0 +1,227 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>predictit.define_inputs &#8212; predictit 18-08-2020 documentation</title>
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for predictit.define_inputs</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">predictit.misc</span> <span class="k">import</span> <span class="n">user_warning</span>
+
+
+<div class="viewcode-block" id="make_sequences"><a class="viewcode-back" href="../../predictit.define_inputs.html#predictit.define_inputs.make_sequences">[docs]</a><span class="k">def</span> <span class="nf">make_sequences</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">n_steps_in</span><span class="p">,</span> <span class="n">n_steps_out</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">predicted_column_index</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">serialize_columns</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">default_other_columns_length</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Function that create inputs and outputs to models.</span>
+
+<span class="sd">    Example for n_steps_in = 3 and n_steps_out = 1</span>
+
+<span class="sd">    From [[1, 2, 3, 4, 5, 6, 7, 8]]</span>
+
+<span class="sd">        Creates [1, 2, 3]  [4]</span>
+<span class="sd">                [5, 6, 7]  [8]</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        data (np.array): Time series data.</span>
+<span class="sd">        n_steps_in (int): Number of input members.</span>
+<span class="sd">        n_steps_out (int, optional): Number of output members. For one-step models use 1. Defaults to 1.</span>
+<span class="sd">        constant (bool, optional): If use bias (add 1 to first place to every member). Defaults to None.</span>
+<span class="sd">        predicted_column_index (int, optional): If multiavriate data, index of predicted column. Defaults to 0.</span>
+<span class="sd">        serialize_columns(bool, optional): If multivariate data, serialize columns sequentions into one row.</span>
+<span class="sd">        default_other_columns_length (int, optional): Length of non-predicted columns that are evaluated in inputs. If None, than same length as predicted column. Defaults to None.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        np.array, np.array: X and y. Inputs and outputs (that can be used for example in sklearn models).</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">n_steps_out</span> <span class="o">&gt;</span> <span class="n">n_steps_in</span><span class="p">:</span>
+        <span class="n">n_steps_in</span> <span class="o">=</span> <span class="n">n_steps_out</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="n">user_warning</span><span class="p">(</span><span class="s1">&#39;n_steps_out was bigger than n_steps_in - n_steps_in changed during prediction!&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">default_other_columns_length</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">data_T</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">T</span>
+    <span class="n">shape</span> <span class="o">=</span> <span class="n">data_T</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="n">data_T</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">n_steps_in</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">n_steps_in</span><span class="p">)</span>
+    <span class="n">strides</span> <span class="o">=</span> <span class="n">data_T</span><span class="o">.</span><span class="n">strides</span> <span class="o">+</span> <span class="p">(</span><span class="n">data_T</span><span class="o">.</span><span class="n">strides</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],)</span>
+    <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">lib</span><span class="o">.</span><span class="n">stride_tricks</span><span class="o">.</span><span class="n">as_strided</span><span class="p">(</span><span class="n">data_T</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="n">shape</span><span class="p">,</span> <span class="n">strides</span><span class="o">=</span><span class="n">strides</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">predicted_column_index</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">X</span><span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="n">predicted_column_index</span><span class="p">],</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">X</span><span class="p">[[</span><span class="n">predicted_column_index</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">:]</span>
+
+    <span class="n">y</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">n_steps_out</span><span class="p">:,</span> <span class="o">-</span><span class="n">n_steps_out</span><span class="p">:]</span>
+
+    <span class="k">if</span> <span class="n">serialize_columns</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">default_other_columns_length</span><span class="p">:</span>
+            <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">([</span><span class="n">X</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]]</span> <span class="o">+</span> <span class="p">[</span><span class="n">X</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:,</span> <span class="o">-</span><span class="n">default_other_columns_length</span><span class="p">:]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">))])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">X</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="o">-</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">constant</span><span class="p">:</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">),</span> <span class="mi">1</span><span class="p">)),</span> <span class="n">X</span><span class="p">])</span>
+
+    <span class="k">if</span> <span class="n">X</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="n">x_input</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+        <span class="n">x_test_inputs</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="o">-</span><span class="n">config</span><span class="o">.</span><span class="n">predicts</span> <span class="o">-</span> <span class="n">config</span><span class="o">.</span><span class="n">repeatit</span><span class="p">:</span> <span class="o">-</span><span class="n">config</span><span class="o">.</span><span class="n">predicts</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span>
+        <span class="n">x_test_inputs</span> <span class="o">=</span> <span class="n">x_test_inputs</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">x_test_inputs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">,</span> <span class="n">x_test_inputs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">x_test_inputs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">x_input</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">x_test_inputs</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="o">-</span><span class="n">config</span><span class="o">.</span><span class="n">predicts</span> <span class="o">-</span> <span class="n">config</span><span class="o">.</span><span class="n">repeatit</span><span class="p">:</span> <span class="o">-</span><span class="n">config</span><span class="o">.</span><span class="n">predicts</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="n">x_test_inputs</span> <span class="o">=</span> <span class="n">x_test_inputs</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">x_test_inputs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">,</span> <span class="n">x_test_inputs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="n">X</span> <span class="o">=</span> <span class="n">X</span><span class="p">[:</span> <span class="o">-</span><span class="n">n_steps_out</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">x_input</span><span class="p">,</span> <span class="n">x_test_inputs</span></div>
+
+
+<div class="viewcode-block" id="create_inputs"><a class="viewcode-back" href="../../predictit.define_inputs.html#predictit.define_inputs.create_inputs">[docs]</a><span class="k">def</span> <span class="nf">create_inputs</span><span class="p">(</span><span class="n">input_name</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">predicted_column_index</span><span class="p">):</span>
+
+    <span class="c1"># Take one input type, make all derivated inputs (save memory, because only slices) and create dictionary of inputs for one iteration</span>
+    <span class="n">used_sequentions</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">if</span> <span class="n">input_name</span> <span class="o">==</span> <span class="s1">&#39;data&#39;</span><span class="p">:</span>
+        <span class="n">used_sequentions</span> <span class="o">=</span> <span class="n">data</span>
+
+    <span class="k">elif</span> <span class="n">input_name</span> <span class="o">==</span> <span class="s1">&#39;data_one_column&#39;</span><span class="p">:</span>
+        <span class="n">used_sequentions</span> <span class="o">=</span> <span class="n">data</span><span class="p">[:,</span> <span class="n">predicted_column_index</span><span class="p">]</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">input_name</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;one_in_one_out_constant&#39;</span><span class="p">,</span> <span class="s1">&#39;one_in_one_out&#39;</span><span class="p">,</span> <span class="s1">&#39;one_in_batch_out&#39;</span><span class="p">]:</span>
+            <span class="n">used_sequentions</span> <span class="o">=</span> <span class="n">data</span><span class="p">[:,</span> <span class="n">predicted_column_index</span><span class="p">:</span> <span class="n">predicted_column_index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">used_sequentions</span> <span class="o">=</span> <span class="n">data</span>
+
+        <span class="n">used_sequentions</span> <span class="o">=</span> <span class="n">make_sequences</span><span class="p">(</span><span class="n">used_sequentions</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="o">**</span><span class="n">config</span><span class="o">.</span><span class="n">input_types</span><span class="p">[</span><span class="n">input_name</span><span class="p">])</span>
+
+    <span class="c1"># data_end = -config.predicts - config.repeatit - config.validation_gap if config.mode == &#39;validate&#39; else None</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">used_sequentions</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+        <span class="n">model_train_input</span> <span class="o">=</span> <span class="p">(</span><span class="n">used_sequentions</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">used_sequentions</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">model_predict_input</span> <span class="o">=</span> <span class="n">used_sequentions</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;validate&#39;</span><span class="p">:</span>
+            <span class="n">model_test_inputs</span> <span class="o">=</span> <span class="p">[</span><span class="n">model_predict_input</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">model_test_inputs</span> <span class="o">=</span> <span class="n">used_sequentions</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">model_train_input</span> <span class="o">=</span> <span class="n">model_predict_input</span> <span class="o">=</span> <span class="n">used_sequentions</span>
+        <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;validate&#39;</span><span class="p">:</span>
+            <span class="n">model_test_inputs</span> <span class="o">=</span> <span class="p">[</span><span class="n">model_predict_input</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">model_test_inputs</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">if</span> <span class="n">used_sequentions</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">repeatit</span><span class="p">):</span>
+                    <span class="n">model_test_inputs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">used_sequentions</span><span class="p">[:</span> <span class="o">-</span> <span class="n">config</span><span class="o">.</span><span class="n">predicts</span> <span class="o">-</span> <span class="n">config</span><span class="o">.</span><span class="n">repeatit</span> <span class="o">+</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">repeatit</span><span class="p">):</span>
+                    <span class="n">model_test_inputs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">used_sequentions</span><span class="p">[:,</span> <span class="p">:</span> <span class="o">-</span> <span class="n">config</span><span class="o">.</span><span class="n">predicts</span> <span class="o">-</span> <span class="n">config</span><span class="o">.</span><span class="n">repeatit</span> <span class="o">+</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">model_train_input</span><span class="p">,</span> <span class="n">model_predict_input</span><span class="p">,</span> <span class="n">model_test_inputs</span></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div id="logo">
+<a href="https://predictit.readthedocs.io/">
+    <img logo" src="https://predictit.readthedocs.io/en/master/_static/logo.png" alt="Logo">
+</a>
+
+<div class="section" id="table-of-contents">
+<h3>Table of contents</h3>
+<div class="toctree-wrapper compound">
+<ul>
+
+    <li class="toctree-l1"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/">predictit</a>
+    <ul>
+        <li class="toctree-l2"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/#output">Output</a></li>
+        <li class="toctree-l2"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/#installation">Installation</a></li>
+        <li class="toctree-l2"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/#how-to">How to</a></li>
+
+        <li class="toctree-l2"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/#submodules">Submodules</a>
+        <ul>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.configuration/">configuration</a></li>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.main/">main</a></li>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.analyze">analyze</a></li>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.best_params/">best_params</a></li>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.database/">database</a></li>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.data_preprocessing/">data_preprocessing</a></li>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.evaluate_predictions/">evaluate_predictions</a></li>
+        </ul></li>
+
+        <li class="toctree-l2"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/#subpackages">Subpackages</a>
+        <ul>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.models/">models</a></li>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.test_data/">test_data</a></li>
+        </ul></li>
+        <li class="toctree-l2"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/genindex/">Index</a></li>
+    </ul></li>
+
+</ul>
+</div>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Daniel Malachov.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+    <a href="https://github.com/Malachov/predictit" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>

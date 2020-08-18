@@ -1,0 +1,180 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>predictit.models.tensorflow module &#8212; predictit 18-08-2020 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="module-predictit.models.tensorflow">
+<span id="predictit-models-tensorflow-module"></span><h1>predictit.models.tensorflow module<a class="headerlink" href="#module-predictit.models.tensorflow" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="predictit.models.tensorflow.get_optimizers_loses_activations">
+<code class="sig-prename descclassname">predictit.models.tensorflow.</code><code class="sig-name descname">get_optimizers_loses_activations</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/predictit/models/tensorflow.html#get_optimizers_loses_activations"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#predictit.models.tensorflow.get_optimizers_loses_activations" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return list of tensorflow optimizers. It’s used by optimize function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>List of tensorflow optimizers.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="predictit.models.tensorflow.predict">
+<code class="sig-prename descclassname">predictit.models.tensorflow.</code><code class="sig-name descname">predict</code><span class="sig-paren">(</span><em class="sig-param">x_input</em>, <em class="sig-param">model</em>, <em class="sig-param">predicts=7</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/predictit/models/tensorflow.html#predict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#predictit.models.tensorflow.predict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function that creates predictions from trained model and input data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x_input</strong> (<em>np.ndarray</em>) – Time series data</p></li>
+<li><p><strong>model</strong> (<em>model</em>) – Trained model object from train function.</p></li>
+<li><p><strong>predicts</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of predicted values. Defaults to 7.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Array of predicted results</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="predictit.models.tensorflow.train">
+<code class="sig-prename descclassname">predictit.models.tensorflow.</code><code class="sig-name descname">train</code><span class="sig-paren">(</span><em class="sig-param">sequentions</em>, <em class="sig-param">layers='default'</em>, <em class="sig-param">predicts=7</em>, <em class="sig-param">epochs=200</em>, <em class="sig-param">load_trained_model=0</em>, <em class="sig-param">update_trained_model=1</em>, <em class="sig-param">save_model=1</em>, <em class="sig-param">saved_model_path_string='stored_models'</em>, <em class="sig-param">optimizer='adam'</em>, <em class="sig-param">loss='mse'</em>, <em class="sig-param">verbose=0</em>, <em class="sig-param">used_metrics='accuracy'</em>, <em class="sig-param">timedistributed=0</em>, <em class="sig-param">batch_size=64</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/predictit/models/tensorflow.html#train"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#predictit.models.tensorflow.train" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tensorflow model. Neural nets - LSTM or MLP (just dense layers). Layers are customizable with arguments.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sequentions</strong> (<em>tuple</em><em>(</em><em>np.ndarray</em><em>, </em><em>np.ndarray</em><em>, </em><em>np.ndarray</em><em>)</em><em>) </em><em>- Tuple</em><em> (</em><em>X</em><em>, </em><em>y</em><em>, </em><em>x_input</em>) – </p></li>
+<li><p><strong>layers</strong> (<em>tuple</em><em>) </em><em>- Tuple of tuples of layer name</em><em> (</em><em>e.g. 'lstm'</em>) – 7, ‘activation’: ‘relu’}). Check default layres tuple here or config example.</p></li>
+<li><p><strong>predicts</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of predicted values. Defaults to 7.</p></li>
+<li><p><strong>epochs</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of epochs to evaluate. Defaults to 100.</p></li>
+<li><p><strong>load_trained_model</strong> – If 1, load model from disk. Most of time is spend on training, so if loaded and not updated, it’s very fast.</p></li>
+<li><p><strong>update_trained_model</strong> – If load_trained_model, it’s updated with new input.</p></li>
+<li><p><strong>save_model</strong> – If 1, save model on disk on saved_model_path_string.</p></li>
+<li><p><strong>saved_model_path_string</strong> – Full path to saved model with name. E.g. ‘/home/dan/mymodel.h5. If ‘stored_models’, then it’s save to library folder models/stored_models.</p></li>
+<li><p><strong>optimizer</strong> (<em>str</em><em>, </em><em>optional</em>) – Used optimizer. Defaults to ‘adam’.</p></li>
+<li><p><strong>loss</strong> (<em>str</em><em>, </em><em>optional</em>) – Loss function. Defaults to ‘mse’.</p></li>
+<li><p><strong>verbose</strong> (<em>int</em><em>, </em><em>optional</em>) – Wheter display details. Defaults to 0.</p></li>
+<li><p><strong>used_metrics</strong> (<em>str</em><em>, </em><em>optional</em>) – Used metrics. ‘accuracy’ or ‘mape’ Defaults to ‘accuracy’.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Trained model object.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>model</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div id="logo">
+<a href="https://predictit.readthedocs.io/">
+    <img logo" src="https://predictit.readthedocs.io/en/master/_static/logo.png" alt="Logo">
+</a>
+
+<div class="section" id="table-of-contents">
+<h3>Table of contents</h3>
+<div class="toctree-wrapper compound">
+<ul>
+
+    <li class="toctree-l1"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/">predictit</a>
+    <ul>
+        <li class="toctree-l2"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/#output">Output</a></li>
+        <li class="toctree-l2"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/#installation">Installation</a></li>
+        <li class="toctree-l2"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/#how-to">How to</a></li>
+
+        <li class="toctree-l2"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/#submodules">Submodules</a>
+        <ul>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.configuration/">configuration</a></li>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.main/">main</a></li>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.analyze">analyze</a></li>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.best_params/">best_params</a></li>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.database/">database</a></li>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.data_preprocessing/">data_preprocessing</a></li>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.evaluate_predictions/">evaluate_predictions</a></li>
+        </ul></li>
+
+        <li class="toctree-l2"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/#subpackages">Subpackages</a>
+        <ul>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.models/">models</a></li>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.test_data/">test_data</a></li>
+        </ul></li>
+        <li class="toctree-l2"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/genindex/">Index</a></li>
+    </ul></li>
+
+</ul>
+</div>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Daniel Malachov.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/predictit.models.tensorflow.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+    <a href="https://github.com/Malachov/predictit" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,217 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>predictit.misc module &#8212; predictit 18-08-2020 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="module-predictit.misc">
+<span id="predictit-misc-module"></span><h1>predictit.misc module<a class="headerlink" href="#module-predictit.misc" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="predictit.misc.colorize">
+<code class="sig-prename descclassname">predictit.misc.</code><code class="sig-name descname">colorize</code><span class="sig-paren">(</span><em class="sig-param">message</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/predictit/misc.html#colorize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#predictit.misc.colorize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add color to message - usally warnings and errors, to know what is internal error on first sight.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>message</strong> (<em>str</em>) – Any string you want to color.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>Message in yellow color. Symbols added to string cannot be read in some terminals.</dt><dd><p>If global _COLORIZE is 0, it return original string.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="predictit.misc.confidence_interval">
+<code class="sig-prename descclassname">predictit.misc.</code><code class="sig-name descname">confidence_interval</code><span class="sig-paren">(</span><em class="sig-param">data</em>, <em class="sig-param">predicts=7</em>, <em class="sig-param">confidence=0.1</em>, <em class="sig-param">p=1</em>, <em class="sig-param">d=0</em>, <em class="sig-param">q=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/predictit/misc.html#confidence_interval"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#predictit.misc.confidence_interval" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to find confidence interval of prediction for graph.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>np.ndarray</em>) – Time series data</p></li>
+<li><p><strong>predicts</strong> (<em>int</em><em>, </em><em>optional</em>) – [description]. Defaults to 7.</p></li>
+<li><p><strong>confidence</strong> (<em>float</em><em>, </em><em>optional</em>) – [description]. Defaults to 0.1.</p></li>
+<li><p><strong>p</strong> (<em>int</em><em>, </em><em>optional</em>) – 1st order of ARIMA. Defaults to 1.</p></li>
+<li><p><strong>d</strong> (<em>int</em><em>, </em><em>optional</em>) – 2nd order of ARIMA. Defaults to 0.</p></li>
+<li><p><strong>q</strong> (<em>int</em><em>, </em><em>optional</em>) – 3rd order of ARIMA. Defaults to 0.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Lower bound, upper bound.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list, list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="predictit.misc.remove_ansi">
+<code class="sig-prename descclassname">predictit.misc.</code><code class="sig-name descname">remove_ansi</code><span class="sig-paren">(</span><em class="sig-param">string</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/predictit/misc.html#remove_ansi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#predictit.misc.remove_ansi" title="Permalink to this definition">¶</a></dt>
+<dd><p>In GUI web page different syntax is necessary than in terminal. This will remove color prefix and replace
+it with html tags.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>string</strong> (<em>str</em>) – String that will be cleaned.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Original string with no color prefix.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="predictit.misc.set_warnings">
+<code class="sig-prename descclassname">predictit.misc.</code><code class="sig-name descname">set_warnings</code><span class="sig-paren">(</span><em class="sig-param">debug</em>, <em class="sig-param">ignored_warnings</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/predictit/misc.html#set_warnings"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#predictit.misc.set_warnings" title="Permalink to this definition">¶</a></dt>
+<dd><p>Define debug type. Can print warnings, ignore them or stop as error</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>debug</strong> (<em>int</em>) – If 0, than warnings are ignored, if 1, than warning will be displayed just once, if 2,
+program raise error on warning and stop.</p></li>
+<li><p><strong>ignored_warnings</strong> (<em>list</em>) – List of warnings (any part of inner string) that will be ingored even if debug is set.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="predictit.misc.traceback_warning">
+<code class="sig-prename descclassname">predictit.misc.</code><code class="sig-name descname">traceback_warning</code><span class="sig-paren">(</span><em class="sig-param">message='Traceback warning'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/predictit/misc.html#traceback_warning"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#predictit.misc.traceback_warning" title="Permalink to this definition">¶</a></dt>
+<dd><p>Raise warning with current traceback as content. There is many models in this library and with some
+configuration some models crashes. Actually it’s not error than, but warning. Display of warning is
+configured with debug variable in <cite>config.py</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>message</strong> (<em>str</em><em>, </em><em>optional</em>) – Caption of warning. Defaults to ‘’.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="predictit.misc.user_warning">
+<code class="sig-prename descclassname">predictit.misc.</code><code class="sig-name descname">user_warning</code><span class="sig-paren">(</span><em class="sig-param">message</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/predictit/misc.html#user_warning"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#predictit.misc.user_warning" title="Permalink to this definition">¶</a></dt>
+<dd><p>Raise warning. Can be colorized. Display of warning is configured with debug variable in <cite>config.py</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>message</strong> (<em>str</em>) – Any string content of warning.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div id="logo">
+<a href="https://predictit.readthedocs.io/">
+    <img logo" src="https://predictit.readthedocs.io/en/master/_static/logo.png" alt="Logo">
+</a>
+
+<div class="section" id="table-of-contents">
+<h3>Table of contents</h3>
+<div class="toctree-wrapper compound">
+<ul>
+
+    <li class="toctree-l1"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/">predictit</a>
+    <ul>
+        <li class="toctree-l2"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/#output">Output</a></li>
+        <li class="toctree-l2"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/#installation">Installation</a></li>
+        <li class="toctree-l2"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/#how-to">How to</a></li>
+
+        <li class="toctree-l2"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/#submodules">Submodules</a>
+        <ul>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.configuration/">configuration</a></li>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.main/">main</a></li>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.analyze">analyze</a></li>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.best_params/">best_params</a></li>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.database/">database</a></li>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.data_preprocessing/">data_preprocessing</a></li>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.evaluate_predictions/">evaluate_predictions</a></li>
+        </ul></li>
+
+        <li class="toctree-l2"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/#subpackages">Subpackages</a>
+        <ul>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.models/">models</a></li>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.test_data/">test_data</a></li>
+        </ul></li>
+        <li class="toctree-l2"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/genindex/">Index</a></li>
+    </ul></li>
+
+</ul>
+</div>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Daniel Malachov.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/predictit.misc.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+    <a href="https://github.com/Malachov/predictit" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>
