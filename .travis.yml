@@ -8,17 +8,12 @@ python:
 
 branches:
 only:
-- master
-- /^deploy-.*$/
+  - master
+  - /^deploy-.*$/
 
 git:
   depth: 25
   quiet: true
-
-branches:
-  only:
-    - master
-    - /v\d+\.\d+[a-z]/
 
 before_install:
   - sudo apt-get install unixodbc-dev
