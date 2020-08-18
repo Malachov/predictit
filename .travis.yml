@@ -9,6 +9,7 @@ python:
 branches:
   only:
     - master
+    - /v\d+\.\d+[a-z]/
 
 before_install:
   - sudo apt-get install unixodbc-dev
