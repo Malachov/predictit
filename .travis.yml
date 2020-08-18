@@ -29,15 +29,15 @@ deploy:
     file: "FILE TO UPLOAD"
     skip_cleanup: true
     on:
+      all_branches: true
       tags: true
-      branch: master
   - provider: pypi
     skip_existing: true
     username: "__token__"
     password:
       secure: "O7gLoBlSCowMD6ZsMS1Ytyeak2t8xG0EtcCcRr3r4CBAArz9yFQEOvcwC4ShaNDqGHtSOYnuSQH5l/Y1YDTaf8M0cfUkS1BHZExPIqZ5mv+czHME1lATKjlqZ8eONfXokQydb1rzZR2frL+kInkXKejFKu49Rx78OQtIW6XYd/q1BGv5jV2ZHSIG2HwyM5gJxUz84Mv7ZFgHNcEcU2Po5b/xFoWFujVP1zzhDImUFSH1uIuMEGUrT7oLufO+/yfyJbZnMr/scGMpHZae5IIc/btzkh+DovmMB6/7yCMBYIppiSMGJI9WKA8LpIYmIeMPxe6GhdbPbpjr5nXrrrUtQRcK0RrX4MRiEoQpbw7HU6qapAGjeMk5MZ056/HPnR6pijWcIpeJd6WN4DI84xnf8WFJtK1KzC4ubI7nwo2XAXIsRdx6e/CKmtQOjzUy3jRM7EmSoADM8/IsDVMLXqr+Du3QgCYZliXuKpNdKIh3M8wiSxF2igG6ozib+cBmpHF+/Sh5l88wDpYQgCKZ/+MC0ipsfXVnyZNh0iveTwYe4jktShZKAzS6LAv3cbZ4Jzccp+rqysbSTDgbPVOkXMcZbLF1E/3NARAHNa5nFiJU6qqyIXx2xK8toQ5xlwjA6kgyh9JXvfemRJ/Q0t+bO7tzqYC59SHbihm5BhpQ3Pw4HE8="
     on:
-      branch: master
+      all_branches: true
       tags: true
       distributions: sdist bdist_wheel
       python: "3.7"
