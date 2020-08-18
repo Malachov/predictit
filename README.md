@@ -146,7 +146,7 @@ To optmize hyperparameters, just set `optimizeit: 1,` and model parameters limit
 
 ## GUI
 
-It is possible to use basic GUI. But only with CSV data source.
+It is possible to use basic GUI. But only with CSV data source. It's rather showcase of algorithms than application to production.
 Just run `gui_start.py` if you have downloaded software or call `predictit.gui_start.run_gui()` if you are importing via PyPI.
 
 ## Example of using library as a pro with deeper editting config
