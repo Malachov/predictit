@@ -6,9 +6,19 @@ python:
   - "3.7"
   - "3.8"
 
+branches:
+only:
+- master
+- /^deploy-.*$/
+
 git:
   depth: 25
   quiet: true
+
+branches:
+  only:
+    - master
+    - /v\d+\.\d+[a-z]/
 
 before_install:
   - sudo apt-get install unixodbc-dev
@@ -24,18 +34,19 @@ install:
 script: coverage run -m pytest -v tests/test_it.py
 
 deploy:
-  provider: pypi
-  skip_existing: true
-  username: "__token__"
-  password:
-    secure: "gOd2iovFFAdo/ysz/+ubpV6UutG3YvrGQ/wez0+E+bm92pH+8aMDPCX0coP/gEX4oUt5wRaxfVfC04MctFLM2w9unbnAMnq8alUHqcZJhmfywIRoaFeyJUKRm09M4k8m4KV7XgyR6SyLlY8kQZoiagGnvCzz4lUf4Ivyw/mPVgrnD5JuDG2GwVq6ZT4XONFpPsFmnhxAKOOfypNgYfdPb7ErJhhXbf6xn7SsBA90WXYcbnXhDKjiDj/wDz75FpKIyJM4+fTLM8HAhjpdPb19RzPKjU0U8wApKkwBb+t5gUPYPYcsVvqg0CPcUYF9ZeAdB290Rxobp/XLcnkFv2cYPpk+oI1BwANdmD2Kg01qrkNeAC1A6mF7VQ9vu1K6gljaLGRA3HtBgU+lVut0DjupPcKglj3nbDoqoxh39M5CJUPUe/95eqvKNtnODyIEFdTT0tIAShyrsjn/53JV5MC7jGGYno6oVRLgJwfM9MNO646icb5IWFxGxqAq40RkXEN5T9q5t3WzTYgDaxv5PcHmMCBVg65bbIfmQgqvdm+LdLc44K5/4fXCS8VRwuJ3LBhml2yOHVxUY3YvpF6tgUU3KGlp7Eqn8gF9A5l970GiC1TFd9iKR7RIj02B7y7GVo2F8wCPVOeoD34P6Ply+z6ifIe9l9L1fGZNangFreCjKDg="
-  on:
-    tags: true
-    distributions: sdist bdist_wheel
-    python: "3.7"
-  #   - provider: releases
-  #   api_key: "GITHUB OAUTH TOKEN"
-  #   file: "FILE TO UPLOAD"
-  #   skip_cleanup: true
-  #   on:
-  #     tags: true
+  - provider: pypi
+    skip_existing: true
+    username: "__token__"
+    password:
+      secure: "gOd2iovFFAdo/ysz/+ubpV6UutG3YvrGQ/wez0+E+bm92pH+8aMDPCX0coP/gEX4oUt5wRaxfVfC04MctFLM2w9unbnAMnq8alUHqcZJhmfywIRoaFeyJUKRm09M4k8m4KV7XgyR6SyLlY8kQZoiagGnvCzz4lUf4Ivyw/mPVgrnD5JuDG2GwVq6ZT4XONFpPsFmnhxAKOOfypNgYfdPb7ErJhhXbf6xn7SsBA90WXYcbnXhDKjiDj/wDz75FpKIyJM4+fTLM8HAhjpdPb19RzPKjU0U8wApKkwBb+t5gUPYPYcsVvqg0CPcUYF9ZeAdB290Rxobp/XLcnkFv2cYPpk+oI1BwANdmD2Kg01qrkNeAC1A6mF7VQ9vu1K6gljaLGRA3HtBgU+lVut0DjupPcKglj3nbDoqoxh39M5CJUPUe/95eqvKNtnODyIEFdTT0tIAShyrsjn/53JV5MC7jGGYno6oVRLgJwfM9MNO646icb5IWFxGxqAq40RkXEN5T9q5t3WzTYgDaxv5PcHmMCBVg65bbIfmQgqvdm+LdLc44K5/4fXCS8VRwuJ3LBhml2yOHVxUY3YvpF6tgUU3KGlp7Eqn8gF9A5l970GiC1TFd9iKR7RIj02B7y7GVo2F8wCPVOeoD34P6Ply+z6ifIe9l9L1fGZNangFreCjKDg="
+    on:
+      tags: true
+      python: "3.7"
+      distributions: sdist bdist_wheel
+  - provider: releases
+    api_key: "GITHUB OAUTH TOKEN"
+    file: "FILE TO UPLOAD"
+    skip_cleanup: false
+    on:
+      tags: true
+      python: "3.7"
