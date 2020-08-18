@@ -6,11 +6,6 @@ python:
   - "3.7"
   - "3.8"
 
-branches:
-  only:
-    - master
-    - /v\d+\.\d+[a-z]/
-
 before_install:
   - sudo apt-get install unixodbc-dev
   - sudo apt-get install libblas-dev liblapack-dev libatlas-base-dev gfortran
