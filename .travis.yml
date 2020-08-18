@@ -31,6 +31,10 @@ deploy:
     on:
       tags: true
       branch: master
+  - provider: pypi
+    username: "__token__"
+    password:
+      secure: "pypi-AgEIcHlwaS5vcmcCJGMwYjgxYmRhLTEzYTItNDlkOC1iOTA4LWVkMGNhYmQzYWFiNgACOnsicGVybWlzc2lvbnMiOiB7InByb2plY3RzIjogWyJwcmVkaWN0aXQiXX0sICJ2ZXJzaW9uIjogMX0AAAYgXunbJfvFXfirkZBfk-oBf1cYnUryh6VirUD2QYJY6Qo"
 
 git:
   depth: 25
