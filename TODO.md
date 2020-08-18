@@ -45,6 +45,7 @@
 
 ## Deals
 
+- [ ] Do some unit tests + some KPI
 - [ ] Try recreate config as data class with type hints and comments that will be parsable
 - [ ] Finish CI process. Joinpublish script to run on travis. Maybe use poetry for versioning and setup pyproject.toml. Build locally with travis and test first
 - [ ] Change GUI to vuetify - do tests.
