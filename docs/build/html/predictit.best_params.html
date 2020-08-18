@@ -1,0 +1,160 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>predictit.best_params module &#8212; predictit 19-08-2020 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="module-predictit.best_params">
+<span id="predictit-best-params-module"></span><h1>predictit.best_params module<a class="headerlink" href="#module-predictit.best_params" title="Permalink to this headline">¶</a></h1>
+<p>Module with main function optimize that find optimal input paramaters for function.
+Arguments are input model, initial function arguments and arguments limits.
+More info is in optimize function documentation</p>
+<dl class="function">
+<dt id="predictit.best_params.optimize">
+<code class="sig-prename descclassname">predictit.best_params.</code><code class="sig-name descname">optimize</code><span class="sig-paren">(</span><em class="sig-param">model_train</em>, <em class="sig-param">model_predict</em>, <em class="sig-param">kwargs</em>, <em class="sig-param">kwargs_limits</em>, <em class="sig-param">model_train_input</em>, <em class="sig-param">model_test_inputs</em>, <em class="sig-param">models_test_outputs</em>, <em class="sig-param">error_criterion='mape'</em>, <em class="sig-param">multicolumn_source=0</em>, <em class="sig-param">fragments=10</em>, <em class="sig-param">iterations=3</em>, <em class="sig-param">details=0</em>, <em class="sig-param">time_limit=5</em>, <em class="sig-param">predicted_column_index=0</em>, <em class="sig-param">name='Your model'</em>, <em class="sig-param">plot=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/predictit/best_params.html#optimize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#predictit.best_params.optimize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to find optimal parameters of function. For example if we want to find minimum of function x^2,
+we can use limits from -10 to 10. If we have 4 fragments and 3 iterations. it will separate interval on 4 parts,
+so we have aproximately points -10, -4, 4, 10. We evaluate the best one and make new interval to closest points,
+so new interval will ber -4 and 4. We divide again into 4 points. We repeat as many times as iterations variable defined.</p>
+<p>If limits are written as int, it will be used only as int, so if you want to use float, write -10.0, 10.0 etc…</p>
+<p>If we have many arguments, it will create many combinations of parameters, so beware…</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model_train</strong> (<em>func</em>) – Model train function (eg: ridgeregression.train).</p></li>
+<li><p><strong>model_predict</strong> (<em>func</em>) – Model predict function (eg: ridgeregression.predict).</p></li>
+<li><p><strong>kwargs</strong> (<em>dict</em>) – Initial arguments (eg: {“alpha”: 0.1, “n_steps_in”: 10}).</p></li>
+<li><p><strong>kwargs_limits</strong> (<em>dict</em>) – Bounds of arguments (eg: {“alpha”: [0.1, 1], “n_steps_in”:[2, 30]}).</p></li>
+<li><p><strong>train_input</strong> (<em>np.array</em><em> or </em><em>tuple</em><em>(</em><em>np.ndarray</em><em>, </em><em>np.ndarray</em><em>, </em><em>np.ndarray</em><em>)</em>) – Data on which function is optimized.
+Use train data or sequentions (tuple with (X, y, x_input)) - depends on model. Defaults to None.</p></li>
+<li><p><strong>X</strong> (<em>np.array</em>) – Input sequentions on which function is optimized. Use this or train_input - depends on model. Defaults to None.</p></li>
+<li><p><strong>y</strong> (<em>np.array</em>) – Output on which function is optimized. Use this or train_input - depends on model. Defaults to None.</p></li>
+<li><p><strong>error_criterion</strong> (<em>str</em><em>, </em><em>optional</em>) – Error criterion used in evaluation. ‘rmse’ or ‘mape’. Defaults to ‘mape’.</p></li>
+<li><p><strong>fragments</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of optimized intervals. Defaults to 10.</p></li>
+<li><p><strong>iterations</strong> (<em>int</em><em>, </em><em>optional</em>) – How many times will be initial interval divided into fragments. Defaults to 3.</p></li>
+<li><p><strong>details</strong> (<em>int</em><em>, </em><em>optional</em>) – 0 print nothing, 1 print best parameters of models, 2 print every new best parameters achieved,
+3 prints all results. Bigger than 0 print precents of progress. Defaults to 0.</p></li>
+<li><p><strong>time_limit</strong> (<em>int</em><em>, </em><em>optional</em>) – How many seconds can one evaluation last. Defaults to 5.</p></li>
+<li><p><strong>predicted_column_index</strong> (<em>int</em><em>, </em><em>optional</em>) – If predicted data havbe more columns, which is predicted. Defaults to 0.</p></li>
+<li><p><strong>name</strong> (<em>str</em><em>, </em><em>optional</em>) – Name of model to be displayed in details. Defaults to ‘your model’.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>TimeoutError</strong> – If evaluation take more time than defined limit.</p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Optimized parameters of model.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div id="logo">
+<a href="https://predictit.readthedocs.io/">
+    <img logo" src="https://predictit.readthedocs.io/en/master/_static/logo.png" alt="Logo">
+</a>
+
+<div class="section" id="table-of-contents">
+<h3>Table of contents</h3>
+<div class="toctree-wrapper compound">
+<ul>
+
+    <li class="toctree-l1"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/">predictit</a>
+    <ul>
+        <li class="toctree-l2"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/#output">Output</a></li>
+        <li class="toctree-l2"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/#installation">Installation</a></li>
+        <li class="toctree-l2"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/#how-to">How to</a></li>
+
+        <li class="toctree-l2"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/#submodules">Submodules</a>
+        <ul>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.configuration/">configuration</a></li>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.main/">main</a></li>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.analyze">analyze</a></li>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.best_params/">best_params</a></li>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.database/">database</a></li>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.data_preprocessing/">data_preprocessing</a></li>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.evaluate_predictions/">evaluate_predictions</a></li>
+        </ul></li>
+
+        <li class="toctree-l2"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/#subpackages">Subpackages</a>
+        <ul>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.models/">models</a></li>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.test_data/">test_data</a></li>
+        </ul></li>
+        <li class="toctree-l2"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/genindex/">Index</a></li>
+    </ul></li>
+
+</ul>
+</div>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Daniel Malachov.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/predictit.best_params.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+    <a href="https://github.com/Malachov/predictit" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>

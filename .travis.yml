@@ -1,0 +1,48 @@
+language: python
+cache: pip
+
+python:
+  - "3.6"
+  - "3.7"
+  - "3.8"
+
+branches:
+only:
+  - master
+  - /^deploy-.*$/
+
+git:
+  depth: 25
+  quiet: true
+
+before_install:
+  - sudo apt-get install unixodbc-dev
+  - sudo apt-get install libblas-dev liblapack-dev libatlas-base-dev gfortran
+
+install:
+  - pip install pip --upgrade
+  - pip install pytest
+  - pip install coverage
+  - pip install -r requirements.txt
+  - python setup.py install
+
+script: coverage run -m pytest -v tests/test_it.py
+
+deploy:
+  - provider: pypi
+    skip_existing: true
+    username: "__token__"
+    password:
+      secure: "gOd2iovFFAdo/ysz/+ubpV6UutG3YvrGQ/wez0+E+bm92pH+8aMDPCX0coP/gEX4oUt5wRaxfVfC04MctFLM2w9unbnAMnq8alUHqcZJhmfywIRoaFeyJUKRm09M4k8m4KV7XgyR6SyLlY8kQZoiagGnvCzz4lUf4Ivyw/mPVgrnD5JuDG2GwVq6ZT4XONFpPsFmnhxAKOOfypNgYfdPb7ErJhhXbf6xn7SsBA90WXYcbnXhDKjiDj/wDz75FpKIyJM4+fTLM8HAhjpdPb19RzPKjU0U8wApKkwBb+t5gUPYPYcsVvqg0CPcUYF9ZeAdB290Rxobp/XLcnkFv2cYPpk+oI1BwANdmD2Kg01qrkNeAC1A6mF7VQ9vu1K6gljaLGRA3HtBgU+lVut0DjupPcKglj3nbDoqoxh39M5CJUPUe/95eqvKNtnODyIEFdTT0tIAShyrsjn/53JV5MC7jGGYno6oVRLgJwfM9MNO646icb5IWFxGxqAq40RkXEN5T9q5t3WzTYgDaxv5PcHmMCBVg65bbIfmQgqvdm+LdLc44K5/4fXCS8VRwuJ3LBhml2yOHVxUY3YvpF6tgUU3KGlp7Eqn8gF9A5l970GiC1TFd9iKR7RIj02B7y7GVo2F8wCPVOeoD34P6Ply+z6ifIe9l9L1fGZNangFreCjKDg="
+    on:
+      tags: true
+      python: "3.7"
+      distributions: sdist bdist_wheel
+  - provider: releases
+    api_key:
+      secure: ZALq7sD9WYog0wazXtOiMd8QvPE/FiNt6cgV5w9m+F8iaU1vntyff7is1GHXDTIKob6IDHNrbJs6xgY3atMClPSAnHhvqMa8TwYmn/AmzdpIXwBw4Qa+ul8H4PfUKVsgedLJG9ksP2tQ8s7+wJL2+puodGp2TdfRCscACBjI3WW1raGrY8Ys2+hMVTupY8k4RkDn4VaZAX6DDL/83XtHBnwdrENhBKLNTlKtO9SBRdwnd/RDGQnX7okaUfJ7fNTpY06kOHYwDBFGaLRcQgJeFOHbs2HB/ZiJYeKSuwXM+vKipLBZ2sad1DPz3imNR3W90T8fILkAxdOWC9duZKyTAEizSUFwcPb7TbGqlAUSE23SOshqgZPGaT7s83KVPP1yY87HNqvYazdOLLhJuBvwbFTjfRjlMsCaBEt1YFHrOq+QJAmbbRiAvJ6xjID/z+M+modY6ehHub3L5sXub3jeEGusR1uncp8+7zlhvFC0LMCy5gqe8vtzArWQB9l0Y/DjK38QeRuXQdTs6wGSlUkF7Bqs1Eq/AFGasoOPZlTmoghjydZC7d/PZqt8Q53x7mEvER4qsMsu33DGptQS3ZReaiI8yanekBJj+qy163LUNoXbPBvAvElvYD3o3XXeftaakeP1ftfl02jEX2YOthBK71IdpsXZgPqvYqg6AEK7ju8=
+    skip_cleanup: false
+    overwrite: true
+    on:
+      tags: true
+      python: "3.7"
