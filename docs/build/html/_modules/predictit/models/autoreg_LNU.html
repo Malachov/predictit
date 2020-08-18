@@ -40,10 +40,13 @@
 <span class="sd">    but also use other faster method to predict weights evolution. In first iteration it will find best weight and in the second iteration, it will train more epochs.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        data (np.ndarray): Time series data.</span>
+<span class="sd">        sequentions (tuple(np.ndarray, np.ndarray, np.ndarray)) - Tuple (X, y, x_input) of input train vectors X, train outputs y, and input for prediction x_input</span>
 <span class="sd">        predicts (int, optional): Number of predicted values. Defaults to 7.</span>
 <span class="sd">        mi (float, optional): Learning rate. If not normalized must be much smaller. Defaults to 0.1.</span>
-<span class="sd">        mi_multiple (np.ndarray, optional): Used learning rate numpy linspace arguments. Defaults to mi_linspace=(1e-8, 10, 20).</span>
+<span class="sd">        mi_multiple (bool): If try more weigths and try to find the best.</span>
+<span class="sd">        mi_linspace (np.ndarray, optional): Used learning rate numpy linspace arguments. Defaults to mi_linspace=(1e-8, 10, 20).</span>
+<span class="sd">        epochs (int): Numer of trained epochs.</span>
+<span class="sd">        w_predict (bool): If predict weights with next predictions.</span>
 <span class="sd">        minormit (int, optional): Whether normalize learning rate. Defaults to 0.</span>
 <span class="sd">        damping (int, optional): Whether damp learning rate or not. Defaults to 1.</span>
 <span class="sd">        plot (int, optional): Whether plot results. Defaults to 0.</span>

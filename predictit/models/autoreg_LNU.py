@@ -4,14 +4,16 @@ import numpy as np
 
 def train(sequentions, predicts=30, mi=1, mi_multiple=1, mi_linspace=(1e-8, 10, 20), epochs=10, w_predict=0, minormit=1, damping=1, plot=0, random=0, w_rand_scope=1, w_rand_shift=0, rand_seed=0):
     """Autoregressive linear neural unit with weight prediction. It's simple one neuron one-step net that predict not only predictions itself,
-    but also use other faster method to predict weights evolution. In first iteration it will find best weight and in the second iteration,
-    it will train more epochs.
+    but also use other faster method to predict weights evolution. In first iteration it will find best weight and in the second iteration, it will train more epochs.
 
     Args:
         sequentions (tuple(np.ndarray, np.ndarray, np.ndarray)) - Tuple (X, y, x_input) of input train vectors X, train outputs y, and input for prediction x_input
         predicts (int, optional): Number of predicted values. Defaults to 7.
         mi (float, optional): Learning rate. If not normalized must be much smaller. Defaults to 0.1.
-        mi_multiple (np.ndarray, optional): Used learning rate numpy linspace arguments. Defaults to mi_linspace=(1e-8, 10, 20).
+        mi_multiple (bool): If try more weigths and try to find the best.
+        mi_linspace (np.ndarray, optional): Used learning rate numpy linspace arguments. Defaults to mi_linspace=(1e-8, 10, 20).
+        epochs (int): Numer of trained epochs.
+        w_predict (bool): If predict weights with next predictions.
         minormit (int, optional): Whether normalize learning rate. Defaults to 0.
         damping (int, optional): Whether damp learning rate or not. Defaults to 1.
         plot (int, optional): Whether plot results. Defaults to 0.

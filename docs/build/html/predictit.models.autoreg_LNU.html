@@ -61,10 +61,13 @@ but also use other faster method to predict weights evolution. In first iteratio
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>data</strong> (<em>np.ndarray</em>) – Time series data.</p></li>
+<li><p><strong>sequentions</strong> (<em>tuple</em><em>(</em><em>np.ndarray</em><em>, </em><em>np.ndarray</em><em>, </em><em>np.ndarray</em><em>)</em><em>) </em><em>- Tuple</em><em> (</em><em>X</em><em>, </em><em>y</em><em>, </em><em>x_input</em>) – </p></li>
 <li><p><strong>predicts</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of predicted values. Defaults to 7.</p></li>
 <li><p><strong>mi</strong> (<em>float</em><em>, </em><em>optional</em>) – Learning rate. If not normalized must be much smaller. Defaults to 0.1.</p></li>
-<li><p><strong>mi_multiple</strong> (<em>np.ndarray</em><em>, </em><em>optional</em>) – Used learning rate numpy linspace arguments. Defaults to mi_linspace=(1e-8, 10, 20).</p></li>
+<li><p><strong>mi_multiple</strong> (<em>bool</em>) – If try more weigths and try to find the best.</p></li>
+<li><p><strong>mi_linspace</strong> (<em>np.ndarray</em><em>, </em><em>optional</em>) – Used learning rate numpy linspace arguments. Defaults to mi_linspace=(1e-8, 10, 20).</p></li>
+<li><p><strong>epochs</strong> (<em>int</em>) – Numer of trained epochs.</p></li>
+<li><p><strong>w_predict</strong> (<em>bool</em>) – If predict weights with next predictions.</p></li>
 <li><p><strong>minormit</strong> (<em>int</em><em>, </em><em>optional</em>) – Whether normalize learning rate. Defaults to 0.</p></li>
 <li><p><strong>damping</strong> (<em>int</em><em>, </em><em>optional</em>) – Whether damp learning rate or not. Defaults to 1.</p></li>
 <li><p><strong>plot</strong> (<em>int</em><em>, </em><em>optional</em>) – Whether plot results. Defaults to 0.</p></li>
