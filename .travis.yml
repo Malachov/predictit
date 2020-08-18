@@ -23,21 +23,6 @@ install:
 
 script: coverage run -m pytest -v tests/test_it.py
 
-deploy:
-  - provider: pypi
-    username: "__token__"
-    password: ""
-    secure: "cjX8fnE/XXX840BK6RVQFRP4NSI+NKBIiMJePvfH9Zd7vsxptWehdXt+2RCaivmJS3QmVZTXxKjpP7gaNn/JI1myi7tvkiSdBxBwiGMH07ALwsNS3fIX5RsAGewbvIEVctZEWYln9u3LAZ98S/CSy8iD1eu63Qo0TKlvjKEwN8UZ+Txxo0CDVtp5s3nIz6yYfM7oyE6jL10vCS5FCfv7OjFh1/Zu8vRr/IgfCA+DlPNNKe6N7LBg9X1hJZY6ekX9yOTtKZzR+2CEcfFoGLycthFCtJ5SKWiagxuG8ybeLP3BDNblt2dAHyO0fcgb0mo2iSAOgfKR7PV/gTD2SlIV0KkUGUuKXh04QtcChAhT5AKxS76OLfLUuwYI3sPGDHgoK2yDpPcGpPh5MR+Rpu3ST9q+xmspd2JTxsuM/FNToyu7lRGMHHsCxjNrCGcWLYYP1mHRo/i6R3izmZft5u/aF69qS7j62SAnMRJTX7hTSDnxSNq/AXXZJQ4lbP2sD34w8bcKNieDC29j3XzkIHqK74YfwKQV9JpU9EK+fYvM7LvI+BKOEDf1YEp9tIwnnZTqQ7o3rWSpOjH1RzdKWpMbh+X65+2tly7RQJ/y2m6tyIoi8ruHPht4h+EO44tej3tJJGQVZhSLvVB8Mu+ck4x5v/C1poUqEAEKiAtXDx07/MM="
-    on:
-      branch: master
-  - provider: releases
-    api_key: "GITHUB OAUTH TOKEN"
-    file: "FILE TO UPLOAD"
-    skip_cleanup: true
-    on:
-      tags: true
-      branch: master
-
 git:
   depth: 25
   quiet: true
