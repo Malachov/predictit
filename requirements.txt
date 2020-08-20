@@ -7,15 +7,9 @@ scikit_learn
 sklearn_extensions
 pygments
 tabulate
-
-# Optional packages - Compulsory just with some config combination
-# Compulsory only if want data analyse or interactive plot output (not necessary for gui)
 matplotlib
 cufflinks
 plotly
 seaborn
-
 dtaidistance
-
-# Dev dependencies
 m2r
