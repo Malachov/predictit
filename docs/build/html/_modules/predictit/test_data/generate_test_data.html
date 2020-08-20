@@ -1,0 +1,173 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>predictit.test_data.generate_test_data &#8212; predictit 20-08-2020 documentation</title>
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for predictit.test_data.generate_test_data</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot; Test data definition. Data can be pickled and saved on disk. User can create own test data and use compare_models to find best models.&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+
+<div class="viewcode-block" id="gen_sin"><a class="viewcode-back" href="../../../predictit.test_data.generate_test_data.html#predictit.test_data.generate_test_data.gen_sin">[docs]</a><span class="k">def</span> <span class="nf">gen_sin</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="mi">1000</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Generate test data of length n in sinus shape.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        n (int): Length of data.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        np.ndarray: Sinus shaped data.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">fs</span> <span class="o">=</span> <span class="mi">8000</span>  <span class="c1"># Sample rate</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="mi">50</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">f</span> <span class="o">*</span> <span class="n">x</span> <span class="o">/</span> <span class="n">fs</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="gen_sign"><a class="viewcode-back" href="../../../predictit.test_data.generate_test_data.html#predictit.test_data.generate_test_data.gen_sign">[docs]</a><span class="k">def</span> <span class="nf">gen_sign</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">periods</span><span class="o">=</span><span class="mi">220</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Generate test data of length n in signum shape.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        n (int): Length of data.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        np.ndarray: Signum shaped data.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">sin</span> <span class="o">=</span> <span class="n">gen_sin</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="n">n</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">sin</span><span class="p">)</span></div>
+
+
+<span class="c1"># Random</span>
+<div class="viewcode-block" id="gen_random"><a class="viewcode-back" href="../../../predictit.test_data.generate_test_data.html#predictit.test_data.generate_test_data.gen_random">[docs]</a><span class="k">def</span> <span class="nf">gen_random</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="mi">1000</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Generate random test data of length.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        n (int): Length of data.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        np.ndarray: Random test data.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">n</span><span class="p">)</span> <span class="o">*</span> <span class="mi">5</span> <span class="o">+</span> <span class="mi">10</span></div>
+
+
+<span class="c1"># Range</span>
+<div class="viewcode-block" id="gen_slope"><a class="viewcode-back" href="../../../predictit.test_data.generate_test_data.html#predictit.test_data.generate_test_data.gen_slope">[docs]</a><span class="k">def</span> <span class="nf">gen_slope</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="mi">1000</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Generate random test data of length.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        n (int): Length of data.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        np.ndarray: Slope test data.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">))</span></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div id="logo">
+<a href="https://predictit.readthedocs.io/">
+    <img logo" src="https://predictit.readthedocs.io/en/master/_static/logo.png" alt="Logo">
+</a>
+
+<div class="section" id="table-of-contents">
+<h3>Table of contents</h3>
+<div class="toctree-wrapper compound">
+<ul>
+
+    <li class="toctree-l1"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/">predictit</a>
+    <ul>
+        <li class="toctree-l2"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/#output">Output</a></li>
+        <li class="toctree-l2"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/#installation">Installation</a></li>
+        <li class="toctree-l2"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/#how-to">How to</a></li>
+
+        <li class="toctree-l2"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/#submodules">Submodules</a>
+        <ul>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.configuration/">configuration</a></li>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.main/">main</a></li>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.analyze">analyze</a></li>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.best_params/">best_params</a></li>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.database/">database</a></li>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.data_preprocessing/">data_preprocessing</a></li>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.evaluate_predictions/">evaluate_predictions</a></li>
+        </ul></li>
+
+        <li class="toctree-l2"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/#subpackages">Subpackages</a>
+        <ul>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.models/">models</a></li>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.test_data/">test_data</a></li>
+        </ul></li>
+        <li class="toctree-l2"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/genindex/">Index</a></li>
+    </ul></li>
+
+</ul>
+</div>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Daniel Malachov.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+    <a href="https://github.com/Malachov/predictit" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>

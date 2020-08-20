@@ -1,0 +1,160 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>predictit.analyze module &#8212; predictit 20-08-2020 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="module-predictit.analyze">
+<span id="predictit-analyze-module"></span><h1>predictit.analyze module<a class="headerlink" href="#module-predictit.analyze" title="Permalink to this headline">¶</a></h1>
+<p>This is module for data analysis. It create plots of data, it’s distribution, it’s details, autocorrelation function etc.
+Matplotlib lazyload because not using in gui.</p>
+<dl class="function">
+<dt id="predictit.analyze.analyze_correlation">
+<code class="sig-prename descclassname">predictit.analyze.</code><code class="sig-name descname">analyze_correlation</code><span class="sig-paren">(</span><em class="sig-param">data_df</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/predictit/analyze.html#analyze_correlation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#predictit.analyze.analyze_correlation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot correlation graph.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>data</strong> (<em>np.ndarray</em>) – Time series data</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="predictit.analyze.analyze_data">
+<code class="sig-prename descclassname">predictit.analyze.</code><code class="sig-name descname">analyze_data</code><span class="sig-paren">(</span><em class="sig-param">array</em>, <em class="sig-param">df</em>, <em class="sig-param">lags=5</em>, <em class="sig-param">window=5</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/predictit/analyze.html#analyze_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#predictit.analyze.analyze_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function that plot data, it’s distribution, some details like minimum, maximum, std, mean etc.
+It also create autocorrelation and partial autocorrelation (good for ARIMA models) and plot rolling mean and rolling std.
+It also tell if data are probably stationary or not.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>pd.DataFrame</em>) – Time series data.</p></li>
+<li><p><strong>lags</strong> (<em>int</em><em>, </em><em>optional</em>) – Lags used for autocorrelation. Defaults to 5.</p></li>
+<li><p><strong>window</strong> (<em>int</em><em>, </em><em>optional</em>) – Window for rolling average and rolling std. Defaults to 5.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="predictit.analyze.decompose">
+<code class="sig-prename descclassname">predictit.analyze.</code><code class="sig-name descname">decompose</code><span class="sig-paren">(</span><em class="sig-param">data</em>, <em class="sig-param">period=365</em>, <em class="sig-param">model='additive'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/predictit/analyze.html#decompose"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#predictit.analyze.decompose" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot decomposition graph. Analze if data are seasonal.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>np.ndarray</em>) – Time series data</p></li>
+<li><p><strong>period</strong> (<em>int</em><em>, </em><em>optional</em>) – Seasonal interval. Defaults to 365.</p></li>
+<li><p><strong>model</strong> (<em>str</em><em>, </em><em>optional</em>) – Additive or multiplicative. Defaults to ‘additive’.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div id="logo">
+<a href="https://predictit.readthedocs.io/">
+    <img logo" src="https://predictit.readthedocs.io/en/master/_static/logo.png" alt="Logo">
+</a>
+
+<div class="section" id="table-of-contents">
+<h3>Table of contents</h3>
+<div class="toctree-wrapper compound">
+<ul>
+
+    <li class="toctree-l1"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/">predictit</a>
+    <ul>
+        <li class="toctree-l2"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/#output">Output</a></li>
+        <li class="toctree-l2"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/#installation">Installation</a></li>
+        <li class="toctree-l2"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/#how-to">How to</a></li>
+
+        <li class="toctree-l2"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/#submodules">Submodules</a>
+        <ul>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.configuration/">configuration</a></li>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.main/">main</a></li>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.analyze">analyze</a></li>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.best_params/">best_params</a></li>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.database/">database</a></li>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.data_preprocessing/">data_preprocessing</a></li>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.evaluate_predictions/">evaluate_predictions</a></li>
+        </ul></li>
+
+        <li class="toctree-l2"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/#subpackages">Subpackages</a>
+        <ul>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.models/">models</a></li>
+            <li class="toctree-l3"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/predictit.test_data/">test_data</a></li>
+        </ul></li>
+        <li class="toctree-l2"><a class="reference internal" href="https://predictit.readthedocs.io/en/master/genindex/">Index</a></li>
+    </ul></li>
+
+</ul>
+</div>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Daniel Malachov.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/predictit.analyze.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+    <a href="https://github.com/Malachov/predictit" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>
