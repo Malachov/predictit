@@ -1,6 +1,6 @@
 #%%
 from setuptools import setup, find_packages
-
+import pkg_resources
 import predictit
 
 
@@ -9,8 +9,12 @@ version = predictit.__version__
 with open('README.md') as readme_file:
     readme = readme_file.read()
 
-# with open('requirements.txt') as f:
-#     myreqs = [line.strip() for line in f]
+with open('requirements.txt') as f:
+    myreqs = [
+        str(requirement)
+        for requirement
+        in pkg_resources.parse_requirements(f)
+    ]
 
 setup(
     name='predictit',
