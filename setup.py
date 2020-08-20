@@ -1,19 +1,15 @@
 #%%
 from setuptools import setup, find_packages
-import sys
-import os
-
-lib_path = os.path.abspath(os.path.dirname(__file__))
-sys.path.insert(0, lib_path)
 
 import predictit
 
+
 version = predictit.__version__
 
-with open(os.path.join(lib_path, 'README.md')) as readme_file:
+with open('README.md') as readme_file:
     readme = readme_file.read()
 
-with open(os.path.join(lib_path, 'requirements.txt')) as f:
+with open('requirements.txt') as f:
     myreqs = [line.strip() for line in f]
 
 setup(
