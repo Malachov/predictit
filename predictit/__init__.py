@@ -72,7 +72,7 @@ from . import gui_start
 
 from . import main
 
-__version__ = "1.45.8"
+__version__ = "1.45.9"
 __author__ = "Daniel Malachov"
 __license__ = "MIT"
 __email__ = "malachovd@seznam.cz"

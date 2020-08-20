@@ -9,8 +9,8 @@ version = predictit.__version__
 with open('README.md') as readme_file:
     readme = readme_file.read()
 
-with open('requirements.txt') as f:
-    myreqs = [line.strip() for line in f]
+# with open('requirements.txt') as f:
+#     myreqs = [line.strip() for line in f]
 
 setup(
     name='predictit',
@@ -19,7 +19,7 @@ setup(
     license='mit',
     author='Daniel Malachov',
     author_email='malachovd@seznam.cz',
-    install_requires=myreqs,
+    install_requires=['numpy', 'pandas', 'eel', 'scipy', 'statsmodels', 'scikit_learn', 'sklearn_extensions', 'pygments', 'tabulate', 'matplotlib', 'cufflinks', 'plotly', 'seaborn', 'dtaidistance', 'm2r'],
     description='Library/framework for making predictions.',
     long_description_content_type='text/markdown',
     long_description=readme,
