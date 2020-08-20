@@ -10,10 +10,10 @@ import predictit
 
 version = predictit.__version__
 
-with open(lib_path / 'README.md') as readme_file:
+with open(os.path.join(lib_path, 'README.md')) as readme_file:
     readme = readme_file.read()
 
-with open(lib_path / 'requirements.txt', 'r') as f:
+with open(os.path.join(lib_path, 'requirements.txt')) as f:
     myreqs = [line.strip() for line in f]
 
 setup(
@@ -46,8 +46,7 @@ setup(
         'Topic :: Software Development :: Libraries :: Application Frameworks',
         'Intended Audience :: Science/Research',
         'Intended Audience :: Developers',
-        'Intended Audience :: Education',
-        ],
+        'Intended Audience :: Education'],
     extras_require={
     }
 )
