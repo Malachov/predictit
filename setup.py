@@ -6,15 +6,19 @@ import predictit
 
 version = predictit.__version__
 
+
 with open('README.md') as readme_file:
     readme = readme_file.read()
 
-with open('requirements.txt') as f:
-    myreqs = [
-        str(requirement)
-        for requirement
-        in pkg_resources.parse_requirements(f)
-    ]
+try:
+    with open('requirements.txt') as f:
+        myreqs = [
+            str(requirement)
+            for requirement
+            in pkg_resources.parse_requirements(f)
+        ]
+except Exception:
+    myreqs=[]
 
 setup(
     name='predictit',
