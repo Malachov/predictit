@@ -1,11 +1,10 @@
 #%%
 from setuptools import setup, find_packages
 import sys
-import pathlib
+import os
 
-lib_path = pathlib.Path(__file__).resolve().parents[0]
-lib_path_str = lib_path.as_posix()
-sys.path.insert(0, lib_path_str)
+lib_path = os.path.abspath(os.path.dirname(__file__))
+sys.path.insert(0, lib_path)
 
 import predictit
 
