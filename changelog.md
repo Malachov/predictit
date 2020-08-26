@@ -1,7 +1,8 @@
 # List of what have been done in new versions
 
-## 1.4x - 06/2020
+## 1.4x - 08/2020
 
+- [x] Travis CI building releases on Pypi as well on github.
 - [x] Config redefined to class and so enabling intellisense in IDE.
 
   - API change!!! instead of config['value'] use config.value. But config.update({'variable': 'value'}) still works !!!

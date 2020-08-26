@@ -46,7 +46,6 @@
 ## Deals
 
 - [ ] Try recreate config as data class with type hints and comments that will be parsable
-- [ ] Finish CI process. Joinpublish script to run on travis. Maybe use poetry for versioning and setup pyproject.toml. Build locally with travis and test first
 - [ ] Change GUI to vuetify - do tests.
 - [ ] For error criterion use compare models values in normal predict to remove best decision_tree which is unfair on insample predictions
 - [ ] CI - set github actions to publish.sh script - recreate documentation and publish on pypi
