@@ -1,0 +1,15 @@
+version: 2
+
+python:
+  version: 3.7
+  install:
+    - requirements: requirements.txt
+    - requirements: requirements_dev.txt
+
+# Build documentation in the source/ directory with Sphinx
+sphinx:
+  configuration: source/conf.py
+
+# Setup submodules
+submodules:
+  include: all
