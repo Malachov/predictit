@@ -8,7 +8,7 @@ python:
 
 # Build documentation in the source/ directory with Sphinx
 sphinx:
-  configuration: source/conf.py
+  configuration: docs/source/conf.py
 
 # Setup submodules
 submodules:
