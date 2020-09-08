@@ -1,4 +1,4 @@
-''' All config for main file. Most of values are boolean 1 or 0. You can setup data source, models to use,
+''' All config for main file. Most of values are boolean 1 or 0. You can setup input data, models to use,
 whether you want find optimal parameters etc. Some setting can be inserted as function parameters, then it has higher priority.
 All values are commented and easy to understand.
 
@@ -9,8 +9,7 @@ Examples:
     >>> from predictit.configuration import config
 
     >>> config.update({
-    >>>     'data_source': 'csv',
-    >>>     'csv_full_path': 'my/path/to.csv',
+    >>>     'data': 'my/path/to.csv',
     >>>     'plot': 1,
     >>>     'debug': 1,
     >>>     'used_models': {
@@ -48,17 +47,14 @@ class config():
 
     # Input settings
 
-    data = None  # Use numpy array, or pandas dataframe. This will overwrite data_source. If you use csv, set up to None. Data shape is (n_samples, n_feature). Rows are samples and columns are features.
-    data_all = None  # [np.array(range(1000)), np.array(range(500))]  # Just for compare_models function. Dictionary of data names and list of it's values and predicted columns or list of data parts.
+    data = "test"  # File path with suffix (string or pathlib Path). Or you can use numpy array, or pandas dataframe.
+    # Supported path formats are .CSV. Data shape for numpy array and dataframe is (n_samples, n_feature). Rows are samples and columns are features.
+    # CSV path can be local or web url. Examples: "https://raw.githubusercontent.com/jbrownlee/Datasets/master/daily-min-temperatures.csv" or "/home/path-to/daily-minimum-temperatures.csv
+
+    data_all = None  # [np.array(range(1000)), np.array(range(500))]  # Just for compare_models function. Dictionary of data names and list of it's values and predicted columns or list of data parts or numpy array with rows as data samples.
     # data_allexample = {data_1 = (my_dataframe, 'column_name_or_index')} or (my_data[-2000:], my_data[-1000:]) and 'predicted_column' as usually in config.
 
-    data_source = 'test'  # Data source. ('csv', 'txt', 'sql' or 'test') - If sql, you have to edit the query to fit your database.
-
-    csv_full_path = r''  # Full CSV path with suffix or web url. Examples: "https://raw.githubusercontent.com/jbrownlee/Datasets/master/daily-min-temperatures.csv" or "/home/dan/ownCloud/Github/predictit_library/predictit/test_data/daily-minimum-temperatures.csv"
     csv_style = {'separator': ",", 'decimal': "."}  # Define CSV separators. En locale usually use {'sep': ",", 'decimal': "."} some Europian country use {'sep': ";", 'decimal': ","}
-
-    # !!! Turn it off if not testing to not break csv full path !!! Test data are gitignored... use your own.
-    csv_test_data_relative_path = ''  # CSV name with suffix in test_data folder (E.g. '5000 Sales Records.csv' or 'daily-minimum-temperatures.csv' - !!! gitignored because of size. Download own.)
 
     predicted_column = ''  # Name of predicted column (for dataframe data) or it's index - string or int.
     predicted_columns = []  # For predict_multiple function only! List of names of predicted columns or it's indexes. If 'data' is dataframe or numpy, then you can use ['*'] to predict all the columns with numbers.
@@ -91,11 +87,10 @@ class config():
     plot_number_of_models = 12  # Number of plotted models. If -1, than all models will be evaluated. 1 if only the best one.
 
     printit = 1  # Turn on and off all printed details at once.
-    print_table = 1  # Whether print table with models errors and time to compute. Also for function compare_models.
+    print_table = 2  # Whether print table with models errors. Option 2 will print detailed table with time, optimized config value etc.
     print_number_of_models = -1  # How many models will be evaluated and printed in results table. If -1, than all models will be evaluated. 1 if only the best one.
     print_time_table = 1  # Whether print table with models errors and time to compute.
     print_result = 1  # Whether print best model results and model details.
-    print_detailed_result = 1  # Whether print detailed results.
     sort_detailed_results_by = 'error'  # 'error' or 'name'
 
     # Prediction parameters settings
@@ -112,13 +107,13 @@ class config():
     optimizeit = 0  # Find optimal parameters of models.
     optimizeit_details = 2  # 1 print best parameters of models, 2 print every new best parameters achieved, 3 prints all results.
     optimizeit_limit = 10  # How many seconds can take one model optimization.
-    optimizeit_plot = 0  # Plot every optimized combinations (plot only if have few parameters, otherwise hundreds of plots!!!)
+    optimizeit_plot = 0  # Plot every optimized combinations (plot in interactive way (jupyter) and only if have few parameters, otherwise hundreds of plots!!!)
 
     multiprocessing = 'pool'  # 'pool' or 'process' or 0
     default_n_steps_in = 30  # How many lagged values are in vector input to model.
     other_columns = 1  # If use other columns. Bool.
     default_other_columns_length = 2  # Other columns vector length used for predictions. If None, lengths same as predicted columnd. If 0, other columns are not used for prediction.
-    remove_nans = 'any_columns'  # 'any_columns' will remove all the columns where is at least one nan column. 'any_rows' delete each row, where is nan value
+    remove_nans = 'any_rows'  # If dataframe, 'any_columns' will remove all the columns where is at least one nan column. 'any_rows' delete each row, where is nan value. None will keep nans.
     dtype = 'float32'  # Main dtype used in prediction. 'float32' or 'float64'.
     repeatit = 50  # How many times is computation repeated for error criterion evaluation.
 
@@ -128,12 +123,12 @@ class config():
     standardizeit = 'standardize'  # 'standardize'  # One from None, 'standardize', '-11', '01', 'robust'.
 
     evaluate_type = 'original'  # 'original' or 'preprocessed'. Define whether error criterion (e.g. RMSE) is evaluated on preprocessed data or on original data.
-    smoothit = (11, 2)  # Smoothing data with Savitzky-Golay filter. First argument is window (must be odd!) and second is polynomial order. If 0, not smoothing.
+    smoothit = False  # Smoothing data with Savitzky-Golay filter. First argument is window (must be odd!) and second is polynomial order. Example: (11, 2) If False, not smoothing.
     power_transformed = 0  # Whether transform results to have same standard deviation and mean as train data.
     remove_outliers = 0  # Remove extraordinary values. Value is threshold for ignored values. Value means how many times standard deviation from the average threshold is far (have to be > 3, else delete most of data). If predicting anomalies, use 0.
     error_criterion = 'mse_sklearn'  # 'mse_sklearn', 'mape' or 'rmse' or 'dtw' (dynamic time warping).
     last_row = 0  # If 0, erase last row (for example in day frequency, day is not complete yet).
-    correlation_threshold = 0.5  # If evaluating from more collumns, use only collumns that are correlated. From 0 (All columns included) to 1 (only column itself).Z
+    correlation_threshold = 0.6  # If evaluating from more collumns, use only collumns that are correlated. From 0 (All columns included) to 1 (only column itself).Z
     confidence_interval = 0.6  # Area of confidence in result plot (grey area where we suppose values) - Bigger value, narrower area - maximum 1. If 0 - not plotted.
     already_trained = 0  # Computationaly hard models (LSTM) load from disk.
     #plotallmodels = 0,  # Plot all models (recommended only in interactive jupyter window).
@@ -225,7 +220,7 @@ class config():
             'tensorflow_mlp', 'Sklearn regression one step', 'Bayes ridge regression one step',
             'Decision tree regression one step', 'Hubber regression one step']},
 
-        # One step not used yet... it's only for multivariate data for predicting just one value
+        # One step not used yet... for multivariate data for predicting just one value
 
         **{model_name: 'batch' for model_name in [
             'Sklearn regression', 'Bayes ridge regression', 'Hubber regression', 'Extra trees regression',
@@ -246,19 +241,19 @@ class config():
         'AR (Autoregression)': {'used_model': 'ar', 'method': 'cmle', 'ic': 'aic', 'trend': 'nc', 'solver': 'lbfgs'},
         'ARMA': {'used_model': 'arma', 'p': 4, 'q': 0, 'method': 'mle', 'ic': 'aic', 'trend': 'nc', 'solver': 'lbfgs'},
         'ARIMA (Autoregression integrated moving average)': {'used_model': 'arima', 'p': 6, 'd': 0, 'q': 0, 'method': 'css', 'ic': 'aic', 'trend': 'nc', 'solver': 'nm'},
-        'autoreg': {'used_model': 'autoreg', 'cov_type': 'nonrobust'},
+        'autoreg': {'used_model': 'autoreg', 'maxlag': 13, 'cov_type': 'nonrobust'},
         'SARIMAX (Seasonal ARIMA)': {'used_model': 'sarimax', 'p': 3, 'd': 0, 'q': 0, 'seasonal': (1, 0, 0, 4), 'method': 'lbfgs', 'trend': 'nc', 'enforce_invertibility': False, 'enforce_stationarity': False},
 
-        'Autoregressive Linear neural unit': {'mi_multiple': 1, 'mi_linspace': (1e-5, 1e-4, 3), 'epochs': 10, 'w_predict': 0, 'minormit': 0},
-        'Autoregressive Linear neural unit normalized': {'mi': 1, 'mi_multiple': 0, 'epochs': 10, 'w_predict': 0, 'minormit': 1},
-        'Linear neural unit with weigths predict': {'mi_multiple': 1, 'mi_linspace': (1e-5, 1e-4, 3), 'epochs': 10, 'w_predict': 1, 'minormit': 0},
-        'Conjugate gradient': {'epochs': 200},
+        'Autoregressive Linear neural unit': {'mi_multiple': 1, 'mi_linspace': (1e-5, 1e-4, 20), 'epochs': 40, 'w_predict': 0, 'minormit': 0},
+        'Autoregressive Linear neural unit normalized': {'mi_multiple': 1, 'mi_linspace': (1e-2, 1, 20), 'epochs': 40, 'w_predict': 0, 'minormit': 1},
+        'Linear neural unit with weigths predict': {'mi_multiple': 1, 'mi_linspace': (1e-5, 1e-4, 20), 'epochs': 40, 'w_predict': 1, 'minormit': 0},
+        'Conjugate gradient': {'epochs': 100},
 
-        'tensorflow_lstm': {'layers': 'default', 'epochs': 200, 'load_trained_model': 0, 'update_trained_model': 0, 'save_model': 1, 'saved_model_path_string': 'stored_models', 'optimizer': 'adam', 'loss': 'mse', 'verbose': 0, 'metrics': 'accuracy', 'timedistributed': 0},
+        'tensorflow_lstm': {'layers': 'default', 'epochs': 200, 'load_trained_model': 0, 'update_trained_model': 0, 'save_model': 1, 'saved_model_path_string': 'stored_models', 'optimizer': 'adam', 'loss': 'mse', 'verbose': 0, 'used_metrics': 'accuracy', 'timedistributed': 0},
         'tensorflow_mlp': {'layers': [['dense', {'units': 32, 'activation': 'relu'}],
                                       ['dropout', {'rate': 0.1}],
                                       ['dense', {'units': 7, 'activation': 'relu'}]],
-                           'epochs': 100, 'load_trained_model': 0, 'update_trained_model': 0, 'save_model': 1, 'saved_model_path_string': 'stored_models', 'optimizer': 'adam', 'loss': 'mse', 'verbose': 0, 'metrics': 'accuracy', 'timedistributed': 0},
+                           'epochs': 100, 'load_trained_model': 0, 'update_trained_model': 0, 'save_model': 1, 'saved_model_path_string': 'stored_models', 'optimizer': 'adam', 'loss': 'mse', 'verbose': 0, 'used_metrics': 'accuracy', 'timedistributed': 0},
 
         'Sklearn regression': {'regressor': 'linear', 'alpha': 0.0001, 'n_iter': 100, 'epsilon': 1.35, 'alphas': [0.1, 0.5, 1], 'gcv_mode': 'auto', 'solver': 'auto', 'alpha_1': 1.e-6,
                                'alpha_2': 1.e-6, 'lambda_1': 1.e-6, 'lambda_2': 1.e-6, 'n_hidden': 20, 'rbf_width': 0, 'activation_func': 'selu'},
@@ -323,8 +318,8 @@ class config():
     def update_references_optimize(cls):
         cls.models_parameters_limits = {
             'AR (Autoregression)': {'ic': ['aic', 'bic', 'hqic', 't-stat'], 'trend': ['c', 'nc']},
-            'ARMA': {'p': [1, cls.maxorder], 'q': cls.order, 'trend': ['c', 'nc']},
-            # 'ARIMA (Autoregression integrated moving average)': {'p': [1, 3, 9], 'd': [0, 1, 2], 'q': [0, 1, 2], 'trend': ['c', 'nc']},
+            # 'ARMA': {'p': [1, cls.maxorder], 'q': cls.order, 'trend': ['c', 'nc']},
+            'ARIMA (Autoregression integrated moving average)': {'p': [1, 25], 'd': [0, 1, 2], 'q': [0, 1, 2], 'trend': ['c', 'nc']},
             'autoreg': {'cov_type': ['nonrobust', 'HC0', 'HC1', 'HC3']},
             # 'SARIMAX (Seasonal ARIMA)': {'p': [1, cls.maxorder], 'd': cls.order, 'q': cls.order, 'pp': cls.order, 'dd': cls.order, 'qq': cls.order,
             # 'season': cls.order, 'method': ['lbfgs', 'bfgs', 'newton', 'nm', 'cg', 'ncg', 'powell'], 'trend': ['n', 'c', 't', 'ct'], 'enforce_invertibility': [True, False], 'enforce_stationarity': [True, False], 'forecast_type': ['in_sample', 'out_of_sample']},

@@ -1,6 +1,6 @@
 # predictit
 
-[![PyPI pyversions](https://img.shields.io/pypi/pyversions/predictit.svg)](https://pypi.python.org/pypi/predictit/) [![PyPI version](https://badge.fury.io/py/predictit.svg)](https://badge.fury.io/py/predictit) [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/Malachov/predictit.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/Malachov/predictit/context:python) [![Build Status](https://travis-ci.com/Malachov/predictit.svg?branch=master)](https://travis-ci.com/Malachov/predictit) [![Documentation Status](https://readthedocs.org/projects/predictit/badge/?version=master)](https://predictit.readthedocs.io/en/master/?badge=master) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![PyPI pyversions](https://img.shields.io/pypi/pyversions/predictit.svg)](https://pypi.python.org/pypi/predictit/) [![PyPI version](https://badge.fury.io/py/predictit.svg)](https://badge.fury.io/py/predictit) [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/Malachov/predictit.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/Malachov/predictit/context:python) [![Build Status](https://travis-ci.com/Malachov/predictit.svg?branch=master)](https://travis-ci.com/Malachov/predictit) [![Documentation Status](https://readthedocs.org/projects/predictit/badge/?version=master)](https://predictit.readthedocs.io/en/master/?badge=master) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) [![codecov](https://codecov.io/gh/Malachov/predictit/branch/master/graph/badge.svg)](https://codecov.io/gh/Malachov/predictit)
 
 Library/framework for making predictions. Choose best of 20 models (ARIMA, regressions, LSTM...) from libraries like statsmodels, scikit-learn, tensorflow and some own models. There are hundreds of customizable options (it's not necessary of course) as well as some config presets.
 
@@ -37,7 +37,7 @@ Sometime you can have issues with installing some libraries from requirements (e
 
 Software can be used in three ways. As a python library or with command line arguments or as normal python scripts.
 Main function is predict in `main.py` script.
-There is also predict_multiple_columns if you want to predict more at once (columns or time frequentions) and also compare_models function that evaluate defined test data and can tell you which models are best. Then you can use only such a models.
+There is also `predict_multiple_columns` function if you want to predict more at once (columns or time frequentions) and also `compare_models` function that tell you which models are best. It evaluate error criterion on out of sample test data instead of predict (use as much as possible) so more reliable errors (for example decision trees just assign input from learning set, so error in predict is 0, in compare_models it's accurate). Then you can use only good models in predict function.
 
 ### Simple example of using predictit as a python library and function arguments
 
@@ -45,7 +45,7 @@ There is also predict_multiple_columns if you want to predict more at once (colu
 import predictit
 import numpy as np
 
-predictions = predictit.main.predict(data=np.random.randn(1, 100), predicts=3, plotit=1)
+predictions_1 = predictit.main.predict(data=np.random.randn(100, 2), predicted_column=1, predicts=3, return_type='best')
 ```
 
 ### Simple example of using as a python library and editing config
@@ -55,18 +55,21 @@ import predictit
 from predictit.configuration import config
 
 # You can edit config in two ways
-config.data_source = 'csv'
-config.csv_full_path = 'https://datahub.io/core/global-temp/r/monthly.csv'  # You can use local path on pc as well... "/home/dan/..."
-config.predicted_column = 'Mean'
-config.datetime_index = 'Date'
+config.data = 'https://raw.githubusercontent.com/jbrownlee/Datasets/master/daily-min-temperatures.csv'  # You can use local path on pc as well... "/home/name/mycsv.csv" !
+config.predicted_column = 'Temp'  # You can use index as well
+config.datetime_index = 'Date'  # Will be used in result
+config.freq = "D"  # One day - one value
+config.resample_function = "mean"  # If more values in one day - use mean (more sources)
+config.return_type = 'detailed_dictionary'
+config.debug = 0  # Ignore warnings
 
 # Or
 config.update({
-    'predicts': 3,
-    'default_n_steps_in': 15
+    'predicts': 14,  # Number of predicted values
+    'default_n_steps_in': 12  # Value of recursive inputs in model (do not use too high - slower and worse predictions)
 })
 
-predictions = predictit.main.predict()
+predictions_2 = predictit.main.predict()
 ```
 
 ### Simple example of using `main.py` as a script
@@ -79,13 +82,15 @@ Run code below in terminal in predictit folder.
 Use `python main.py --help` for more parameters info.
 
 ```
-python main.py --used_function predict --data_source 'csv' --csv_full_path 'https://datahub.io/core/global-temp/r/monthly.csv' --predicted_column "'Mean'"
+python main.py --used_function predict --data 'https://raw.githubusercontent.com/jbrownlee/Datasets/master/daily-min-temperatures.csv' --predicted_column "'Temp'"
 
 ```
 
 ### Explore config
 
-To see all the possible values in `configuration.py` from your IDE, use
+Type `config.`, then, if not autamatically, use ctrl + spacebar to see all posible values. To see what option means, type for example `config.return_type`, than do mouseover with pressed ctrl. It will reveal comment that describe the option (at least at VS Code)
+
+To see all the possible values in `configuration.py`, use
 
 ```Python
 predictit.configuration.print_config()
@@ -104,7 +109,7 @@ config.update({
     'data_all': (my_data_array[-2000:], my_data_array[-1500:], my_data_array[-1000:])
 })
 
-predictit.main.compare_models()
+compared_models = predictit.main.compare_models()
 ```
 
 ### Example of predict_multiple function
@@ -113,12 +118,13 @@ predictit.main.compare_models()
 import predictit
 from predictit.configuration import config
 
-config.data = pd.read_csv("https://datahub.io/core/global-temp/r/monthly.csv")
+config.data = pd.read_csv("https://raw.githubusercontent.com/jbrownlee/Datasets/master/daily-min-temperatures.csv")
 
 # Define list of columns or '*' for predicting all of the columns
 config.predicted_columns = ['*']
 
-predictit.main.predict_multiple_columns()
+multiple_columns_prediction = predictit.main.predict_multiple_columns()
+
 ```
 
 ### Example of config variable optimization
@@ -126,18 +132,18 @@ predictit.main.predict_multiple_columns()
 ```Python
 
 config.update({
-    'data_source': 'csv',
-    'csv_full_path': "https://datahub.io/core/global-temp/r/monthly.csv",
-    'predicted_column': 'Mean',
+    'data': "https://raw.githubusercontent.com/jbrownlee/Datasets/master/daily-min-temperatures.csv",
+    'predicted_column': 'Temp',
     'return_type': 'all_dataframe',
     'optimization': 1,
     'optimization_variable': 'default_n_steps_in',
-    'optimization_values': [12, 20, 40],
+    'optimization_values': [4, 8, 10],
     'plot_all_optimized_models': 1,
-    'print_detailed_result': 1
+    'print_table': 2  # Print detailed table
 })
 
-predictions = predictit.main.predict()
+predictions_optimized_config = predictit.main.predict()
+
 ```
 
 ### Hyperparameters tuning
@@ -157,9 +163,8 @@ import predictit
 from predictit.configuration import config
 
 config.update({
-    'data_source': 'test',  # Data source. ('csv' or 'sql' or 'test')
-    'csv_full_path': r'C:\Users\truton\ownCloud\Github\predictit_library\predictit\test_data\5000 Sales Records.csv',  # Full CSV path with suffix
-    'predicted_column': '',  # Column name that we want to predict
+    'data': r'https://raw.githubusercontent.com/jbrownlee/Datasets/master/daily-min-temperatures.csv',  # Full CSV path with suffix
+    'predicted_column': 'Temp',  # Column name that we want to predict
 
     'predicts': 7,  # Number of predicted values - 7 by default
     'print_number_of_models': 6,  # Visualize 6 best models
@@ -174,24 +179,24 @@ config.update({
         "Autoregressive Linear neural unit",
         "Conjugate gradient",
         "Sklearn regression",
-        'Bayes ridge regression one step',
-        'Decision tree regression',
+        "Bayes ridge regression one step",
+        "Decision tree regression",
     ],
 
     # Define parameters of models
 
     'models_parameters': {
 
-        'AR (Autoregression)': {'used_model': 'ar', 'method': 'cmle', 'ic': 'aic', 'trend': 'nc', 'solver': 'lbfgs'},
-        'ARIMA (Autoregression integrated moving average)': {'used_model': 'arima', 'p': 6, 'd': 0, 'q': 0, 'method': 'css', 'ic': 'aic', 'trend': 'nc', 'solver': 'nm'},
+        "AR (Autoregression)": {'used_model': 'ar', 'method': 'cmle', 'ic': 'aic', 'trend': 'nc', 'solver': 'lbfgs'},
+        "ARIMA (Autoregression integrated moving average)": {'used_model': 'arima', 'p': 6, 'd': 0, 'q': 0, 'method': 'css', 'ic': 'aic', 'trend': 'nc', 'solver': 'nm'},
 
-        'Autoregressive Linear neural unit': {'mi_multiple': 1, 'mi_linspace': (1e-5, 1e-4, 3), 'epochs': 10, 'w_predict': 0, 'minormit': 0},
-        'Conjugate gradient': {'epochs': 200},
+        "Autoregressive Linear neural unit": {'mi_multiple': 1, 'mi_linspace': (1e-5, 1e-4, 3), 'epochs': 10, 'w_predict': 0, 'minormit': 0},
+        "Conjugate gradient": {'epochs': 200},
 
-        'Bayes ridge regression': {'regressor': 'bayesianridge', 'n_iter': 300, 'alpha_1': 1.e-6, 'alpha_2': 1.e-6, 'lambda_1': 1.e-6, 'lambda_2': 1.e-6},
-
+        "Bayes ridge regression": {'regressor': 'bayesianridge', 'n_iter': 300, 'alpha_1': 1.e-6, 'alpha_2': 1.e-6, 'lambda_1': 1.e-6, 'lambda_2': 1.e-6},
+    }
 })
 
-predictions = predictit.main.predict()
+predictions_configured = predictit.main.predict()
 
 ```

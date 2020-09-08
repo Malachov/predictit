@@ -3,22 +3,13 @@ from setuptools import setup, find_packages
 import pkg_resources
 import predictit
 
-
 version = predictit.__version__
-
 
 with open('README.md') as readme_file:
     readme = readme_file.read()
 
-try:
-    with open('requirements.txt') as f:
-        myreqs = [
-            str(requirement)
-            for requirement
-            in pkg_resources.parse_requirements(f)
-        ]
-except Exception:
-    myreqs=[]
+with open('requirements.txt') as f:
+    myreqs = [str(requirement) for requirement in pkg_resources.parse_requirements(f)]
 
 setup(
     name='predictit',
@@ -27,7 +18,7 @@ setup(
     license='mit',
     author='Daniel Malachov',
     author_email='malachovd@seznam.cz',
-    install_requires=['numpy', 'pandas', 'eel', 'scipy', 'statsmodels', 'scikit_learn', 'sklearn_extensions', 'pygments', 'tabulate', 'matplotlib', 'cufflinks', 'plotly', 'seaborn', 'dtaidistance', 'm2r'],
+    install_requires=myreqs,
     description='Library/framework for making predictions.',
     long_description_content_type='text/markdown',
     long_description=readme,

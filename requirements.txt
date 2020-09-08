@@ -8,8 +8,6 @@ sklearn_extensions
 pygments
 tabulate
 matplotlib
-cufflinks
 plotly
 seaborn
 dtaidistance
-m2r

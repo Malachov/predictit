@@ -1,5 +1,10 @@
 # List of what have been done in new versions
 
+## 1.5x - 08/2020
+
+- [x] Data consolidation simplified - only in dataframe now
+- [x] Data preprocessing functions possible now in dataframe
+
 ## 1.4x - 08/2020
 
 - [x] Travis CI building releases on Pypi as well on github.

@@ -2,7 +2,7 @@ import statsmodels.tsa.api as sm
 import statsmodels.tsa.ar_model as ar_model
 
 
-def train(data, used_model='autoreg', p=5, d=1, q=0, cov_type='nonrobust', method='cmle', ic='aic', trend='nc', solver='lbfgs',
+def train(data, used_model='autoreg', p=5, d=1, q=0, cov_type='nonrobust', method='cmle', ic='aic', trend='nc', solver='lbfgs', maxlag=13,
           # SARIMAX args
           seasonal=(1, 1, 1, 24), enforce_invertibility=False, enforce_stationarity=False):
     """Autoregressive model from statsmodels library. Only univariate data.
@@ -39,7 +39,7 @@ def train(data, used_model='autoreg', p=5, d=1, q=0, cov_type='nonrobust', metho
         fitted_model = model.fit(method=method, ic=ic, trend=trend, solver=solver, disp=0)
 
     elif used_model == 'autoreg':
-        auto = ar_model.ar_select_order(data, maxlag=40)
+        auto = ar_model.ar_select_order(data, maxlag=maxlag)
         model = ar_model.AutoReg(data, lags=auto.ar_lags, trend=auto.trend, seasonal=auto.seasonal, period=auto.period)
         fitted_model = model.fit(cov_type=cov_type)
 

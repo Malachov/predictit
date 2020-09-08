@@ -4,7 +4,6 @@ import textwrap
 import os
 import pygments
 
-_GUI = 0
 
 try:
     from IPython import get_ipython
@@ -21,13 +20,31 @@ else:
     _JUPYTER = 0
 
 _COLORIZE = 1
+_GUI = 0
 
 # To enable colors in cmd...
 os.system('')
 
 
+def objectize_str(message):
+    """Make a class from a string to be able to apply escape characters and colors in tracebacks.
+
+    Args:
+        message (str): Any string you use.
+
+    Returns:
+        Object: Object, that can return string if printed or used in warning or raise.
+    """
+    class X(str):
+        def __repr__(self):
+            return f"{message}"
+
+    return X(message)
+
+
 def colorize(message):
     """Add color to message - usally warnings and errors, to know what is internal error on first sight.
+    Simple string edit.
 
     Args:
         message (str): Any string you want to color.
@@ -36,24 +53,36 @@ def colorize(message):
         str: Message in yellow color. Symbols added to string cannot be read in some terminals.
             If global _COLORIZE is 0, it return original string.
     """
-    class X(str):
-        def __repr__(self):
-            return f"\033[93m {message} \033[0m" if _COLORIZE else message
 
-    return X(message)
+    return f"\033[93m {message} \033[0m"
 
 
-def user_warning(message):
-    """Raise warning. Can be colorized. Display of warning is configured with debug variable in `config.py`.
+def user_message(message, caption="User message"):
+    """Return enhanced colored message. Used for raising exceptions, assertions or important warninfs mainly.
+    You can print returned message, or you can use user_warning function. Then it will be printed only in debug mode.
+
+    Args:
+        message (str): Any string content of warning.
+
+    Returns:
+        enhanced
+    """
+    updated_str = textwrap.indent(text=f"\n\n========= {caption} ========= \n\n {message} \n\n", prefix='    ')
+
+    if _COLORIZE:
+        updated_str = colorize(updated_str)
+
+    return objectize_str(updated_str)
+
+
+def user_warning(message, caption="User message"):
+    """Raise warning - just message, not traceback. Can be colorized. Display of warning is configured with debug variable in `config.py`.
 
     Args:
         message (str): Any string content of warning.
     """
 
-    if _COLORIZE:
-        warnings.warn(f"\033[93m \n\n\t{message}\n\n \033[0m", stacklevel=2)
-    else:
-        warnings.warn(f"\n\n\t{message}\n\n", stacklevel=2)
+    warnings.warn(user_message(message, caption=caption))
 
 
 def traceback_warning(message='Traceback warning'):
@@ -62,7 +91,7 @@ def traceback_warning(message='Traceback warning'):
     configured with debug variable in `config.py`.
 
     Args:
-        message (str, optional): Caption of warning. Defaults to ''.
+        message (str, optional): Caption of warning. Defaults to 'Traceback warning'.
     """
     if _COLORIZE:
         separated_traceback = pygments.highlight(traceback.format_exc(), pygments.lexers.PythonTracebackLexer(), pygments.formatters.Terminal256Formatter(style='friendly'))
@@ -153,7 +182,7 @@ def confidence_interval(data, predicts=7, confidence=0.1, p=1, d=0, q=0):
         last_value = data[-1]
         data = data_preprocessing.do_difference(data)
 
-        model = ARIMA(data, order=order)
+        model = sm.ARIMA(data, order=order)
         model_fit = model.fit(disp=0)
         predictions = model_fit.forecast(steps=predicts, alpha=confidence)
 

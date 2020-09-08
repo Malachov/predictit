@@ -4,7 +4,6 @@ import sklearn.multioutput
 import sklearn.tree
 import sklearn.neighbors
 import numpy as np
-import sklearn_extensions.extreme_learning_machines.elm as elm
 
 linear_model = sklearn.linear_model
 
@@ -85,18 +84,22 @@ def train(sequentions, regressor='bayesianridge', predicts=7, load_trained_model
     elif regressor == 'Passive aggressive regression':
         model = sklearn.linear_model.PassiveAggressiveRegressor()
     elif regressor == 'elm':
+        import sklearn_extensions.extreme_learning_machines.elm as elm
         model = elm.ELMRegressor(n_hidden=n_hidden, alpha=alpha, rbf_width=rbf_width, activation_func=activation_func)
     elif regressor == 'elm_gen':
+        import sklearn_extensions.extreme_learning_machines.elm as elm
         model = elm.GenELMRegressor()
 
     if sequentions[1].shape[1] == 1:
         model.output_shape = 'one_step'
+        output = sequentions[1].ravel()
 
     else:
         model = sklearn.multioutput.MultiOutputRegressor(model)
         model.output_shape = 'batch'
+        output = sequentions[1]
 
-    model.fit(sequentions[0], sequentions[1])
+    model.fit(sequentions[0], output)
 
     return model
 
