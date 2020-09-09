@@ -482,7 +482,7 @@ if __name__ == "__main__":
     # test_compare_models_list = test_compare_models_list()
     # test_compare_models_with_optimization = test_compare_models_with_optimization()
     # test_GUI()
-    test_preprocessing()
+    # test_preprocessing()
 
     ## Custom use case test...
 
@@ -498,4 +498,9 @@ if __name__ == "__main__":
     # })
 
     # predictions = predictit.main.predict()
+    my_data = pd.read_csv("https://raw.githubusercontent.com/jbrownlee/Datasets/master/daily-min-temperatures.csv")
+
+    predictions = predictit.main.predict(data=my_data, predicted_column="Temp", use_config_preset="fast", plotit=1, show_plot=1, printit=0, return_type='detailed_dictionary')
+
+
     pass

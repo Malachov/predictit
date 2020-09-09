@@ -1,6 +1,3 @@
-import statsmodels.tsa.api as sm
-import statsmodels.tsa.ar_model as ar_model
-
 
 def train(data, used_model='autoreg', p=5, d=1, q=0, cov_type='nonrobust', method='cmle', ic='aic', trend='nc', solver='lbfgs', maxlag=13,
           # SARIMAX args
@@ -19,6 +16,9 @@ def train(data, used_model='autoreg', p=5, d=1, q=0, cov_type='nonrobust', metho
     Returns:
         np.ndarray: Predictions of input time series.
     """
+
+    import statsmodels.tsa.api as sm
+    import statsmodels.tsa.ar_model as ar_model
 
     if used_model == 'ar':
         model = sm.AR(data)

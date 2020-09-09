@@ -41,6 +41,7 @@
 
 ## Deals
 
+- [ ] Try if scikit can be removed (smoothing) (100mb) (in other libs requirements?)
 - [ ] Remove other columns option and use default_other_columns_length to create one_column_input data
 - [ ] Define some set of datasets and evaluate results on commit with tag. save results into csv and evalueate KPI
 - [ ] Tests for GUI and unit test for define inputs

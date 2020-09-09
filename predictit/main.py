@@ -141,12 +141,12 @@ def predict(**function_kwargs):
         def update_gui(content, id):
             pass
 
+    # Edit config.py default values with arguments values if exist
+    config.update(function_kwargs)
+
     if config.use_config_preset and config.use_config_preset != 'none':
         updated_config = config.presets[config.use_config_preset]
         config.update(updated_config)
-
-    # Edit config.py default values with arguments values if exist
-    config.update(function_kwargs)
 
     # Do not repeat actually mean evaluate once
     if not config.repeatit:

@@ -19,8 +19,6 @@ so reshape(1, -1) if necessary...
 
 import pandas as pd
 import numpy as np
-import scipy.signal
-import scipy.stats
 import warnings
 from sklearn import preprocessing
 from pathlib import Path
@@ -91,11 +89,12 @@ def load_data(config):
                     data = pd.read_csv(test_data_path.as_posix(), sep=config.csv_style['separator'],
                                        decimal=config.csv_style['decimal']).iloc[-config.max_imported_length:, :]
 
-                except Exception:
+                except Exception as err:
                     if not_found:
                         raise FileNotFoundError(user_message(
                             "File not found on configured path. If you are using relative path, file must have be in CWD "
-                            "(current working directory) or must be inserted in system paths (sys.path.insert(...)). If url, check if page is available.",
+                            "(current working directory) or must be inserted in system paths (sys.path.insert(...)). If url, check if page is available."
+                            f"\n\n Detailed error: \n\n {err}",
                             caption="File not found error"))
                     else:
                         raise(RuntimeError(user_message("Data load error. File found on path, but not loaded. Check if you use "
@@ -513,6 +512,8 @@ def smooth(data, window=101, polynom_order=2):
     Returns:
         ndarray: Cleaned data with less noise.
     """
+    import scipy.signal
+
     for i in range(data.shape[1]):
         data[:, i] = scipy.signal.savgol_filter(
             data[:, i], window, polynom_order)
@@ -534,6 +535,8 @@ def fitted_power_transform(data, fitted_stdev, mean=None, fragments=10, iteratio
     Returns:
         np.array: Transformed data with demanded standard deviation and mean.
     """
+
+    import scipy.stats
 
     lmbda_low = 0
     lmbda_high = 3
