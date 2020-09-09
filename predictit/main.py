@@ -118,9 +118,6 @@ def predict(**function_kwargs):
     # Some global config variables will be updated. But after finishing function, original global config have to be returned
     config_freezed = config.freeze()
 
-    # Define whether to print warnings or not or stop on warnings as on error
-    predictit.misc.set_warnings(config.debug, config.ignored_warnings)
-
     _GUI = predictit.misc._GUI
 
     # Add everything printed + warnings to variable to be able to print in GUI
@@ -143,6 +140,9 @@ def predict(**function_kwargs):
 
     # Edit config.py default values with arguments values if exist
     config.update(function_kwargs)
+
+    # Define whether to print warnings or not or stop on warnings as on error
+    predictit.misc.set_warnings(config.debug, config.ignored_warnings)
 
     if config.use_config_preset and config.use_config_preset != 'none':
         updated_config = config.presets[config.use_config_preset]
