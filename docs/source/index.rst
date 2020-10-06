@@ -3,42 +3,36 @@
 Submodules
 ==========
 
-`configuration <predictit.configuration>`_
--------------------------------------------
+`configuration <predictit.configuration.html>`_
+-----------------------------------------------
 
 .. automodule:: predictit.configuration
 
-`main <predictit.main>`_
+`main <predictit.main.html>`_
 -----------------------------
 
 .. automodule:: predictit.main
 
 
-`analyze <predictit.analyze>`_
+`analyze <predictit.analyze.html>`_
 -----------------------------------
 
 .. automodule:: predictit.analyze
 
 
-`best_params <predictit.best_params>`_
+`best_params <predictit.best_params.html>`_
 -------------------------------------------
 
 .. automodule:: predictit.best_params
 
 
-`database <predictit.database>`_
+`database <predictit.database.html>`_
 -------------------------------------
 
 .. automodule:: predictit.database
 
 
-`data_preprocessing <predictit.data_preprocessing>`_
------------------------------------------------------
-
-.. automodule:: predictit.data_preprocessing
-
-
-`evaluate_predictions <predictit.evaluate_predictions>`_
+`evaluate_predictions <predictit.evaluate_predictions.html>`_
 -------------------------------------------------------------
 
 .. automodule:: predictit.evaluate_predictions
@@ -47,13 +41,13 @@ Submodules
 Subpackages
 ===========
 
-`models <predictit.models>`_
---------------------------------
+`models <predictit.models.html>`_
+---------------------------------
 
 .. automodule:: predictit.models
 
-`test_data <predictit.test_data>`_
---------------------------------
+`test_data <predictit.test_data.html>`_
+---------------------------------------
 
 .. automodule:: predictit.test_data
 

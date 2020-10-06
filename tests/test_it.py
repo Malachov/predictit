@@ -14,23 +14,29 @@ import inspect
 import os
 import warnings
 import matplotlib
-matplotlib.use('agg')
+
+import mydatapreprocessing as mdp
+import mylogging
+
+
+sys.path.insert(0, Path(os.path.abspath(inspect.getframeinfo(inspect.currentframe()).filename)).parents[0].as_posix())
+
+from visual import visual_test
 
 sys.path.insert(0, Path(os.path.abspath(inspect.getframeinfo(inspect.currentframe()).filename)).parents[1].as_posix())
 
-warnings.filterwarnings('ignore', message=r"[\s\S]*Matplotlib is currently using agg, which is a non-GUI backend*")
-
 import predictit
-config = predictit.configuration.config
 
-predictit.misc._COLORIZE = 0
+Config = predictit.configuration.Config
+Config.plotit = 0
+config_unchanged = Config.freeze()
+
+mylogging._COLORIZE = 0
+warnings.filterwarnings('ignore', message=r"[\s\S]*Matplotlib is currently using agg, which is a non-GUI backend*")
+matplotlib.use('agg')
 
 
-config.plotit = 0
-
-config_unchanged = config.freeze()
-
-config.update({
+Config.update({
     'return_type': 'best',
     'predicted_column': 0,
     'debug': 1,
@@ -49,20 +55,34 @@ config.update({
     ]
 })
 
-config_original = config.freeze()
+config_original = Config.freeze()
 
-np.random.seed(1)
+np.random.seed(2)
 
 
-def test_own_data():
-    config.plotit = 1
-    config.printit = 1
-    config.plot_type = 'plotly'
-    config.show_plot = 0
+def test_1():
+    Config.update({
+        'data': "https://blockchain.info/unconfirmed-transactions?format=json",
+        'data_orientation': "index",
+        'request_datatype_suffix': ".json",
+        'predicted_table': 'txs',
+        'predicted_column': "weight",
+        'datalength': 200,
+        'remove_nans_threshold': 0.85,
+        'remove_nans_or_replace': 'neighbor',
+        'add_fft_columns': 0,
+        'do_data_extension': False,
+        'embedding': 'label',
+    })
 
-    config.other_columns = 0
-    config.multiprocessing = 0
-    result = predictit.main.predict(data=np.random.randn(100, 5), predicts=3, return_type='detailed_dictionary')
+    Config.plotit = 1
+    Config.printit = 1
+    Config.plot_type = 'plotly'
+    Config.show_plot = 0
+
+    Config.other_columns = 0
+    Config.multiprocessing = 0
+    result = predictit.main.predict(predicts=3, return_type='detailed_dictionary')
     assert not np.isnan(np.min(result['best']))
     return result
 
@@ -70,24 +90,24 @@ def test_own_data():
 def test_readmes():
 
     ### Example 1 ###
-    config.update(config_unchanged)
+    Config.update(config_unchanged)
 
     predictions_1 = predictit.main.predict(data=np.random.randn(100, 2), predicted_column=1, predicts=3, return_type='best')
 
     ### Example 2 ###
-    config.update(config_unchanged)
+    Config.update(config_unchanged)
 
-    # You can edit config in two ways
-    config.data = 'https://raw.githubusercontent.com/jbrownlee/Datasets/master/daily-min-temperatures.csv'  # You can use local path on pc as well... "/home/name/mycsv.csv" !
-    config.predicted_column = 'Temp'  # You can use index as well
-    config.datetime_index = 'Date'  # Will be used in result
-    config.freq = "D"  # One day - one value
-    config.resample_function = "mean"  # If more values in one day - use mean (more sources)
-    config.return_type = 'detailed_dictionary'
-    config.debug = 0  # Ignore warnings
+    # You can edit Config in two ways
+    Config.data = 'https://raw.githubusercontent.com/jbrownlee/Datasets/master/daily-min-temperatures.csv'  # You can use local path on pc as well... "/home/name/mycsv.csv" !
+    Config.predicted_column = 'Temp'  # You can use index as well
+    Config.datetime_column = 'Date'  # Will be used in result
+    Config.freq = "D"  # One day - one value
+    Config.resample_function = "mean"  # If more values in one day - use mean (more sources)
+    Config.return_type = 'detailed_dictionary'
+    Config.debug = 0  # Ignore warnings
 
     # Or
-    config.update({
+    Config.update({
         'predicts': 12,  # Number of predicted values
         'default_n_steps_in': 12  # Value of recursive inputs in model (do not use too high - slower and worse predictions)
     })
@@ -95,31 +115,31 @@ def test_readmes():
     predictions_2 = predictit.main.predict()
 
     ### Example 3 ###
-    config.update(config_unchanged)
+    Config.update(config_unchanged)
 
-    my_data_array = np.random.randn(2000, 4)  # Define your data here
+    my_data_array = np.random.randn(500, 3)  # Define your data here
 
     # You can compare it on same data in various parts or on different data (check configuration on how to insert dictionary with data names)
-    config.update({
-        'data_all': (my_data_array[-2000:], my_data_array[-1500:], my_data_array[-1000:])
+    Config.update({
+        'data_all': {'First part': (my_data_array[-500:], 0), 'Second part': (my_data_array[-200:], 2)}
     })
 
     compared_models = predictit.main.compare_models()
 
     ### Example 4 ###
-    config.update(config_unchanged)
+    Config.update(config_unchanged)
 
-    config.data = pd.read_csv("https://raw.githubusercontent.com/jbrownlee/Datasets/master/daily-min-temperatures.csv")
+    Config.data = pd.read_csv("https://raw.githubusercontent.com/jbrownlee/Datasets/master/daily-min-temperatures.csv")
 
     # Define list of columns or '*' for predicting all of the columns
-    config.predicted_columns = ['*']
+    Config.predicted_columns = ['*']
 
     multiple_columns_prediction = predictit.main.predict_multiple_columns()
 
     ### Example 5 ###
-    config.update(config_unchanged)
+    Config.update(config_unchanged)
 
-    config.update({
+    Config.update({
         'data': "https://raw.githubusercontent.com/jbrownlee/Datasets/master/daily-min-temperatures.csv",
         'predicted_column': 'Temp',
         'return_type': 'all_dataframe',
@@ -133,9 +153,36 @@ def test_readmes():
     predictions_optimized_config = predictit.main.predict()
 
     ### Example 6 ###
-    config.update(config_unchanged)
 
-    config.update({
+    from predictit.analyze import analyze_column
+    from mydatapreprocessing.preprocessing import load_data, data_consolidation, preprocess_data
+    from predictit.plots import plot
+
+    data = "https://blockchain.info/unconfirmed-transactions?format=json"
+
+    # Load data from file or URL
+    data_loaded = load_data(data, request_datatype_suffix=".json", predicted_table='txs')
+
+    # Transform various data into defined format - pandas dataframe - convert to numeric if possible, keep
+    # only numeric data and resample ifg configured. It return array, dataframe
+    data_consolidated = data_consolidation(
+        data_loaded, predicted_column="weight", data_orientation="index", remove_nans_threshold=0.9, remove_nans_or_replace='interpolate')
+
+    # Predicted column is on index 0 after consolidation)
+    analyze_column(data_consolidated.iloc[:, 0])
+
+    # Preprocess data. It return preprocessed data, but also last undifferenced value and scaler for inverse
+    # transformation, so unpack it with _
+    data_preprocessed, _, _ = preprocess_data(data_consolidated, remove_outliers=True, smoothit=False,
+                                              correlation_threshold=False, data_transform=False, standardizeit='standardize')
+
+    # Plot inserted data (show false just because tests)
+    plot(data_preprocessed, show=0)
+
+    ### Example 7 ###
+    Config.update(config_unchanged)
+
+    Config.update({
         'data': r'https://raw.githubusercontent.com/jbrownlee/Datasets/master/daily-min-temperatures.csv',  # Full CSV path with suffix
         'predicted_column': 'Temp',  # Column name that we want to predict
 
@@ -187,21 +234,28 @@ def test_readmes():
 
 def test_main_from_config():
 
-    config.update(config_original)
-    config.update({
+    Config.update(config_original)
+    Config.update({
         'data': 'https://raw.githubusercontent.com/jbrownlee/Datasets/master/daily-min-temperatures.csv',
         'predicted_column': 'Temp',
-        'datetime_index': 'Date',
+        'datetime_column': 'Date',
         'freq': 'D',
         'return_type': 'all_dataframe',
-        'max_imported_length': 1000,
+        'max_imported_length': 300,
         'plotit': 1,
         'plot_type': 'matplotlib',
         'show_plot': 0,
-        'optimization': 1,
-        'optimization_variable': 'data_transform',
-        'optimization_values': [0, 'difference'],
         'print_number_of_models': 10,
+        'add_fft_columns': 1,
+        'fft_window': 16,
+        'do_data_extension': True,
+        'add_differences': True,
+        'add_second_differences': True,
+        'add_multiplications': True,
+        'add_rolling_means': True,
+        'add_rolling_stds': True,
+        'rolling_data_window': 10,
+        'add_mean_distances': True,
         'analyzeit': 1,
         'last_row': 0,
         'correlation_threshold': 0.2,
@@ -224,12 +278,12 @@ def test_main_from_config():
 
 def test_main_optimize_and_args():
 
-    config.update(config_original)
-    config.update({
+    Config.update(config_original)
+    Config.update({
         'data': 'test',
         'predicted_column': '',
         'predicts': 6,
-        'datetime_index': '',
+        'datetime_column': '',
         'freq': 'M',
         'datalength': 1000,
         'default_n_steps_in': 5,
@@ -259,13 +313,13 @@ def test_main_optimize_and_args():
 
 def test_config_optimization():
 
-    config.update(config_original)
+    Config.update(config_original)
     df = pd.DataFrame([range(200), range(1000, 1200)]).T
     df['time'] = pd.date_range('2018-01-01', periods=len(df), freq='H')
 
-    config.update({
+    Config.update({
         'data': df,
-        'datetime_index': 'time',
+        'datetime_column': 'time',
         'freq': '',
         'predicted_column': 0,
         'datalength': 300,
@@ -274,7 +328,8 @@ def test_config_optimization():
         'data_transform': None,
         'repeatit': 1,
         'remove_outliers': 0,
-        'remove_nans': 'any_rows',
+        'remove_nans_threshold': 0.8,
+        'remove_nans_or_replace': 'mean',
         'optimization': 1,
         'optimization_variable': 'default_n_steps_in',
         'optimization_values': [12, 20, 40],
@@ -294,10 +349,10 @@ def test_config_optimization():
 
 def test_most_models():
 
-    config.update(config_original)
+    Config.update(config_original)
     df = pd.DataFrame([range(200), range(1000, 1200)]).T
 
-    config.update({
+    Config.update({
         'data': df,
         'predicts': 7,
         'default_n_steps_in': 10,
@@ -306,7 +361,7 @@ def test_most_models():
 
         'used_models': [
             'ARMA', 'ARIMA (Autoregression integrated moving average)', 'autoreg', 'SARIMAX (Seasonal ARIMA)',
-            'Autoregressive Linear neural unit', 'Autoregressive Linear neural unit normalized', 'Linear neural unit with weigths predict',
+            'Autoregressive Linear neural unit', 'Autoregressive Linear neural unit normalized', 'Linear neural unit with weights predict',
             'Sklearn regression', 'Bayes ridge regression', 'Passive aggressive regression', 'Gradient boosting',
             'KNeighbors regression', 'Decision tree regression', 'Hubber regression',
             'Bagging regression', 'Stochastic gradient regression', 'Extreme learning machine', 'Gen Extreme learning machine', 'Extra trees regression', 'Random forest regression',
@@ -316,15 +371,30 @@ def test_most_models():
     })
 
     result = predictit.main.predict()
+
     assert not np.isnan(np.min(result))
+
     return result
 
 
+def test_other_models_functions():
+    tf_optimizers = predictit.models.tensorflow.get_optimizers_loses_activations()
+    sklearn_regressors = predictit.models.sklearn_regression.get_regressors()
+
+    sequentions = mdp.inputs.make_sequences(np.random.randn(100, 1), 5)
+    predictit.models.autoreg_LNU.train(sequentions, plot=1)
+
+    assert tf_optimizers and sklearn_regressors
+
+
 def test_presets():
-    config.update(config_original)
-    config.update({
-        'data': "https://raw.githubusercontent.com/jbrownlee/Datasets/master/daily-min-temperatures.csv",
-        'predicted_column': 'Temp',
+    Config.update(config_original)
+    Config.update({
+        'data': "https://blockchain.info/unconfirmed-transactions?format=json",
+        'request_datatype_suffix': '.json',
+        'predicted_table': 'txs',
+        'data_orientation': 'index',
+        'predicted_column': 'weight',
         'datalength': 500,
         'use_config_preset': 'fast',
     })
@@ -332,7 +402,7 @@ def test_presets():
     result = predictit.main.predict()
     assert not np.isnan(np.min(result))
 
-    config.update({
+    Config.update({
         'use_config_preset': 'normal'
     })
 
@@ -343,8 +413,8 @@ def test_presets():
 
 def test_main_multiple():
 
-    config.update(config_original)
-    config.update({
+    Config.update(config_original)
+    Config.update({
         'data': np.random.randn(300, 3),
         'predicted_columns': [0, 1],
         'error_criterion': 'mse_sklearn',
@@ -358,14 +428,15 @@ def test_main_multiple():
 
 def test_main_multiple_all_columns():
 
-    config.update(config_original)
-    config.update({
+    Config.update(config_original)
+    Config.update({
         'use_config_preset': 'fast',
-        'datetime_index': 'Date',
+        'datetime_column': 'Date',
         'freqs': ['D'],
         'data': 'https://www.stats.govt.nz/assets/Uploads/Effects-of-COVID-19-on-trade/Effects-of-COVID-19-on-trade-1-February-1-July-2020-provisional/Download-data/Effects-of-COVID-19-on-trade-1-February-1-July-2020-provisional.csv',
         'predicted_columns': '*',
-        'remove_nans': 'any_columns',
+        'remove_nans_threshold': 0.9,
+        'remove_nans_or_replace': 2,
         'optimization': 0,
         'optimization_variable': 'default_n_steps_in',
         'optimization_values': [12, 20, 40],
@@ -378,7 +449,7 @@ def test_main_multiple_all_columns():
 
 
 def test_compare_models():
-    config.update(config_original)
+    Config.update(config_original)
     data_all = None
 
     result = predictit.main.compare_models(data_all=data_all)
@@ -387,9 +458,9 @@ def test_compare_models():
 
 
 def test_compare_models_list():
-    config.update(config_original)
+    Config.update(config_original)
     dummy_data = np.random.randn(500)
-    data_all = [dummy_data[:200], dummy_data[200: 400], dummy_data[300: ]]
+    data_all = [dummy_data[:200], dummy_data[200: 400], dummy_data[300:]]
 
     result = predictit.main.compare_models(data_all=data_all)
 
@@ -397,14 +468,12 @@ def test_compare_models_list():
 
 
 def test_compare_models_with_optimization():
-    config.update(config_original)
-    config.update({
-        'data_all': {'sin': [predictit.test_data.generate_test_data.gen_sin(), 0],
-                     'Sign': [predictit.test_data.generate_test_data.gen_sign(), 0],
-                     'Random data': [predictit.test_data.generate_test_data.gen_random(), 0]},
+    Config.update(config_original)
+    Config.update({
+        'data_all': None,  # Means default sin, random, sign
         'optimization': 1,
-        'optimization_variable': 'default_n_steps_in',
-        'optimization_values': [4, 6, 8]
+        'optimization_variable': 'data_transform',
+        'optimization_values': [0, 'difference'],
     })
 
     result = predictit.main.compare_models()
@@ -412,56 +481,8 @@ def test_compare_models_with_optimization():
     assert result
 
 
-##################
-### Unit tests ###
-##################
-
-def test_preprocessing():
-
-    ### Column with nan should be removed, row with outlier big value should be removed.
-    ### Preprocessing and inverse will be made and than just  compare with good results
-
-    test_df = pd.DataFrame(np.array([range(5), range(20, 25), range(25, 30), np.random.randn(5)]).T, columns=["First", "Predicted", "Ignored", "Ignored 2"])
-    test_df.iloc[2, 1] = 500
-    test_df.iloc[2, 2] = np.nan
-
-    config = predictit.configuration.config
-    config.predicted_column = 1
-    config.other_columns = 1
-    config.datetime_index = False
-    config.remove_nans = "any_columns"
-
-    data_df, df_df, _ = predictit.data_preprocessing.data_consolidation(test_df, config)
-
-    # Predicted column moved to index 0, but for test reason test, use different one
-    processed_df, last_undiff_value_df, final_scaler_df = predictit.data_preprocessing.preprocess_data(
-        df_df, multicolumn=1, remove_outliers=1, correlation_threshold=0.6, data_transform='difference', standardizeit='standardize')
-
-    inverse_processed_df = predictit.data_preprocessing.preprocess_data_inverse(
-        processed_df['Predicted'].iloc[1:], final_scaler=final_scaler_df, last_undiff_value=test_df['Predicted'][0],
-        standardizeit='standardize', data_transform='difference')
-
-    processed_df_2, last_undiff_value_df_2, final_scaler_df_2 = predictit.data_preprocessing.preprocess_data(
-        data_df, multicolumn=1, remove_outliers=1, correlation_threshold=0.6, data_transform='difference',
-        standardizeit='standardize')
-
-    inverse_processed_df_2 = predictit.data_preprocessing.preprocess_data_inverse(
-        processed_df_2[1:, 0], final_scaler=final_scaler_df_2, last_undiff_value=test_df['Predicted'][0],
-        standardizeit='standardize', data_transform='difference')
-
-    correct_preprocessing = np.array([[-0.707107, -0.707107],
-                                      [1.414214, 1.414214],
-                                      [-0.707107, -0.707107]])
-
-    check_1 = np.allclose(processed_df.values, correct_preprocessing)
-    check_2 = np.allclose(processed_df_2, correct_preprocessing)
-
-    correct_inveerse_preprocessing = np.array([22., 23.])
-
-    check_3 = np.allclose(inverse_processed_df, correct_inveerse_preprocessing)
-    check_4 = np.allclose(inverse_processed_df_2, correct_inveerse_preprocessing)
-
-    assert check_1 and check_2 and check_3 and check_4
+def test_visual():
+    visual_test(print_analyze=1, print_preprocessing=1, print_data_flow=1, print_postprocessing=1)
 
 
 # def test_GUI():
@@ -470,9 +491,9 @@ def test_preprocessing():
 
 # For deeper debug, uncomment problematic test
 if __name__ == "__main__":
-    # result = test_own_data()
+    # result = test_1()
     # result_readmes = test_readmes()
-    # result1 = test_main_from_config()
+    result1 = test_main_from_config()
     # result_2 = test_main_optimize_and_args()
     # result_3 = test_config_optimization()
     # result_4 = test_presets()
@@ -486,21 +507,47 @@ if __name__ == "__main__":
 
     ## Custom use case test...
 
-    # # You can edit config in two ways
-    # config.data = 'https://raw.githubusercontent.com/jbrownlee/Datasets/master/daily-min-temperatures.csv'  # You can use local path on pc as well... "/home/name/mycsv.csv" !
-    # config.predicted_column = 'Temp'  # You can use index as well
-    # config.datetime_index = 'Date'  # Will be used in result
+    # You can edit Config in two ways
 
-    # # Or
-    # config.update({
-    #     'predicts': 14,  # Number of predicted values
-    #     'default_n_steps_in': 15  # Value of recursive inputs in model (do not use too high - slower and worse predictions)
+    # Or
+    # Config.update({
+
+    #     "data": 'https://blockchain.info/unconfirmed-transactions?format=json',
+    #     "predicted_column": 0,
+    #     'request_datatype_suffix': '.json',
+    #     'predicted_table': 'txs',
+    #     'data_orientation': 'index',
     # })
 
     # predictions = predictit.main.predict()
-    my_data = pd.read_csv("https://raw.githubusercontent.com/jbrownlee/Datasets/master/daily-min-temperatures.csv")
 
-    predictions = predictit.main.predict(data=my_data, predicted_column="Temp", use_config_preset="fast", plotit=1, show_plot=1, printit=0, return_type='detailed_dictionary')
-
-
+    # aa =
     pass
+
+#%%
+
+# import pandas as pd
+
+# import sys
+# from pathlib import Path
+# import inspect
+
+# sys.path.insert(0, Path(os.path.abspath(inspect.getframeinfo(inspect.currentframe()).filename)).parents[1].as_posix())
+
+# import predictit
+
+#%%
+# from loguru import logger
+# import logging
+
+# logger.add(sys.stdout, colorize=True, format="<green>{time}</green> <level>{message}</level>")
+
+# @logger.catch
+# def my_function(x, y, z):
+#     # An error? It's caught anyway!
+#     return 1 / (x + y + z)
+
+# my_function()
+
+# # logger.debug("That's it, beautiful and simple logging!")
+# print('ahoj')

@@ -6,9 +6,9 @@ import numpy as np
 import itertools
 import time
 import sys
+from mylogging import traceback_warning
 
 from . import evaluate_predictions
-from .misc import traceback_warning
 
 
 def optimize(model_train, model_predict, kwargs, kwargs_limits, model_train_input, model_test_inputs, models_test_outputs, error_criterion='mape',

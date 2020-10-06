@@ -1,6 +1,7 @@
-"""Module with function compare_predicted_to_test that Compare tested model with reality. It return some error criterion based on config.py"""
+"""Module with function compare_predicted_to_test that Compare tested model with reality. It return some error criterion based on Config.py"""
 
 import numpy as np
+from mylogging import user_message
 from predictit import misc
 
 
@@ -23,7 +24,7 @@ def compare_predicted_to_test(predicted, test, error_criterion='mape', plot=0, m
     predicts = len(predicted)
 
     if predicts != len(test):
-        print('Test and predicted lenght not equeal')
+        print('Test and predicted length not equeal')
         return np.nan
 
     if predicted is not None:
@@ -65,12 +66,19 @@ def compare_predicted_to_test(predicted, test, error_criterion='mape', plot=0, m
             criterion_value = np.mean(np.abs((test - predicted) / no_zero_test)) * 100
 
         elif error_criterion == 'dtw':
+
+            try:
+                from dtaidistance import dtw
+            except Exception:
+                raise ImportError(user_message(
+                    "Library dtaidistance necessary for configured dtw (dynamic time warping) "
+                    "error criterion is not installed! Instal it via \n\npip install dtaidistance"))
+
             predicted_double = predicted.astype('double')
             test_double = test.astype('double')
-            from dtaidistance import dtw
             criterion_value = dtw.distance_fast(predicted_double, test_double)
 
         else:
-            raise KeyError(misc.colorize(f"bad 'error_criterion' config - '{error_criterion}'. Use some from options from config comment..."))
+            raise KeyError(user_message(f"bad 'error_criterion' Config - '{error_criterion}'. Use some from options from config comment..."))
 
         return criterion_value

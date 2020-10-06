@@ -1,5 +1,6 @@
 import numpy as np
 from pathlib import Path
+from mylogging import user_warning
 
 
 def train(sequentions, layers='default', predicts=7, epochs=200, load_trained_model=0, update_trained_model=1, save_model=1,
@@ -24,8 +25,13 @@ def train(sequentions, layers='default', predicts=7, epochs=200, load_trained_mo
         model: Trained model object.
     """
 
-    import keras
-    import tensorflow as tf
+    try:
+        import tensorflow as tf
+    except Exception:
+        user_warning("Tensorflow model configured, but tensorflow library not installed. It's not "
+                     "in general requirements, because very big and not work everywhere. If you "
+                     "want to use tensorflow model, install it via \n\npip install tensorflow")
+        return
 
     if layers == 'default':
         layers = (('lstm', {'units': 32, 'activation': 'relu', 'return_sequences': 1}),
@@ -36,7 +42,7 @@ def train(sequentions, layers='default', predicts=7, epochs=200, load_trained_mo
     y = sequentions[1]
     X_ndim = X.ndim
 
-    models = {'dense': keras.layers.Dense, 'lstm': keras.layers.LSTM, 'mlp': keras.layers.Dense, 'gru': keras.layers.GRU, 'conv2d': keras.layers.Conv2D, 'rnn': keras.layers.SimpleRNN, 'convlstm2d': keras.layers.ConvLSTM2D, 'dropout': keras.layers.Dropout, 'batchnormalization': keras.layers.BatchNormalization}
+    models = {'dense': tf.keras.layers.Dense, 'lstm': tf.keras.layers.LSTM, 'mlp': tf.keras.layers.Dense, 'gru': tf.keras.layers.GRU, 'conv2d': tf.keras.layers.Conv2D, 'rnn': tf.keras.layers.SimpleRNN, 'convlstm2d': tf.keras.layers.ConvLSTM2D, 'dropout': tf.keras.layers.Dropout, 'batchnormalization': tf.keras.layers.BatchNormalization}
 
     if used_metrics == 'accuracy':
         metrics = [tf.keras.metrics.Accuracy()]
@@ -67,16 +73,16 @@ def train(sequentions, layers='default', predicts=7, epochs=200, load_trained_mo
             layers[0][1]['input_shape'] = (X.shape[1],)
             assert (X.ndim != 3), 'For dense first layer only univariate data supported (e.g. shape = (n_samples, n_features))- if ndim > 2: serialize first.'
 
-        model = keras.models.Sequential()
+        model = tf.keras.models.Sequential()
 
         for i, j in enumerate(layers):
 
             model.add(models[j[0]](**j[1] if len(j) > 1 else {}))
 
         if timedistributed == 1:
-            model.add(keras.layers.TimeDistributed(keras.layers.Dense(y.shape[1])))
+            model.add(tf.keras.layers.TimeDistributed(tf.keras.layers.Dense(y.shape[1])))
         else:
-            model.add(keras.layers.Dense(y.shape[1]))
+            model.add(tf.keras.layers.Dense(y.shape[1]))
 
         model.compile(optimizer=optimizer, loss=loss, metrics=metrics)
         model.fit(X, y, epochs=epochs, batch_size=64, verbose=verbose)
@@ -130,14 +136,15 @@ def get_optimizers_loses_activations():
     Returns:
         list: List of tensorflow optimizers.
     """
-    from keras import optimizers
 
-    sgd = optimizers.SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
-    rmsprop = optimizers.RMSprop(lr=0.001, rho=0.9, epsilon=None, decay=0.0)
-    adagrad = optimizers.Adagrad(lr=0.01, epsilon=None, decay=0.0)
-    adadelta = optimizers.Adadelta(lr=1.0, rho=0.95, epsilon=None, decay=0.0)
-    adam = optimizers.Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0.0, amsgrad=False)
-    adamax = optimizers.Adamax(lr=0.002, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0.0)
-    nadam = optimizers.Nadam(lr=0.002, beta_1=0.9, beta_2=0.999, epsilon=None, schedule_decay=0.004)
+    import tensorflow as tf
+
+    sgd = tf.keras.optimizers.SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
+    rmsprop = tf.keras.optimizers.RMSprop(lr=0.001, rho=0.9, epsilon=None, decay=0.0)
+    adagrad = tf.keras.optimizers.Adagrad(lr=0.01, epsilon=None, decay=0.0)
+    adadelta = tf.keras.optimizers.Adadelta(lr=1.0, rho=0.95, epsilon=None, decay=0.0)
+    adam = tf.keras.optimizers.Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0.0, amsgrad=False)
+    adamax = tf.keras.optimizers.Adamax(lr=0.002, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0.0)
+    nadam = tf.keras.optimizers.Nadam(lr=0.002, beta_1=0.9, beta_2=0.999, epsilon=None, schedule_decay=0.004)
 
     return [sgd, rmsprop, adagrad, adadelta, adam, adamax, nadam]

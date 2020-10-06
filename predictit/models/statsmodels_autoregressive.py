@@ -54,7 +54,7 @@ def predict(data, model, predicts=7):
 
     Args:
         data (np.ndarray): Time series data
-        model (list, class): Trained model. It can be list of neural weigths or it can be fitted model class from imported library.
+        model (list, class): Trained model. It can be list of neural weights or it can be fitted model class from imported library.
         predicts (int, optional): Number of predicted values. Defaults to 7.
 
     Returns:

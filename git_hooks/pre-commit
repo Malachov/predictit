@@ -1,0 +1,31 @@
+#!/bin/sh
+
+cd docs/source
+
+mv conf.py ..
+mv index.rst ..
+mv _static ..
+mv _templates ..
+
+cd ..
+
+rm -r source
+rm -r build
+
+mkdir source
+
+mv conf.py source
+mv index.rst source
+mv _static source
+mv _templates source
+
+sphinx-apidoc -f -e -o source ../predictit
+
+cd source
+
+make html
+
+cd ../..
+
+git add docs
+

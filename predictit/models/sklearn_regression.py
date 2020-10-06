@@ -8,23 +8,6 @@ import numpy as np
 linear_model = sklearn.linear_model
 
 
-def get_regressors():
-    """ Create list of all regressors from sklearn (classes, that can be called). E.g. [bayes_ridge_regressor, linear_regressor]"""
-
-    from importlib import import_module
-
-    regressors=[]
-    for module in sklearn.__all__:
-        try:
-            module = import_module(f'sklearn.{module}')
-            regressors.extend([getattr(module, cls) for cls in module.__all__ if 'Regress' in cls])
-        except Exception:
-            pass
-    regressors.append(sklearn.svm.SVR)
-
-    return regressors
-
-
 def train(sequentions, regressor='bayesianridge', predicts=7, load_trained_model=0, update_trained_model=1, save_model=1,
           saved_model_path_string='stored_models', n_estimators=100,
           alpha=0.0001, alpha_1=1.e-6, alpha_2=1.e-6, lambda_1=1.e-6,
@@ -109,7 +92,7 @@ def predict(x_input, model, predicts=7):
 
     Args:
         data (np.ndarray): Time series data
-        model (list, class): Trained model. It can be list of neural weigths or it can be fitted model class from imported library.
+        model (list, class): Trained model. It can be list of neural weights or it can be fitted model class from imported library.
         predicts (int, optional): Number of predicted values. Defaults to 7.
 
     Returns:
@@ -135,3 +118,20 @@ def predict(x_input, model, predicts=7):
     predictions = np.array(predictions).reshape(-1)
 
     return predictions
+
+
+def get_regressors():
+    """ Create list of all regressors from sklearn (classes, that can be called). E.g. [bayes_ridge_regressor, linear_regressor]"""
+
+    from importlib import import_module
+
+    regressors=[]
+    for module in sklearn.__all__:
+        try:
+            module = import_module(f'sklearn.{module}')
+            regressors.extend([getattr(module, cls) for cls in module.__all__ if 'Regress' in cls])
+        except Exception:
+            pass
+    regressors.append(sklearn.svm.SVR)
+
+    return regressors

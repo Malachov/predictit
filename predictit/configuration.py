@@ -1,14 +1,14 @@
-''' All config for main file. Most of values are boolean 1 or 0. You can setup input data, models to use,
+''' All Config for main file. Most of values are boolean 1 or 0. You can setup input data, models to use,
 whether you want find optimal parameters etc. Some setting can be inserted as function parameters, then it has higher priority.
 All values are commented and easy to understand.
 
-If you downloaded the script, edit, save and run function from main, if you use library, import config and edit values...
+If you downloaded the script, edit, save and run function from main, if you use library, import Config and edit values...
 Examples:
 
     >>> import predictit
-    >>> from predictit.configuration import config
+    >>> from predictit.configuration import Config
 
-    >>> config.update({
+    >>> Config.update({
     >>>     'data': 'my/path/to.csv',
     >>>     'plot': 1,
     >>>     'debug': 1,
@@ -20,7 +20,7 @@ Examples:
     >>> }
 
     >>> # You can alse use this syntax
-    >>> config.datalength = 2000
+    >>> Config.datalength = 2000
 
     >>> # Config work for predict() function as well as for predict_multiple_columns() and compare_models
 
@@ -29,78 +29,107 @@ Examples:
     >>> # You can pass configuration as dict kwargs...
     >>> predictions = predictit.main.predict({})
 
-    >>> You can also apply config
+    >>> You can also apply Config
 To see all the possible values, use
 
     >>> predictit.configuration.print_config()
 '''
 
 
-class config():
+class Config():
 
-    # Edit presets as you need but beware - it will overwrite normal config. Default presets edit for example
+    # Edit presets as you need but beware - it will overwrite normal Config. Default presets edit for example
     # number of used models, number of lengths, n_steps_in.
 
-    used_function = 'predict'  # If running main.py script, execute function.Choice = 'predict', 'predict_multiple' or 'compare_models'. If import as library, ignore - just use function.
+    #############
+    ### Input ###
+    #############
 
-    use_config_preset = 'none'  # 'fast', 'normal' or 'none'. Edit some selected config, other remains the same, check config_presets.py file.
-
-    # Input settings
-
-    data = "test"  # File path with suffix (string or pathlib Path). Or you can use numpy array, or pandas dataframe.
+    data = "test"  # File path with suffix (string or pathlib Path). Or you can use numpy array, pandas dataframe or series, list or dictionary.
     # Supported path formats are .CSV. Data shape for numpy array and dataframe is (n_samples, n_feature). Rows are samples and columns are features.
-    # CSV path can be local or web url. Examples: "https://raw.githubusercontent.com/jbrownlee/Datasets/master/daily-min-temperatures.csv" or "/home/path-to/daily-minimum-temperatures.csv
+    # CSV path can be local or web url.
+    # Examples:
+    #   myarray_or_dataframe  # Numpy array or Pandas.DataFrame
+    #   r"/home/user/my.json"  # Local file. The same with .parquet, .h5, .json or .xlsx.  On windows it's necessary to use raw string - 'r' in front of string because of escape symbols \
+    #   "https://yoururl/your.csv"  # Web url (with suffix). Same with json.
+    #   "https://blockchain.info/unconfirmed-transactions?format=json"  # In this case you have to specify also  'request_datatype_suffix': "json", 'data_orientation': "index", 'predicted_table': 'txs',
+    #   [{'col_1': 3, 'col_2': 'a'}, {'col_1': 0, 'col_2': 'd'}]  # List of records
+    #   {'col_1': [3, 2, 1, 0], 'col_2': ['a', 'b', 'c', 'd']}  # Dict with colums or rows (index) - necessary to setup data_orientation!
 
     data_all = None  # [np.array(range(1000)), np.array(range(500))]  # Just for compare_models function. Dictionary of data names and list of it's values and predicted columns or list of data parts or numpy array with rows as data samples.
-    # data_allexample = {data_1 = (my_dataframe, 'column_name_or_index')} or (my_data[-2000:], my_data[-1000:]) and 'predicted_column' as usually in config.
+    # Examples:
+    #   {data_1 = (my_dataframe, 'column_name_or_index')}
+    #   (my_data[-2000:], my_data[-1000:])  # and 'predicted_column' as usually in Config.
 
+    predicted_table = None  # If using excel (xlsx) - it means what sheet to use, if json, it means what key values, if SQL, then it mean what table. Else it have no impact.
+    data_orientation = None  # 'columns' or 'index'. If using json or dictionary, it describe how data are oriented. Default is 'columns' if None used. If orientation is records (in pandas terminology), it's detected automatically.
+    header = 0  # Row index used as column names
     csv_style = {'separator': ",", 'decimal': "."}  # Define CSV separators. En locale usually use {'sep': ",", 'decimal': "."} some Europian country use {'sep': ";", 'decimal': ","}
+    request_datatype_suffix = None  # 'json' for example. If using url with no extension, define which datatype is on this url with GET request
 
     predicted_column = ''  # Name of predicted column (for dataframe data) or it's index - string or int.
     predicted_columns = []  # For predict_multiple function only! List of names of predicted columns or it's indexes. If 'data' is dataframe or numpy, then you can use ['*'] to predict all the columns with numbers.
 
-    datetime_index = ''  # Index of dataframe datetime column or it's name if it has datetime column. If there already is index in input data, it will be used automatically. Data are sorted by time.
-    freq = 0  # Interval for predictions 'M' - months, 'D' - Days, 'H' - Hours.
+    datetime_column = ''  # Index of dataframe datetime column or it's name if it has datetime column. If there already is index in input data, it will be used automatically. Data are sorted by time.
+    freq = None  # Interval for predictions 'M' - months, 'D' - Days, 'H' - Hours. Resample data if datetime column available.
     freqs = []  # For predict_multiple function only! List of intervals of predictions 'M' - months, 'D' - Days, 'H' - Hours. Default use [].
     resample_function = 'sum'  # 'sum' or 'mean' depends of data. For example if current in technological process - mean, if units sold, then sum.
 
     datalength = 0  # The length of the data used for prediction (after resampling). If 0, than full length.
     max_imported_length = 0  # Max length of imported samples (before resampling). If 0, than full length.
 
-    # Output settings
+    ##############
+    ### Output ###
+    ##############
+
+    used_function = 'predict'  # If running main.py script, execute function.Choice = 'predict', 'predict_multiple' or 'compare_models'. If import as library, ignore - just use function.
+    use_config_preset = 'none'  # 'fast', 'normal' or 'none'. Edit some selected Config, other remains the same, check config_presets.py file.
 
     predicts = 7  # Number of predicted values - 7 by default.
 
     return_type = 'best'  # 'best', 'all_dataframe', 'detailed_dictionary' or 'models_error_criterion'.
     # 'best' return array of predictions, 'all_dataframe' return results and models names in columns. 'detailed_dictionary' is used for GUI
-    # and return results as best result, all results dataframe, dataframe for plot, string div with plot and more. 'models_error_criterion' returns MAPE, RMSE or DWT(based on config) criterion of all models in array.
+    # and return results as best result, all results dataframe, dataframe for plot, string div with plot and more. 'models_error_criterion' returns MAPE, RMSE or DWT(based on Config) criterion of all models in array.
 
-    debug = 1  # Debug - If 1, print all results and all the warnings and errors on the way, if 2, stop on first warning, if -1 do not print anything, just return result.
+    debug = 0  # Debug - If 1, print all results and all the warnings and errors on the way, if 2, stop on first warning, if -1 do not print anything, just return result.
 
     plotit = 1  # If 1, plot interactive graph.
     plot_type = 'plotly'  # 'plotly' (interactive) or matplotlib.
     show_plot = 1  # Whether display plot or not. If in jupyter dislplay in jupyter, else in default browser.
     save_plot = 0  # (bool) - Html if plotly type, png if matplotlibtype.
     save_plot_path = ''  # Path where to save the plot (String), if empty string or 0 - saved to desktop.
+    plot_legend = False  # Whether to show description of lines in chart. Even if turned off, it's still displayed on mouseover.
     plot_name = 'Predictions'
     plot_history_length = 200  # How many historic values will be plotted
-    plot_number_of_models = 12  # Number of plotted models. If -1, than all models will be evaluated. 1 if only the best one.
+    plot_number_of_models = 12  # Number of plotted models. If None, than all models will be plotted. 1 if only the best one.
+    # If you want to remove grey area where we suppose the values, setup confidence_area to False.
 
     printit = 1  # Turn on and off all printed details at once.
-    print_table = 2  # Whether print table with models errors. Option 2 will print detailed table with time, optimized config value etc.
-    print_number_of_models = -1  # How many models will be evaluated and printed in results table. If -1, than all models will be evaluated. 1 if only the best one.
+    print_table = 2  # Whether print table with models errors. Option 2 will print detailed table with time, optimized Config value etc.
+    print_number_of_models = None  # How many models will be printed in results table. If None, than all models will be plotted. 1 if only the best one.
     print_time_table = 1  # Whether print table with models errors and time to compute.
     print_result = 1  # Whether print best model results and model details.
     sort_detailed_results_by = 'error'  # 'error' or 'name'
 
-    # Prediction parameters settings
+    confidence_interval = 0.6  # Area of confidence in result plot (grey area where we suppose values) - Bigger value, narrower area - maximum 1. If 0 - not plotted.
 
-    # Optimization of some outer config value e.g. datalength. It will automatically choose the best value for each model
+    ###########################
+    ### Prediction settings ###
+    ###########################
+
+    ### OPTIMIZATIONS ###  !!! Can be time consuming
+
+    multiprocessing = 'pool'  # 'pool' or 'process' or 0
+    already_trained = 0  # Computationaly hard models (LSTM) load from disk.
+
+    ### Option values optimization
+    # Optimization of some outer Config value e.g. datalength. It will automatically choose the best value for each model
     optimization = 0  # If 0 do not optimize. If 1, compute on various option defined values. Automatically choose the best one for each model separately. Can be time consuming (every models are computed several times)
     optimization_variable = 'default_n_steps_in'  # Some value from config that will be optimized. Unlike hyperparameters only defined values will be computed.
     optimization_values = [12, 20, 40]  # List of evaluatedconfig values. Results of each value are only in detailed table.
     plot_all_optimized_models = 1
 
+    ### Models parameters (hyperparameters) optimization
     # Optimization of inner model hyperparameter e.g. number of lags
     # Optimization means, that all the process is evalueated several times. Avoid too much combinations.
     # If you optimize for example 8 parameters and divide it into 5 intervals it means hundreads of combinations (optimize only parameters worth of it) or do it by parts
@@ -109,30 +138,49 @@ class config():
     optimizeit_limit = 10  # How many seconds can take one model optimization.
     optimizeit_plot = 0  # Plot every optimized combinations (plot in interactive way (jupyter) and only if have few parameters, otherwise hundreds of plots!!!)
 
-    multiprocessing = 'pool'  # 'pool' or 'process' or 0
-    default_n_steps_in = 30  # How many lagged values are in vector input to model.
-    other_columns = 1  # If use other columns. Bool.
-    default_other_columns_length = 2  # Other columns vector length used for predictions. If None, lengths same as predicted columnd. If 0, other columns are not used for prediction.
-    remove_nans = 'any_rows'  # If dataframe, 'any_columns' will remove all the columns where is at least one nan column. 'any_rows' delete each row, where is nan value. None will keep nans.
-    dtype = 'float32'  # Main dtype used in prediction. 'float32' or 'float64'.
-    repeatit = 50  # How many times is computation repeated for error criterion evaluation.
-
-    data_transform = 0  # 'difference' or 0 - Transform the data on differences between two neighbor values.
+    ### Data anlalysis
     analyzeit = 0  # If 1, analyze original data, if 2 analyze preprocessed data, if 3, then both. Statistical distribution, autocorrelation, seasonal decomposition etc.
     analyze_seasonal_decompose = {'period': 365, 'model': 'additive'}  # Parameters for seasonal decompose in analyze. Find if there are periodically repeating patterns in data.
-    standardizeit = 'standardize'  # 'standardize'  # One from None, 'standardize', '-11', '01', 'robust'.
 
-    evaluate_type = 'original'  # 'original' or 'preprocessed'. Define whether error criterion (e.g. RMSE) is evaluated on preprocessed data or on original data.
+    ### Data preprocessing
+    unique_threshlold = 0.1  # Romeve string columns, that have to many categories. E.g 0.1 define, that has to be less that 10% of unique values. It will remove ids, hashes etc.
+    embedding = 'label'  # Categorical encoding. Create numbers from strings. 'label' give each category (unique string)
+    # concrete number - result will have same number of columns. 'one-hot' create for every category new column.
+    remove_nans_threshold = 0.2  # From 0 to 1. How much not nans (not a number) can be in column to not be deleted. For example if 0.9 means that columns has to have more than 90% values that are not nan to not be deleted.
+    remove_nans_or_replace = 'mean'  # 'mean', 'interpolate', 'neighbor', 'remove' or value. After removing columns over nan threshold, this will remove or replace rest nan values.
+    #If 'mean', replace with mean of column where nan is, if 'interpolate', it will return guess value based on neighbors. 'neighbor' use value before nan. Remove will remove rows where nans, if value set, it will replace all nans for example with 0.
+    data_transform = 0  # 'difference' or 0 - Transform the data on differences between two neighbor values.
+    standardizeit = 'standardize'  # 'standardize'  # One from None, 'standardize', '-11', '01', 'robust'.
     smoothit = False  # Smoothing data with Savitzky-Golay filter. First argument is window (must be odd!) and second is polynomial order. Example: (11, 2) If False, not smoothing.
     power_transformed = 0  # Whether transform results to have same standard deviation and mean as train data.
     remove_outliers = 0  # Remove extraordinary values. Value is threshold for ignored values. Value means how many times standard deviation from the average threshold is far (have to be > 3, else delete most of data). If predicting anomalies, use 0.
-    error_criterion = 'mse_sklearn'  # 'mse_sklearn', 'mape' or 'rmse' or 'dtw' (dynamic time warping).
     last_row = 0  # If 0, erase last row (for example in day frequency, day is not complete yet).
     correlation_threshold = 0.6  # If evaluating from more collumns, use only collumns that are correlated. From 0 (All columns included) to 1 (only column itself).Z
-    confidence_interval = 0.6  # Area of confidence in result plot (grey area where we suppose values) - Bigger value, narrower area - maximum 1. If 0 - not plotted.
-    already_trained = 0  # Computationaly hard models (LSTM) load from disk.
-    #plotallmodels = 0,  # Plot all models (recommended only in interactive jupyter window).
 
+    ### Data extension = add derived columns
+    add_fft_columns = False  # Whether add rolling window fast fourier data - maximum and maximum of shift
+    fft_window = 32  # Size of used window for fft
+
+    do_data_extension = False  # Add new derived column to data that can help to better predictions - derived from all the columns
+    # do_data_extension turns on or off next options like add_differences or add_rolling means
+    add_differences = True  # Eg. from [1, 2, 3] create [1, 1]
+    add_second_differences = True  # Add second ddifferences
+    add_multiplications = True  # Add all combinations of multiplicated columns
+    add_rolling_means = True  # Add rolling means
+    add_rolling_stds = True  # Add rolling standard deviations
+    add_mean_distances = True  # Add distance from mean for all columns
+    rolling_data_window = 10  # Window for rolling mean and rolling std
+
+    ### Data inputs definition
+    default_n_steps_in = 30  # How many lagged values are in vector input to model.
+    other_columns = 1  # If use other columns. Bool.
+    default_other_columns_length = 2  # Other columns vector length used for predictions. If None, lengths same as predicted columnd. If 0, other columns are not used for prediction.
+    dtype = 'float32'  # Main dtype used in prediction. If 0, None or False, it will keep original. Eg.'float32' or 'float64'.
+
+    ### Error evaluation
+    error_criterion = 'mse_sklearn'  # 'mse_sklearn', 'mape' or 'rmse' or 'dtw' (dynamic time warping).
+    evaluate_type = 'original'  # 'original' or 'preprocessed'. Define whether error criterion (e.g. RMSE) is evaluated on preprocessed data or on original data.
+    repeatit = 50  # How many times is computation repeated for error criterion evaluation.
     mode = 'predict'  # If 'validate', put apart last few ('predicts' + 'validation_gap') values and evaluate on test data that was not in train set. Do not setup - use compare_models function, it will use it automattically.
     validation_gap = 10  # If 'mode' == 'validate' (in compare_models funciton), then describe how many samples are between train and test set. The bigger gap is, the bigger knowledge generalization is necesssary.
 
@@ -141,9 +189,6 @@ class config():
     ### Models, that will be used ###
     #################################
     # Verbose documentation is in models module (__init__.py) and it's files.
-    # Ctrl and Click on import name in main, or right click and go to definition.
-
-    # Two asterisks means bulk edit values
 
     # Extra trees regression and tensorflow are turned off by default, because too timeconsuming.
     # If editting or adding new models, name of the models have to be the same as in models module.
@@ -161,7 +206,7 @@ class config():
 
         #predictit.models.autoreg_LNU
         'Autoregressive Linear neural unit', 'Autoregressive Linear neural unit normalized',
-        # , 'Linear neural unit with weigths predict'
+        # , 'Linear neural unit with weights predict'
 
         # predictit.models.conjugate_gradient
         'Conjugate gradient',
@@ -191,8 +236,8 @@ class config():
 
         cls.input_types = {
 
-            # data
-            # data_one_column
+            'data': None,
+            'data_one_column': None,
 
             'one_step_constant': {'n_steps_in': cls.default_n_steps_in, 'n_steps_out': 1, 'default_other_columns_length': cls.default_other_columns_length, 'constant': 1},
             'one_step': {'n_steps_in': cls.default_n_steps_in, 'n_steps_out': 1, 'default_other_columns_length': cls.default_other_columns_length, 'constant': 0},
@@ -214,7 +259,7 @@ class config():
 
         **{model_name: 'one_in_one_out_constant' for model_name in [
             'Autoregressive Linear neural unit', 'Autoregressive Linear neural unit normalized',
-            'Linear neural unit with weigths predict', 'Conjugate gradient']},
+            'Linear neural unit with weights predict', 'Conjugate gradient']},
 
         **{model_name: 'one_in_one_out' for model_name in [
             'tensorflow_mlp', 'Sklearn regression one step', 'Bayes ridge regression one step',
@@ -246,7 +291,7 @@ class config():
 
         'Autoregressive Linear neural unit': {'mi_multiple': 1, 'mi_linspace': (1e-5, 1e-4, 20), 'epochs': 40, 'w_predict': 0, 'minormit': 0},
         'Autoregressive Linear neural unit normalized': {'mi_multiple': 1, 'mi_linspace': (1e-2, 1, 20), 'epochs': 40, 'w_predict': 0, 'minormit': 1},
-        'Linear neural unit with weigths predict': {'mi_multiple': 1, 'mi_linspace': (1e-5, 1e-4, 20), 'epochs': 40, 'w_predict': 1, 'minormit': 0},
+        'Linear neural unit with weights predict': {'mi_multiple': 1, 'mi_linspace': (1e-5, 1e-4, 20), 'epochs': 40, 'w_predict': 1, 'minormit': 0},
         'Conjugate gradient': {'epochs': 100},
 
         'tensorflow_lstm': {'layers': 'default', 'epochs': 200, 'load_trained_model': 0, 'update_trained_model': 0, 'save_model': 1, 'saved_model_path_string': 'stored_models', 'optimizer': 'adam', 'loss': 'mse', 'verbose': 0, 'used_metrics': 'accuracy', 'timedistributed': 0},
@@ -325,7 +370,7 @@ class config():
             # 'season': cls.order, 'method': ['lbfgs', 'bfgs', 'newton', 'nm', 'cg', 'ncg', 'powell'], 'trend': ['n', 'c', 't', 'ct'], 'enforce_invertibility': [True, False], 'enforce_stationarity': [True, False], 'forecast_type': ['in_sample', 'out_of_sample']},
 
             # 'Autoregressive Linear neural unit': {'mi': [1e-8, 10.0], 'minormit': [0, 1], 'damping': [0.0, 100.0]},
-            # 'Linear neural unit with weigths predict': {'mi': [1e-8, 10.0], 'minormit': [0, 1], 'damping': [0.0, 100.0]},
+            # 'Linear neural unit with weights predict': {'mi': [1e-8, 10.0], 'minormit': [0, 1], 'damping': [0.0, 100.0]},
             # 'Conjugate gradient': {'epochs': cls.epochs},
 
             ### 'tensorflow_lstm': {'loses':["mean_squared_error", "mean_absolute_error", "mean_absolute_percentage_error", "mean_squared_logarithmic_error", "squared_hinge", "logcosh",
@@ -366,7 +411,6 @@ class config():
         "Mean of empty slice",
         "Check mle_retvals",
     ]
-
 
     # If SQL, sql credentials
     server = '.'
@@ -417,17 +461,17 @@ class config():
         }
     }
 
-    # Some config empty containers for values used globally
+    # Some Config empty containers for values used globally
 
     ###############################
-    ### End of edidatble config ###
+    ### End of edidatble Config ###
     ###############################
 
     # !!! Do not edit from here further !!!
     this_path = None
 
 
-orig_config = {key: value for key, value in config.__dict__.items() if not key.startswith('__') and not callable(key)}
+orig_config = {key: value for key, value in Config.__dict__.items() if not key.startswith('__') and not callable(key)}
 
 
 def print_config():

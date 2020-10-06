@@ -1,4 +1,4 @@
-"""Module include two functions: database_load and database_deploy. First download data from database - it's necessary to set up connect credentials in config and edit query!
+"""Module include two functions: database_load and database_deploy. First download data from database - it's necessary to set up connect credentials in Config and edit query!
 The database_deploy than use predicted values and deploy it to database server.
 
 """
@@ -121,30 +121,30 @@ def database_deploy(server, database, last_date, sum_number, sum_duration, freq=
     from sqlalchemy import create_engine
     import urllib
 
-    lenght = len(sum_number)
+    length = len(sum_number)
 
     dataframe_to_sql = pd.DataFrame([])
-    dataframe_to_sql['EventStart'] = pd.date_range(start=last_date, periods=lenght + 1, freq=freq)
+    dataframe_to_sql['EventStart'] = pd.date_range(start=last_date, periods=length + 1, freq=freq)
     dataframe_to_sql = dataframe_to_sql.iloc[1:]
 
     dataframe_to_sql['DimDateId'] = dataframe_to_sql['EventStart'].dt.date
     dataframe_to_sql['DimTimeId'] = dataframe_to_sql['EventStart'].dt.time
-    dataframe_to_sql['DimShiftOrigId'] = [-1] * lenght
-    dataframe_to_sql['DimOperationOutBk'] = ['K1'] * lenght
-    dataframe_to_sql['DimProductionEventBk'] = [-1000] * lenght
-    dataframe_to_sql['DimProductOutBk'] = [-1] * lenght
-    dataframe_to_sql['DimEmployeeCode'] = ['D'] * lenght
-    dataframe_to_sql['DimOrderBk'] = [-1] * lenght
-    dataframe_to_sql['DimScenarioBk'] = ['Prediction {}'.format(freq)] * lenght
+    dataframe_to_sql['DimShiftOrigId'] = [-1] * length
+    dataframe_to_sql['DimOperationOutBk'] = ['K1'] * length
+    dataframe_to_sql['DimProductionEventBk'] = [-1000] * length
+    dataframe_to_sql['DimProductOutBk'] = [-1] * length
+    dataframe_to_sql['DimEmployeeCode'] = ['D'] * length
+    dataframe_to_sql['DimOrderBk'] = [-1] * length
+    dataframe_to_sql['DimScenarioBk'] = ['Prediction {}'.format(freq)] * length
 
     dataframe_to_sql['Number'] = sum_number
 
     dataframe_to_sql['Duration'] = sum_duration
 
-    dataframe_to_sql['MaxCycle'] = [0] * lenght
-    dataframe_to_sql['DescriptionCze'] = [''] * lenght
-    dataframe_to_sql['DescriptionEng'] = [''] * lenght
-    dataframe_to_sql['DataFlowLogInsertId'] = [35] * lenght
+    dataframe_to_sql['MaxCycle'] = [0] * length
+    dataframe_to_sql['DescriptionCze'] = [''] * length
+    dataframe_to_sql['DescriptionEng'] = [''] * length
+    dataframe_to_sql['DataFlowLogInsertId'] = [35] * length
 
     params = urllib.parse.quote_plus(r'DRIVER={driver};SERVER={server};DATABASE={database};Trusted_Connection=yes'.format(driver=r'{SQL Server}', server=server, database=database))
     conn_str = 'mssql+pyodbc:///?odbc_connect={}'.format(params)

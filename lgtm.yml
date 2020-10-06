@@ -1,0 +1,7 @@
+extraction:
+  python:
+    python_setup:
+      requirements_files:
+        - requirements.txt
+        - requirements_advanced.txt
+        - requirements_dev.txt

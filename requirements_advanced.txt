@@ -1,0 +1,4 @@
+tensorflow
+dtaidistance
+sklearn_extensions
+xlrd

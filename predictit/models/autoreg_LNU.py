@@ -10,7 +10,7 @@ def train(sequentions, predicts=30, mi=1, mi_multiple=1, mi_linspace=(1e-8, 10, 
         sequentions (tuple(np.ndarray, np.ndarray, np.ndarray)) - Tuple (X, y, x_input) of input train vectors X, train outputs y, and input for prediction x_input
         predicts (int, optional): Number of predicted values. Defaults to 7.
         mi (float, optional): Learning rate. If not normalized must be much smaller. Defaults to 0.1.
-        mi_multiple (bool): If try more weigths and try to find the best. Set the possible values with mi_linspace.
+        mi_multiple (bool): If try more weights and try to find the best. Set the possible values with mi_linspace.
         mi_linspace (np.ndarray, optional): Used learning rate numpy linspace arguments. Defaults to mi_linspace=(1e-8, 10, 20).
             That means, that mimimum value is 1e-8, maximum 20 and there is 20 values in the interval.
         epochs (int): Numer of trained epochs.
@@ -150,7 +150,7 @@ def predict(x_input, model, predicts=7):
 
     Args:
         x_input (np.ndarray): Time series data.
-        model (list, class): Trained model. It can be list of neural weigths .
+        model (list, class): Trained model. It can be list of neural weights .
         predicts (int, optional): Number of predicted values. Defaults to 7.
 
     Returns:

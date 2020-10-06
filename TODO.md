@@ -1,71 +1,86 @@
 # List of what could be done
 
-!! Repair difference transform - last value changing
+## Working on
+
+- [ ] Add transformations results as next input in parallel
+  - [ ] Multiplied columns transform
+  - [ ] Difference transform
+  - [ ] Fast fourier transform
+  - [ ] Rolling window and rolling std transformation
+  - [ ] Distance from the mean
+
+## First to do
+
+- [ ] Test on some larger files
+- [ ] data_preprocessing
+  - [ ] Put data_preprocessing into separate library and import - also misc.warnings
+  - [ ] In remove_outliers function do not remove it, but interpolate by neighbors option
+- [ ] Optionally save and load trained models .npy format for numpy.By default save to trained models folder, as parameter save or load model elsewhere
+- [ ] One hot encoding: OneHotEncoder(dtype=np.int, sparse=True) dataframe string to num
+- [ ] Ensamble learning - bagging - Best models average as one new model
+- [ ] Segmentation for input data subselection - Try TICC method or Matrix profile method or something new
+- [ ] Dask for big data (dask.np.aray and dask dataframe) - chunk datasource
+- [ ] Binnig inputs and classify- E.g. https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.Binarizer.html#sklearn.preprocessing.Binarizer
+- [ ] Fast boosted hyperparametrs optimization method option - (optimize each parameter separately - then again...)
+- [ ] Change GUI to vuetify - do tests on it.
+- [ ] Numba optimization (probably just own models - LNU autoreg model and conjugate grad)
+- [ ] Feature selection (which columns to use) - E.g. https://towardsdatascience.com/deep-dive-into-catboost-functionalities-for-model-interpretation-7cdef669aeed, https://scikit-learn.org/stable/modules/feature_selection.html, https://towardsdatascience.com/feature-selection-with-pandas-e3690ad8504b
+- [ ] Ability to load and save config to json to folder
+- [ ] For error criterion use compare models values in normal predict to remove best decision_tree which is unfair on insample predictions - config option - real error criterion (computationly harder)
+- [ ] Conjugate gradient and autoreg LNU for multiple column data
+- [ ] List of string path files - use glob
 
 ## Big Deals
 
 - [ ] Rewrite own modules (autoreg LNU and Conjugate grad) core loops as C extension
-- [ ] Optionally save and load trained models .npy format for numpy.By default save to trained models folder, as parameter save or load model elsewhere
 - [ ] Analyze output (residuals - mean, std etc. in comparison with original data)
 - [ ] Feature extraction - E.G. autoencoder to shrink input multivariate data to small vectors
+- [ ] Other feature extraction - Choose columns not on correlation, but based on error lowerage with simple model
 - [ ] Results postprocessing
 - [ ] Implement nan values
-  - [ ] One hot encoding: OneHotEncoder(dtype=np.int, sparse=True) dataframe string to num
   - [ ] Vectorize - Embedding
 - [ ] New models
-  - [ ] Ensamble learning - bagging - Best models average as one new model
+  - [ ] LigthGBM
+  - [ ] Prophet
+  - [ ] CatBoostClassifierm CatBoostRegressor
   - [ ] HONU
   - [ ] Levenberg-Marquardt
   - [ ] Random walk with same std and mean and trend as very few last data
   - [ ] Add some boost method (lgboost library..., own adaboost for multivariate data)
   - [ ] ETS method
+  - [ ] Bayes classification - sklearn
 - [ ] Transformations
-  - [ ] Fast fourier transform
-  - [ ] Rolling window and rolling std transformation
   - [ ] Hilbert huang tranformation (pyhht) - predict each part separately and then sum to have result
-  - [ ] Add transformation results as next input
-- [ ] Segmentation for input data subselection - Try TICC method or Matrix profile method or something new
 - [ ] Big data
-  - [ ] PCA on higher dimension data
-  - [ ] Dask for big data (dask.np.aray and dask dataframe) - chunk datasource
+  - [ ] PCA on higher dimension data - try to predict all the columns and inverse transformation. Second option: comprime only other than predicted colums
   - [ ] Incremental learning
     - [ ] In sklearn (partial_fit)
 - [ ] Create prediction type - Regression, classification (binning inputs), anomaly prediction in config
-  - [ ] Binnig inputs and classify- E.g. https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.Binarizer.html#sklearn.preprocessing.Binarizer
-- [ ] Fast boosted hyperparametrs optimization method option - (optimize each parameter separately - then again...)
 - [ ] Add scientific documentation into docstrings (equations and diagrams)
 - [ ] Add exogenous parametrs where possible
-- [ ] Change GUI to vuetify - do tests on it.
-- [ ] Numba optimization (probably just own models - LNU autoreg model and conjugate grad)
-- [ ] Feature selection (which columns to use) - E.g. https://scikit-learn.org/stable/modules/feature_selection.html, https://towardsdatascience.com/feature-selection-with-pandas-e3690ad8504b
 
 ## Deals
 
-- [ ] Try if scikit can be removed (smoothing) (100mb) (in other libs requirements?)
+- [ ] Remove complete dataframe copy in plots.py
+- [ ] In GUI not remove ansi, but do not color
+- [ ] Change config comments https://www.sphinx-doc.org/en/1.4.8/ext/autodoc.html#directive-autoattribute and use in argparse in for loop
+- [ ] Make copy of input data only once - remove in main
 - [ ] Remove other columns option and use default_other_columns_length to create one_column_input data
 - [ ] Define some set of datasets and evaluate results on commit with tag. save results into csv and evalueate KPI
 - [ ] Tests for GUI and unit test for define inputs
 - [ ] Test dataframe data input for statsmodels - date as index
-- [ ] Intellisense option values from list somehow
+- [ ] Intellisense option values from list somehow to give settings options
 - [ ] Do repeate average and more from evaluate in multiprocessing loop and then use sorting as `a = {k: v for k, v in sorted(x.items(), key=lambda item: item[1]['a'])}` then use just slicing for plot and print results and Remove predicted_models_for_table and predicted_models_for_plot
 - [ ] Try recreate config as data class with type hints and comments that will be parsable
-- [ ] For error criterion use compare models values in normal predict to remove best decision_tree which is unfair on insample predictions
-- [ ] Change config comments https://www.sphinx-doc.org/en/1.4.8/ext/autodoc.html#directive-autoattribute
-- [ ] To compare models add second table - summ of error
 - [ ] Full config to readthedocs documentation
-- [ ] Ability to load and save config to json to folder
 - [ ] Print failed models apart and put not in table results
 - [ ] Check if can some lists replace with sets (faster)
-- [ ] Data preprocessing
-  - [ ] Binning inputs
-  - [ ] In remove_outliers function do not remove it, but interpolate by neighbors option
-- [ ] In optimization, compare models on more results to reduce chance
+- [ ] In optimization, compare models on more results to reduce chance. First do create real-error-criterion - than use it.
 - [ ] Remove sys.path.insert in main and do imports better way
 - [ ] Translate and finish models **init** docstrings
 - [ ] Add residuals matrix from results_matrix and add plotly box plot for residuals of models in main.py (https://plot.ly/python/box-plots/), or box plot for error criterion (data lengths and for repetitions) on compare_models
 - [ ] Improve / edit existing models
   - [ ] For models with significant results diversity (ELM...) use optional bagging (mean of more results) in models
   - [ ] Add auto arima models from new libraries
-  - [ ] Conjugate gradient and autoreg LNU for multiple column data
   - [ ] Add stochastic gradient method to autoreg (adam or adagrad)
 - [ ] Finish config presets

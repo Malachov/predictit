@@ -34,7 +34,7 @@ models_assignment = {
     ]},
 
     **{model_name: autoreg_LNU for model_name in [
-        'Autoregressive Linear neural unit', 'Autoregressive Linear neural unit normalized', 'Linear neural unit with weigths predict']},
+        'Autoregressive Linear neural unit', 'Autoregressive Linear neural unit normalized', 'Linear neural unit with weights predict']},
 
     'Conjugate gradient': conjugate_gradient,
 

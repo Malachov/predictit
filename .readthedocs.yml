@@ -5,6 +5,7 @@ python:
   install:
     - requirements: requirements.txt
     - requirements: requirements_dev.txt
+    - requirements: requirements_advanced.txt
 
 # Build documentation in the source/ directory with Sphinx
 sphinx:

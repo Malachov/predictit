@@ -1,16 +1,25 @@
 # List of what have been done in new versions
 
-## 1.5x - 08/2020
+## 1.6x - 10/2020
 
-- [x] Data consolidation simplified - only in dataframe now
+[x] Api change! Config renamed because class with capitalize C from config to Config. 'datetime_index' renamed to 'datetime_column' - Old scripts wont work
+[x] Data_preprocessing and logging from misc moved into own projects and imported. Projects are called mylogging and mydatapreprocessing. It'necessary to have corresponding version
+
+## 1.5x - 09/2020
+
+- [x] New data input. Config Api changed! No data_source anymore. Setup path, url or python data in Config.data. Check configuration for some examples.
+- [x] New data input formats - dictionary, list, parquet, json, h5 or url that return data in request
 - [x] Data preprocessing functions possible now in dataframe
+- [x] Data consolidation simplified - only in dataframe now
+- [x] Remove nans changed. Now first columns with nans over threshold removed, then removed or replaced based on Config.
+- [x] Data_load and data_consolidation arguments changed. Config instance no necessary now, so functions can be used outside this library.
 
 ## 1.4x - 08/2020
 
 - [x] Travis CI building releases on Pypi as well on github.
 - [x] Config redefined to class and so enabling intellisense in IDE.
 
-  - API change!!! instead of config['value'] use config.value. But config.update({'variable': 'value'}) still works !!!
+  - API change!!! instead of config['value'] use Config.value. But Config.update({'variable': 'value'}) still works !!!
 
 - [x] Creating inputs defined in visual test
 - [x] Csv locale option - separator and decimal for correct data reading.
@@ -40,7 +49,7 @@
 
 ## v1.2x. - 03/2020
 
-- [x] Validation mode in config. Results are evaluated on data that was not in train data - used in compare_models.
+- [x] Validation mode in Config. Results are evaluated on data that was not in train data - used in compare_models.
 - [x] Remove nan values - all column option was added
 - [x] User colored warnings in misc (not only traceback warnings) and colorized error raising
 - [x] Two options / modes of analyze - Originall data and preprocessed data
@@ -57,8 +66,6 @@
 - [x] Basic data postprocessing - Power transformation - Two options 1) On train data (change error criterion) 2) Only on output
 
 ## v1.0 - 03/2020 (first no in development version)
-
-### Small Deals
 
 - [x] Tensorflow models architecture configurable with arguments - layers and its parameters in list.
 - [x] Choose which models to optimize (comment out config models_parameters_limits dictionary)

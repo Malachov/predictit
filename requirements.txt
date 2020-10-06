@@ -1,13 +1,14 @@
+mylogging
+mydatapreprocessing
 numpy
 pandas
 eel
 scipy
 statsmodels
-scikit_learn
-sklearn_extensions
+sklearn
 pygments
 tabulate
 matplotlib
 plotly
 seaborn
-dtaidistance
+requests

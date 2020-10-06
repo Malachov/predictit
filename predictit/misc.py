@@ -1,10 +1,4 @@
-import warnings
-import traceback
-import textwrap
-import os
-import pygments
-
-
+import mylogging
 try:
     from IPython import get_ipython
     ipython = get_ipython()
@@ -19,127 +13,7 @@ if ipython is not None:
 else:
     _JUPYTER = 0
 
-_COLORIZE = 1
 _GUI = 0
-
-# To enable colors in cmd...
-os.system('')
-
-
-def objectize_str(message):
-    """Make a class from a string to be able to apply escape characters and colors in tracebacks.
-
-    Args:
-        message (str): Any string you use.
-
-    Returns:
-        Object: Object, that can return string if printed or used in warning or raise.
-    """
-    class X(str):
-        def __repr__(self):
-            return f"{message}"
-
-    return X(message)
-
-
-def colorize(message):
-    """Add color to message - usally warnings and errors, to know what is internal error on first sight.
-    Simple string edit.
-
-    Args:
-        message (str): Any string you want to color.
-
-    Returns:
-        str: Message in yellow color. Symbols added to string cannot be read in some terminals.
-            If global _COLORIZE is 0, it return original string.
-    """
-
-    return f"\033[93m {message} \033[0m"
-
-
-def user_message(message, caption="User message"):
-    """Return enhanced colored message. Used for raising exceptions, assertions or important warninfs mainly.
-    You can print returned message, or you can use user_warning function. Then it will be printed only in debug mode.
-
-    Args:
-        message (str): Any string content of warning.
-
-    Returns:
-        enhanced
-    """
-    updated_str = textwrap.indent(text=f"\n\n========= {caption} ========= \n\n {message} \n\n", prefix='    ')
-
-    if _COLORIZE:
-        updated_str = colorize(updated_str)
-
-    return objectize_str(updated_str)
-
-
-def user_warning(message, caption="User message"):
-    """Raise warning - just message, not traceback. Can be colorized. Display of warning is configured with debug variable in `config.py`.
-
-    Args:
-        message (str): Any string content of warning.
-    """
-
-    warnings.warn(user_message(message, caption=caption))
-
-
-def traceback_warning(message='Traceback warning'):
-    """Raise warning with current traceback as content. There is many models in this library and with some
-    configuration some models crashes. Actually it's not error than, but warning. Display of warning is
-    configured with debug variable in `config.py`.
-
-    Args:
-        message (str, optional): Caption of warning. Defaults to 'Traceback warning'.
-    """
-    if _COLORIZE:
-        separated_traceback = pygments.highlight(traceback.format_exc(), pygments.lexers.PythonTracebackLexer(), pygments.formatters.Terminal256Formatter(style='friendly'))
-    else:
-        separated_traceback = traceback.format_exc()
-
-    separated_traceback = textwrap.indent(text=f"\n\n{message}\n====================\n\n{separated_traceback}\n====================\n", prefix='    ')
-
-    warnings.warn(f"\n\n\n{separated_traceback}\n\n")
-
-
-def set_warnings(debug, ignored_warnings):
-    """Define debug type. Can print warnings, ignore them or stop as error
-
-    Args:
-        debug (int): If 0, than warnings are ignored, if 1, than warning will be displayed just once, if 2,
-            program raise error on warning and stop.
-        ignored_warnings (list): List of warnings (any part of inner string) that will be ingored even if debug is set.
-    """
-
-    if debug == 1:
-        warnings.filterwarnings('once')
-    elif debug == 2:
-        warnings.filterwarnings('error')
-    else:
-        warnings.filterwarnings('ignore')
-
-    for i in ignored_warnings:
-        warnings.filterwarnings('ignore', message=fr"[\s\S]*{i}*")
-
-
-def remove_ansi(string):
-    """In GUI web page different syntax is necessary than in terminal. This will remove color prefix and replace
-    it with html tags.
-
-    Args:
-        string (str): String that will be cleaned.
-
-    Returns:
-        str: Original string with no color prefix.
-    """
-    # if not isinstance(string, str):
-    #     string = str(string)
-
-    string = string.replace('\033[93m', '<b>')
-    string = string.replace('\033[0m', '</b>')
-
-    return string
 
 
 def confidence_interval(data, predicts=7, confidence=0.1, p=1, d=0, q=0):
@@ -212,27 +86,27 @@ def confidence_interval(data, predicts=7, confidence=0.1, p=1, d=0, q=0):
 #     data_folder = Path(folder_path)
 
 #     with open(file_path, "rb") as input_file:
-#         config['data_all'][i] = pickle.load(input_file)
+#         Config['data_all'][i] = pickle.load(input_file)
 
 
 # ## Pickle all the data in test data folder
 # ## Pickle option was removed, add if you need it... it's from main, so it need to be updated
 
-# if config['pickleit']:
+# if Config['pickleit']:
 #     from predictit.test_data.pickle_test_data import pickle_data_all
 #     import pickle
-#     pickle_data_all(config['data_all'], datalength=config['datalength'])
+#     pickle_data_all(Config['data_all'], datalength=Config['datalength'])
 
-# if config['from_pickled']:
+# if Config['from_pickled']:
 
 #     script_dir = Path(__file__).resolve().parent
 #     data_folder = script_dir / "test_data" / "pickled"
 
-#     for i, j in config['data_all'].items():
+#     for i, j in Config['data_all'].items():
 #         file_name = i + '.pickle'
 #         file_path = data_folder / file_name
 #         try:
 #             with open(file_path, "rb") as input_file:
-#                 config['data_all'][i] = pickle.load(input_file)
+#                 Config['data_all'][i] = pickle.load(input_file)
 #         except Exception:
-#             traceback_warning(f"Test data not loaded - First in config['py'] pickleit = 1, that save the data on disk, then load from pickled.")
+#             traceback_warning(f"Test data not loaded - First in Config['py'] pickleit = 1, that save the data on disk, then load from pickled.")

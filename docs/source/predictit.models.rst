@@ -5,6 +5,7 @@ Submodules
 ----------
 
 .. toctree::
+   :maxdepth: 4
 
    predictit.models.autoreg_LNU
    predictit.models.compare_with_average

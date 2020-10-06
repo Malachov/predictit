@@ -35,10 +35,10 @@ def run_gui():
 
     import predictit
 
-    config = predictit.configuration.config
+    Config = predictit.configuration.Config
 
     predictit.misc._GUI = 1
-    config.update({
+    Config.update({
         "show_plot": 0,
         "save_plot": 0,
         "return_type": 'detailed_dictionary',
@@ -57,7 +57,7 @@ def run_gui():
             configured (dict): Some configuration values can be configured in GUI.
         """
         for i, j in configured.items():
-            if j != "" and i in config:
+            if j != "" and i in Config:
 
                 try:
                     val = int(j)
@@ -67,10 +67,10 @@ def run_gui():
                     except ValueError:
                         val = j
 
-                config[i] = val
+                Config[i] = val
 
             else:
-                warnings.warn(f"\n \t Inserted option with command line --{i} not found in config.py use --help for more information.\n")
+                warnings.warn(f"\n \t Inserted option with command line --{i} not found in Config.py use --help for more information.\n")
 
         eel.edit_gui_js("Setup finished", "progress_phase")
 
@@ -80,12 +80,12 @@ def run_gui():
             div = results["plot"]
 
             #                            content      p_tag    id_parent    id_created    label    classes
-            if config["print_result"]:
+            if Config["print_result"]:
                 eel.add_HTML_element(str(results["best"]), True, "content", "best_result", "Best result")
 
             eel.add_HTML_element(div, False, "content", "ploted_results", "Interactive plot", ["plot"])
 
-            if config["print_table"]:
+            if Config["print_table"]:
                 eel.add_HTML_element(results["models_table"], False, "content", "models_table", "Models results", "table")
 
 
@@ -93,7 +93,7 @@ def run_gui():
 
             eel.add_delete_button("content")
 
-            if config["debug"]:
+            if Config["debug"]:
 
                 eel.add_HTML_element(results["time_table"], False, "content", "time_parts_table", "Time schema of prediction", "table")
                 eel.add_HTML_element(predictit.misc.remove_ansi(results['output']), True, "content", "printed_output", "Everything printed", "pre-wrapped")

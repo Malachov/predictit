@@ -1,11 +1,11 @@
 """Plot predicted data. Input data are divided on data history and results. Youi can choose between plotly (interactive) and matplotlib (faster)"""
 
 from predictit import misc
-from predictit.configuration import config
+from predictit.configuration import Config
 import os
 
 
-def plot(complete_dataframe, plot_type='plotly', show=1, save=0, save_path='', plot_return=None, bounds='default', predicted_column_name='', best_model_name=''):
+def plot(complete_dataframe, plot_type='plotly', show=1, save=0, save_path='', legend=True, plot_return=None, bounds='default', predicted_column_name='', best_model_name=''):
 
     if save and not save_path:
         save_path = os.path.normpath(os.path.expanduser('~/Desktop') + '/plot.html')
@@ -19,7 +19,9 @@ def plot(complete_dataframe, plot_type='plotly', show=1, save=0, save_path='', p
         plt.rcParams["figure.figsize"] = (12, 8)
 
         complete_dataframe.plot()
-        plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.05), ncol=3, fancybox=True, shadow=True)
+        if legend:
+            plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.05), ncol=3, fancybox=True, shadow=True)
+
         if save:
             plt.savefig(save_path)
         if show:
@@ -95,10 +97,11 @@ def plot(complete_dataframe, plot_type='plotly', show=1, save=0, save_path='', p
 
         fig.layout.update(
             yaxis=dict(title='Values'),
-            title={'text': config.plot_name, 'x': 0.5, 'xanchor': 'center', 'yanchor': 'top',
+            title={'text': Config.plot_name, 'x': 0.5, 'xanchor': 'center', 'yanchor': 'top',
                    'y': 0.9 if misc._JUPYTER else 0.95},
             titlefont={'size': 28},
-            showlegend=False,
+            showlegend=True if legend else False,
+            legend_orientation="h",
             paper_bgcolor='#d9f0e8',
             hoverlabel={'namelength': -1}
         )
