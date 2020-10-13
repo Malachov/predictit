@@ -11,10 +11,10 @@ Library contain model hyperparameters optimization as well as option variable op
 Most common output is plotly interactive graph, numpy array of results or deploying to database.
 
 <p align="center">
-<img src="https://raw.githubusercontent.com/Malachov/predictit/master/output_example.png" width="620" alt="Plot of results"/>
+<img src="./docs/source/_static/output_example.png" width="620" alt="Plot of results"/>
 </p>
 <p align="center">
-<img src="https://raw.githubusercontent.com/Malachov/predictit/master/table_of_results.png" width="620" alt="Table of results"/>
+<img src="./docs/source/_static/table_of_results.png" width="620" alt="Table of results"/>
 </p>
 
 Return type of main predict function depends on `configation.py`. It can return best prediction as array or all predictions as dataframe. Interactive html plot is also created.
