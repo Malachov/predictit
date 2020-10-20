@@ -1,5 +1,5 @@
 
-def train(data, used_model='autoreg', p=5, d=1, q=0, cov_type='nonrobust', method='cmle', ic='aic', trend='nc', solver='lbfgs', maxlag=13,
+def train(data, used_model='autoreg', p=5, d=1, q=0, cov_type='nonrobust', method='cmle', trend='nc', solver='lbfgs', maxlag=13,
           # SARIMAX args
           seasonal=(1, 1, 1, 24), enforce_invertibility=False, enforce_stationarity=False):
     """Autoregressive model from statsmodels library. Only univariate data.
@@ -18,29 +18,29 @@ def train(data, used_model='autoreg', p=5, d=1, q=0, cov_type='nonrobust', metho
     """
 
     import statsmodels.tsa.api as sm
-    import statsmodels.tsa.ar_model as ar_model
+    from statsmodels.tsa.statespace.sarimax import SARIMAX
+    from statsmodels.tsa.arima.model import ARIMA
+    from statsmodels.tsa import ar_model
+
+    used_model = used_model.lower()
 
     if used_model == 'ar':
         model = sm.AR(data)
-
-    elif used_model == 'arma':
-        order = (p, q)
-        model = sm.ARMA(data, order=order)
+        fitted_model = model.fit(method=method, trend=trend, solver=solver, disp=0)
 
     elif used_model == 'arima':
         order = (p, d, q)
-        model = sm.ARIMA(data, order=order)
+        model = ARIMA(data, order=order)
+        fitted_model = model.fit()
 
     elif used_model == 'sarimax':
         order = (p, d, q)
-        model = sm.SARIMAX(data, order=order, seasonal_order=seasonal)
-
-    if used_model in ('ar', 'arma', 'arima', 'sarimax'):
-        fitted_model = model.fit(method=method, ic=ic, trend=trend, solver=solver, disp=0)
+        model = SARIMAX(data, order=order, seasonal_order=seasonal)
+        fitted_model = model.fit(method=method, trend=trend, solver=solver, disp=0)
 
     elif used_model == 'autoreg':
-        auto = ar_model.ar_select_order(data, maxlag=maxlag)
-        model = ar_model.AutoReg(data, lags=auto.ar_lags, trend=auto.trend, seasonal=auto.seasonal, period=auto.period)
+        auto = ar_model.ar_select_order(data, maxlag=maxlag, old_names=False)
+        model = ar_model.AutoReg(data, lags=auto.ar_lags, trend=auto.trend, seasonal=auto.seasonal, period=auto.period, old_names=False)
         fitted_model = model.fit(cov_type=cov_type)
 
     fitted_model.my_name = used_model

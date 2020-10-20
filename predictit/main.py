@@ -40,7 +40,7 @@ this_path_string = this_path.as_posix()
 sys.path.insert(0, this_path_string)
 
 import predictit
-import predictit.configuration
+from predictit import configuration
 from predictit.configuration import Config
 
 Config.this_path = this_path
@@ -65,9 +65,9 @@ if __name__ == "__main__":
     parser.add_argument("--plotit", type=bool, help="If 1, plot interactive graph")
     parser.add_argument("--datetime_column", type=int, help="Index of dataframe or it's name. Can be empty, then index 0 or new if no date column.")
     parser.add_argument("--return_type", type=str, choices=['best', 'all_dataframe', 'detailed_dictionary', 'models_error_criterion', 'all_dataframe', 'detailed_dictionary'],
-                        help=("'best' return array of predictions, 'all_dataframe' return dataframe of all models results. 'detailed_dictionary' is used for GUI and return"
-                              "results as best result, all results, string div with plot and more. 'models_error_criterion' returns MAPE, RMSE (based on Config) or dynamic "
-                              "warping criterion of all models in array."))
+                        help=("'best', 'all_dataframe', 'detailed_dictionary', or 'results'."
+                              "'best' return array of predictions, 'all_dataframe' return results and models names in columns. 'detailed_dictionary' is used for GUI"
+                              "and return results as best result,dataframe for plot, string div with plot and more. If 'results', then all models data are returned including trained models etc..."))
     parser.add_argument("--datalength", type=int, help="The length of the data used for prediction")
     parser.add_argument("--debug", type=bool, help="Debug - print all results and all the errors on the way")
     parser.add_argument("--analyzeit", type=bool, help="Analyze input data - Statistical distribution, autocorrelation, seasonal decomposition etc.")
@@ -144,7 +144,7 @@ def predict(**function_kwargs):
     Config.update(function_kwargs)
 
     # Define whether to print warnings or not or stop on warnings as on error
-    set_warnings(Config.debug, Config.ignored_warnings)
+    set_warnings(Config.debug, Config.ignored_warnings, Config.ignored_warnings_class_type)
 
     if Config.use_config_preset and Config.use_config_preset != 'none':
         updated_config = Config.presets[Config.use_config_preset]
@@ -155,15 +155,15 @@ def predict(**function_kwargs):
         Config.repeatit = 1
 
     # Find difference between original Config and set values and if there are any differences, raise error
-    config_errors = set({key: value for key, value in Config.__dict__.items() if not key.startswith('__') and not callable(key)}.keys()) - set(predictit.configuration.orig_config)
+    config_errors = configuration.all_variables_set - set(predictit.configuration.orig_config)
     if config_errors:
         raise KeyError(user_message(f"Some Config values: {config_errors} was named incorrectly. Check configuration.py for more informations"))
 
     # Definition of the table for spent time on code parts
-    time_parts_table = []
+    time_df = []
 
     def update_time_table(time_last):
-        time_parts_table.append([progress_phase, round((time.time() - time_last), 3)])
+        time_df.append([progress_phase, round((time.time() - time_last), 3)])
         return time.time()
     time_point = time_begin = time.time()
 
@@ -189,7 +189,7 @@ def predict(**function_kwargs):
     data_for_predictions_df = mdp.preprocessing.data_consolidation(
         Config.data, predicted_column=Config.predicted_column, other_columns=Config.other_columns, datalength=Config.datalength,
         data_orientation=Config.data_orientation, datetime_column=Config.datetime_column, unique_threshlold=Config.unique_threshlold,
-        embedding=Config.embedding, remove_nans_threshold=Config.remove_nans_threshold,
+        embedding=Config.embedding, freq=Config.freq, resample_function=Config.resample_function, remove_nans_threshold=Config.remove_nans_threshold,
         remove_nans_or_replace=Config.remove_nans_or_replace, dtype=Config.dtype)
 
     if Config.mode == 'validate':
@@ -205,13 +205,11 @@ def predict(**function_kwargs):
     ############# Data analyze ###### Analyze original data
     ########################################
 
-
     multicolumn = 0 if data_for_predictions_df.shape[1] == 1 else 1
-    column_for_predictions_series = data_for_predictions_df.iloc[:, 0]
-    models_number = len(Config.used_models)
+    column_for_predictions_df = data_for_predictions_df.iloc[:, 0:1]
     used_models_assigned = {i: j for (i, j) in predictit.models.models_assignment.items() if i in Config.used_models}
 
-    results = []
+    results = {}
     used_input_types = []
 
     for i in Config.used_models:
@@ -227,19 +225,24 @@ def predict(**function_kwargs):
         except Exception:
             traceback_warning("Analyze failed")
 
-    if Config.multiprocessing == 'process':
-        processes = []
-        pipes = []
-        # queues_dict = used_models_assigned.copy()
-        # for i in queues_dict:
-        #     queues_dict[i] = multiprocessing.Pipe()  # TODO duplex=False
+    semaphor = None
 
-    if Config.multiprocessing == 'pool':
-        pool = multiprocessing.Pool()
+    if Config.multiprocessing:
 
-        # It is not possible easy share data in multiprocessing, so results are resulted via callback function
-        def return_result(result):
-            results.append(result)
+        if not Config.processes_limit:
+            Config.processes_limit = multiprocessing.cpu_count() - 1
+
+        if Config.multiprocessing == 'process':
+            pipes = []
+            semaphor = multiprocessing.Semaphore(Config.processes_limit)
+
+        elif Config.multiprocessing == 'pool':
+            pool = multiprocessing.Pool(Config.processes_limit)
+
+            # It is not possible easy share data in multiprocessing, so results are resulted via callback function
+            def return_result(result):
+                for i, j in result.items():
+                    results[i] = j
 
     ### Optimization loop
 
@@ -248,17 +251,6 @@ def predict(**function_kwargs):
     else:
         option_optimization_list = ['Not optimized']
         Config.optimization_variable = None
-
-    option_optimization_number = len(option_optimization_list)
-
-    # Empty boxes for results definition
-    # The final result is - [repeated, model, data, results]
-    test_results_matrix = np.zeros((Config.repeatit, models_number, option_optimization_number, Config.predicts))
-    evaluated_matrix = np.zeros((Config.repeatit, models_number, option_optimization_number))
-    reality_results_matrix = np.zeros((models_number, option_optimization_number, Config.predicts))
-    test_results_matrix.fill(np.nan)
-    evaluated_matrix.fill(np.nan)
-    reality_results_matrix.fill(np.nan)
 
     time_point = update_time_table(time_point)
     progress_phase = "Predict"
@@ -269,9 +261,6 @@ def predict(**function_kwargs):
     #######################################
 
     for optimization_index, optimization_value in enumerate(option_optimization_list):
-
-        if Config.optimization_variable:
-            Config.optimization_variable = optimization_value
 
         # Some Config values are derived from other values. If it has been changed, it has to be updated.
         if not Config.input_types:
@@ -303,6 +292,8 @@ def predict(**function_kwargs):
         ############ DATA preprocessing ###### ANCHOR Data preprocessing
         #############################################
 
+        # TODO Remove unnecessary copies (only data_for_predictions_df and using .values) and check if input data stays the same after all models computations - the same in preprocessing
+
         data_for_predictions = data_for_predictions_df.values.copy()
 
         data_for_predictions, last_undiff_value, final_scaler = mdp.preprocessing.preprocess_data(
@@ -310,14 +301,14 @@ def predict(**function_kwargs):
             correlation_threshold=Config.correlation_threshold, data_transform=Config.data_transform,
             standardizeit=Config.standardizeit)
 
-        column_for_predictions = data_for_predictions[:, predicted_column_index]
+        column_for_predictions_processed = data_for_predictions[:, predicted_column_index]
 
         data_shape = np.shape(data_for_predictions)
-        data_length = len(column_for_predictions)
+        data_length = len(column_for_predictions_processed)
 
-        data_std = np.std(column_for_predictions[-30:])
-        data_mean = np.mean(column_for_predictions[-30:])
-        data_abs_max = max(abs(column_for_predictions.min()), abs(column_for_predictions.max()))
+        data_std = np.std(column_for_predictions_processed[-30:])
+        data_mean = np.mean(column_for_predictions_processed[-30:])
+        data_abs_max = max(abs(column_for_predictions_processed.min()), abs(column_for_predictions_processed.max()))
 
         multicolumn = 0 if data_shape[1] == 1 else 1
 
@@ -325,7 +316,7 @@ def predict(**function_kwargs):
 
             print("\n\n Analyze of preprocessed data \n")
             try:
-                predictit.analyze.analyze_column(column_for_predictions, window=30)
+                predictit.analyze.analyze_column(column_for_predictions_processed, window=30)
             except Exception:
                 traceback_warning("Analyze failed")
 
@@ -342,7 +333,7 @@ def predict(**function_kwargs):
 
         else:
             if Config.evaluate_type == 'original':
-                models_test_outputs = mdp.inputs.create_tests_outputs(column_for_predictions_series.values, predicts=Config.predicts, repeatit=Config.repeatit)
+                models_test_outputs = mdp.inputs.create_tests_outputs(column_for_predictions_df.values.ravel(), predicts=Config.predicts, repeatit=Config.repeatit)
 
             elif Config.evaluate_type == 'preprocessed':
                 models_test_outputs = mdp.inputs.create_tests_outputs(data_for_predictions[:, 0], predicts=Config.predicts, repeatit=Config.repeatit)
@@ -369,7 +360,7 @@ def predict(**function_kwargs):
                         'iterated_model_index': iterated_model_index, 'optimization_index': optimization_index, 'optimization_value': optimization_value,
                         'option_optimization_list': option_optimization_list, 'model_train_input': model_train_input, 'model_predict_input': model_predict_input,
                         'model_test_inputs': model_test_inputs, 'data_abs_max': data_abs_max, 'data_mean': data_mean, 'data_std': data_std,
-                        'last_undiff_value': last_undiff_value, 'models_test_outputs': models_test_outputs, 'final_scaler': final_scaler
+                        'last_undiff_value': last_undiff_value, 'models_test_outputs': models_test_outputs, 'final_scaler': final_scaler, 'semaphor': semaphor
                     }
 
                     if Config.models_input[iterated_model_name] in ['one_step', 'one_step_constant']:
@@ -380,10 +371,10 @@ def predict(**function_kwargs):
                             continue
 
                     if Config.multiprocessing == 'process':
+
+                        # TODO duplex=False
                         pipes.append(multiprocessing.Pipe())
                         p = multiprocessing.Process(target=predictit.main_loop.train_and_predict, kwargs={**predict_parameters, **{'pipe': pipes[-1][1]}})
-
-                        processes.append(p)
                         p.start()
 
                     elif Config.multiprocessing == 'pool':
@@ -391,13 +382,14 @@ def predict(**function_kwargs):
                         pool.apply_async(predictit.main_loop.train_and_predict, (), predict_parameters, callback=return_result)
 
                     else:
-                        results.append(predictit.main_loop.train_and_predict(**predict_parameters))
+                        results = {**results, **predictit.main_loop.train_and_predict(**predict_parameters)}
 
     if Config.multiprocessing:
         if Config.multiprocessing == 'process':
+
             for i in pipes:
                 try:
-                    results.append(i[0].recv())
+                    results = {**results, **i[0].recv()}
                 except Exception:
                     pass
 
@@ -405,68 +397,11 @@ def predict(**function_kwargs):
             pool.close()
             pool.join()
 
-    for i in results:
-        try:
-            if 'results' and 'evaluated_matrix' in i:
-                reality_results_matrix[i['index'][0], i['index'][1], :] = i['results']
-                evaluated_matrix[:, i['index'][0], i['index'][1]] = i['evaluated_matrix']
-        except Exception:
-            pass
-
-    # TODO Do repeate average and more from evaluate in multiprocessing loop and then use sorting as
-    # a = {k: v for k, v in sorted(x.items(), key=lambda item: item[1]['a'])} then use just slicing for plot and print results
-
-    #############################################
-    ############# Evaluate models ######## ANCHOR Evaluate
-    #############################################
-
-    # Criterion is the best of average from repetitions
-    time_point = update_time_table(time_point)
-    progress_phase = "Evaluation"
-    update_gui(progress_phase, 'progress_phase')
-
-    repeated_average = np.mean(evaluated_matrix, axis=0)
-
-    model_results = []
-
-    for i in repeated_average:
-        model_results.append(np.nan if np.isnan(i).all() else np.nanmin(i))
-
-    sorted_results = np.argsort(model_results)
-
-    result_ordered_dict = {}
-    predicted_models_for_table = {}
-    predicted_models_for_plot = {}
-
-    for i, j in enumerate(sorted_results):
-        this_model = list(used_models_assigned.keys())[j]
-
-        result_ordered_dict[this_model] = {
-            'order': i + 1, 'error_criterion': model_results[j], 'predictions': reality_results_matrix[j, np.argmin(repeated_average[j])],
-            'best_config_optimized_value': Config.optimization_values[np.argmin(repeated_average[j])]}
-
-    predicted_models_for_table = dict(list(result_ordered_dict.items())[0: Config.print_number_of_models])
-    predicted_models_for_plot = dict(list(result_ordered_dict.items())[0: Config.plot_number_of_models])
-
-    best_model_predicts = None
-
-    for i, j in result_ordered_dict.items():
-
-        if not np.isnan(np.min(j['predictions'])):
-            best_model_name = i
-            best_model_predicts = j['predictions']
-            break
-
-    if best_model_predicts is None:
-        raise RuntimeError(user_message("None of models finished predictions. Setup Config to one to see the warnings.",
-                                        caption="All models failed for some reason"))
-
-    complete_dataframe = column_for_predictions_series[-Config.plot_history_length:].to_frame()
-
+    # Create confidence intervals
     if Config.confidence_interval:
         try:
-            lower_bound, upper_bound = predictit.misc.confidence_interval(column_for_predictions_series.values, predicts=Config.predicts, confidence=Config.confidence_interval)
-            complete_dataframe['Lower bound'] = complete_dataframe['Upper bound'] = None
+            lower_bound, upper_bound = predictit.misc.confidence_interval(column_for_predictions_df.values, predicts=Config.predicts, confidence=Config.confidence_interval)
+
             bounds = True
         except Exception:
             bounds = False
@@ -475,40 +410,103 @@ def predict(**function_kwargs):
     else:
         bounds = False
 
-    last_date = column_for_predictions_series.index[-1]
+    ################################################
+    ############# Results processing ######## ANCHOR Results processing
+    ################################################
+
+    # Criterion is the best of average from repetitions
+    time_point = update_time_table(time_point)
+    progress_phase = "Evaluation"
+    update_gui(progress_phase, 'progress_phase')
+
+    # Two kind of results we will create. Both as dataframe
+    #   - First are all the details around prediction. Model errors, time, memory peak etc.
+    #   - Second we have predicted values
+
+    # Results such as trained model etc. that cannot be displayed in dataframe are in original results dict.
+
+    # Convert results from dictionary to dataframe - exclude objects like trained model
+    results_df = pd.DataFrame.from_dict(results, orient='index').drop(['index', 'optimization_index'], axis=1)
+
+    results_df.sort_values("model_error", inplace=True)
+
+    results_df['name'] = results_df.index
+
+    # Generate date indexes for result predictions
+    last_date = column_for_predictions_df.index[-1]
 
     if isinstance(last_date, (pd.core.indexes.datetimes.DatetimeIndex, pd._libs.tslibs.timestamps.Timestamp)):
-        date_index = pd.date_range(start=last_date, periods=Config.predicts + 1, freq=column_for_predictions_series.index.freq)[1:]
+        date_index = pd.date_range(start=last_date, periods=Config.predicts + 1, freq=column_for_predictions_df.index.freq)[1:]
         date_index = pd.to_datetime(date_index)
 
     else:
         date_index = list(range(last_date + 1, last_date + Config.predicts + 1))
 
-    results_dataframe = pd.DataFrame(data={'Lower bound': lower_bound, 'Upper bound': upper_bound}, index=date_index) if bounds else pd.DataFrame(index=date_index)
+    predictions = pd.DataFrame(index=date_index)
 
-    for i, j in predicted_models_for_plot.items():
-        if 'predictions' in j:
-            results_dataframe[f"{j['order']} - {i}"] = j['predictions']
-            complete_dataframe[f"{j['order']} - {i}"] = None
-            if j['order'] == 1:
-                best_model_name_plot = f"{j['order']} - {i}"
+    for i in results_df['results'].index:
+        predictions[i] = results_df['results'][i]
 
-    results_all_dataframe = pd.DataFrame(index=date_index)
-
-    for res in results:
-        if Config.optimization:
-            results_all_dataframe[f"{res['name']} - {res['optimization_value']}"] = res.get('results')
-        else:
-            results_all_dataframe[f"{res['name']}"] = res.get('results')
+    best_model_name = results_df.index[0]
+    best_model_predicts = predictions[best_model_name]
 
     if Config.mode == 'validate':
         best_model_name_plot = 'Test'
-        results_dataframe['Test'] = test
+        predictions['Test'] = test
 
-    last_value = float(column_for_predictions_series.iloc[-1])
+    else:
+        best_model_name_plot = best_model_name
 
-    complete_dataframe = pd.concat([complete_dataframe, results_dataframe], sort=False)
-    complete_dataframe.iloc[-Config.predicts - 1] = last_value
+    if best_model_predicts is None or np.isnan(np.min(best_model_predicts)):
+        raise RuntimeError(user_message("None of models finished predictions. Setup Config to one to see the warnings.",
+                                        caption="All models failed for some reason"))
+
+    predictions_for_plot = predictions
+    predictions_for_plot.columns = [f"{i + 1} - {j}" for i, j in enumerate(predictions_for_plot.columns)]
+
+    bounds_df = pd.DataFrame(index=date_index)
+
+    if bounds:
+        bounds_df['Upper bound'] = upper_bound
+        bounds_df['Lower bound'] = lower_bound
+
+    last_value = float(column_for_predictions_df.iloc[-1])
+
+    predictions_for_plot = pd.concat([predictions_for_plot.iloc[:, :Config.plot_number_of_models], bounds_df], axis=1)
+    predictions_with_history = pd.concat([column_for_predictions_df[-Config.plot_history_length:], predictions_for_plot], sort=False)
+    predictions_with_history.iloc[-Config.predicts - 1, :] = last_value
+
+    if Config.sort_results_by.lower() == 'name':
+        results_df.sort_index(key=lambda x: x.str.lower(), inplace=True)
+        predictions.sort_index(key=lambda x: x.str.lower(), inplace=True)
+
+    time_df.append(['Complete time', round((time.time() - time_begin), 3)])
+    time_df = pd.DataFrame(time_df, columns=["Part", "Time"])
+
+    if Config.print_table == 1:
+        models_table = tabulate(
+            results_df[['name', 'model_error']].iloc[:Config.print_number_of_models, :].values,
+            headers=['Model', f'Average {Config.error_criterion} error'],
+            tablefmt='grid', floatfmt='.3f', numalign="center", stralign="center")
+
+    else:
+        models_table = tabulate(
+            results_df[['name', 'model_error', 'optimization_value', 'model_time', 'memory_peak_MB']].values,
+            headers=['Model', f'Average\n{Config.error_criterion}\nerror', f'Config optimization\n{Config.optimization_variable}', 'Time\n[s]', 'Memory Peak\n[MB]'],
+            tablefmt='grid', floatfmt=".2f", numalign="center", stralign="center")
+
+    ### ANCHOR Print
+
+    if Config.printit:
+        if Config.print_best_model_result:
+            print((f"\n Best model is {best_model_name} with results \n\n\t{best_model_predicts.values} \n\n\t with model error {Config.error_criterion} = "
+                   f"{results_df.loc[best_model_name, 'model_error']}"))
+
+        if Config.print_table:
+            print(f"\n {models_table} \n")
+
+        if Config.print_time_table:
+            print(f'\n {tabulate(time_df.values, headers=time_df.columns, tablefmt="grid", floatfmt=".3f", numalign="center", stralign="center")} \n')
 
     #######################################
     ############# Plot ############# ANCHOR Plot
@@ -525,70 +523,22 @@ def predict(**function_kwargs):
 
             plot_return = 'div' if _GUI else ''
             div = predictit.plots.plot(
-                complete_dataframe, plot_type=Config.plot_type, show=Config.show_plot, save=Config.save_plot,
+                predictions_with_history, plot_type=Config.plot_type, show=Config.show_plot, save=Config.save_plot,
                 save_path=Config.save_plot_path, plot_return=plot_return, best_model_name=best_model_name_plot,
                 legend=Config.plot_legend, predicted_column_name=predicted_column_name)
 
             if Config.plot_all_optimized_models:
                 predictit.plots.plot(
-                    results_all_dataframe, plot_type=Config.plot_type, show=Config.show_plot, save=Config.save_plot,
+                    predictions, plot_type=Config.plot_type, show=Config.show_plot, save=Config.save_plot,
                     legend=Config.plot_legend, save_path=Config.save_plot_path, best_model_name=best_model_name_plot)
 
     time_point = update_time_table(time_point)
     progress_phase = "Completed"
     update_gui(progress_phase, 'progress_phase')
 
-
-    ####################################
-    ############# Results ####### ANCHOR Results
-    ####################################
-
-    # Table of results
-    models_table = []
-    # Fill the table
-    for i, j in predicted_models_for_table.items():
-        models_table.append([i, round(j['error_criterion'], 3)])
-
-    models_table = pd.DataFrame(models_table, columns=['Model', f"Average {Config.error_criterion} error"])
-
-    time_parts_table.append(['Complete time', round((time.time() - time_begin), 3)])
-
-    detailed_table = []
-    for i in results:
-        try:
-            detailed_table.append([i['name'], round(i['model_error'], 3), round(i['model_time'], 3), i['optimization_value']])
-        except Exception:
-            detailed_table.append([i['name'], np.inf, np.nan, 'Model crashed'])
-
-    if Config.optimizeit:
-        try:
-            detailed_table.append('Optimization time', [i.get('optimization_time') for i in results])
-        except Exception:
-            pass
-
-    time_parts_table = pd.DataFrame(time_parts_table, columns=["Part", "Time"])
-    detailed_table = pd.DataFrame(detailed_table, columns=['Name', f"Average {Config.error_criterion} error", 'Time', 'Config optimization'])
-
-    if Config.sort_detailed_results_by == 'name':
-        detailed_table.sort_values('Name', inplace=True)
-
-    elif Config.sort_detailed_results_by == 'error':
-        detailed_table.sort_values(f"Average {Config.error_criterion} error", inplace=True)
-
-    if Config.printit:
-        if Config.print_result:
-            print((f"\n Best model is {best_model_name} \n\t with results {best_model_predicts} \n\t with model error {Config.error_criterion} = "
-                   f"{predicted_models_for_table[best_model_name]['error_criterion']}"))
-
-        if Config.print_table == 1:
-            print(f'\n {tabulate(models_table.values, headers=models_table.columns, tablefmt="pretty")} \n')
-
-        ### Print detailed resuts ###
-        if Config.print_table == 2:
-            print(f'\n {tabulate(detailed_table.values, headers=detailed_table.columns, tablefmt="pretty")} \n')
-
-        if Config.print_time_table:
-            print(f'\n {tabulate(time_parts_table.values, headers=time_parts_table.columns, tablefmt="pretty")} \n')
+    ################################
+    ########### Return ###### ANCHOR Return
+    ################################
 
     # Return stdout and stop collect warnings and printed output
     if _GUI:
@@ -602,22 +552,19 @@ def predict(**function_kwargs):
     # Return original Config values before predict function
     Config.update(config_freezed)
 
-    ################################
-    ########### Return ###### ANCHOR Return
-    ################################
 
-    if not return_type or return_type == 'best':
+    if return_type == 'best':
         return best_model_predicts
 
     elif return_type == 'all_dataframe':
-        return results_dataframe
+        return predictions
 
     elif return_type == 'detailed_dictionary':
         detailed_dictionary = {
-            'predicted_models': predicted_models_for_table,
             'best': best_model_predicts,
-            'all_dataframe': results_dataframe,
-            'complete_dataframe': complete_dataframe
+            'all_predictions': predictions,
+            'results': results_df,
+            'predictions_with_history': predictions_with_history
         }
 
         if _GUI:
@@ -625,24 +572,27 @@ def predict(**function_kwargs):
                 'plot': div,
                 'output': output,
 
-                'time_table': str(tabulate(time_parts_table.values, headers=time_parts_table.columns, tablefmt="html")),
-                'models_table': str(tabulate(models_table.values, headers=models_table.columns, tablefmt="html")),
+                'time_table': str(tabulate(time_df.values, headers=time_df.columns, tablefmt="html")),
+                'models_table': str(tabulate(
+                    results_df[['name', 'model_error']].iloc[:Config.print_number_of_models, :].values,
+                    headers=['Model', f'Average {Config.error_criterion} error'],
+                    tablefmt='html', floatfmt='.3f'))
             })
 
         else:
             detailed_dictionary.update({
-                'time_table': time_parts_table,
+                'time_table': time_df,
                 'models_table': models_table,
             })
 
         return detailed_dictionary
 
-    elif return_type == 'models_error_criterion':
-        return repeated_average
-
     elif return_type == 'visual_check':
         return {'data_for_predictions (X, y)': data_for_predictions, 'model_train_input': model_train_input,
                 'model_predict_input': model_predict_input, 'model_test_inputs': model_test_inputs, 'models_test_outputs': models_test_outputs}
+
+    else:
+        return results
 
 
 def predict_multiple_columns(**function_kwargs):
@@ -721,7 +671,7 @@ def compare_models(**function_kwargs):
     Config.update(function_kwargs)
 
     # Edit Config.py default values with arguments values if exist
-    Config.update({'return_type': 'models_error_criterion', 'mode': 'validate', 'confidence_interval': 0, 'optimizeit': 0})
+    Config.update({'return_type': 'results', 'mode': 'validate', 'confidence_interval': 0, 'optimizeit': 0})
 
     # If no data_all inserted, default will be used
     if not Config.data_all:
@@ -740,6 +690,8 @@ def compare_models(**function_kwargs):
         same_data = True
         data_dict = {f"Data {i}": (j, Config.predicted_column) for i, j in enumerate(data_dict)}
 
+    optimization_number = len(Config.optimization_values) if Config.optimization_values else 1
+
     for i, j in data_dict.items():
 
         Config.data = j[0]
@@ -748,8 +700,21 @@ def compare_models(**function_kwargs):
 
         try:
             result = predict()
-            results[i] = (result - np.nanmin(result)) / (np.nanmax(result) - np.nanmin(result))
-            unstardized_results[i] = result
+
+            evaluated_matrix = np.zeros((Config.repeatit, len(Config.used_models), optimization_number))
+            evaluated_matrix.fill(np.nan)
+
+            for k in result.values():
+                try:
+                    if 'results' and 'test_errors' in k:
+                        evaluated_matrix[:, k['index'][0], k['index'][1]] = k['test_errors']
+                except Exception:
+                    pass
+
+            repeated_average = np.mean(evaluated_matrix, axis=0)
+
+            results[i] = (repeated_average - np.nanmin(repeated_average)) / (np.nanmax(repeated_average) - np.nanmin(repeated_average))
+            unstardized_results[i] = repeated_average
 
         except Exception:
             traceback_warning(f"Comparison for data {i} didn't finished.")
@@ -786,7 +751,7 @@ def compare_models(**function_kwargs):
 
     models_table = pd.DataFrame(models_table, columns=['Model', 'Percentual standardized error', 'Error average'])
 
-    print(f'\n {tabulate(models_table.values, headers=models_table.columns, tablefmt="pretty")} \n')
+    print(f"\n {tabulate(models_table.values, headers=models_table.columns, tablefmt='grid', floatfmt=('.3f'))} \n")
 
     print(f"\n\nBest model is {best_compared_model_name}")
 

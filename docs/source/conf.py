@@ -56,18 +56,18 @@ html_theme_options = {
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-                'sphinx.ext.autodoc',
-                'sphinx.ext.napoleon',
-                'sphinx.ext.intersphinx',
-                'sphinx.ext.viewcode',
-                'sphinx.ext.githubpages',
-                'sphinx.ext.imgmath',
-                'm2r',
-                'sphinx.ext.autosectionlabel'
+    'sphinx.ext.autodoc',
+    'sphinx.ext.napoleon',
+    'sphinx.ext.intersphinx',
+    'sphinx.ext.viewcode',
+    'sphinx.ext.githubpages',
+    'sphinx.ext.imgmath',
+    'sphinx.ext.autosectionlabel'
+    'm2r2',
 ]
 
-# 'about.html', 
-html_sidebars = { '**': ['navi.html', 'searchbox.html']}
+# 'about.html',
+html_sidebars = {'**': ['navi.html', 'searchbox.html']}
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']

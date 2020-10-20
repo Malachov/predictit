@@ -129,14 +129,6 @@ multiple_columns_prediction = predictit.main.predict_multiple_columns()
 
 ```
 
-### Feature derivation
-
-It is possible to add new data that is derived from original. It can be running fourier transform maximum or two columns multiplication or rolling standard deviation.
-
-### Categorical embedings
-
-It is also possible to use string values in predictions. You can choose Config values 'embedding' 'label' and every unique string will be assigned unique number, 'one-hot' create new column for every unique string (can be time consuming).
-
 ### Example of Config variable optimization
 
 ```Python
@@ -149,7 +141,8 @@ Config.update({
     'optimization_variable': 'default_n_steps_in',
     'optimization_values': [4, 8, 10],
     'plot_all_optimized_models': 1,
-    'print_table': 2  # Print detailed table
+    'print_table': 2,  # Print detailed table
+    'used_models': ['AR (Autoregression)', 'Conjugate gradient', 'Sklearn regression']
 })
 
 predictions_optimized_config = predictit.main.predict()
@@ -165,10 +158,29 @@ To optmize hyperparameters, just set `optimizeit: 1,` and model parameters limit
 It is possible to use basic GUI. But only with CSV data source.
 Just run `gui_start.py` if you have downloaded software or call `predictit.gui_start.run_gui()` if you are importing via PyPI.
 
+Screenshot of such a GUI
+
+<p align="center">
+<img src="./docs/source/_static/GUI.png" width="620" alt="Table of results"/>
+</p>
+
+Better GUI with fully customizable settings will be shipped next year.
+
+### Feature derivation
+
+It is possible to add new data that is derived from original. It can be running fourier transform maximum or two columns multiplication or rolling standard deviation.
+
+### Categorical embedings
+
+It is also possible to use string values in predictions. You can choose Config values 'embedding' 'label' and every unique string will be assigned unique number, 'one-hot' create new column for every unique string (can be time consuming).
+
+### Feature extraction
+
+Under development right now :[
+
 ## Data preprocessing, plotting and other Functions
 
-You can use any library functions separately for your needs of course. mydatapreprocessing, mylogging and myplottling are my other projects,
-which are used heavily here. Example is here
+You can use any library functions separately for your needs of course. mydatapreprocessing, mylogging and myplottling are my other projects, which are used heavily. Example is here
 
 ```Python
 
@@ -232,10 +244,10 @@ Config.update({
     'models_parameters': {
 
         "AR (Autoregression)": {'used_model': 'ar', 'method': 'cmle', 'ic': 'aic', 'trend': 'nc', 'solver': 'lbfgs'},
-        "ARIMA (Autoregression integrated moving average)": {'used_model': 'arima', 'p': 6, 'd': 0, 'q': 0, 'method': 'css', 'ic': 'aic', 'trend': 'nc', 'solver': 'nm'},
+        "ARIMA (Autoregression integrated moving average)": {'used_model': 'arima', 'p': 6, 'd': 0, 'q': 0},
 
         "Autoregressive Linear neural unit": {'mi_multiple': 1, 'mi_linspace': (1e-5, 1e-4, 3), 'epochs': 10, 'w_predict': 0, 'minormit': 0},
-        "Conjugate gradient": {'epochs': 200},
+        "Conjugate gradient": {'epochs': 80},
 
         "Bayes ridge regression": {'regressor': 'bayesianridge', 'n_iter': 300, 'alpha_1': 1.e-6, 'alpha_2': 1.e-6, 'lambda_1': 1.e-6, 'lambda_2': 1.e-6},
     }

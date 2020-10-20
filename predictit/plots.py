@@ -77,7 +77,7 @@ def plot(complete_dataframe, plot_type='plotly', show=1, save=0, save_path='', l
         if predicted_column_name in complete_dataframe:
 
             history_ax = pl.graph_objs.Scatter(
-                name=predicted_column_name,
+                name=str(predicted_column_name),
                 x=complete_dataframe.index,
                 y=complete_dataframe[predicted_column_name],
                 line={'color': 'rgb(31, 119, 180)', 'width': 2})
@@ -102,8 +102,9 @@ def plot(complete_dataframe, plot_type='plotly', show=1, save=0, save_path='', l
             titlefont={'size': 28},
             showlegend=True if legend else False,
             legend_orientation="h",
-            paper_bgcolor='#d9f0e8',
-            hoverlabel={'namelength': -1}
+            hoverlabel={'namelength': -1},
+            font={'size': 17},
+            margin={'l': 160, 'r': 130, 'b': 160, 't': 110}
         )
 
         if show:
@@ -117,6 +118,7 @@ def plot(complete_dataframe, plot_type='plotly', show=1, save=0, save_path='', l
             fig.layout.update(
                 title=None,
                 height=290,
+                paper_bgcolor='#d9f0e8',
                 margin={'b': 35, 't': 35, 'pad': 4},
             )
 

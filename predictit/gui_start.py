@@ -57,7 +57,7 @@ def run_gui():
             configured (dict): Some configuration values can be configured in GUI.
         """
         for i, j in configured.items():
-            if j != "" and i in Config:
+            if j != "" and i in predictit.configuration.all_variables_set:
 
                 try:
                     val = int(j)
@@ -67,7 +67,7 @@ def run_gui():
                     except ValueError:
                         val = j
 
-                Config[i] = val
+                setattr(Config, i, val)
 
             else:
                 warnings.warn(f"\n \t Inserted option with command line --{i} not found in Config.py use --help for more information.\n")
@@ -80,12 +80,12 @@ def run_gui():
             div = results["plot"]
 
             #                            content      p_tag    id_parent    id_created    label    classes
-            if Config["print_result"]:
+            if Config.print_best_model_result:
                 eel.add_HTML_element(str(results["best"]), True, "content", "best_result", "Best result")
 
             eel.add_HTML_element(div, False, "content", "ploted_results", "Interactive plot", ["plot"])
 
-            if Config["print_table"]:
+            if Config.print_table:
                 eel.add_HTML_element(results["models_table"], False, "content", "models_table", "Models results", "table")
 
 
@@ -93,14 +93,14 @@ def run_gui():
 
             eel.add_delete_button("content")
 
-            if Config["debug"]:
+            if Config.debug:
 
                 eel.add_HTML_element(results["time_table"], False, "content", "time_parts_table", "Time schema of prediction", "table")
-                eel.add_HTML_element(predictit.misc.remove_ansi(results['output']), True, "content", "printed_output", "Everything printed", "pre-wrapped")
+                eel.add_HTML_element(results['output'], True, "content", "printed_output", "Everything printed", "pre-wrapped")
 
         except Exception:
 
-            eel.add_HTML_element(f"\n Error in making predictions - {predictit.misc.remove_ansi(traceback.format_exc())} \n", True, "progress_phase", "error-log", "Error log", "pre-wrapped")
+            eel.add_HTML_element(f"\n Error in making predictions - {traceback.format_exc()} \n", True, "progress_phase", "error-log", "Error log", "pre-wrapped")
 
     eel.start('index.html', port=0)  # mode='chrome-app'
 

@@ -12,3 +12,4 @@ matplotlib
 plotly
 seaborn
 requests
+IPython

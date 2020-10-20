@@ -87,11 +87,11 @@ class Config():
 
     predicts = 7  # Number of predicted values - 7 by default.
 
-    return_type = 'best'  # 'best', 'all_dataframe', 'detailed_dictionary' or 'models_error_criterion'.
+    return_type = 'best'  # 'best', 'all_dataframe', 'detailed_dictionary', or 'results'.
     # 'best' return array of predictions, 'all_dataframe' return results and models names in columns. 'detailed_dictionary' is used for GUI
-    # and return results as best result, all results dataframe, dataframe for plot, string div with plot and more. 'models_error_criterion' returns MAPE, RMSE or DWT(based on Config) criterion of all models in array.
+    # and return results as best result,dataframe for plot, string div with plot and more. If 'results', then all models data are returned including trained models etc..
 
-    debug = 0  # Debug - If 1, print all results and all the warnings and errors on the way, if 2, stop on first warning, if -1 do not print anything, just return result.
+    debug = 1  # Debug - If 1, print all the warnings and errors on the way, if 2, stop on first warning, if -1 do not print anything, just return result.
 
     plotit = 1  # If 1, plot interactive graph.
     plot_type = 'plotly'  # 'plotly' (interactive) or matplotlib.
@@ -108,8 +108,8 @@ class Config():
     print_table = 2  # Whether print table with models errors. Option 2 will print detailed table with time, optimized Config value etc.
     print_number_of_models = None  # How many models will be printed in results table. If None, than all models will be plotted. 1 if only the best one.
     print_time_table = 1  # Whether print table with models errors and time to compute.
-    print_result = 1  # Whether print best model results and model details.
-    sort_detailed_results_by = 'error'  # 'error' or 'name'
+    print_best_model_result = 1  # Whether print best model results and model details.
+    sort_results_by = 'error'  # 'error' or 'name'
 
     confidence_interval = 0.6  # Area of confidence in result plot (grey area where we suppose values) - Bigger value, narrower area - maximum 1. If 0 - not plotted.
 
@@ -117,16 +117,18 @@ class Config():
     ### Prediction settings ###
     ###########################
 
-    ### OPTIMIZATIONS ###  !!! Can be time consuming
-
-    multiprocessing = 'pool'  # 'pool' or 'process' or 0
+    multiprocessing = 0  # 'pool' or 'process' or 0
+    processes_limit = None  # Max number of concurrent processes. If None, then (CPUs - 1) is used
+    trace_processes_memory = True
     already_trained = 0  # Computationaly hard models (LSTM) load from disk.
+
+    ### OPTIMIZATIONS ###  !!! Can be time consuming
 
     ### Option values optimization
     # Optimization of some outer Config value e.g. datalength. It will automatically choose the best value for each model
     optimization = 0  # If 0 do not optimize. If 1, compute on various option defined values. Automatically choose the best one for each model separately. Can be time consuming (every models are computed several times)
     optimization_variable = 'default_n_steps_in'  # Some value from config that will be optimized. Unlike hyperparameters only defined values will be computed.
-    optimization_values = [12, 20, 40]  # List of evaluatedconfig values. Results of each value are only in detailed table.
+    optimization_values = [4, 8, 12]  # List of evaluatedconfig values. Results of each value are only in detailed table.
     plot_all_optimized_models = 1
 
     ### Models parameters (hyperparameters) optimization
@@ -172,7 +174,7 @@ class Config():
     rolling_data_window = 10  # Window for rolling mean and rolling std
 
     ### Data inputs definition
-    default_n_steps_in = 30  # How many lagged values are in vector input to model.
+    default_n_steps_in = 16  # How many lagged values are in vector input to model.
     other_columns = 1  # If use other columns. Bool.
     default_other_columns_length = 2  # Other columns vector length used for predictions. If None, lengths same as predicted columnd. If 0, other columns are not used for prediction.
     dtype = 'float32'  # Main dtype used in prediction. If 0, None or False, it will keep original. Eg.'float32' or 'float64'.
@@ -201,21 +203,21 @@ class Config():
 
     used_models = [
 
-        # predictit.models.statsmodels_autoregressive
+        # ### predictit.models.statsmodels_autoregressive
         'AR (Autoregression)', 'ARMA', 'ARIMA (Autoregression integrated moving average)', 'autoreg', 'SARIMAX (Seasonal ARIMA)',
 
-        #predictit.models.autoreg_LNU
+        # ### predictit.models.autoreg_LNU
         'Autoregressive Linear neural unit', 'Autoregressive Linear neural unit normalized',
-        # , 'Linear neural unit with weights predict'
+        # # , 'Linear neural unit with weights predict'
 
-        # predictit.models.conjugate_gradient
+        ### predictit.models.conjugate_gradient
         'Conjugate gradient',
 
-        # predictit.models.tensorflow
-        ### 'tensorflow_lstm'
-        ### 'tensorflow_mlp'
+        ### predictit.models.tensorflow
+        # 'tensorflow_lstm',
+        # 'tensorflow_mlp',
 
-        # predictit.models.sklearn_regression
+        ### predictit.models.sklearn_regression
         'Sklearn regression', 'Bayes ridge regression', 'Passive aggressive regression', 'Gradient boosting',
         'KNeighbors regression', 'Decision tree regression', 'Hubber regression',
         # 'Bagging regression', 'Stochastic gradient regression', 'Extreme learning machine', 'Gen Extreme learning machine',  'Extra trees regression', 'Random forest regression'
@@ -283,9 +285,9 @@ class Config():
     # If commented - default parameters will be used.
     models_parameters = {
 
-        'AR (Autoregression)': {'used_model': 'ar', 'method': 'cmle', 'ic': 'aic', 'trend': 'nc', 'solver': 'lbfgs'},
-        'ARMA': {'used_model': 'arma', 'p': 4, 'q': 0, 'method': 'mle', 'ic': 'aic', 'trend': 'nc', 'solver': 'lbfgs'},
-        'ARIMA (Autoregression integrated moving average)': {'used_model': 'arima', 'p': 6, 'd': 0, 'q': 0, 'method': 'css', 'ic': 'aic', 'trend': 'nc', 'solver': 'nm'},
+        'AR (Autoregression)': {'used_model': 'ar', 'method': 'cmle', 'trend': 'nc', 'solver': 'lbfgs'},
+        'ARMA': {'used_model': 'arima', 'p': 4, 'd': 0, 'q': 1},
+        'ARIMA (Autoregression integrated moving average)': {'used_model': 'arima', 'p': 6, 'd': 1, 'q': 1},
         'autoreg': {'used_model': 'autoreg', 'maxlag': 13, 'cov_type': 'nonrobust'},
         'SARIMAX (Seasonal ARIMA)': {'used_model': 'sarimax', 'p': 3, 'd': 0, 'q': 0, 'seasonal': (1, 0, 0, 4), 'method': 'lbfgs', 'trend': 'nc', 'enforce_invertibility': False, 'enforce_stationarity': False},
 
@@ -339,10 +341,8 @@ class Config():
     # If you use list of strings or more than 2 values (e.g. [5, 4, 7]), then only this defined values will be executed
     #   ana no new generated
 
-
     fragments = 4
     iterations = 2
-
 
     # This boundaries repeat across models.
     alpha = [0.0, 1.0]
@@ -393,8 +393,9 @@ class Config():
         "statsmodels.tsa.AR has been deprecated",
         "divide by zero encountered in true_divide",
         "pandas.util.testing is deprecated",
+        "statsmodels.tsa.arima_model.ARIMA have been deprecated",
         # Tensorflow
-        "numpy.ufunc size changed, may indicate binary incompatibility",
+        "numpy.ufunc size changed",
         # Autoregressive neuron
         "overflow encountered in multiply",
         # Sklearn
@@ -409,7 +410,11 @@ class Config():
         "can't resolve package from",
         "unclosed file <_io.TextIOWrapper name",
         "Mean of empty slice",
-        "Check mle_retvals",
+    ]
+
+    # Sometimes only message does not work, then ignore it with class and warning type
+    ignored_warnings_class_type = [
+        ('statsmodels.tsa.arima_model', FutureWarning),
     ]
 
     # If SQL, sql credentials
@@ -472,6 +477,7 @@ class Config():
 
 
 orig_config = {key: value for key, value in Config.__dict__.items() if not key.startswith('__') and not callable(key)}
+all_variables_set = set({key: value for key, value in Config.__dict__.items() if not key.startswith('__') and not callable(key)}.keys())
 
 
 def print_config():

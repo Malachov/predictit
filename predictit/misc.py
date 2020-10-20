@@ -1,4 +1,5 @@
-import mylogging
+from mydatapreprocessing import preprocessing
+
 try:
     from IPython import get_ipython
     ipython = get_ipython()
@@ -51,18 +52,16 @@ def confidence_interval(data, predicts=7, confidence=0.1, p=1, d=0, q=0):
 
     except Exception:
 
-        from predictit import data_preprocessing
-
         last_value = data[-1]
-        data = data_preprocessing.do_difference(data)
+        data = preprocessing.do_difference(data)
 
         model = sm.ARIMA(data, order=order)
         model_fit = model.fit(disp=0)
         predictions = model_fit.forecast(steps=predicts, alpha=confidence)
 
         bounds = predictions[2].T
-        lower_bound = data_preprocessing.inverse_difference(bounds[0], last_value)
-        upper_bound = data_preprocessing.inverse_difference(bounds[1], last_value)
+        lower_bound = preprocessing.inverse_difference(bounds[0], last_value)
+        upper_bound = preprocessing.inverse_difference(bounds[1], last_value)
 
 
     return lower_bound, upper_bound

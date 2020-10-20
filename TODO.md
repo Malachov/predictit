@@ -1,22 +1,17 @@
 # List of what could be done
 
-## Working on
-
-- [ ] Add transformations results as next input in parallel
-  - [ ] Multiplied columns transform
-  - [ ] Difference transform
-  - [ ] Fast fourier transform
-  - [ ] Rolling window and rolling std transformation
-  - [ ] Distance from the mean
-
 ## First to do
 
+- [ ] Remove unnecessary copies (only data_for_predictions_df and using .values) and check if input data stays the same after all models computations - the same in preprocessing
+- [ ] Add transformations results as next input in parallel
+  - [ ] Lagged values
+  - [ ] Datetime transformations - is workday, is holiday, day, night etc...
+- [ ] Conjugate gradient, autoreg LNU but also other models both multiple and one column data
 - [ ] Test on some larger files
+- [ ] Feature selection (which columns to use) - E.g. https://towardsdatascience.com/deep-dive-into-catboost-functionalities-for-model-interpretation-7cdef669aeed, https://scikit-learn.org/stable/modules/feature_selection.html, https://towardsdatascience.com/feature-selection-with-pandas-e3690ad8504b
 - [ ] data_preprocessing
-  - [ ] Put data_preprocessing into separate library and import - also misc.warnings
-  - [ ] In remove_outliers function do not remove it, but interpolate by neighbors option
+  - [ ] In remove_outliers function do not remove it, but interpolate by neighbors option - same as in nans
 - [ ] Optionally save and load trained models .npy format for numpy.By default save to trained models folder, as parameter save or load model elsewhere
-- [ ] One hot encoding: OneHotEncoder(dtype=np.int, sparse=True) dataframe string to num
 - [ ] Ensamble learning - bagging - Best models average as one new model
 - [ ] Segmentation for input data subselection - Try TICC method or Matrix profile method or something new
 - [ ] Dask for big data (dask.np.aray and dask dataframe) - chunk datasource
@@ -24,11 +19,9 @@
 - [ ] Fast boosted hyperparametrs optimization method option - (optimize each parameter separately - then again...)
 - [ ] Change GUI to vuetify - do tests on it.
 - [ ] Numba optimization (probably just own models - LNU autoreg model and conjugate grad)
-- [ ] Feature selection (which columns to use) - E.g. https://towardsdatascience.com/deep-dive-into-catboost-functionalities-for-model-interpretation-7cdef669aeed, https://scikit-learn.org/stable/modules/feature_selection.html, https://towardsdatascience.com/feature-selection-with-pandas-e3690ad8504b
 - [ ] Ability to load and save config to json to folder
 - [ ] For error criterion use compare models values in normal predict to remove best decision_tree which is unfair on insample predictions - config option - real error criterion (computationly harder)
-- [ ] Conjugate gradient and autoreg LNU for multiple column data
-- [ ] List of string path files - use glob
+- [ ] List of string path files, not only one file - use glob
 
 ## Big Deals
 
@@ -44,6 +37,7 @@
   - [ ] Prophet
   - [ ] CatBoostClassifierm CatBoostRegressor
   - [ ] HONU
+  - [ ] statsmodels.tsa.vector_ar.var_model import VAR
   - [ ] Levenberg-Marquardt
   - [ ] Random walk with same std and mean and trend as very few last data
   - [ ] Add some boost method (lgboost library..., own adaboost for multivariate data)

@@ -2,8 +2,11 @@
 
 ## 1.6x - 10/2020
 
+[x] String embedding - One hot or label encoding
 [x] Api change! Config renamed because class with capitalize C from config to Config. 'datetime_index' renamed to 'datetime_column' - Old scripts wont work
 [x] Data_preprocessing and logging from misc moved into own projects and imported. Projects are called mylogging and mydatapreprocessing. It'necessary to have corresponding version
+[x] Various transforms added as derived columns. For example: Difference transform, Rolling window and rolling std transformation, Distance from the mean.
+[x] Fast fourier transform as new information.
 
 ## 1.5x - 09/2020
 

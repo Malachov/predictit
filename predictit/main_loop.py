@@ -6,11 +6,19 @@ import predictit
 
 
 # This is core function... It should be sequentionally in the middle of main script in predict function, but it has to be 1st level function to be able to use in multiprocessing.
-# To understand content, see code below function
 def train_and_predict(
         Config, iterated_model_train, iterated_model_predict, iterated_model_name, iterated_model_index, optimization_index,
         optimization_value, option_optimization_list, model_train_input, model_predict_input, model_test_inputs,
-        data_abs_max, data_mean, data_std, models_test_outputs, last_undiff_value=None, final_scaler=None, pipe=None):
+        data_abs_max, data_mean, data_std, models_test_outputs, last_undiff_value=None, final_scaler=None, pipe=None, semaphor=None):
+
+    # Config here is just dic, so cannot use Config.value syntax here
+    if semaphor:
+        semaphor.acquire()
+
+    if Config['trace_processes_memory']:
+        import tracemalloc
+
+        tracemalloc.start()
 
     model_results = {}
 
@@ -40,7 +48,6 @@ def train_and_predict(
     try:
         start = time.time()
 
-        model_results['name'] = iterated_model_name
         model_results['index'] = (iterated_model_index, optimization_index)
         model_results['optimization_index'] = optimization_index
         model_results['optimization_value'] = optimization_value
@@ -50,10 +57,10 @@ def train_and_predict(
             Config['models_parameters'][iterated_model_name] = {}
 
         # Train all models
-        model_results['trained_model'] = iterated_model_train(model_train_input, **Config['models_parameters'][iterated_model_name])
+        trained_model = iterated_model_train(model_train_input, **Config['models_parameters'][iterated_model_name])
 
         # Create predictions - out of sample
-        one_reality_result = iterated_model_predict(model_predict_input, model_results['trained_model'], Config['predicts'])
+        one_reality_result = iterated_model_predict(model_predict_input, trained_model, Config['predicts'])
 
         if np.isnan(np.sum(one_reality_result)) or one_reality_result is None:
             return
@@ -71,39 +78,56 @@ def train_and_predict(
 
         model_results['results'] = one_reality_result
 
-        process_repeated_matrix = np.zeros((Config['repeatit'], Config['predicts']))
-        process_evaluated_matrix = np.zeros(Config['repeatit'])
+        tests_results = np.zeros((Config['repeatit'], Config['predicts']))
+        test_errors = np.zeros(Config['repeatit'])
 
         # Predict many values in test inputs to evaluate which models are best - do not inverse data preprocessing, because test data are processed
         for repeat_iteration in range(Config['repeatit']):
 
             # Create in-sample predictions to evaluate if model is good or not
-            process_repeated_matrix[repeat_iteration] = iterated_model_predict(model_test_inputs[repeat_iteration], model_results['trained_model'], predicts=Config['predicts'])
+            tests_results[repeat_iteration] = iterated_model_predict(model_test_inputs[repeat_iteration], trained_model, predicts=Config['predicts'])
 
             if Config['power_transformed']:
-                process_repeated_matrix[repeat_iteration] = preprocessing.fitted_power_transform(process_repeated_matrix[repeat_iteration], data_std, data_mean)
+                tests_results[repeat_iteration] = preprocessing.fitted_power_transform(tests_results[repeat_iteration], data_std, data_mean)
+
+            if Config['evaluate_type'] == 'preprocessed':
+                test_errors[repeat_iteration] = predictit.evaluate_predictions.compare_predicted_to_test(
+                    tests_results[repeat_iteration], models_test_outputs[repeat_iteration], error_criterion=Config['error_criterion'])
+
+            tests_results[repeat_iteration] = preprocessing.preprocess_data_inverse(
+                tests_results[repeat_iteration], final_scaler=final_scaler, last_undiff_value=last_undiff_value,
+                standardizeit=Config['standardizeit'], data_transform=Config['data_transform'])
 
             if Config['evaluate_type'] == 'original':
-                process_repeated_matrix[repeat_iteration] = preprocessing.preprocess_data_inverse(
-                    process_repeated_matrix[repeat_iteration], final_scaler=final_scaler, last_undiff_value=last_undiff_value,
-                    standardizeit=Config['standardizeit'], data_transform=Config['data_transform'])
+                test_errors[repeat_iteration] = predictit.evaluate_predictions.compare_predicted_to_test(
+                    tests_results[repeat_iteration], models_test_outputs[repeat_iteration], error_criterion=Config['error_criterion'])
 
-            process_evaluated_matrix[repeat_iteration] = predictit.evaluate_predictions.compare_predicted_to_test(
-                process_repeated_matrix[repeat_iteration], models_test_outputs[repeat_iteration], error_criterion=Config['error_criterion'])
+        model_results['tests_results'] = tests_results
+        model_results['test_errors'] = test_errors
+        model_results['model_error'] = test_errors.mean()
 
-        model_results['repeated_matrix'] = process_repeated_matrix
-        model_results['evaluated_matrix'] = process_evaluated_matrix
-        model_results['model_error'] = process_evaluated_matrix.mean()
+        # For example tensorflow is not pickable, so sending model from process would fail. Trained models only if not multiprocessing
+        if not Config['multiprocessing']:
+            model_results['trained_model'] = trained_model
 
     except Exception:
-
-        traceback_warning(f"Error in {iterated_model_name} model on data length {optimization_value}")
+        model_results['model_error'] = np.inf
+        traceback_warning(f"Error in {iterated_model_name} model" if not Config['optimization'] else f"Error in {iterated_model_name} model with optimized value: {optimization_value}")
 
     finally:
         model_results['model_time'] = time.time() - start
 
+        if Config['trace_processes_memory']:
+            _, memory_peak_MB = tracemalloc.get_traced_memory()
+            model_results['memory_peak_MB'] = memory_peak_MB / 10**6
+            tracemalloc.stop()
+
+        if semaphor:
+            semaphor.release()
+
         if Config['multiprocessing'] == 'process':
-            pipe.send(model_results)
+            pipe.send({iterated_model_name: model_results})
             pipe.close()
+
         else:
-            return model_results
+            return {iterated_model_name: model_results}

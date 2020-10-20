@@ -79,11 +79,12 @@ def test_1():
     Config.printit = 1
     Config.plot_type = 'plotly'
     Config.show_plot = 0
+    Config.confidence_interval = 0
 
     Config.other_columns = 0
     Config.multiprocessing = 0
-    result = predictit.main.predict(predicts=3, return_type='detailed_dictionary')
-    assert not np.isnan(np.min(result['best']))
+    result = predictit.main.predict(predicts=3, return_type=None)
+    assert not np.isnan(np.min(list(result.values())[0]['tests_results']))
     return result
 
 
@@ -145,9 +146,11 @@ def test_readmes():
         'return_type': 'all_dataframe',
         'optimization': 1,
         'optimization_variable': 'default_n_steps_in',
-        'optimization_values': [4, 8, 10],
+        'optimization_values': [4, 5, 6],
         'plot_all_optimized_models': 1,
-        'print_table': 2  # Print detailed table
+        'print_table': 2,  # Print detailed table
+        'used_models': ['AR (Autoregression)', 'Conjugate gradient', 'Sklearn regression']
+
     })
 
     predictions_optimized_config = predictit.main.predict()
@@ -208,7 +211,7 @@ def test_readmes():
         'models_parameters': {
 
             "AR (Autoregression)": {'used_model': 'ar', 'method': 'cmle', 'ic': 'aic', 'trend': 'nc', 'solver': 'lbfgs'},
-            "ARIMA (Autoregression integrated moving average)": {'used_model': 'arima', 'p': 6, 'd': 0, 'q': 0, 'method': 'css', 'ic': 'aic', 'trend': 'nc', 'solver': 'nm'},
+            "ARIMA (Autoregression integrated moving average)": {'used_model': 'arima', 'p': 6, 'd': 0, 'q': 0},
 
             "Autoregressive Linear neural unit": {'mi_multiple': 1, 'mi_linspace': (1e-5, 1e-4, 3), 'epochs': 10, 'w_predict': 0, 'minormit': 0},
             "Conjugate gradient": {'epochs': 200},
@@ -218,8 +221,6 @@ def test_readmes():
     })
 
     predictions_configured = predictit.main.predict()
-
-
     first_multiple_array = multiple_columns_prediction[list(multiple_columns_prediction.keys())[0]]
 
     condition_1 = not np.isnan(np.min(predictions_1))
@@ -265,9 +266,11 @@ def test_main_from_config():
         'smoothit': (19, 2),
         'power_transformed': 1,
         'analyze_seasonal_decompose': {'period': 32, 'model': 'additive'},
+        'confidence_interval': 1,
 
         'used_models': [
             "Bayes ridge regression",
+            "Conjugate gradient",
         ]
     })
 
@@ -493,7 +496,7 @@ def test_visual():
 if __name__ == "__main__":
     # result = test_1()
     # result_readmes = test_readmes()
-    result1 = test_main_from_config()
+    # result1 = test_main_from_config()
     # result_2 = test_main_optimize_and_args()
     # result_3 = test_config_optimization()
     # result_4 = test_presets()
@@ -510,31 +513,19 @@ if __name__ == "__main__":
     # You can edit Config in two ways
 
     # Or
-    # Config.update({
+    Config.update(config_unchanged)
+    Config.update({
+        "data": '/home/dan/Desktop/archive/Jan_2019_ontime.csv',
+        "predicted_column": 'DISTANCE',
+        "datalength": 100000,
 
-    #     "data": 'https://blockchain.info/unconfirmed-transactions?format=json',
-    #     "predicted_column": 0,
-    #     'request_datatype_suffix': '.json',
-    #     'predicted_table': 'txs',
-    #     'data_orientation': 'index',
-    # })
+        # 'pool' or 'process' or 0
+        "multiprocessing": 0
+    })
 
-    # predictions = predictit.main.predict()
+    predictions = predictit.main.predict()
 
-    # aa =
     pass
-
-#%%
-
-# import pandas as pd
-
-# import sys
-# from pathlib import Path
-# import inspect
-
-# sys.path.insert(0, Path(os.path.abspath(inspect.getframeinfo(inspect.currentframe()).filename)).parents[1].as_posix())
-
-# import predictit
 
 #%%
 # from loguru import logger
