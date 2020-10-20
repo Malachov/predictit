@@ -2,6 +2,7 @@
 
 cd docs/source
 
+mv img ..
 mv conf.py ..
 mv index.rst ..
 mv _static ..
@@ -14,6 +15,7 @@ rm -r build
 
 mkdir source
 
+mv img source
 mv conf.py source
 mv index.rst source
 mv _static source
