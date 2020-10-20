@@ -62,7 +62,7 @@ extensions = [
     'sphinx.ext.viewcode',
     'sphinx.ext.githubpages',
     'sphinx.ext.imgmath',
-    'sphinx.ext.autosectionlabel'
+    'sphinx.ext.autosectionlabel',
     'm2r2',
 ]
 
