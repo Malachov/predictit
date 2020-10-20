@@ -11,10 +11,10 @@ Library contain model hyperparameters optimization as well as option variable op
 Most common output is plotly interactive graph, numpy array of results or deploying to database.
 
 <p align="center">
-<img src="output_example.png" width="620" alt="Plot of results"/>
+<img src="./output_example.png" width="620" alt="Plot of results"/>
 </p>
 <p align="center">
-<img src="table_of_results.png" width="620" alt="Table of results"/>
+<img src="./table_of_results.png" width="620" alt="Table of results"/>
 </p>
 
 Return type of main predict function depends on `configation.py`. It can return best prediction as array or all predictions as dataframe. Interactive html plot is also created.
@@ -161,7 +161,7 @@ Just run `gui_start.py` if you have downloaded software or call `predictit.gui_s
 Screenshot of such a GUI
 
 <p align="center">
-<img src="GUI.png" width="620" alt="Table of results"/>
+<img src="./GUI.png" width="620" alt="Table of results"/>
 </p>
 
 Better GUI with fully customizable settings will be shipped next year.
