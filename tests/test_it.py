@@ -513,17 +513,17 @@ if __name__ == "__main__":
     # You can edit Config in two ways
 
     # Or
-    Config.update(config_unchanged)
-    Config.update({
-        "data": '/home/dan/Desktop/archive/Jan_2019_ontime.csv',
-        "predicted_column": 'DISTANCE',
-        "datalength": 100000,
+    # Config.update(config_unchanged)
+    # Config.update({
+    #     "data": '/home/dan/Desktop/archive/Jan_2019_ontime.csv',
+    #     "predicted_column": 'DISTANCE',
+    #     "datalength": 100000,
 
-        # 'pool' or 'process' or 0
-        "multiprocessing": 0
-    })
+    #     # 'pool' or 'process' or 0
+    #     "multiprocessing": 0
+    # })
 
-    predictions = predictit.main.predict()
+    # predictions = predictit.main.predict()
 
     pass
 
