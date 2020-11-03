@@ -81,7 +81,6 @@ def test_1():
     Config.show_plot = 0
     Config.confidence_interval = 0
 
-    Config.other_columns = 0
     Config.multiprocessing = 0
     result = predictit.main.predict(predicts=3, return_type=None)
     assert not np.isnan(np.min(list(result.values())[0]['tests_results']))
@@ -164,12 +163,12 @@ def test_readmes():
     data = "https://blockchain.info/unconfirmed-transactions?format=json"
 
     # Load data from file or URL
-    data_loaded = load_data(data, request_datatype_suffix=".json", predicted_table='txs')
+    data_loaded = load_data(data, request_datatype_suffix=".json", predicted_table='txs', data_orientation="index")
 
     # Transform various data into defined format - pandas dataframe - convert to numeric if possible, keep
     # only numeric data and resample ifg configured. It return array, dataframe
     data_consolidated = data_consolidation(
-        data_loaded, predicted_column="weight", data_orientation="index", remove_nans_threshold=0.9, remove_nans_or_replace='interpolate')
+        data_loaded, predicted_column="weight", remove_nans_threshold=0.9, remove_nans_or_replace='interpolate')
 
     # Predicted column is on index 0 after consolidation)
     analyze_column(data_consolidated.iloc[:, 0])
@@ -527,18 +526,35 @@ if __name__ == "__main__":
 
     pass
 
+
 #%%
-# from loguru import logger
-# import logging
 
-# logger.add(sys.stdout, colorize=True, format="<green>{time}</green> <level>{message}</level>")
+# import categorical_embedder as ce
+# from sklearn.model_selection import train_test_split
 
-# @logger.catch
-# def my_function(x, y, z):
-#     # An error? It's caught anyway!
-#     return 1 / (x + y + z)
+# # df = pd.DataFrame([['Hodne', 20, 'efs', 3], ['stredne', 10, 'efs', 3], ['malp', 2, 'ef', 3], ['Hodne', 20, 'ef', 3], ['stredne', 10, 'ef', 3], ['malp', 2, 'ef', 3],['Hodne', 20, 'ef', 3], ['stredne', 10, 'ef', 3], ['malp', 2, 'ef', 3]])
+# # X = df.iloc[:, 0:2]
+# # y = df.iloc[:, 3:4]
 
-# my_function()
 
-# # logger.debug("That's it, beautiful and simple logging!")
-# print('ahoj')
+
+# import categorical_embedder as ce
+# from sklearn.model_selection import train_test_split
+# df = pd.read_csv('tests/data.csv')
+# X = df.drop(['employee_id', 'is_promoted'], axis=1)
+# y = df['is_promoted']
+# embedding_info = ce.get_embedding_info(X)
+# X_encoded, encoders = ce.get_label_encoded_data(X)
+# X_train, X_test, y_train, y_test = train_test_split(X_encoded, y)
+# embeddings = ce.get_embeddings(X_train, y_train, categorical_embedding_info=embedding_info, 
+#                             is_classification=True, epochs=100,batch_size=256)
+
+# # embedding_info = ce.get_embedding_info(X)
+# # X_encoded,encoders = ce.get_label_encoded_data(X)
+
+# # embeddings = ce.get_embeddings(X, y, categorical_embedding_info=embedding_info, 
+# #                             is_classification=True, epochs=100, batch_size=256)
+# # embeddings_df = ce.get_embeddings_in_dataframe(embeddings, encoders)
+
+
+# aa = 1

@@ -177,7 +177,8 @@ def predict(**function_kwargs):
     if isinstance(Config.data, (str, PurePath)):
         Config.data = mdp.preprocessing.load_data(
             Config.data, header=Config.header, csv_style=Config.csv_style, predicted_table=Config.predicted_table,
-            max_imported_length=Config.max_imported_length, request_datatype_suffix=Config.request_datatype_suffix)
+            max_imported_length=Config.max_imported_length, request_datatype_suffix=Config.request_datatype_suffix,
+            data_orientation=Config.data_orientation)
 
     #############################################
     ############ DATA consolidation ###### ANCHOR Data consolidation
@@ -188,7 +189,7 @@ def predict(**function_kwargs):
 
     data_for_predictions_df = mdp.preprocessing.data_consolidation(
         Config.data, predicted_column=Config.predicted_column, other_columns=Config.other_columns, datalength=Config.datalength,
-        data_orientation=Config.data_orientation, datetime_column=Config.datetime_column, unique_threshlold=Config.unique_threshlold,
+        datetime_column=Config.datetime_column, unique_threshlold=Config.unique_threshlold,
         embedding=Config.embedding, freq=Config.freq, resample_function=Config.resample_function, remove_nans_threshold=Config.remove_nans_threshold,
         remove_nans_or_replace=Config.remove_nans_or_replace, dtype=Config.dtype)
 
@@ -292,12 +293,8 @@ def predict(**function_kwargs):
         ############ DATA preprocessing ###### ANCHOR Data preprocessing
         #############################################
 
-        # TODO Remove unnecessary copies (only data_for_predictions_df and using .values) and check if input data stays the same after all models computations - the same in preprocessing
-
-        data_for_predictions = data_for_predictions_df.values.copy()
-
         data_for_predictions, last_undiff_value, final_scaler = mdp.preprocessing.preprocess_data(
-            data_for_predictions, remove_outliers=Config.remove_outliers, smoothit=Config.smoothit,
+            data_for_predictions_df.values, remove_outliers=Config.remove_outliers, smoothit=Config.smoothit,
             correlation_threshold=Config.correlation_threshold, data_transform=Config.data_transform,
             standardizeit=Config.standardizeit)
 
@@ -623,9 +620,10 @@ def predict_multiple_columns(**function_kwargs):
         if isinstance(Config.data, str):
             Config.data = mdp.preprocessing.load_data(
                 Config.data, header=Config.header, csv_style=Config.csv_style, predicted_table=Config.predicted_table,
-                max_imported_length=Config.max_imported_length, request_datatype_suffix=Config.request_datatype_suffix)
+                max_imported_length=Config.max_imported_length, request_datatype_suffix=Config.request_datatype_suffix,
+                data_orientation=Config.data_orientation)
 
-        predicted_columns = mdp.preprocessing.data_consolidation(Config.data, data_orientation=Config.data_orientation).columns
+        predicted_columns = mdp.preprocessing.data_consolidation(Config.data).columns
 
     predictions = {}
 

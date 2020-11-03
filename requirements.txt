@@ -1,5 +1,5 @@
+mydatapreprocessing>=1.1
 mylogging
-mydatapreprocessing
 numpy
 pandas
 eel

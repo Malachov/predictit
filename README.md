@@ -191,12 +191,12 @@ from predictit.analyze import analyze_column
 data = "https://blockchain.info/unconfirmed-transactions?format=json"
 
 # Load data from file or URL
-data_loaded = load_data(data, request_datatype_suffix=".json", predicted_table='txs')
+data_loaded = load_data(data, request_datatype_suffix=".json", predicted_table='txs', data_orientation="index")
 
 # Transform various data into defined format - pandas dataframe - convert to numeric if possible, keep
 # only numeric data and resample ifg configured. It return array, dataframe
 data_consolidated = data_consolidation(
-    data_loaded, predicted_column="weight", data_orientation="index", remove_nans_threshold=0.9, remove_nans_or_replace='interpolate')
+    data_loaded, predicted_column="weight", remove_nans_threshold=0.9, remove_nans_or_replace='interpolate')
 
 # Predicted column is on index 0 after consolidation)
 analyze_column(data_consolidated.iloc[:, 0])
