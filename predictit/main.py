@@ -206,7 +206,6 @@ def predict(**function_kwargs):
     ############# Data analyze ###### Analyze original data
     ########################################
 
-    multicolumn = 0 if data_for_predictions_df.shape[1] == 1 else 1
     column_for_predictions_df = data_for_predictions_df.iloc[:, 0:1]
     used_models_assigned = {i: j for (i, j) in predictit.models.models_assignment.items() if i in Config.used_models}
 
@@ -529,7 +528,7 @@ def predict(**function_kwargs):
                     predictions, plot_type=Config.plot_type, show=Config.show_plot, save=Config.save_plot,
                     legend=Config.plot_legend, save_path=Config.save_plot_path, best_model_name=best_model_name_plot)
 
-    time_point = update_time_table(time_point)
+    update_time_table(time_point)
     progress_phase = "Completed"
     update_gui(progress_phase, 'progress_phase')
 

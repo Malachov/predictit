@@ -1,0 +1,206 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>predictit.models.autoreg_LNU module &#8212; predictit 11-11-2020 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="module-predictit.models.autoreg_LNU">
+<span id="predictit-models-autoreg-lnu-module"></span><h1>predictit.models.autoreg_LNU module<a class="headerlink" href="#module-predictit.models.autoreg_LNU" title="Permalink to this headline">¶</a></h1>
+<dl class="py function">
+<dt id="predictit.models.autoreg_LNU.predict">
+<code class="sig-prename descclassname">predictit.models.autoreg_LNU.</code><code class="sig-name descname">predict</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x_input</span></em>, <em class="sig-param"><span class="n">model</span></em>, <em class="sig-param"><span class="n">predicts</span><span class="o">=</span><span class="default_value">7</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/predictit/models/autoreg_LNU.html#predict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#predictit.models.autoreg_LNU.predict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function that creates predictions from trained model and input data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x_input</strong> (<em>np.ndarray</em>) – Time series data.</p></li>
+<li><p><strong>model</strong> (<em>list</em><em>, </em><em>class</em>) – Trained model. It can be list of neural weights .</p></li>
+<li><p><strong>predicts</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of predicted values. Defaults to 7.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Array of predicted results</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="predictit.models.autoreg_LNU.train">
+<code class="sig-prename descclassname">predictit.models.autoreg_LNU.</code><code class="sig-name descname">train</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">sequentions</span></em>, <em class="sig-param"><span class="n">predicts</span><span class="o">=</span><span class="default_value">30</span></em>, <em class="sig-param"><span class="n">mi</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">mi_multiple</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">mi_linspace</span><span class="o">=</span><span class="default_value">1e-08, 10, 20</span></em>, <em class="sig-param"><span class="n">epochs</span><span class="o">=</span><span class="default_value">10</span></em>, <em class="sig-param"><span class="n">w_predict</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">minormit</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">damping</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">plot</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">random</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">w_rand_scope</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">w_rand_shift</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">rand_seed</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/predictit/models/autoreg_LNU.html#train"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#predictit.models.autoreg_LNU.train" title="Permalink to this definition">¶</a></dt>
+<dd><p>Autoregressive linear neural unit. It’s simple one neuron one-step neural net. It can predict not only predictions itself,
+but also use other faster method to predict weights evolution for out of sample predictions. In first iteration it will find best learning step
+and in the second iteration, it will train more epochs.
+:param sequentions:
+:type sequentions: tuple(np.ndarray, np.ndarray, np.ndarray)) - Tuple (X, y, x_input
+:param predicts: Number of predicted values. Defaults to 7.
+:type predicts: int, optional
+:param mi: Learning rate. If not normalized must be much smaller. Defaults to 0.1.
+:type mi: float, optional
+:param mi_multiple: If try more weights and try to find the best. Set the possible values with mi_linspace.
+:type mi_multiple: bool
+:param mi_linspace: Used learning rate numpy linspace arguments. Defaults to mi_linspace=(1e-8, 10, 20).</p>
+<blockquote>
+<div><p>That means, that mimimum value is 1e-8, maximum 20 and there is 20 values in the interval.</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>epochs</strong> (<em>int</em>) – Numer of trained epochs.</p></li>
+<li><p><strong>w_predict</strong> (<em>bool</em>) – If predict weights with next predictions.</p></li>
+<li><p><strong>minormit</strong> (<em>int</em><em>, </em><em>optional</em>) – Whether normalize learning rate. Defaults to 0.</p></li>
+<li><p><strong>damping</strong> (<em>int</em><em>, </em><em>optional</em>) – Whether damp learning rate or not. Defaults to 1.</p></li>
+<li><p><strong>plot</strong> (<em>int</em><em>, </em><em>optional</em>) – Whether plot results. Defaults to 0.</p></li>
+<li><p><strong>random</strong> (<em>int</em><em>, </em><em>optional</em>) – Whether initial weights are random or not. Defaults to 0.</p></li>
+<li><p><strong>w_rand_scope</strong> (<em>int</em><em>, </em><em>optional</em>) – w_rand_scope of random weights. Defaults to 1.</p></li>
+<li><p><strong>w_rand_shift</strong> (<em>int</em><em>, </em><em>optional</em>) – w_rand_shift of random weights. Defaults to 0.</p></li>
+<li><p><strong>rand_seed</strong> (<em>int</em><em>, </em><em>optional</em>) – Random weights but the same everytime. Defaults to 0.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Predictions of input time series.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div id="logo">
+    <a href="https://predictit.readthedocs.io/">
+        <img logo" src="https://predictit.readthedocs.io/en/master/_static/logo.png" alt="Logo">
+    </a>
+
+    <div class="section" id="table-of-contents">
+        <h3>Table of contents</h3>
+        <div class="toctree-wrapper compound">
+            <ul>
+
+                <li class="toctree-l1"><a class="reference internal"
+                        href="https://predictit.readthedocs.io/en/master/">predictit</a>
+                    <ul>
+                        <li class="toctree-l2"><a class="reference internal"
+                                href="https://predictit.readthedocs.io/en/master/#output">Output</a></li>
+                        <li class="toctree-l2"><a class="reference internal"
+                                href="https://predictit.readthedocs.io/en/master/#installation">Installation</a></li>
+                        <li class="toctree-l2"><a class="reference internal"
+                                href="https://predictit.readthedocs.io/en/master/#how-to">How to</a></li>
+
+                        <li class="toctree-l2"><a class="reference internal"
+                                href="https://predictit.readthedocs.io/en/master/#submodules">Submodules</a>
+                            <ul>
+                                <li class="toctree-l3"><a class="reference internal"
+                                        href="https://predictit.readthedocs.io/en/master/predictit.configuration.html">configuration</a>
+                                </li>
+                                <li class="toctree-l3"><a class="reference internal"
+                                        href="https://predictit.readthedocs.io/en/master/predictit.main.html">main</a>
+                                </li>
+                                <li class="toctree-l3"><a class="reference internal"
+                                        href="https://predictit.readthedocs.io/en/master/predictit.analyze">analyze</a>
+                                </li>
+                                <li class="toctree-l3"><a class="reference internal"
+                                        href="https://predictit.readthedocs.io/en/master/predictit.best_params.html">best_params</a>
+                                </li>
+                                <li class="toctree-l3"><a class="reference internal"
+                                        href="https://predictit.readthedocs.io/en/master/predictit.database.html">database</a>
+                                </li>
+                                <li class="toctree-l3"><a class="reference internal"
+                                        href="https://predictit.readthedocs.io/en/master/predictit.data_preprocessing.html">data_preprocessing</a>
+                                </li>
+                                <li class="toctree-l3"><a class="reference internal"
+                                        href="https://predictit.readthedocs.io/en/master/predictit.evaluate_predictions.html">evaluate_predictions</a>
+                                </li>
+                            </ul>
+                        </li>
+
+                        <li class="toctree-l2"><a class="reference internal"
+                                href="https://predictit.readthedocs.io/en/master/#subpackages">Subpackages</a>
+                            <ul>
+                                <li class="toctree-l3"><a class="reference internal"
+                                        href="https://predictit.readthedocs.io/en/master/predictit.models.html">models</a>
+                                </li>
+                                <li class="toctree-l3"><a class="reference internal"
+                                        href="https://predictit.readthedocs.io/en/master/predictit.test_data.html">test_data</a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li class="toctree-l2"><a class="reference internal"
+                                href="https://predictit.readthedocs.io/en/master/genindex.html">Index</a></li>
+                    </ul>
+                </li>
+
+            </ul>
+        </div>
+    </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Daniel Malachov.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.2.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/predictit.models.autoreg_LNU.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+    <a href="https://github.com/Malachov/predictit" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,212 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>predictit.models.statsmodels_autoregressive &#8212; predictit 11-11-2020 documentation</title>
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for predictit.models.statsmodels_autoregressive</h1><div class="highlight"><pre>
+<span></span>
+<div class="viewcode-block" id="train"><a class="viewcode-back" href="../../../predictit.models.statsmodels_autoregressive.html#predictit.models.statsmodels_autoregressive.train">[docs]</a><span class="k">def</span> <span class="nf">train</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">used_model</span><span class="o">=</span><span class="s1">&#39;autoreg&#39;</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">d</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">cov_type</span><span class="o">=</span><span class="s1">&#39;nonrobust&#39;</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;cmle&#39;</span><span class="p">,</span> <span class="n">trend</span><span class="o">=</span><span class="s1">&#39;nc&#39;</span><span class="p">,</span> <span class="n">solver</span><span class="o">=</span><span class="s1">&#39;lbfgs&#39;</span><span class="p">,</span> <span class="n">maxlag</span><span class="o">=</span><span class="mi">13</span><span class="p">,</span>
+          <span class="c1"># SARIMAX args</span>
+          <span class="n">seasonal</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">24</span><span class="p">),</span> <span class="n">enforce_invertibility</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">enforce_stationarity</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Autoregressive model from statsmodels library. Only univariate data.</span>
+<span class="sd">    Args:</span>
+<span class="sd">        data (np.ndarray): Time series data.</span>
+<span class="sd">        predicts (int, optional): Number of predicted values. Defaults to 7.</span>
+<span class="sd">        plot (int, optional): Whether plot results. Defaults to 0.</span>
+<span class="sd">        predicted_column_index (int, optional): If multidimensional, define what column is predicted. Defaults to 0.</span>
+<span class="sd">        method (str, optional): Parameter of statsmodels fit function. Defaults to &#39;cmle&#39;.</span>
+<span class="sd">        ic (str, optional): Parameter of statsmodels fit function. Defaults to &#39;aic&#39;.</span>
+<span class="sd">        trend (str, optional): Parameter of statsmodels fit function. Defaults to &#39;nc&#39;.</span>
+<span class="sd">        solver (str, optional):ort statsmodels.api as sm</span>
+<span class="sd">      File &quot;/home/dan/.local/lib/pyt Parameter of statsmodels fit function. Defaults to &#39;lbfgs&#39;.</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        np.ndarray: Predictions of input time series.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="kn">import</span> <span class="nn">statsmodels.tsa.api</span> <span class="k">as</span> <span class="nn">sm</span>
+    <span class="kn">from</span> <span class="nn">statsmodels.tsa.statespace.sarimax</span> <span class="kn">import</span> <span class="n">SARIMAX</span>
+    <span class="kn">from</span> <span class="nn">statsmodels.tsa.arima.model</span> <span class="kn">import</span> <span class="n">ARIMA</span>
+    <span class="kn">from</span> <span class="nn">statsmodels.tsa</span> <span class="kn">import</span> <span class="n">ar_model</span>
+
+    <span class="n">used_model</span> <span class="o">=</span> <span class="n">used_model</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">used_model</span> <span class="o">==</span> <span class="s1">&#39;ar&#39;</span><span class="p">:</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">AR</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="n">fitted_model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">,</span> <span class="n">trend</span><span class="o">=</span><span class="n">trend</span><span class="p">,</span> <span class="n">solver</span><span class="o">=</span><span class="n">solver</span><span class="p">,</span> <span class="n">disp</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="n">used_model</span> <span class="o">==</span> <span class="s1">&#39;arima&#39;</span><span class="p">:</span>
+        <span class="n">order</span> <span class="o">=</span> <span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">q</span><span class="p">)</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">ARIMA</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="n">order</span><span class="p">)</span>
+        <span class="n">fitted_model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
+
+    <span class="k">elif</span> <span class="n">used_model</span> <span class="o">==</span> <span class="s1">&#39;sarimax&#39;</span><span class="p">:</span>
+        <span class="n">order</span> <span class="o">=</span> <span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">q</span><span class="p">)</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">SARIMAX</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="n">order</span><span class="p">,</span> <span class="n">seasonal_order</span><span class="o">=</span><span class="n">seasonal</span><span class="p">)</span>
+        <span class="n">fitted_model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">,</span> <span class="n">trend</span><span class="o">=</span><span class="n">trend</span><span class="p">,</span> <span class="n">solver</span><span class="o">=</span><span class="n">solver</span><span class="p">,</span> <span class="n">disp</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="n">used_model</span> <span class="o">==</span> <span class="s1">&#39;autoreg&#39;</span><span class="p">:</span>
+        <span class="n">auto</span> <span class="o">=</span> <span class="n">ar_model</span><span class="o">.</span><span class="n">ar_select_order</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">maxlag</span><span class="o">=</span><span class="n">maxlag</span><span class="p">,</span> <span class="n">old_names</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">ar_model</span><span class="o">.</span><span class="n">AutoReg</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">lags</span><span class="o">=</span><span class="n">auto</span><span class="o">.</span><span class="n">ar_lags</span><span class="p">,</span> <span class="n">trend</span><span class="o">=</span><span class="n">auto</span><span class="o">.</span><span class="n">trend</span><span class="p">,</span> <span class="n">seasonal</span><span class="o">=</span><span class="n">auto</span><span class="o">.</span><span class="n">seasonal</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="n">auto</span><span class="o">.</span><span class="n">period</span><span class="p">,</span> <span class="n">old_names</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">fitted_model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">cov_type</span><span class="o">=</span><span class="n">cov_type</span><span class="p">)</span>
+
+    <span class="n">fitted_model</span><span class="o">.</span><span class="n">my_name</span> <span class="o">=</span> <span class="n">used_model</span>
+    <span class="n">fitted_model</span><span class="o">.</span><span class="n">data_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">fitted_model</span></div>
+
+
+<div class="viewcode-block" id="predict"><a class="viewcode-back" href="../../../predictit.models.statsmodels_autoregressive.html#predictit.models.statsmodels_autoregressive.predict">[docs]</a><span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">predicts</span><span class="o">=</span><span class="mi">7</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Function that creates predictions from trained model and input data.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        data (np.ndarray): Time series data</span>
+<span class="sd">        model (list, class): Trained model. It can be list of neural weights or it can be fitted model class from imported library.</span>
+<span class="sd">        predicts (int, optional): Number of predicted values. Defaults to 7.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        np.ndarray: Array of predicted results</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">start</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">data_len</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">model</span><span class="o">.</span><span class="n">data_len</span> <span class="k">else</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="c1"># Input data must have same starting point as data in train so the starting point be correct</span>
+    <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">my_name</span> <span class="o">==</span> <span class="s1">&#39;arima&#39;</span><span class="p">:</span>
+        <span class="n">predictions</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="n">start</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">predicts</span><span class="p">,</span> <span class="n">typ</span><span class="o">=</span><span class="s1">&#39;levels&#39;</span><span class="p">)[</span><span class="o">-</span><span class="n">predicts</span><span class="p">:]</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">predictions</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="n">start</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">predicts</span><span class="p">)[</span><span class="o">-</span><span class="n">predicts</span><span class="p">:]</span>
+
+    <span class="k">return</span> <span class="n">predictions</span></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div id="logo">
+    <a href="https://predictit.readthedocs.io/">
+        <img logo" src="https://predictit.readthedocs.io/en/master/_static/logo.png" alt="Logo">
+    </a>
+
+    <div class="section" id="table-of-contents">
+        <h3>Table of contents</h3>
+        <div class="toctree-wrapper compound">
+            <ul>
+
+                <li class="toctree-l1"><a class="reference internal"
+                        href="https://predictit.readthedocs.io/en/master/">predictit</a>
+                    <ul>
+                        <li class="toctree-l2"><a class="reference internal"
+                                href="https://predictit.readthedocs.io/en/master/#output">Output</a></li>
+                        <li class="toctree-l2"><a class="reference internal"
+                                href="https://predictit.readthedocs.io/en/master/#installation">Installation</a></li>
+                        <li class="toctree-l2"><a class="reference internal"
+                                href="https://predictit.readthedocs.io/en/master/#how-to">How to</a></li>
+
+                        <li class="toctree-l2"><a class="reference internal"
+                                href="https://predictit.readthedocs.io/en/master/#submodules">Submodules</a>
+                            <ul>
+                                <li class="toctree-l3"><a class="reference internal"
+                                        href="https://predictit.readthedocs.io/en/master/predictit.configuration.html">configuration</a>
+                                </li>
+                                <li class="toctree-l3"><a class="reference internal"
+                                        href="https://predictit.readthedocs.io/en/master/predictit.main.html">main</a>
+                                </li>
+                                <li class="toctree-l3"><a class="reference internal"
+                                        href="https://predictit.readthedocs.io/en/master/predictit.analyze">analyze</a>
+                                </li>
+                                <li class="toctree-l3"><a class="reference internal"
+                                        href="https://predictit.readthedocs.io/en/master/predictit.best_params.html">best_params</a>
+                                </li>
+                                <li class="toctree-l3"><a class="reference internal"
+                                        href="https://predictit.readthedocs.io/en/master/predictit.database.html">database</a>
+                                </li>
+                                <li class="toctree-l3"><a class="reference internal"
+                                        href="https://predictit.readthedocs.io/en/master/predictit.data_preprocessing.html">data_preprocessing</a>
+                                </li>
+                                <li class="toctree-l3"><a class="reference internal"
+                                        href="https://predictit.readthedocs.io/en/master/predictit.evaluate_predictions.html">evaluate_predictions</a>
+                                </li>
+                            </ul>
+                        </li>
+
+                        <li class="toctree-l2"><a class="reference internal"
+                                href="https://predictit.readthedocs.io/en/master/#subpackages">Subpackages</a>
+                            <ul>
+                                <li class="toctree-l3"><a class="reference internal"
+                                        href="https://predictit.readthedocs.io/en/master/predictit.models.html">models</a>
+                                </li>
+                                <li class="toctree-l3"><a class="reference internal"
+                                        href="https://predictit.readthedocs.io/en/master/predictit.test_data.html">test_data</a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li class="toctree-l2"><a class="reference internal"
+                                href="https://predictit.readthedocs.io/en/master/genindex.html">Index</a></li>
+                    </ul>
+                </li>
+
+            </ul>
+        </div>
+    </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Daniel Malachov.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.2.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+    <a href="https://github.com/Malachov/predictit" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>

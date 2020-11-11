@@ -145,9 +145,9 @@ class Config():
     analyze_seasonal_decompose = {'period': 365, 'model': 'additive'}  # Parameters for seasonal decompose in analyze. Find if there are periodically repeating patterns in data.
 
     ### Data preprocessing
-    unique_threshlold = 0.1  # Romeve string columns, that have to many categories. E.g 0.1 define, that has to be less that 10% of unique values. It will remove ids, hashes etc.
-    embedding = 'label'  # Categorical encoding. Create numbers from strings. 'label' give each category (unique string)
-    # concrete number - result will have same number of columns. 'one-hot' create for every category new column.
+    unique_threshlold = 0.1  # Remove string columns, that have to many categories. E.g 0.1 define, that has to be less that 10% of unique values. It will remove ids, hashes etc.
+    embedding = 'label'  # Categorical encoding. Create numbers from strings. 'label' give each category (unique string) concrete number.
+    #		Result will have same number of columns. 'one-hot' create for every category new column.
     remove_nans_threshold = 0.2  # From 0 to 1. How much not nans (not a number) can be in column to not be deleted. For example if 0.9 means that columns has to have more than 90% values that are not nan to not be deleted.
     remove_nans_or_replace = 'mean'  # 'mean', 'interpolate', 'neighbor', 'remove' or value. After removing columns over nan threshold, this will remove or replace rest nan values.
     #If 'mean', replace with mean of column where nan is, if 'interpolate', it will return guess value based on neighbors. 'neighbor' use value before nan. Remove will remove rows where nans, if value set, it will replace all nans for example with 0.

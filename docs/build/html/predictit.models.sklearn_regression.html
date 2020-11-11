@@ -1,0 +1,206 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>predictit.models.sklearn_regression module &#8212; predictit 11-11-2020 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="module-predictit.models.sklearn_regression">
+<span id="predictit-models-sklearn-regression-module"></span><h1>predictit.models.sklearn_regression module<a class="headerlink" href="#module-predictit.models.sklearn_regression" title="Permalink to this headline">¶</a></h1>
+<dl class="py function">
+<dt id="predictit.models.sklearn_regression.get_regressors">
+<code class="sig-prename descclassname">predictit.models.sklearn_regression.</code><code class="sig-name descname">get_regressors</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/predictit/models/sklearn_regression.html#get_regressors"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#predictit.models.sklearn_regression.get_regressors" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create list of all regressors from sklearn (classes, that can be called). E.g. [bayes_ridge_regressor, linear_regressor]</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="predictit.models.sklearn_regression.predict">
+<code class="sig-prename descclassname">predictit.models.sklearn_regression.</code><code class="sig-name descname">predict</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x_input</span></em>, <em class="sig-param"><span class="n">model</span></em>, <em class="sig-param"><span class="n">predicts</span><span class="o">=</span><span class="default_value">7</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/predictit/models/sklearn_regression.html#predict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#predictit.models.sklearn_regression.predict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function that creates predictions from trained model and input data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>np.ndarray</em>) – Time series data</p></li>
+<li><p><strong>model</strong> (<em>list</em><em>, </em><em>class</em>) – Trained model. It can be list of neural weights or it can be fitted model class from imported library.</p></li>
+<li><p><strong>predicts</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of predicted values. Defaults to 7.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Array of predicted results</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="predictit.models.sklearn_regression.train">
+<code class="sig-prename descclassname">predictit.models.sklearn_regression.</code><code class="sig-name descname">train</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">sequentions</span></em>, <em class="sig-param"><span class="n">regressor</span><span class="o">=</span><span class="default_value">'bayesianridge'</span></em>, <em class="sig-param"><span class="n">predicts</span><span class="o">=</span><span class="default_value">7</span></em>, <em class="sig-param"><span class="n">load_trained_model</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">update_trained_model</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">save_model</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">saved_model_path_string</span><span class="o">=</span><span class="default_value">'stored_models'</span></em>, <em class="sig-param"><span class="n">n_estimators</span><span class="o">=</span><span class="default_value">100</span></em>, <em class="sig-param"><span class="n">alpha</span><span class="o">=</span><span class="default_value">0.0001</span></em>, <em class="sig-param"><span class="n">alpha_1</span><span class="o">=</span><span class="default_value">1e-06</span></em>, <em class="sig-param"><span class="n">alpha_2</span><span class="o">=</span><span class="default_value">1e-06</span></em>, <em class="sig-param"><span class="n">lambda_1</span><span class="o">=</span><span class="default_value">1e-06</span></em>, <em class="sig-param"><span class="n">lambda_2</span><span class="o">=</span><span class="default_value">1e-06</span></em>, <em class="sig-param"><span class="n">n_iter</span><span class="o">=</span><span class="default_value">300</span></em>, <em class="sig-param"><span class="n">epsilon</span><span class="o">=</span><span class="default_value">1.35</span></em>, <em class="sig-param"><span class="n">alphas</span><span class="o">=</span><span class="default_value">[0.1, 0.5, 1]</span></em>, <em class="sig-param"><span class="n">gcv_mode</span><span class="o">=</span><span class="default_value">'auto'</span></em>, <em class="sig-param"><span class="n">solver</span><span class="o">=</span><span class="default_value">'auto'</span></em>, <em class="sig-param"><span class="n">n_hidden</span><span class="o">=</span><span class="default_value">20</span></em>, <em class="sig-param"><span class="n">rbf_width</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">activation_func</span><span class="o">=</span><span class="default_value">'selu'</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/predictit/models/sklearn_regression.html#train"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#predictit.models.sklearn_regression.train" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sklearn regression model. Regressor is input parameter. It can be linear, or ridge, or Huber. It use function that return
+all existing regressor (with function optimize it automaticcaly find the best one). It also contain extreme learning machine model from sklearn extensions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sequentions</strong> (<em>tuple</em><em>(</em><em>np.ndarray</em><em>, </em><em>np.ndarray</em><em>, </em><em>np.ndarray</em><em>)</em><em>) </em><em>- Tuple</em><em> (</em><em>X</em><em>, </em><em>y</em><em>, </em><em>x_input</em>) – </p></li>
+<li><p><strong>regressor</strong> (<em>str</em><em>, </em><em>optional</em>) – Regressor that sklearn use. Defaults to ‘bayesianridge’.</p></li>
+<li><p><strong>predicts</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of predicted values. Defaults to 7.</p></li>
+<li><p><strong>alpha</strong> (<em>float</em><em>, </em><em>optional</em>) – Parameter of some regressor. Defaults to 0.0001.</p></li>
+<li><p><strong>alpha_1</strong> (<em>float</em><em>, </em><em>optional</em>) – Parameter of some regressor. Defaults to 1.e-6.</p></li>
+<li><p><strong>alpha_2</strong> (<em>float</em><em>, </em><em>optional</em>) – Parameter of some regressor. Defaults to 1.e-6.</p></li>
+<li><p><strong>lambda_1</strong> (<em>float</em><em>, </em><em>optional</em>) – Parameter of some regressor. Defaults to 1.e-6.</p></li>
+<li><p><strong>lambda_2</strong> (<em>float</em><em>, </em><em>optional</em>) – Parameter of some regressor. Defaults to 1.e-6.</p></li>
+<li><p><strong>n_iter</strong> (<em>int</em><em>, </em><em>optional</em>) – Parameter of some regressor. Defaults to 300.</p></li>
+<li><p><strong>epsilon</strong> (<em>float</em><em>, </em><em>optional</em>) – Parameter of some regressor. Defaults to 1.35.</p></li>
+<li><p><strong>alphas</strong> (<em>list</em><em>, </em><em>optional</em>) – Parameter of some regressor. Defaults to [0.1, 0.5, 1].</p></li>
+<li><p><strong>gcv_mode</strong> (<em>str</em><em>, </em><em>optional</em>) – Parameter of some regressor. Defaults to ‘auto’.</p></li>
+<li><p><strong>solver</strong> (<em>str</em><em>, </em><em>optional</em>) – Parameter of some regressor. Defaults to ‘auto’.</p></li>
+<li><p><strong>n_hidden</strong> (<em>int</em><em>, </em><em>optional</em>) – Parameter of some regressor. Defaults to 20.</p></li>
+<li><p><strong>rbf_width</strong> (<em>int</em><em>, </em><em>optional</em>) – Parameter of some regressor. Defaults to 0.</p></li>
+<li><p><strong>activation_func</strong> (<em>str</em><em>, </em><em>optional</em>) – Parameter of some regressor. Defaults to ‘selu’.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Predictions of input time series.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div id="logo">
+    <a href="https://predictit.readthedocs.io/">
+        <img logo" src="https://predictit.readthedocs.io/en/master/_static/logo.png" alt="Logo">
+    </a>
+
+    <div class="section" id="table-of-contents">
+        <h3>Table of contents</h3>
+        <div class="toctree-wrapper compound">
+            <ul>
+
+                <li class="toctree-l1"><a class="reference internal"
+                        href="https://predictit.readthedocs.io/en/master/">predictit</a>
+                    <ul>
+                        <li class="toctree-l2"><a class="reference internal"
+                                href="https://predictit.readthedocs.io/en/master/#output">Output</a></li>
+                        <li class="toctree-l2"><a class="reference internal"
+                                href="https://predictit.readthedocs.io/en/master/#installation">Installation</a></li>
+                        <li class="toctree-l2"><a class="reference internal"
+                                href="https://predictit.readthedocs.io/en/master/#how-to">How to</a></li>
+
+                        <li class="toctree-l2"><a class="reference internal"
+                                href="https://predictit.readthedocs.io/en/master/#submodules">Submodules</a>
+                            <ul>
+                                <li class="toctree-l3"><a class="reference internal"
+                                        href="https://predictit.readthedocs.io/en/master/predictit.configuration.html">configuration</a>
+                                </li>
+                                <li class="toctree-l3"><a class="reference internal"
+                                        href="https://predictit.readthedocs.io/en/master/predictit.main.html">main</a>
+                                </li>
+                                <li class="toctree-l3"><a class="reference internal"
+                                        href="https://predictit.readthedocs.io/en/master/predictit.analyze">analyze</a>
+                                </li>
+                                <li class="toctree-l3"><a class="reference internal"
+                                        href="https://predictit.readthedocs.io/en/master/predictit.best_params.html">best_params</a>
+                                </li>
+                                <li class="toctree-l3"><a class="reference internal"
+                                        href="https://predictit.readthedocs.io/en/master/predictit.database.html">database</a>
+                                </li>
+                                <li class="toctree-l3"><a class="reference internal"
+                                        href="https://predictit.readthedocs.io/en/master/predictit.data_preprocessing.html">data_preprocessing</a>
+                                </li>
+                                <li class="toctree-l3"><a class="reference internal"
+                                        href="https://predictit.readthedocs.io/en/master/predictit.evaluate_predictions.html">evaluate_predictions</a>
+                                </li>
+                            </ul>
+                        </li>
+
+                        <li class="toctree-l2"><a class="reference internal"
+                                href="https://predictit.readthedocs.io/en/master/#subpackages">Subpackages</a>
+                            <ul>
+                                <li class="toctree-l3"><a class="reference internal"
+                                        href="https://predictit.readthedocs.io/en/master/predictit.models.html">models</a>
+                                </li>
+                                <li class="toctree-l3"><a class="reference internal"
+                                        href="https://predictit.readthedocs.io/en/master/predictit.test_data.html">test_data</a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li class="toctree-l2"><a class="reference internal"
+                                href="https://predictit.readthedocs.io/en/master/genindex.html">Index</a></li>
+                    </ul>
+                </li>
+
+            </ul>
+        </div>
+    </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Daniel Malachov.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.2.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/predictit.models.sklearn_regression.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+    <a href="https://github.com/Malachov/predictit" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>
