@@ -7,6 +7,7 @@
 [x] Data_preprocessing and logging from misc moved into own projects and imported. Projects are called mylogging and mydatapreprocessing. It'necessary to have corresponding version
 [x] Various transforms added as derived columns. For example: Difference transform, Rolling window and rolling std transformation, Distance from the mean.
 [x] Fast fourier transform as new information.
+[x] Short way of using functions with positional argument - predictit.main.predict(np.random.randn(1000). Same with predict_multiple and compare models.
 
 ## 1.5x - 09/2020
 

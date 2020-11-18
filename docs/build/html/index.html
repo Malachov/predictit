@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>predictit &#8212; predictit 11-11-2020 documentation</title>
+    <title>predictit &#8212; predictit 18-11-2020 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -77,6 +77,12 @@ There is also <code class="docutils literal notranslate"><span class="pre">predi
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
 <span class="n">predictions_1</span> <span class="o">=</span> <span class="n">predictit</span><span class="o">.</span><span class="n">main</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">predicted_column</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">predicts</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">return_type</span><span class="o">=</span><span class="s1">&#39;best&#39;</span><span class="p">)</span>
+
+<span class="c1"># There are only two positional arguments (because, there is more than hundred configurable values).</span>
+<span class="c1"># data and predicted_column, so you can use also</span>
+
+<span class="n">mydata</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">])</span>
+<span class="n">predictions_1_positional</span> <span class="o">=</span> <span class="n">predictit</span><span class="o">.</span><span class="n">main</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">mydata</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -277,9 +283,71 @@ Just run <code class="docutils literal notranslate"><span class="pre">gui_start.
 <h1>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="id1">
 <h2><a class="reference external" href="predictit.configuration.html">configuration</a><a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-predictit.configuration"></span><p>All Config for main file. Most of values are boolean 1 or 0. You can setup input data, models to use,
+whether you want find optimal parameters etc. Some setting can be inserted as function parameters, then it has higher priority.
+All values are commented and easy to understand.</p>
+<p>If you downloaded the script, edit, save and run function from main, if you use library, import Config and edit values…
+.. rubric:: Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">predictit</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">predictit.configuration</span> <span class="kn">import</span> <span class="n">Config</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Config</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="s1">&#39;data&#39;</span><span class="p">:</span> <span class="s1">&#39;my/path/to.csv&#39;</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="s1">&#39;plot&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="s1">&#39;debug&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="s1">&#39;used_models&#39;</span><span class="p">:</span> <span class="p">{</span>
+<span class="gp">&gt;&gt;&gt; </span>           <span class="s1">&#39;AR (Autoregression)&#39;</span><span class="p">:</span> <span class="n">predictit</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">ar</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>           <span class="s1">&#39;Autoregressive Linear neural unit&#39;</span><span class="p">:</span> <span class="n">predictit</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">autoreg_LNU</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>           <span class="s1">&#39;Sklearn regression&#39;</span><span class="p">:</span> <span class="n">predictit</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">regression</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="p">}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="p">}</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># You can alse use this syntax</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Config</span><span class="o">.</span><span class="n">datalength</span> <span class="o">=</span> <span class="mi">2000</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Config work for predict() function as well as for predict_multiple_columns() and compare_models</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">predictions</span> <span class="o">=</span> <span class="n">predictit</span><span class="o">.</span><span class="n">main</span><span class="o">.</span><span class="n">predict</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># You can pass configuration as dict kwargs...</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">predictions</span> <span class="o">=</span> <span class="n">predictit</span><span class="o">.</span><span class="n">main</span><span class="o">.</span><span class="n">predict</span><span class="p">({})</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">You</span> <span class="n">can</span> <span class="n">also</span> <span class="n">apply</span> <span class="n">Config</span>
+</pre></div>
+</div>
+<p>To see all the possible values, use</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">predictit</span><span class="o">.</span><span class="n">configuration</span><span class="o">.</span><span class="n">print_config</span><span class="p">()</span>
+</pre></div>
+</div>
 </div>
 <div class="section" id="id2">
 <h2><a class="reference external" href="predictit.main.html">main</a><a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-predictit.main"></span><p>This is main module for making predictions.</p>
+<dl>
+<dt>It contain functions - predict() - More return types - Depends on Config</dt><dd><blockquote>
+<div><ul class="simple">
+<li><p>predict_multiple() - Predict multiple columns at once</p></li>
+<li><p>compare_models() - Test on data that was not in test set and compare models errors</p></li>
+</ul>
+</div></blockquote>
+<p>Examples:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">predictit</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">predictions</span> <span class="o">=</span> <span class="n">predictit</span><span class="o">.</span><span class="n">main</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">100</span><span class="p">),</span> <span class="n">predicts</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">plotit</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+<p>Do not edit this file if you are user, it’s not necassary! Only call function from here. The only file to edit is configuration.py. If you are developer, edit as you need.</p>
+<p>There are working examples in main readme and also in test_it module. Particular modules functionality is vissible in visual.py in tests.</p>
 </div>
 <div class="section" id="id3">
 <h2><a class="reference external" href="predictit.analyze.html">analyze</a><a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>

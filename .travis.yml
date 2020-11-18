@@ -34,9 +34,7 @@ deploy:
     on:
       tags: true
       python: "3.7"
-    edge:
-      source: "native-api/dpl"
-      branch: "pip_fix_upgrade_deps"
+
   - provider: releases
     api_key:
       secure: ZALq7sD9WYog0wazXtOiMd8QvPE/FiNt6cgV5w9m+F8iaU1vntyff7is1GHXDTIKob6IDHNrbJs6xgY3atMClPSAnHhvqMa8TwYmn/AmzdpIXwBw4Qa+ul8H4PfUKVsgedLJG9ksP2tQ8s7+wJL2+puodGp2TdfRCscACBjI3WW1raGrY8Ys2+hMVTupY8k4RkDn4VaZAX6DDL/83XtHBnwdrENhBKLNTlKtO9SBRdwnd/RDGQnX7okaUfJ7fNTpY06kOHYwDBFGaLRcQgJeFOHbs2HB/ZiJYeKSuwXM+vKipLBZ2sad1DPz3imNR3W90T8fILkAxdOWC9duZKyTAEizSUFwcPb7TbGqlAUSE23SOshqgZPGaT7s83KVPP1yY87HNqvYazdOLLhJuBvwbFTjfRjlMsCaBEt1YFHrOq+QJAmbbRiAvJ6xjID/z+M+modY6ehHub3L5sXub3jeEGusR1uncp8+7zlhvFC0LMCy5gqe8vtzArWQB9l0Y/DjK38QeRuXQdTs6wGSlUkF7Bqs1Eq/AFGasoOPZlTmoghjydZC7d/PZqt8Q53x7mEvER4qsMsu33DGptQS3ZReaiI8yanekBJj+qy163LUNoXbPBvAvElvYD3o3XXeftaakeP1ftfl02jEX2YOthBK71IdpsXZgPqvYqg6AEK7ju8=

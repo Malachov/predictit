@@ -1,7 +1,7 @@
 # predictit
 
-[![PyPI pyversions](https://img.shields.io/pypi/pyversions/predictit.svg)](https://pypi.python.org/pypi/predictit/) 
-[![PyPI version](https://badge.fury.io/py/predictit.svg)](https://badge.fury.io/py/predictit) 
+[![PyPI pyversions](https://img.shields.io/pypi/pyversions/predictit.svg)](https://pypi.python.org/pypi/predictit/)
+[![PyPI version](https://badge.fury.io/py/predictit.svg)](https://badge.fury.io/py/predictit)
 [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/Malachov/predictit.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/Malachov/predictit/context:python) [![Build Status](https://travis-ci.com/Malachov/predictit.svg?branch=master)](https://travis-ci.com/Malachov/predictit) [![Documentation Status](https://readthedocs.org/projects/predictit/badge/?version=master)](https://predictit.readthedocs.io/en/master/?badge=master) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) [![codecov](https://codecov.io/gh/Malachov/predictit/branch/master/graph/badge.svg)](https://codecov.io/gh/Malachov/predictit)
 
 Library/framework for making predictions. Choose best of 20 models (ARIMA, regressions, LSTM...) from libraries like statsmodels, scikit-learn, tensorflow and some own models. There are hundreds of customizable options (it's not necessary of course) as well as some Config presets.
@@ -50,6 +50,12 @@ import predictit
 import numpy as np
 
 predictions_1 = predictit.main.predict(data=np.random.randn(100, 2), predicted_column=1, predicts=3, return_type='best')
+
+# There are only two positional arguments (because, there is more than hundred configurable values).
+# data and predicted_column, so you can use also
+
+mydata = pd.DataFrame(np.random.randn(100, 2), columns=['a', 'b'])
+predictions_1_positional = predictit.main.predict(mydata, 'b')
 ```
 
 ### Simple example of using as a python library and editing Config
