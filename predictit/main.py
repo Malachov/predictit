@@ -89,7 +89,7 @@ if __name__ == "__main__":
     Config.update(parser_args_dict)
 
 
-def predict(**function_kwargs):
+def predict(positional_data=None, positional_predicted_column=None, **function_kwargs):
 
     """Make predictions mostly on time-series data. Data input and other Config options can be set up in configuration.py or overwritenn on the fly. Setup can be also done
     as function input arguments or as command line arguments (it will overwrite Config values).
@@ -141,6 +141,12 @@ def predict(**function_kwargs):
             pass
 
     # Edit configuration.py default values with arguments values if exist
+    if positional_data is not None:
+        function_kwargs['data'] = positional_data
+
+    if positional_predicted_column is not None:
+        function_kwargs['predicted_column'] = positional_predicted_column
+
     Config.update(function_kwargs)
 
     # Define whether to print warnings or not or stop on warnings as on error
@@ -486,9 +492,14 @@ def predict(**function_kwargs):
             tablefmt='grid', floatfmt='.3f', numalign="center", stralign="center")
 
     else:
+        used_table_dict = {i: j for (i, j) in {
+            'name': 'Model', 'model_error': f'Average\n{Config.error_criterion}\nerror',
+            'optimization_value': f'Config optimization\n{Config.optimization_variable}',
+            'model_time': 'Time\n[s]', 'memory_peak_MB': 'Memory Peak\n[MB]'}.items() if i in results_df.columns}
+
         models_table = tabulate(
-            results_df[['name', 'model_error', 'optimization_value', 'model_time', 'memory_peak_MB']].values,
-            headers=['Model', f'Average\n{Config.error_criterion}\nerror', f'Config optimization\n{Config.optimization_variable}', 'Time\n[s]', 'Memory Peak\n[MB]'],
+            results_df[used_table_dict.keys()],
+            headers=used_table_dict,
             tablefmt='grid', floatfmt=".2f", numalign="center", stralign="center")
 
     ### ANCHOR Print
@@ -591,7 +602,7 @@ def predict(**function_kwargs):
         return results
 
 
-def predict_multiple_columns(**function_kwargs):
+def predict_multiple_columns(positional_data=None, positional_predicted_columns=None, **function_kwargs):
     """Predict multiple colums and multiple frequencions at once. Use predict function.
 
     Args:
@@ -605,6 +616,12 @@ def predict_multiple_columns(**function_kwargs):
     Returns:
         np.ndarray: All the predicted results.
     """
+
+    if positional_data is not None:
+        function_kwargs['data'] = positional_data
+
+    if positional_predicted_columns is not None:
+        function_kwargs['predicted_column'] = positional_predicted_columns
 
     config_freezed = Config.freeze()
 
@@ -649,7 +666,7 @@ def predict_multiple_columns(**function_kwargs):
     return predictions
 
 
-def compare_models(**function_kwargs):
+def compare_models(positional_data_all=None, positional_predicted_column=None, **function_kwargs):
     """Function that helps to choose apropriate models. It evaluate it on test data and then return results.
     After you know what models are the best, you can use only them in functions predict() or predict_multiple_columns.
     You can define your own test data and find best modules for your process.
@@ -661,6 +678,12 @@ def compare_models(**function_kwargs):
               (my_data[-2000:], my_data[-1000:])  # and 'predicted_column' as usually in Config.
         **kwargs (dict): All parameters of predict function. Check Config.py or run predictit.configuration.print_config() for parameters details.
     """
+
+    if positional_data_all is not None:
+        function_kwargs['data'] = positional_data_all
+
+    if positional_predicted_column is not None:
+        function_kwargs['predicted_column'] = positional_predicted_column
 
     config_freezed = Config.freeze()
 
@@ -694,6 +717,8 @@ def compare_models(**function_kwargs):
         Config.data = j[0]
         if not same_data:
             Config.predicted_column = j[1]
+
+        Config.plot_name = i
 
         try:
             result = predict()

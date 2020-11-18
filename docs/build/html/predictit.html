@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>predictit package &#8212; predictit 11-11-2020 documentation</title>
+    <title>predictit package &#8212; predictit 18-11-2020 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -74,8 +74,154 @@
 </ul>
 </div>
 </div>
-<div class="section" id="module-contents">
-<h2>Module contents<a class="headerlink" href="#module-contents" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-predictit">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-predictit" title="Permalink to this headline">¶</a></h2>
+<p>Library/framework for making predictions. Choose best of 20 models (ARIMA, regressions, LSTM…)
+from libraries like statsmodels, scikit-learn, tensorflow and some own models. There are hundreds of
+customizable options (it’s not necessary of course) as well as some config presets.</p>
+<p>Library contain model hyperparameters optimization as well as option variable optimization.
+That means, that library can find optimal preprocessing (smoothing, dropping non correlated columns,
+standardization) and on top of that it can find optimal models inner parameters such as number of neuron layers.</p>
+<p>## Output</p>
+<p>Most common output is plotly interactive graph, numpy array of results or deploying to database.</p>
+<p>&lt;p align=”center”&gt;
+&lt;img src=”<a class="reference external" href="https://raw.githubusercontent.com/Malachov/predictit/master/output_example.png">https://raw.githubusercontent.com/Malachov/predictit/master/output_example.png</a>” width=”620” alt=”Plot of results”/&gt;
+&lt;/p&gt;
+&lt;p align=”center”&gt;
+&lt;img src=”<a class="reference external" href="https://raw.githubusercontent.com/Malachov/predictit/master/table_of_results.png">https://raw.githubusercontent.com/Malachov/predictit/master/table_of_results.png</a>” width=”620” alt=”Table of results”/&gt;
+&lt;/p&gt;</p>
+<p>Return type of main predict function depends on <cite>configation.py</cite>. It can return best prediction as array
+or all predictions as dataframe. Interactive html plot is also created.</p>
+<p>## Oficial repo and documentation links</p>
+<p>[Repo on github](<a class="reference external" href="https://github.com/Malachov/predictit">https://github.com/Malachov/predictit</a>)</p>
+<p>[Official readthedocs documentation](<a class="reference external" href="https://predictit.readthedocs.io">https://predictit.readthedocs.io</a>)</p>
+<p>## Installation</p>
+<p>Python &gt;=3.6. Python 2 is not supported. Install just with</p>
+<blockquote>
+<div><p>pip install predictit</p>
+</div></blockquote>
+<p>Sometime you can have issues with installing some libraries from requirements
+(e.g. numpy because not BLAS / LAPACK). There are also two libraries - Tensorflow
+and pyodbc not in requirements, because not necessary, but troublesome. If library
+not installed with pip, check which library don’t work, install manually with stackoverflow and repeat…</p>
+<p>## How to</p>
+<p>Software can be used in three ways. As a python library or with command line arguments
+or as normal python scripts.
+Main function is predict in <cite>main.py</cite> script.
+There is also <cite>predict_multiple_columns</cite> function if you want to predict more at once
+(columns or time frequentions) and also <cite>compare_models</cite> function that tell you which models are best.
+It evaluate error criterion on out of sample test data instead of predict (use as much as possible)
+so more reliable errors (for example decision trees just assign input from learning set, so error
+in predict is 0, in compare_models it’s accurate). Then you can use only good models in predict function.</p>
+<p>### Simple example of using predictit as a python library and function arguments</p>
+<p><a href="#id1"><span class="problematic" id="id2">``</span></a><a href="#id3"><span class="problematic" id="id4">`</span></a>Python
+import predictit
+import numpy as np</p>
+<p>predictions_1 = predictit.main.predict(data=np.random.randn(100, 2), predicted_column=1, predicts=3, return_type=’best’)
+<a href="#id5"><span class="problematic" id="id6">``</span></a><a href="#id7"><span class="problematic" id="id8">`</span></a></p>
+<p>### Simple example of using as a python library and editing Config</p>
+<p><a href="#id9"><span class="problematic" id="id10">``</span></a><a href="#id11"><span class="problematic" id="id12">`</span></a>Python
+import predictit
+from predictit.configuration import Config</p>
+<p># You can edit Config in two ways
+Config.data = ‘<a class="reference external" href="https://raw.githubusercontent.com/jbrownlee/Datasets/master/daily-min-temperatures.csv">https://raw.githubusercontent.com/jbrownlee/Datasets/master/daily-min-temperatures.csv</a>’  # You can use local path on pc as well… “/home/name/mycsv.csv” !
+Config.predicted_column = ‘Temp’  # You can use index as well
+Config.datetime_column = ‘Date’  # Will be used in result
+Config.freq = “D”  # One day - one value
+Config.resample_function = “mean”  # If more values in one day - use mean (more sources)
+Config.return_type = ‘detailed_dictionary’
+Config.debug = 0  # Ignore warnings</p>
+<p># Or
+Config.update({</p>
+<blockquote>
+<div><p>‘predicts’: 14,  # Number of predicted values
+‘default_n_steps_in’: 12  # Value of recursive inputs in model (do not use too high - slower and worse predictions)</p>
+</div></blockquote>
+<p>})</p>
+<p>predictions_2 = predictit.main.predict()
+<a href="#id13"><span class="problematic" id="id14">``</span></a><a href="#id15"><span class="problematic" id="id16">`</span></a></p>
+<p>### Simple example of using <cite>main.py</cite> as a script</p>
+<p>Open <cite>configuration.py</cite> (only script you need to edit (very simple)), do the setup. Mainly used_function and data or data_source and path. Then just run <cite>main.py</cite>.</p>
+<p>### Simple example of using command line arguments</p>
+<p>Run code below in terminal in predictit folder.
+Use <cite>python main.py –help</cite> for more parameters info.</p>
+<p><a href="#id17"><span class="problematic" id="id18">``</span></a>`
+python main.py –used_function predict –data ‘<a class="reference external" href="https://raw.githubusercontent.com/jbrownlee/Datasets/master/daily-min-temperatures.csv">https://raw.githubusercontent.com/jbrownlee/Datasets/master/daily-min-temperatures.csv</a>’ –predicted_column “‘Temp’”</p>
+<p><a href="#id19"><span class="problematic" id="id20">``</span></a><a href="#id21"><span class="problematic" id="id22">`</span></a></p>
+<p>### Explore Config</p>
+<p>Type <cite>Config.</cite>, then, if not autamatically, use ctrl + spacebar to see all posible values. To see what option means, type for example <cite>Config.return_type</cite>, than do mouseover with pressed ctrl. It will reveal comment that describe the option (at least at VS Code)</p>
+<p>To see all the possible values in <cite>configuration.py</cite>, use</p>
+<p><code class="docutils literal notranslate"><span class="pre">`Python</span>
+<span class="pre">predictit.configuration.print_config()</span>
+<span class="pre">`</span></code></p>
+<p>### Example of compare_models function</p>
+<p><a href="#id23"><span class="problematic" id="id24">``</span></a><a href="#id25"><span class="problematic" id="id26">`</span></a>Python
+import predictit
+from predictit.configuration import Config</p>
+<p>my_data_array = np.random.randn(2000, 4)  # Define your data here</p>
+<p># You can compare it on same data in various parts or on different data (check configuration on how to insert dictionary with data names)
+Config.update({</p>
+<blockquote>
+<div><p>‘data_all’: (my_data_array[-2000:], my_data_array[-1500:], my_data_array[-1000:])</p>
+</div></blockquote>
+<p>})</p>
+<p>compared_models = predictit.main.compare_models()
+<a href="#id27"><span class="problematic" id="id28">``</span></a><a href="#id29"><span class="problematic" id="id30">`</span></a></p>
+<p>### Example of predict_multiple function</p>
+<p><a href="#id31"><span class="problematic" id="id32">``</span></a><a href="#id33"><span class="problematic" id="id34">`</span></a>Python
+import predictit
+from predictit.configuration import Config</p>
+<p>Config.data = pd.read_csv(“<a class="reference external" href="https://raw.githubusercontent.com/jbrownlee/Datasets/master/daily-min-temperatures.csv">https://raw.githubusercontent.com/jbrownlee/Datasets/master/daily-min-temperatures.csv</a>”)</p>
+<p># Define list of columns or ‘*’ for predicting all of the columns
+Config.predicted_columns = [‘*’]</p>
+<p>multiple_columns_prediction = predictit.main.predict_multiple_columns()</p>
+<p><a href="#id35"><span class="problematic" id="id36">``</span></a><a href="#id37"><span class="problematic" id="id38">`</span></a></p>
+<p>### Example of Config variable optimization</p>
+<p><a href="#id39"><span class="problematic" id="id40">``</span></a><a href="#id41"><span class="problematic" id="id42">`</span></a>Python</p>
+<dl class="simple">
+<dt>Config.update({</dt><dd><p>‘data’: “<a class="reference external" href="https://raw.githubusercontent.com/jbrownlee/Datasets/master/daily-min-temperatures.csv">https://raw.githubusercontent.com/jbrownlee/Datasets/master/daily-min-temperatures.csv</a>”,
+‘predicted_column’: ‘Temp’,
+‘return_type’: ‘all_dataframe’,
+‘optimization’: 1,
+‘optimization_variable’: ‘default_n_steps_in’,
+‘optimization_values’: [4, 8, 10],
+‘plot_all_optimized_models’: 1,
+‘print_table’: 2  # Print detailed table</p>
+</dd>
+</dl>
+<p>})</p>
+<p>predictions_optimized_config = predictit.main.predict()</p>
+<p><a href="#id43"><span class="problematic" id="id44">``</span></a><a href="#id45"><span class="problematic" id="id46">`</span></a></p>
+<p>### Hyperparameters tuning</p>
+<p>To optmize hyperparameters, just set <cite>optimizeit: 1,</cite> and model parameters limits. It is commented in <cite>Config.py</cite> how to use it. It’s not grid bruteforce. Heuristic method based on halving interval is used, but still it can be time consuming. It is recomend only to tune parameters worth of it. Or tune it by parts.</p>
+<p>## GUI</p>
+<p>It is possible to use basic GUI. But only with CSV data source.
+Just run <cite>gui_start.py</cite> if you have downloaded software or call <cite>predictit.gui_start.run_gui()</cite> if you are importing via PyPI.</p>
+<p>## Data preprocessing, plotting and other Functions</p>
+<p>You can use any library function separately for your needs of course. Example is here</p>
+<p><a href="#id47"><span class="problematic" id="id48">``</span></a><a href="#id49"><span class="problematic" id="id50">`</span></a>Python</p>
+<p>from predictit.analyze import analyze_column
+from predictit.data_preprocessing import load_data, data_consolidation, preprocess_data
+from predictit.plots import plot</p>
+<p>data = “<a class="reference external" href="https://blockchain.info/unconfirmed-transactions?format=json">https://blockchain.info/unconfirmed-transactions?format=json</a>”</p>
+<p># Load data from file or URL
+data_loaded = load_data(data, request_datatype_suffix=”.json”, predicted_table=’txs’)</p>
+<p># Transform various data into defined format - pandas dataframe - convert to numeric if possible, keep
+# only numeric data and resample ifg configured. It return array, dataframe
+data_consolidated = data_consolidation(</p>
+<blockquote>
+<div><p>data_loaded, predicted_column=”weight”, data_orientation=”index”, remove_nans_threshold=0.9, remove_nans_or_replace=’interpolate’)</p>
+</div></blockquote>
+<p># Predicted column is on index 0 after consolidation)
+analyze_column(data_consolidated.iloc[:, 0])</p>
+<p># Preprocess data. It return preprocessed data, but also last undifferenced value and scaler for inverse
+# transformation, so unpack it with _
+data_preprocessed, _, _ = preprocess_data(data_consolidated, remove_outliers=True, smoothit=False,</p>
+<blockquote>
+<div><p>correlation_threshold=False, data_transform=False, standardizeit=’standardize’)</p>
+</div></blockquote>
+<p># Plot inserted data
+plot(data_preprocessed)</p>
 </div>
 </div>
 

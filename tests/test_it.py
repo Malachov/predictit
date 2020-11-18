@@ -94,6 +94,9 @@ def test_readmes():
 
     predictions_1 = predictit.main.predict(data=np.random.randn(100, 2), predicted_column=1, predicts=3, return_type='best')
 
+    mydata = pd.DataFrame(np.random.randn(100, 2), columns=['a', 'b'])
+    predictions_1_positional = predictit.main.predict(mydata, 'b')
+
     ### Example 2 ###
     Config.update(config_unchanged)
 
@@ -147,7 +150,7 @@ def test_readmes():
         'optimization_variable': 'default_n_steps_in',
         'optimization_values': [4, 5, 6],
         'plot_all_optimized_models': 1,
-        'print_table': 2,  # Print detailed table
+        'print_table': 1,  # Print detailed table
         'used_models': ['AR (Autoregression)', 'Conjugate gradient', 'Sklearn regression']
 
     })
@@ -223,13 +226,14 @@ def test_readmes():
     first_multiple_array = multiple_columns_prediction[list(multiple_columns_prediction.keys())[0]]
 
     condition_1 = not np.isnan(np.min(predictions_1))
+    condition_1_a = not np.isnan(np.min(predictions_1_positional))
     condition_2 = not np.isnan(np.min(predictions_2['best']))
     condition_3 = compared_models
     condition_4 = not np.isnan(np.nanmax(first_multiple_array))
     condition_5 = not predictions_optimized_config.dropna().empty
     condition_6 = not np.isnan(np.min(predictions_configured))
 
-    assert (condition_1 and condition_2 and condition_3 and condition_4 and condition_5 and condition_6)
+    assert (condition_1 and condition_1_a and condition_2 and condition_3 and condition_4 and condition_5 and condition_6)
 
 
 def test_main_from_config():
@@ -245,6 +249,7 @@ def test_main_from_config():
         'plotit': 1,
         'plot_type': 'matplotlib',
         'show_plot': 0,
+        'trace_processes_memory': False,
         'print_number_of_models': 10,
         'add_fft_columns': 1,
         'fft_window': 16,
@@ -293,6 +298,8 @@ def test_main_optimize_and_args():
         'error_criterion': 'rmse',
         'remove_outliers': 1,
         'print_number_of_models': 1,
+        'print_table': 2,
+        'print_time_table': 1,
         'last_row': 1,
         'correlation_threshold': 0.2,
         'optimizeit': 1,
@@ -301,6 +308,7 @@ def test_main_optimize_and_args():
         'optimizeit_plot': 1,
         'standardizeit': 0,
         'multiprocessing': 'pool',
+        'trace_processes_memory': True,
         'used_models': ["Bayes ridge regression"],
         'models_parameters': {"Bayes ridge regression": {"regressor": 'bayesianridge', "n_iter": 300, "alpha_1": 1.e-6, "alpha_2": 1.e-6, "lambda_1": 1.e-6, "lambda_2": 1.e-6}},
         'fragments': 4,
@@ -556,5 +564,3 @@ if __name__ == "__main__":
 # #                             is_classification=True, epochs=100, batch_size=256)
 # # embeddings_df = ce.get_embeddings_in_dataframe(embeddings, encoders)
 
-
-# aa = 1
