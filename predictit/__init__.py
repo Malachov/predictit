@@ -215,7 +215,7 @@ from . import gui_start
 
 from . import main
 
-__version__ = "1.60.5"
+__version__ = "1.60.6"
 __author__ = "Daniel Malachov"
 __license__ = "MIT"
 __email__ = "malachovd@seznam.cz"

@@ -37,20 +37,20 @@ def train_and_predict(
 
                 Config['models_parameters'][iterated_model_name][k] = l
 
-        except Exception:
-            traceback_warning("Optimization didn't finished")
-
-        finally:
             stop_optimization = time.time()
-
             model_results['optimization_time'] = stop_optimization - start_optimization
+
+        except Exception:
+            traceback_warning(f"Hyperparameters optimization of {iterated_model_name} didn't finished")
+
 
     try:
         start = time.time()
 
-        model_results['index'] = (iterated_model_index, optimization_index)
-        model_results['optimization_index'] = optimization_index
-        model_results['optimization_value'] = optimization_value
+        model_results['Name'] = iterated_model_name
+        model_results['Index'] = (iterated_model_index, optimization_index)
+        model_results['Optimization index'] = optimization_index
+        model_results['Optimization value'] = optimization_value
 
         # If no parameters or parameters details, add it so no index errors later
         if iterated_model_name not in Config['models_parameters']:
@@ -76,7 +76,7 @@ def train_and_predict(
             one_reality_result, final_scaler=final_scaler, last_undiff_value=last_undiff_value,
             standardizeit=Config['standardizeit'], data_transform=Config['data_transform'])
 
-        model_results['results'] = one_reality_result
+        model_results['Results'] = one_reality_result
 
         tests_results = np.zeros((Config['repeatit'], Config['predicts']))
         test_errors = np.zeros(Config['repeatit'])
@@ -102,32 +102,32 @@ def train_and_predict(
                 test_errors[repeat_iteration] = predictit.evaluate_predictions.compare_predicted_to_test(
                     tests_results[repeat_iteration], models_test_outputs[repeat_iteration], error_criterion=Config['error_criterion'])
 
-        model_results['tests_results'] = tests_results
-        model_results['test_errors'] = test_errors
-        model_results['model_error'] = test_errors.mean()
+        model_results['Tests results'] = tests_results
+        model_results['Test errors'] = test_errors
+        model_results['Model error'] = test_errors.mean()
 
         # For example tensorflow is not pickable, so sending model from process would fail. Trained models only if not multiprocessing
         if not Config['multiprocessing']:
-            model_results['trained_model'] = trained_model
+            model_results['Trained model'] = trained_model
 
     except Exception:
-        model_results['model_error'] = np.inf
-        traceback_warning(f"Error in {iterated_model_name} model" if not Config['optimization'] else f"Error in {iterated_model_name} model with optimized value: {optimization_value}")
+        model_results[f'Average\n{Config.error_criterion}\nerror'] = np.inf
+        traceback_warning(f"Error in '{iterated_model_name} - {optimization_value}' model" if not Config['optimization'] else f"Error in {iterated_model_name} model with optimized value: {optimization_value}")
 
     finally:
-        model_results['model_time'] = time.time() - start
+        model_results['Model time [s]'] = time.time() - start
 
         if Config['trace_processes_memory']:
             _, memory_peak_MB = tracemalloc.get_traced_memory()
-            model_results['memory_peak_MB'] = memory_peak_MB / 10**6
+            model_results['Memory Peak\n[MB]'] = memory_peak_MB / 10**6
             tracemalloc.stop()
 
         if semaphor:
             semaphor.release()
 
         if Config['multiprocessing'] == 'process':
-            pipe.send({iterated_model_name: model_results})
+            pipe.send({f"{iterated_model_name} - {optimization_value}": model_results})
             pipe.close()
 
         else:
-            return {iterated_model_name: model_results}
+            return {f"{iterated_model_name} - {optimization_value}": model_results}
