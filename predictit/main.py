@@ -428,11 +428,9 @@ def predict(positional_data=None, positional_predicted_column=None, **function_k
     # Results such as trained model etc. that cannot be displayed in dataframe are in original results dict.
 
     # Convert results from dictionary to dataframe - exclude objects like trained model
-    results_df = pd.DataFrame.from_dict(results, orient='index').drop(['index', 'optimization_index'], axis=1)
+    results_df = pd.DataFrame.from_dict(results, orient='index').drop(['Index'], axis=1)
 
-    results_df.sort_values("model_error", inplace=True)
-
-    results_df['name'] = results_df.index
+    results_df.sort_values("Model error", inplace=True)
 
     # Generate date indexes for result predictions
     last_date = column_for_predictions_df.index[-1]
@@ -446,8 +444,8 @@ def predict(positional_data=None, positional_predicted_column=None, **function_k
 
     predictions = pd.DataFrame(index=date_index)
 
-    for i in results_df['results'].index:
-        predictions[i] = results_df['results'][i]
+    for i in results_df['Results'].index:
+        predictions[i] = results_df['Results'][i]
 
     best_model_name = results_df.index[0]
     best_model_predicts = predictions[best_model_name]
@@ -487,19 +485,16 @@ def predict(positional_data=None, positional_predicted_column=None, **function_k
 
     if Config.print_table == 1:
         models_table = tabulate(
-            results_df[['name', 'model_error']].iloc[:Config.print_number_of_models, :].values,
+            results_df[['Name', 'Model error']].iloc[:Config.print_number_of_models, :].values,
             headers=['Model', f'Average {Config.error_criterion} error'],
             tablefmt='grid', floatfmt='.3f', numalign="center", stralign="center")
 
     else:
-        used_table_dict = {i: j for (i, j) in {
-            'name': 'Model', 'model_error': f'Average\n{Config.error_criterion}\nerror',
-            'optimization_value': f'Config optimization\n{Config.optimization_variable}',
-            'model_time': 'Time\n[s]', 'memory_peak_MB': 'Memory Peak\n[MB]'}.items() if i in results_df.columns}
+        used_columns = set(('Name', f'Model error', 'Optimization value', 'Model time', 'Memory Peak\n[MB]')) & set(results_df.columns)
 
         models_table = tabulate(
-            results_df[used_table_dict.keys()],
-            headers=used_table_dict,
+            results_df[used_columns].set_index('Name', drop=True, inplace=False),
+            headers=used_columns,
             tablefmt='grid', floatfmt=".2f", numalign="center", stralign="center")
 
     ### ANCHOR Print
@@ -507,7 +502,7 @@ def predict(positional_data=None, positional_predicted_column=None, **function_k
     if Config.printit:
         if Config.print_best_model_result:
             print((f"\n Best model is {best_model_name} with results \n\n\t{best_model_predicts.values} \n\n\t with model error {Config.error_criterion} = "
-                   f"{results_df.loc[best_model_name, 'model_error']}"))
+                   f"{results_df.loc[best_model_name, 'Model error']}"))
 
         if Config.print_table:
             print(f"\n {models_table} \n")
@@ -581,7 +576,7 @@ def predict(positional_data=None, positional_predicted_column=None, **function_k
 
                 'time_table': str(tabulate(time_df.values, headers=time_df.columns, tablefmt="html")),
                 'models_table': str(tabulate(
-                    results_df[['name', 'model_error']].iloc[:Config.print_number_of_models, :].values,
+                    results_df[['Name', 'Model_error']].iloc[:Config.print_number_of_models, :].values,
                     headers=['Model', f'Average {Config.error_criterion} error'],
                     tablefmt='html', floatfmt='.3f'))
             })
@@ -728,8 +723,8 @@ def compare_models(positional_data_all=None, positional_predicted_column=None, *
 
             for k in result.values():
                 try:
-                    if 'results' and 'test_errors' in k:
-                        evaluated_matrix[:, k['index'][0], k['index'][1]] = k['test_errors']
+                    if 'Results' and 'Test errors' in k:
+                        evaluated_matrix[:, k['Index'][0], k['Index'][1]] = k['Model error']
                 except Exception:
                     pass
 

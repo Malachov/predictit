@@ -83,7 +83,7 @@ def test_1():
 
     Config.multiprocessing = 0
     result = predictit.main.predict(predicts=3, return_type=None)
-    assert not np.isnan(np.min(list(result.values())[0]['tests_results']))
+    assert not np.isnan(np.min(list(result.values())[0]['Test errors']))
     return result
 
 
@@ -520,15 +520,23 @@ if __name__ == "__main__":
     # You can edit Config in two ways
 
     # Or
-    # Config.update(config_unchanged)
-    # Config.update({
-    #     "data": '/home/dan/Desktop/archive/Jan_2019_ontime.csv',
-    #     "predicted_column": 'DISTANCE',
-    #     "datalength": 100000,
+    Config.update(config_original)
 
-    #     # 'pool' or 'process' or 0
-    #     "multiprocessing": 0
-    # })
+    Config.update({
+        'printit': 1,
+
+        'optimization': 1,
+        'optimization_variable': 'data_transform',
+        'optimization_values': [0, 'difference'],
+        # "data": '/home/dan/Desktop/archive/Jan_2019_ontime.csv',
+        # "predicted_column": 'DISTANCE',
+        # "datalength": 100000,
+
+        # # 'pool' or 'process' or 0
+        # "multiprocessing": 0
+    })
+
+    result = predictit.main.compare_models()
 
     # predictions = predictit.main.predict()
 
@@ -544,8 +552,6 @@ if __name__ == "__main__":
 # # X = df.iloc[:, 0:2]
 # # y = df.iloc[:, 3:4]
 
-
-
 # import categorical_embedder as ce
 # from sklearn.model_selection import train_test_split
 # df = pd.read_csv('tests/data.csv')
@@ -554,13 +560,12 @@ if __name__ == "__main__":
 # embedding_info = ce.get_embedding_info(X)
 # X_encoded, encoders = ce.get_label_encoded_data(X)
 # X_train, X_test, y_train, y_test = train_test_split(X_encoded, y)
-# embeddings = ce.get_embeddings(X_train, y_train, categorical_embedding_info=embedding_info, 
+# embeddings = ce.get_embeddings(X_train, y_train, categorical_embedding_info=embedding_info,
 #                             is_classification=True, epochs=100,batch_size=256)
 
 # # embedding_info = ce.get_embedding_info(X)
 # # X_encoded,encoders = ce.get_label_encoded_data(X)
 
-# # embeddings = ce.get_embeddings(X, y, categorical_embedding_info=embedding_info, 
+# # embeddings = ce.get_embeddings(X, y, categorical_embedding_info=embedding_info,
 # #                             is_classification=True, epochs=100, batch_size=256)
 # # embeddings_df = ce.get_embeddings_in_dataframe(embeddings, encoders)
-
