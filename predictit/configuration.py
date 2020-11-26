@@ -117,9 +117,9 @@ class Config():
     ### Prediction settings ###
     ###########################
 
-    multiprocessing = 0  # 'pool' or 'process' or 0
+    multiprocessing = 'pool'  # 'pool' or 'process' or 0
     processes_limit = None  # Max number of concurrent processes. If None, then (CPUs - 1) is used
-    trace_processes_memory = True
+    trace_processes_memory = False  # Add how much memory was used by each model.
     already_trained = 0  # Computationaly hard models (LSTM) load from disk.
 
     ### OPTIMIZATIONS ###  !!! Can be time consuming

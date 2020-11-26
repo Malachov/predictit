@@ -2,6 +2,7 @@
 
 ## First to do
 
+- [ ] evaluated_matrix from compare to main and in optimization new config value - use only best or keep all
 - [ ] Remove unnecessary copies (only data_for_predictions_df and using .values) and check if input data stays the same after all models computations - the same in preprocessing
 - [ ] Add transformations results as next input in parallel
   - [ ] Lagged values

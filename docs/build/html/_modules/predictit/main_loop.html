@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>predictit.main_loop &#8212; predictit 18-11-2020 documentation</title>
+    <title>predictit.main_loop &#8212; predictit 26-11-2020 documentation</title>
     <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
@@ -42,7 +42,7 @@
 <span class="c1"># This is core function... It should be sequentionally in the middle of main script in predict function, but it has to be 1st level function to be able to use in multiprocessing.</span>
 <div class="viewcode-block" id="train_and_predict"><a class="viewcode-back" href="../../predictit.main_loop.html#predictit.main_loop.train_and_predict">[docs]</a><span class="k">def</span> <span class="nf">train_and_predict</span><span class="p">(</span>
         <span class="n">Config</span><span class="p">,</span> <span class="n">iterated_model_train</span><span class="p">,</span> <span class="n">iterated_model_predict</span><span class="p">,</span> <span class="n">iterated_model_name</span><span class="p">,</span> <span class="n">iterated_model_index</span><span class="p">,</span> <span class="n">optimization_index</span><span class="p">,</span>
-        <span class="n">optimization_value</span><span class="p">,</span> <span class="n">option_optimization_list</span><span class="p">,</span> <span class="n">model_train_input</span><span class="p">,</span> <span class="n">model_predict_input</span><span class="p">,</span> <span class="n">model_test_inputs</span><span class="p">,</span>
+        <span class="n">optimization_value</span><span class="p">,</span> <span class="n">model_train_input</span><span class="p">,</span> <span class="n">model_predict_input</span><span class="p">,</span> <span class="n">model_test_inputs</span><span class="p">,</span>
         <span class="n">data_abs_max</span><span class="p">,</span> <span class="n">data_mean</span><span class="p">,</span> <span class="n">data_std</span><span class="p">,</span> <span class="n">models_test_outputs</span><span class="p">,</span> <span class="n">last_undiff_value</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">final_scaler</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">pipe</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">semaphor</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 
     <span class="c1"># Config here is just dic, so cannot use Config.value syntax here</span>
@@ -55,6 +55,8 @@
         <span class="n">tracemalloc</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
 
     <span class="n">model_results</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="n">model_results</span><span class="p">[</span><span class="s1">&#39;Name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">iterated_model_name</span>
 
     <span class="k">if</span> <span class="p">(</span><span class="n">Config</span><span class="p">[</span><span class="s1">&#39;optimizeit&#39;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">optimization_index</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">iterated_model_name</span> <span class="ow">in</span> <span class="n">Config</span><span class="p">[</span><span class="s1">&#39;models_parameters_limits&#39;</span><span class="p">]):</span>
 
@@ -81,11 +83,6 @@
     <span class="k">try</span><span class="p">:</span>
         <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
 
-        <span class="n">model_results</span><span class="p">[</span><span class="s1">&#39;Name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">iterated_model_name</span>
-        <span class="n">model_results</span><span class="p">[</span><span class="s1">&#39;Optimization index&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">optimization_index</span>
-        <span class="n">model_results</span><span class="p">[</span><span class="s1">&#39;Optimization value&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">optimization_value</span>
-        <span class="n">model_results</span><span class="p">[</span><span class="s1">&#39;Index&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">iterated_model_index</span><span class="p">,</span> <span class="n">optimization_index</span><span class="p">)</span>
-
         <span class="c1"># If no parameters or parameters details, add it so no index errors later</span>
         <span class="k">if</span> <span class="n">iterated_model_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">Config</span><span class="p">[</span><span class="s1">&#39;models_parameters&#39;</span><span class="p">]:</span>
             <span class="n">Config</span><span class="p">[</span><span class="s1">&#39;models_parameters&#39;</span><span class="p">][</span><span class="n">iterated_model_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
@@ -97,7 +94,7 @@
         <span class="n">one_reality_result</span> <span class="o">=</span> <span class="n">iterated_model_predict</span><span class="p">(</span><span class="n">model_predict_input</span><span class="p">,</span> <span class="n">trained_model</span><span class="p">,</span> <span class="n">Config</span><span class="p">[</span><span class="s1">&#39;predicts&#39;</span><span class="p">])</span>
 
         <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">one_reality_result</span><span class="p">))</span> <span class="ow">or</span> <span class="n">one_reality_result</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">return</span>
+            <span class="k">raise</span>
 
         <span class="c1"># Remove wrong values out of scope to not be plotted</span>
         <span class="n">one_reality_result</span><span class="p">[</span><span class="nb">abs</span><span class="p">(</span><span class="n">one_reality_result</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">data_abs_max</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
@@ -109,8 +106,6 @@
         <span class="n">one_reality_result</span> <span class="o">=</span> <span class="n">preprocessing</span><span class="o">.</span><span class="n">preprocess_data_inverse</span><span class="p">(</span>
             <span class="n">one_reality_result</span><span class="p">,</span> <span class="n">final_scaler</span><span class="o">=</span><span class="n">final_scaler</span><span class="p">,</span> <span class="n">last_undiff_value</span><span class="o">=</span><span class="n">last_undiff_value</span><span class="p">,</span>
             <span class="n">standardizeit</span><span class="o">=</span><span class="n">Config</span><span class="p">[</span><span class="s1">&#39;standardizeit&#39;</span><span class="p">],</span> <span class="n">data_transform</span><span class="o">=</span><span class="n">Config</span><span class="p">[</span><span class="s1">&#39;data_transform&#39;</span><span class="p">])</span>
-
-        <span class="n">model_results</span><span class="p">[</span><span class="s1">&#39;Results&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">one_reality_result</span>
 
         <span class="n">tests_results</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">Config</span><span class="p">[</span><span class="s1">&#39;repeatit&#39;</span><span class="p">],</span> <span class="n">Config</span><span class="p">[</span><span class="s1">&#39;predicts&#39;</span><span class="p">]))</span>
         <span class="n">test_errors</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">Config</span><span class="p">[</span><span class="s1">&#39;repeatit&#39;</span><span class="p">])</span>
@@ -136,16 +131,19 @@
                 <span class="n">test_errors</span><span class="p">[</span><span class="n">repeat_iteration</span><span class="p">]</span> <span class="o">=</span> <span class="n">predictit</span><span class="o">.</span><span class="n">evaluate_predictions</span><span class="o">.</span><span class="n">compare_predicted_to_test</span><span class="p">(</span>
                     <span class="n">tests_results</span><span class="p">[</span><span class="n">repeat_iteration</span><span class="p">],</span> <span class="n">models_test_outputs</span><span class="p">[</span><span class="n">repeat_iteration</span><span class="p">],</span> <span class="n">error_criterion</span><span class="o">=</span><span class="n">Config</span><span class="p">[</span><span class="s1">&#39;error_criterion&#39;</span><span class="p">])</span>
 
-        <span class="n">model_results</span><span class="p">[</span><span class="s1">&#39;Tests results&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">tests_results</span>
-        <span class="n">model_results</span><span class="p">[</span><span class="s1">&#39;Test errors&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">test_errors</span>
         <span class="n">model_results</span><span class="p">[</span><span class="s1">&#39;Model error&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">test_errors</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">Config</span><span class="p">[</span><span class="s1">&#39;optimization_variable&#39;</span><span class="p">]:</span>
+            <span class="n">model_results</span><span class="p">[</span><span class="s1">&#39;Optimization value&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">optimization_value</span>
+        <span class="n">model_results</span><span class="p">[</span><span class="s1">&#39;Results&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">one_reality_result</span>
+        <span class="n">model_results</span><span class="p">[</span><span class="s1">&#39;Test errors&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">test_errors</span>
+        <span class="n">model_results</span><span class="p">[</span><span class="s1">&#39;Index&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">iterated_model_index</span><span class="p">,</span> <span class="n">optimization_index</span><span class="p">)</span>
 
         <span class="c1"># For example tensorflow is not pickable, so sending model from process would fail. Trained models only if not multiprocessing</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">Config</span><span class="p">[</span><span class="s1">&#39;multiprocessing&#39;</span><span class="p">]:</span>
             <span class="n">model_results</span><span class="p">[</span><span class="s1">&#39;Trained model&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">trained_model</span>
 
     <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
-        <span class="n">model_results</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;Average</span><span class="se">\n</span><span class="si">{</span><span class="n">Config</span><span class="o">.</span><span class="n">error_criterion</span><span class="si">}</span><span class="se">\n</span><span class="s1">error&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span>
+        <span class="n">model_results</span><span class="p">[</span><span class="s1">&#39;Model error&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span>
         <span class="n">traceback_warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error in &#39;</span><span class="si">{</span><span class="n">iterated_model_name</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">optimization_value</span><span class="si">}</span><span class="s2">&#39; model&quot;</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">Config</span><span class="p">[</span><span class="s1">&#39;optimization&#39;</span><span class="p">]</span> <span class="k">else</span> <span class="sa">f</span><span class="s2">&quot;Error in </span><span class="si">{</span><span class="n">iterated_model_name</span><span class="si">}</span><span class="s2"> model with optimized value: </span><span class="si">{</span><span class="n">optimization_value</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
     <span class="k">finally</span><span class="p">:</span>

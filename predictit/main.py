@@ -268,10 +268,13 @@ def predict(positional_data=None, positional_predicted_column=None, **function_k
 
     for optimization_index, optimization_value in enumerate(option_optimization_list):
 
+        if Config.optimization_variable:
+            setattr(Config, Config.optimization_variable, optimization_value)
+
         # Some Config values are derived from other values. If it has been changed, it has to be updated.
-        if not Config.input_types:
-            Config.update_references_input_types()
-        if Config.optimizeit and not Config.models_parameters_limits:
+        Config.update_references_input_types()
+
+        if Config.optimizeit:
             Config.update_references_optimize()
 
 
@@ -358,9 +361,9 @@ def predict(positional_data=None, positional_predicted_column=None, **function_k
                 if Config.models_input[iterated_model_name] == input_type_name:
 
                     predict_parameters = {
-                        'Config': config_multiprocessed, 'iterated_model_train': iterated_model.train, 'iterated_model_predict': iterated_model.predict, 'iterated_model_name': iterated_model_name,
-                        'iterated_model_index': iterated_model_index, 'optimization_index': optimization_index, 'optimization_value': optimization_value,
-                        'option_optimization_list': option_optimization_list, 'model_train_input': model_train_input, 'model_predict_input': model_predict_input,
+                        'Config': config_multiprocessed, 'iterated_model_train': iterated_model.train, 'iterated_model_predict': iterated_model.predict,
+                        'iterated_model_name': iterated_model_name, 'iterated_model_index': iterated_model_index, 'optimization_index': optimization_index,
+                        'optimization_value': optimization_value, 'model_train_input': model_train_input, 'model_predict_input': model_predict_input,
                         'model_test_inputs': model_test_inputs, 'data_abs_max': data_abs_max, 'data_mean': data_mean, 'data_std': data_std,
                         'last_undiff_value': last_undiff_value, 'models_test_outputs': models_test_outputs, 'final_scaler': final_scaler, 'semaphor': semaphor
                     }
@@ -428,7 +431,11 @@ def predict(positional_data=None, positional_predicted_column=None, **function_k
     # Results such as trained model etc. that cannot be displayed in dataframe are in original results dict.
 
     # Convert results from dictionary to dataframe - exclude objects like trained model
-    results_df = pd.DataFrame.from_dict(results, orient='index').drop(['Index'], axis=1)
+
+    results_df = pd.DataFrame.from_dict(results, orient='index')
+
+    results_to_drop = [i for i in ['Index', 'Trained model', 'Test errors', 'Results'] if i in results_df.columns]
+    results_df.drop(columns=results_to_drop, inplace=True)
 
     results_df.sort_values("Model error", inplace=True)
 
@@ -444,9 +451,9 @@ def predict(positional_data=None, positional_predicted_column=None, **function_k
 
     predictions = pd.DataFrame(index=date_index)
 
-    for i in results_df['Results'].index:
-        predictions[i] = results_df['Results'][i]
-
+    for i, j in results.items():
+        if 'Results' in j:
+            predictions[i] = j['Results']
     best_model_name = results_df.index[0]
     best_model_predicts = predictions[best_model_name]
 
@@ -490,11 +497,9 @@ def predict(positional_data=None, positional_predicted_column=None, **function_k
             tablefmt='grid', floatfmt='.3f', numalign="center", stralign="center")
 
     else:
-        used_columns = set(('Name', f'Model error', 'Optimization value', 'Model time', 'Memory Peak\n[MB]')) & set(results_df.columns)
-
         models_table = tabulate(
-            results_df[used_columns].set_index('Name', drop=True, inplace=False),
-            headers=used_columns,
+            results_df.values,
+            headers=results_df.columns,
             tablefmt='grid', floatfmt=".2f", numalign="center", stralign="center")
 
     ### ANCHOR Print
@@ -747,9 +752,12 @@ def compare_models(positional_data_all=None, positional_predicted_column=None, *
 
     models_best_results = []
     unstardized_models_best_results = []
+    optimization_params = []
 
     for i in all_data_average:
         models_best_results.append(np.nan if np.isnan(i).all() else np.nanmin(i))
+        optimization_params.append(Config.optimization_values[int(np.nanargmin(i))] if not np.isnan(i).all() else np.nan)
+
     models_best_results = np.array(models_best_results)
 
     for i in unstardized_all_data_average:
@@ -764,11 +772,11 @@ def compare_models(positional_data_all=None, positional_predicted_column=None, *
 
     # Fill the table
     for i, j in enumerate(Config.used_models):
-        models_table.append([j, models_best_results[i], unstardized_models_best_results[i]])
+        models_table.append([j, models_best_results[i], unstardized_models_best_results[i], optimization_params[i]])
 
-    models_table = pd.DataFrame(models_table, columns=['Model', 'Percentual standardized error', 'Error average'])
+    models_table = pd.DataFrame(models_table, columns=['Model', 'Percentual standardized error', 'Error average', f'Optimized variable \n{Config.optimization_variable}'])
 
-    print(f"\n {tabulate(models_table.values, headers=models_table.columns, tablefmt='grid', floatfmt=('.3f'))} \n")
+    print(f"\n {tabulate(models_table.values, headers=models_table.columns, tablefmt='grid', floatfmt=('.3f'), numalign='center', stralign='center')} \n")
 
     print(f"\n\nBest model is {best_compared_model_name}")
 

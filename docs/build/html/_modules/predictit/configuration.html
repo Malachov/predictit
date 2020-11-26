@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>predictit.configuration &#8212; predictit 18-11-2020 documentation</title>
+    <title>predictit.configuration &#8212; predictit 26-11-2020 documentation</title>
     <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
@@ -151,9 +151,9 @@
     <span class="c1">### Prediction settings ###</span>
     <span class="c1">###########################</span>
 
-    <span class="n">multiprocessing</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># &#39;pool&#39; or &#39;process&#39; or 0</span>
+    <span class="n">multiprocessing</span> <span class="o">=</span> <span class="s1">&#39;pool&#39;</span>  <span class="c1"># &#39;pool&#39; or &#39;process&#39; or 0</span>
     <span class="n">processes_limit</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># Max number of concurrent processes. If None, then (CPUs - 1) is used</span>
-    <span class="n">trace_processes_memory</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">trace_processes_memory</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1"># Add how much memory was used by each model.</span>
     <span class="n">already_trained</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># Computationaly hard models (LSTM) load from disk.</span>
 
     <span class="c1">### OPTIMIZATIONS ###  !!! Can be time consuming</span>

@@ -524,10 +524,11 @@ if __name__ == "__main__":
 
     Config.update({
         'printit': 1,
+        'debug': 1,
 
         'optimization': 1,
-        'optimization_variable': 'data_transform',
-        'optimization_values': [0, 'difference'],
+        'optimization_variable': 'default_n_steps_in',
+        'optimization_values': [3, 6, 20],
         # "data": '/home/dan/Desktop/archive/Jan_2019_ontime.csv',
         # "predicted_column": 'DISTANCE',
         # "datalength": 100000,
