@@ -490,27 +490,19 @@ def predict(positional_data=None, positional_predicted_column=None, **function_k
     time_df.append(['Complete time', round((time.time() - time_begin), 3)])
     time_df = pd.DataFrame(time_df, columns=["Part", "Time"])
 
-    if Config.print_table == 1:
-        models_table = tabulate(
-            results_df[['Name', 'Model error']].iloc[:Config.print_number_of_models, :].values,
-            headers=['Model', f'Average {Config.error_criterion} error'],
-            tablefmt='grid', floatfmt='.3f', numalign="center", stralign="center")
-
-    else:
-        models_table = tabulate(
-            results_df.values,
-            headers=results_df.columns,
-            tablefmt='grid', floatfmt=".2f", numalign="center", stralign="center")
-
-    ### ANCHOR Print
+    small_results_table = results_df[['Name', 'Model error']].iloc[:Config.print_number_of_models, :]
 
     if Config.printit:
         if Config.print_best_model_result:
             print((f"\n Best model is {best_model_name} with results \n\n\t{best_model_predicts.values} \n\n\t with model error {Config.error_criterion} = "
                    f"{results_df.loc[best_model_name, 'Model error']}"))
 
-        if Config.print_table:
-            print(f"\n {models_table} \n")
+        if Config.print_table == 1:
+            print(f"\n {small_results_table.values} \n")
+
+        elif Config.print_table == 2:
+            tabulate(results_df.values, headers=['Model', f'Average {Config.error_criterion} error'],
+                     tablefmt='grid', floatfmt='.3f', numalign="center", stralign="center")
 
         if Config.print_time_table:
             print(f'\n {tabulate(time_df.values, headers=time_df.columns, tablefmt="grid", floatfmt=".3f", numalign="center", stralign="center")} \n')
@@ -580,16 +572,16 @@ def predict(positional_data=None, positional_predicted_column=None, **function_k
                 'output': output,
 
                 'time_table': str(tabulate(time_df.values, headers=time_df.columns, tablefmt="html")),
-                'models_table': str(tabulate(
-                    results_df[['Name', 'Model_error']].iloc[:Config.print_number_of_models, :].values,
-                    headers=['Model', f'Average {Config.error_criterion} error'],
-                    tablefmt='html', floatfmt='.3f'))
+                'models_table_str': str(tabulate(small_results_table.values,
+                                                 headers=['Model', f'Average {Config.error_criterion} error'],
+                                                 tablefmt='html', floatfmt='.3f'))
             })
 
         else:
             detailed_dictionary.update({
                 'time_table': time_df,
-                'models_table': models_table,
+                'models_table': results_df,
+                'small_models_table': small_results_table,
             })
 
         return detailed_dictionary
@@ -774,7 +766,7 @@ def compare_models(positional_data_all=None, positional_predicted_column=None, *
     for i, j in enumerate(Config.used_models):
         models_table.append([j, models_best_results[i], unstardized_models_best_results[i], optimization_params[i]])
 
-    models_table = pd.DataFrame(models_table, columns=['Model', 'Percentual standardized error', 'Error average', f'Optimized variable \n{Config.optimization_variable}'])
+    models_table = pd.DataFrame(models_table, columns=['Model', 'Percentual standardized error', 'Error average', f'Best optimized variable \n{Config.optimization_variable}'])
 
     print(f"\n {tabulate(models_table.values, headers=models_table.columns, tablefmt='grid', floatfmt=('.3f'), numalign='center', stralign='center')} \n")
 

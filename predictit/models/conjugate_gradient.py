@@ -33,8 +33,17 @@ def train(sequentions, epochs=100):
         w = w + alpha * p
         re_prev = re.copy()
         re = re_prev - alpha * np.dot(A, p)
+        if np.isnan(re).any():
+            np.nan_to_num(re, copy=False)
         beta = np.dot(re.T, re) / np.dot(re_prev.T, re_prev)
+        if np.isnan(re).any():
+            np.nan_to_num(re, copy=False)
         p = re + beta * p
+        if np.isnan(p).any():
+            if np.isnan(p).all():
+                break
+            else:
+                np.nan_to_num(p, copy=False)
 
     return w
 

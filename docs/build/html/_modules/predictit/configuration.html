@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>predictit.configuration &#8212; predictit 26-11-2020 documentation</title>
+    <title>predictit.configuration &#8212; predictit 30-11-2020 documentation</title>
     <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
@@ -151,7 +151,7 @@
     <span class="c1">### Prediction settings ###</span>
     <span class="c1">###########################</span>
 
-    <span class="n">multiprocessing</span> <span class="o">=</span> <span class="s1">&#39;pool&#39;</span>  <span class="c1"># &#39;pool&#39; or &#39;process&#39; or 0</span>
+    <span class="n">multiprocessing</span> <span class="o">=</span> <span class="s1">&#39;process&#39;</span>  <span class="c1"># &#39;pool&#39; or &#39;process&#39; or 0</span>
     <span class="n">processes_limit</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># Max number of concurrent processes. If None, then (CPUs - 1) is used</span>
     <span class="n">trace_processes_memory</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1"># Add how much memory was used by each model.</span>
     <span class="n">already_trained</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># Computationaly hard models (LSTM) load from disk.</span>
@@ -208,7 +208,7 @@
     <span class="n">rolling_data_window</span> <span class="o">=</span> <span class="mi">10</span>  <span class="c1"># Window for rolling mean and rolling std</span>
 
     <span class="c1">### Data inputs definition</span>
-    <span class="n">default_n_steps_in</span> <span class="o">=</span> <span class="mi">16</span>  <span class="c1"># How many lagged values are in vector input to model.</span>
+    <span class="n">default_n_steps_in</span> <span class="o">=</span> <span class="mi">8</span>  <span class="c1"># How many lagged values are in vector input to model.</span>
     <span class="n">other_columns</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1"># If use other columns. Bool.</span>
     <span class="n">default_other_columns_length</span> <span class="o">=</span> <span class="mi">2</span>  <span class="c1"># Other columns vector length used for predictions. If None, lengths same as predicted columnd. If 0, other columns are not used for prediction.</span>
     <span class="n">dtype</span> <span class="o">=</span> <span class="s1">&#39;float32&#39;</span>  <span class="c1"># Main dtype used in prediction. If 0, None or False, it will keep original. Eg.&#39;float32&#39; or &#39;float64&#39;.</span>

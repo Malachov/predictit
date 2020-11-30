@@ -21,8 +21,9 @@ def train_and_predict(
         tracemalloc.start()
 
     model_results = {}
-
     model_results['Name'] = iterated_model_name
+
+    result_name = f"{iterated_model_name} - {optimization_value}" if Config['optimization'] else f"{iterated_model_name}" 
 
     if (Config['optimizeit'] and optimization_index == 0 and iterated_model_name in Config['models_parameters_limits']):
 
@@ -110,7 +111,7 @@ def train_and_predict(
 
     except Exception:
         model_results['Model error'] = np.inf
-        traceback_warning(f"Error in '{iterated_model_name} - {optimization_value}' model" if not Config['optimization'] else f"Error in {iterated_model_name} model with optimized value: {optimization_value}")
+        traceback_warning(f"Error in '{result_name}' model" if not Config['optimization'] else f"Error in {iterated_model_name} model with optimized value: {optimization_value}")
 
     finally:
         model_results['Model time [s]'] = time.time() - start
@@ -124,8 +125,8 @@ def train_and_predict(
             semaphor.release()
 
         if Config['multiprocessing'] == 'process':
-            pipe.send({f"{iterated_model_name} - {optimization_value}": model_results})
+            pipe.send({f"{result_name}": model_results})
             pipe.close()
 
         else:
-            return {f"{iterated_model_name} - {optimization_value}": model_results}
+            return {f"{result_name}": model_results}

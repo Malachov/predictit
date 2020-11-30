@@ -117,7 +117,7 @@ class Config():
     ### Prediction settings ###
     ###########################
 
-    multiprocessing = 'pool'  # 'pool' or 'process' or 0
+    multiprocessing = 'process'  # 'pool' or 'process' or 0
     processes_limit = None  # Max number of concurrent processes. If None, then (CPUs - 1) is used
     trace_processes_memory = False  # Add how much memory was used by each model.
     already_trained = 0  # Computationaly hard models (LSTM) load from disk.
@@ -174,7 +174,7 @@ class Config():
     rolling_data_window = 10  # Window for rolling mean and rolling std
 
     ### Data inputs definition
-    default_n_steps_in = 16  # How many lagged values are in vector input to model.
+    default_n_steps_in = 8  # How many lagged values are in vector input to model.
     other_columns = 1  # If use other columns. Bool.
     default_other_columns_length = 2  # Other columns vector length used for predictions. If None, lengths same as predicted columnd. If 0, other columns are not used for prediction.
     dtype = 'float32'  # Main dtype used in prediction. If 0, None or False, it will keep original. Eg.'float32' or 'float64'.
