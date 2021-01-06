@@ -3,9 +3,9 @@ from pathlib import Path
 from mylogging import user_warning
 
 
-def train(sequentions, layers='default', predicts=7, epochs=200, load_trained_model=0, update_trained_model=1, save_model=1,
+def train(sequentions, layers='default', epochs=200, load_trained_model=0, update_trained_model=1, save_model=1,
           saved_model_path_string='stored_models', optimizer='adam', loss='mse', verbose=0, used_metrics='accuracy', timedistributed=0, batch_size=64):
-    """Tensorflow model. Neural nets - LSTM or MLP (just dense layers). Layers are customizable with arguments.
+    """Tensorflow model. Neural nets - LSTM or MLP (dense layers). Layers are customizable with arguments.
 
     Args:
         sequentions (tuple(np.ndarray, np.ndarray, np.ndarray)) - Tuple (X, y, x_input) of input train vectors X, train outputs y, and input for prediction x_input
@@ -48,6 +48,8 @@ def train(sequentions, layers='default', predicts=7, epochs=200, load_trained_mo
         metrics = [tf.keras.metrics.Accuracy()]
     elif used_metrics == 'mape':
         metrics = [tf.keras.metrics.MeanAbsolutePercentageError()]
+    else:
+        raise ValueError("metrics has to be one from ['accuracy', 'mape']")
 
     if saved_model_path_string == 'stored_models':
         saved_model_path_string = str(Path(__file__).resolve().parent / 'stored_models' / 'tensorflow.h5')
@@ -61,7 +63,7 @@ def train(sequentions, layers='default', predicts=7, epochs=200, load_trained_mo
             raise NameError("Model is not saved, first saveit = 1 in config")
 
         if update_trained_model:
-            model.fit(X, y, epochs=epochs, batch_size=64, verbose=verbose)
+            model.fit(X, y, epochs=epochs, batch_size=batch_size, verbose=verbose)
 
     else:
         if layers[0][0] == 'lstm':
@@ -85,7 +87,7 @@ def train(sequentions, layers='default', predicts=7, epochs=200, load_trained_mo
             model.add(tf.keras.layers.Dense(y.shape[1]))
 
         model.compile(optimizer=optimizer, loss=loss, metrics=metrics)
-        model.fit(X, y, epochs=epochs, batch_size=64, verbose=verbose)
+        model.fit(X, y, epochs=epochs, batch_size=batch_size, verbose=verbose)
 
     if save_model == 1:
         model.save(saved_model_path_string)

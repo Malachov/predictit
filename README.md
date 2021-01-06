@@ -35,6 +35,10 @@ Python >=3.6. Python 2 is not supported. Install just with
 
 Sometime you can have issues with installing some libraries from requirements (e.g. numpy because not BLAS / LAPACK). There are also two libraries - Tensorflow and pyodbc not in requirements, because not necessary, but troublesome. If library not installed with pip, check which library don't work, install manually with stackoverflow and repeat...
 
+Versions troubleshooting => Software is build in way, that it should be the best using latest versions of dependencies. In most cases older versions works well as well. Only exception can be author's library mydatapreprocessing, which is new and under development (API is not stable) and some version of predictit has dependency on particular version of mydatapreprocessing. Clean install of latest versions fix issue.
+
+Library was developed during 2020 and structure and even API (configuration) changed a lot. From version 1.60 it's considered to be stable and code made for library will work till 2.0.0.
+
 ## How to
 
 Software can be used in three ways. As a python library or with command line arguments or as normal python scripts.
@@ -68,13 +72,14 @@ from predictit.configuration import Config
 Config.data = 'https://raw.githubusercontent.com/jbrownlee/Datasets/master/daily-min-temperatures.csv'  # You can use local path on pc as well... "/home/name/mycsv.csv" !
 Config.predicted_column = 'Temp'  # You can use index as well
 Config.datetime_column = 'Date'  # Will be used for resampling and result plot description
-Config.freq = "D"  # One day - one value
+Config.freq = "D"  # One day - one value resampling
 Config.resample_function = "mean"  # If more values in one day - use mean (more sources)
 Config.return_type = 'detailed_dictionary'
 Config.debug = 0  # Ignore warnings
 
 # Or
 Config.update({
+    'datalength': 300,  # Used datalength
     'predicts': 14,  # Number of predicted values
     'default_n_steps_in': 12  # Value of recursive inputs in model (do not use too high - slower and worse predictions)
 })
@@ -112,11 +117,11 @@ predictit.configuration.print_config()
 import predictit
 from predictit.configuration import Config
 
-my_data_array = np.random.randn(2000, 4)  # Define your data here
+my_data_array = np.random.randn(200, 2)  # Define your data here
 
 # You can compare it on same data in various parts or on different data (check configuration on how to insert dictionary with data names)
 Config.update({
-    'data_all': (my_data_array[-2000:], my_data_array[-1500:], my_data_array[-1000:])
+    'data_all': {'First part': (my_data_array[:100], 0), 'Second part': (my_data_array[100:], 1)}
 })
 
 compared_models = predictit.main.compare_models()
@@ -128,10 +133,9 @@ compared_models = predictit.main.compare_models()
 import predictit
 from predictit.configuration import Config
 
-Config.data = pd.read_csv("https://raw.githubusercontent.com/jbrownlee/Datasets/master/daily-min-temperatures.csv")
-
-# Define list of columns or '*' for predicting all of the columns
-Config.predicted_columns = ['*']
+Config.data = np.random.randn(120, 3)
+Config.predicted_columns = ['*']  # Define list of columns or '*' for predicting all of the numeric columns
+Config.used_models = ['Conjugate gradient', 'Decision tree regression']  # Use just few models to be faster
 
 multiple_columns_prediction = predictit.main.predict_multiple_columns()
 
@@ -145,12 +149,13 @@ Config.update({
     'data': "https://raw.githubusercontent.com/jbrownlee/Datasets/master/daily-min-temperatures.csv",
     'predicted_column': 'Temp',
     'return_type': 'all_dataframe',
+    'datalength': 120,
     'optimization': 1,
     'optimization_variable': 'default_n_steps_in',
-    'optimization_values': [4, 8, 10],
-    'plot_all_optimized_models': 1,
+    'optimization_values': [4, 6, 8],
+    'plot_all_optimized_models': 0,
     'print_table': 2,  # Print detailed table
-    'used_models': ['AR (Autoregression)', 'Conjugate gradient', 'Sklearn regression']
+    'used_models': ['AR (Autoregression)', 'Sklearn regression']
 })
 
 predictions_optimized_config = predictit.main.predict()
@@ -229,7 +234,7 @@ from predictit.configuration import Config
 Config.update({
     'data': r'https://raw.githubusercontent.com/jbrownlee/Datasets/master/daily-min-temperatures.csv',  # Full CSV path with suffix
     'predicted_column': 'Temp',  # Column name that we want to predict
-
+    'datalength': 200,
     'predicts': 7,  # Number of predicted values - 7 by default
     'print_number_of_models': 6,  # Visualize 6 best models
     'repeatit': 50,  # Repeat calculation times on shifted data to evaluate error criterion

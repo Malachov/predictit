@@ -5,7 +5,6 @@ Subpackages
 -----------
 
 .. toctree::
-   :maxdepth: 4
 
    predictit.models
    predictit.test_data
@@ -14,7 +13,6 @@ Submodules
 ----------
 
 .. toctree::
-   :maxdepth: 4
 
    predictit.analyze
    predictit.best_params

@@ -39,9 +39,12 @@ def train(data, used_model='autoreg', p=5, d=1, q=0, cov_type='nonrobust', metho
         fitted_model = model.fit(method=method, trend=trend, solver=solver, disp=0)
 
     elif used_model == 'autoreg':
-        auto = ar_model.ar_select_order(data, maxlag=maxlag, old_names=False)
-        model = ar_model.AutoReg(data, lags=auto.ar_lags, trend=auto.trend, seasonal=auto.seasonal, period=auto.period, old_names=False)
+        auto = ar_model.ar_select_order(data, maxlag=maxlag)
+        model = ar_model.AutoReg(data, lags=auto.ar_lags, trend=auto.trend, seasonal=auto.seasonal, period=auto.period)
         fitted_model = model.fit(cov_type=cov_type)
+
+    else:
+        raise ValueError(f"Used model has to be one of ['ar', 'arima', 'sarimax', 'autoreg']. You configured: {used_model}")
 
     fitted_model.my_name = used_model
     fitted_model.data_len = len(data)

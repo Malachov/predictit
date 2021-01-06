@@ -1,4 +1,4 @@
-mydatapreprocessing>=1.1
+mydatapreprocessing>=1.1.14
 mylogging
 numpy
 pandas

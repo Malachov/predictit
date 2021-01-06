@@ -92,7 +92,7 @@ def visual_test(print_analyze, print_preprocessing, print_data_flow, print_postp
         ### Make sequences - n_steps_in = 6, n_steps_out = 1, constant = 1 ### \n
         Original: \n {data} \n\nsequences: \n{seqs} \n\nY: \n{Y} \n\nx_input:{x_input} \n\n Tests inputs:{test_inputs}\n
 
-        ### Make batch sequences - n_steps_in = 4, n_steps_out = 2, constant = 0 ### \n
+        ### Make multi_step sequences - n_steps_in = 4, n_steps_out = 2, constant = 0 ### \n
         Original: \n {data} \n\nsequences: \n{seqs_2} \n\nY: \n{Y_2} \n \nx_input: \n{x_input2} \n\n Tests inputs:{test_inputs2} \n
 
             ####################
@@ -112,7 +112,7 @@ def visual_test(print_analyze, print_preprocessing, print_data_flow, print_postp
         ### Make sequences - n_steps_in=4, n_steps_out=1, default_other_columns_length=None, constant=1 ### \n
         Original: \n {data_multi_col} \n\nsequences: \n{seqs_m} \n\nY: \n{Y_m} \nx_input: \n\n{x_input_m} \n\n Tests inputs:{test_inputs_m} \n
 
-        ### Make batch sequences - n_steps_in=3, n_steps_out=2, default_other_columns_length=1, constant=0 ### \n
+        ### Make multi_step sequences - n_steps_in=3, n_steps_out=2, default_other_columns_length=1, constant=0 ### \n
         Original: \n {data_multi_col} \n\nsequences: \n{seqs_2_m} \n\nY: \n{Y_2_m} \nx_input: \n\n{x_input2_m} \n\n Tests inputs:{test_inputs2_m} \n
 
         """)
@@ -133,7 +133,7 @@ def visual_test(print_analyze, print_preprocessing, print_data_flow, print_postp
             'optimization': 0,
             'mode': 'predict',
             'validation_gap': 2,
-            'models_input': {'Bayes ridge regression': 'batch', 'AR (Autoregression)': 'data_one_column'},
+            'models_input': {'Bayes ridge regression': 'multi_step', 'AR (Autoregression)': 'data_one_column'},
         })
 
         results = {

@@ -15,6 +15,7 @@ else:
     _JUPYTER = 0
 
 _GUI = 0
+_IS_TESTED = 0
 
 
 def confidence_interval(data, predicts=7, confidence=0.1, p=1, d=0, q=0):

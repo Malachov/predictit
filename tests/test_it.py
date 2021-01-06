@@ -18,23 +18,23 @@ import matplotlib
 import mydatapreprocessing as mdp
 import mylogging
 
+with warnings.catch_warnings():
+    warnings.simplefilter("ignore")
+    matplotlib.use('agg')
 
 sys.path.insert(0, Path(os.path.abspath(inspect.getframeinfo(inspect.currentframe()).filename)).parents[0].as_posix())
+sys.path.insert(0, Path(os.path.abspath(inspect.getframeinfo(inspect.currentframe()).filename)).parents[1].as_posix())
 
 from visual import visual_test
 
-sys.path.insert(0, Path(os.path.abspath(inspect.getframeinfo(inspect.currentframe()).filename)).parents[1].as_posix())
-
 import predictit
+predictit.misc._IS_TESTED = 1
 
 Config = predictit.configuration.Config
 Config.plotit = 0
 config_unchanged = Config.freeze()
 
 mylogging._COLORIZE = 0
-warnings.filterwarnings('ignore', message=r"[\s\S]*Matplotlib is currently using agg, which is a non-GUI backend*")
-matplotlib.use('agg')
-
 
 Config.update({
     'return_type': 'best',
@@ -44,7 +44,8 @@ Config.update({
     'plotit': 0,
     'show_plot': 0,
     'data': None,
-    'datalength': 500,
+    'datalength': 120,
+    'default_n_řžsteps_in': 3,
     'analyzeit': 0,
     'optimization': 0,
     'optimizeit': 0,
@@ -67,7 +68,6 @@ def test_1():
         'request_datatype_suffix': ".json",
         'predicted_table': 'txs',
         'predicted_column': "weight",
-        'datalength': 200,
         'remove_nans_threshold': 0.85,
         'remove_nans_or_replace': 'neighbor',
         'add_fft_columns': 0,
@@ -89,7 +89,9 @@ def test_1():
 
 def test_readmes():
 
-    ### Example 1 ###
+    ######
+    ### Simple example of using predictit as a python library and function arguments
+    ######
     Config.update(config_unchanged)
 
     predictions_1 = predictit.main.predict(data=np.random.randn(100, 2), predicted_column=1, predicts=3, return_type='best')
@@ -97,67 +99,78 @@ def test_readmes():
     mydata = pd.DataFrame(np.random.randn(100, 2), columns=['a', 'b'])
     predictions_1_positional = predictit.main.predict(mydata, 'b')
 
-    ### Example 2 ###
+    ######
+    ### Simple example of using as a python library and editing Config
+    ######
     Config.update(config_unchanged)
 
     # You can edit Config in two ways
     Config.data = 'https://raw.githubusercontent.com/jbrownlee/Datasets/master/daily-min-temperatures.csv'  # You can use local path on pc as well... "/home/name/mycsv.csv" !
     Config.predicted_column = 'Temp'  # You can use index as well
     Config.datetime_column = 'Date'  # Will be used in result
-    Config.freq = "D"  # One day - one value
+    Config.freq = "D"  # One day - one value resampling
     Config.resample_function = "mean"  # If more values in one day - use mean (more sources)
     Config.return_type = 'detailed_dictionary'
     Config.debug = 0  # Ignore warnings
 
     # Or
     Config.update({
-        'predicts': 12,  # Number of predicted values
-        'default_n_steps_in': 12  # Value of recursive inputs in model (do not use too high - slower and worse predictions)
+        'datalength': 300,  # Used datalength
+        'predicts': 9,  # Number of predicted values
+        'default_n_steps_in': 9  # Value of recursive inputs in model (do not use too high - slower and worse predictions)
     })
 
     predictions_2 = predictit.main.predict()
 
-    ### Example 3 ###
+    ######
+    ### Example of compare_models function
+    ######
     Config.update(config_unchanged)
 
-    my_data_array = np.random.randn(500, 3)  # Define your data here
+    my_data_array = np.random.randn(200, 2)  # Define your data here
 
     # You can compare it on same data in various parts or on different data (check configuration on how to insert dictionary with data names)
     Config.update({
-        'data_all': {'First part': (my_data_array[-500:], 0), 'Second part': (my_data_array[-200:], 2)}
+        'data_all': {'First part': (my_data_array[:100], 0), 'Second part': (my_data_array[100:], 1)}
     })
 
     compared_models = predictit.main.compare_models()
 
-    ### Example 4 ###
+    ######
+    ### Example of predict_multiple function
+    ######
     Config.update(config_unchanged)
 
-    Config.data = pd.read_csv("https://raw.githubusercontent.com/jbrownlee/Datasets/master/daily-min-temperatures.csv")
-
-    # Define list of columns or '*' for predicting all of the columns
-    Config.predicted_columns = ['*']
+    Config.data = np.random.randn(120, 3)
+    Config.predicted_columns = ['*']  # Define list of columns or '*' for predicting all of the numeric columns
+    Config.used_models = ['Conjugate gradient', 'Decision tree regression']  # Use just few models to be faster
 
     multiple_columns_prediction = predictit.main.predict_multiple_columns()
 
-    ### Example 5 ###
+    ######
+    ### Example of Config variable optimization ###
+    ######
     Config.update(config_unchanged)
 
     Config.update({
         'data': "https://raw.githubusercontent.com/jbrownlee/Datasets/master/daily-min-temperatures.csv",
         'predicted_column': 'Temp',
         'return_type': 'all_dataframe',
+        'datalength': 120,
         'optimization': 1,
         'optimization_variable': 'default_n_steps_in',
-        'optimization_values': [4, 5, 6],
-        'plot_all_optimized_models': 1,
+        'optimization_values': [4, 6, 8],
+        'plot_all_optimized_models': 0,
         'print_table': 1,  # Print detailed table
-        'used_models': ['AR (Autoregression)', 'Conjugate gradient', 'Sklearn regression']
+        'used_models': ['AR (Autoregression)', 'Sklearn regression']
 
     })
 
     predictions_optimized_config = predictit.main.predict()
 
-    ### Example 6 ###
+    ######
+    ### Data preprocessing, plotting and other Functions
+    ######
 
     from predictit.analyze import analyze_column
     from mydatapreprocessing.preprocessing import load_data, data_consolidation, preprocess_data
@@ -184,13 +197,15 @@ def test_readmes():
     # Plot inserted data (show false just because tests)
     plot(data_preprocessed, show=0)
 
-    ### Example 7 ###
+    ######
+    ### Example of using library as a pro with deeper editting Config
+    ######
     Config.update(config_unchanged)
 
     Config.update({
         'data': r'https://raw.githubusercontent.com/jbrownlee/Datasets/master/daily-min-temperatures.csv',  # Full CSV path with suffix
         'predicted_column': 'Temp',  # Column name that we want to predict
-
+        'datalength': 200,
         'predicts': 7,  # Number of predicted values - 7 by default
         'print_number_of_models': 6,  # Visualize 6 best models
         'repeatit': 50,  # Repeat calculation times on shifted data to evaluate error criterion
@@ -292,8 +307,8 @@ def test_main_optimize_and_args():
         'predicts': 6,
         'datetime_column': '',
         'freq': 'M',
-        'datalength': 1000,
-        'default_n_steps_in': 5,
+        'datalength': 100,
+        'default_n_steps_in': 3,
         'data_transform': 'difference',
         'error_criterion': 'rmse',
         'remove_outliers': 1,
@@ -313,7 +328,7 @@ def test_main_optimize_and_args():
         'models_parameters': {"Bayes ridge regression": {"regressor": 'bayesianridge', "n_iter": 300, "alpha_1": 1.e-6, "alpha_2": 1.e-6, "lambda_1": 1.e-6, "lambda_2": 1.e-6}},
         'fragments': 4,
         'iterations': 2,
-        'models_parameters_limits': {"Bayes ridge regression": {"alpha_1": [0.1e-6, 3e-6], "regressor": ['bayesianridge', 'lasso'], "n_iter": [50, 100]}},
+        'models_parameters_limits': {"Bayes ridge regression": {"alpha_1": [0.1e-6, 3e-6], "regressor": ['bayesianridge', 'lasso']}},
     })
 
     result = predictit.main.predict(data='test', predicted_column=[], repeatit=20)
@@ -332,7 +347,7 @@ def test_config_optimization():
         'datetime_column': 'time',
         'freq': '',
         'predicted_column': 0,
-        'datalength': 300,
+        'datalength': 100,
         'other_columns': 1,
         'default_other_columns_length': 5,
         'data_transform': None,
@@ -342,14 +357,13 @@ def test_config_optimization():
         'remove_nans_or_replace': 'mean',
         'optimization': 1,
         'optimization_variable': 'default_n_steps_in',
-        'optimization_values': [12, 20, 40],
+        'optimization_values': [3, 6, 9],
+        'plot_all_optimized_models': 1,
         'last_row': 0,
         'correlation_threshold': 0.4,
         'standardizeit': 'standardize',
         'predicts': 7,
         'smoothit': 0,
-        'default_n_steps_in': 10,
-
     })
 
     result = predictit.main.predict()
@@ -360,14 +374,13 @@ def test_config_optimization():
 def test_most_models():
 
     Config.update(config_original)
-    df = pd.DataFrame([range(200), range(1000, 1200)]).T
+    df = pd.DataFrame([range(100), range(1000, 1100)]).T
 
     Config.update({
         'data': df,
         'predicts': 7,
-        'default_n_steps_in': 10,
+        'default_n_steps_in': 3,
         'error_criterion': 'mape',
-
 
         'used_models': [
             'ARMA', 'ARIMA (Autoregression integrated moving average)', 'autoreg', 'SARIMAX (Seasonal ARIMA)',
@@ -405,7 +418,7 @@ def test_presets():
         'predicted_table': 'txs',
         'data_orientation': 'index',
         'predicted_column': 'weight',
-        'datalength': 500,
+        'datalength': 100,
         'use_config_preset': 'fast',
     })
 
@@ -425,7 +438,7 @@ def test_main_multiple():
 
     Config.update(config_original)
     Config.update({
-        'data': np.random.randn(300, 3),
+        'data': np.random.randn(120, 3),
         'predicted_columns': [0, 1],
         'error_criterion': 'mse_sklearn',
     })
@@ -442,14 +455,12 @@ def test_main_multiple_all_columns():
     Config.update({
         'use_config_preset': 'fast',
         'datetime_column': 'Date',
-        'freqs': ['D'],
-        'data': 'https://www.stats.govt.nz/assets/Uploads/Effects-of-COVID-19-on-trade/Effects-of-COVID-19-on-trade-1-February-1-July-2020-provisional/Download-data/Effects-of-COVID-19-on-trade-1-February-1-July-2020-provisional.csv',
         'predicted_columns': '*',
+        'freqs': ['D', 'M'],
+        'data': pd.read_csv("https://raw.githubusercontent.com/jbrownlee/Datasets/master/daily-min-temperatures.csv").iloc[:120, :3],
         'remove_nans_threshold': 0.9,
         'remove_nans_or_replace': 2,
         'optimization': 0,
-        'optimization_variable': 'default_n_steps_in',
-        'optimization_values': [12, 20, 40],
     })
 
     result_multiple = predictit.main.predict_multiple_columns()
@@ -469,8 +480,8 @@ def test_compare_models():
 
 def test_compare_models_list():
     Config.update(config_original)
-    dummy_data = np.random.randn(500)
-    data_all = [dummy_data[:200], dummy_data[200: 400], dummy_data[300:]]
+    dummy_data = np.random.randn(300)
+    data_all = [dummy_data[:100], dummy_data[100: 200], dummy_data[200:]]
 
     result = predictit.main.compare_models(data_all=data_all)
 
@@ -501,7 +512,7 @@ def test_visual():
 
 # For deeper debug, uncomment problematic test
 if __name__ == "__main__":
-    # result = test_1()
+    result = test_1()
     # result_readmes = test_readmes()
     # result1 = test_main_from_config()
     # result_2 = test_main_optimize_and_args()
@@ -520,24 +531,25 @@ if __name__ == "__main__":
     # You can edit Config in two ways
 
     # Or
-    Config.update(config_original)
 
-    Config.update({
-        'printit': 1,
-        'debug': 1,
+    # Config.update(config_original)
 
-        'optimization': 1,
-        'optimization_variable': 'default_n_steps_in',
-        'optimization_values': [3, 6, 20],
-        # "data": '/home/dan/Desktop/archive/Jan_2019_ontime.csv',
-        # "predicted_column": 'DISTANCE',
-        # "datalength": 100000,
+    # Config.update({
+    #     'printit': 1,
+    #     'debug': 1,
 
-        # # 'pool' or 'process' or 0
-        # "multiprocessing": 0
-    })
+    #     'optimization': 1,
+    #     'optimization_variable': 'default_n_steps_in',
+    #     'optimization_values': [3, 6, 20],
+    #     "data": '/home/dan/Desktop/archive/Jan_2019_ontime.csv',
+    #     "predicted_column": 'DISTANCE',
+    #     "datalength": 100000,
 
-    result = predictit.main.compare_models()
+    #     # 'pool' or 'process' or 0
+    #     "multiprocessing": 0
+    # })
+
+    # result = predictit.main.compare_models()
 
     # predictions = predictit.main.predict()
 

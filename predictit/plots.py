@@ -5,7 +5,7 @@ from predictit.configuration import Config
 import os
 
 
-def plot(complete_dataframe, plot_type='plotly', show=1, save=0, save_path='', legend=True, plot_return=None, bounds='default', predicted_column_name='', best_model_name=''):
+def plot(complete_dataframe, plot_type='plotly', show=1, save=0, save_path='', legend=True, plot_return=None, bounds='default', predicted_column_name='', best_model_name='', test=False):
 
     if save and not save_path:
         save_path = os.path.normpath(os.path.expanduser('~/Desktop') + '/plot.html')
@@ -43,7 +43,6 @@ def plot(complete_dataframe, plot_type='plotly', show=1, save=0, save_path='', l
                 y=complete_dataframe['Upper bound'],
                 line={'width': 0}
             )
-
 
             complete_dataframe.drop('Upper bound', axis=1, inplace=True)
             graph_data.append(upper_bound)

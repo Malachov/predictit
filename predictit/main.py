@@ -39,6 +39,7 @@ this_path_string = this_path.as_posix()
 
 sys.path.insert(0, this_path_string)
 
+
 import predictit
 from predictit import configuration
 from predictit.configuration import Config
@@ -342,6 +343,8 @@ def predict(positional_data=None, positional_predicted_column=None, **function_k
 
             elif Config.evaluate_type == 'preprocessed':
                 models_test_outputs = mdp.inputs.create_tests_outputs(data_for_predictions[:, 0], predicts=Config.predicts, repeatit=Config.repeatit)
+            else:
+                raise ValueError("Config.evaluate_type can only be one of ['original', 'preprocessed']")
 
         for input_type_name in used_input_types:
             try:
@@ -365,14 +368,15 @@ def predict(positional_data=None, positional_predicted_column=None, **function_k
                         'iterated_model_name': iterated_model_name, 'iterated_model_index': iterated_model_index, 'optimization_index': optimization_index,
                         'optimization_value': optimization_value, 'model_train_input': model_train_input, 'model_predict_input': model_predict_input,
                         'model_test_inputs': model_test_inputs, 'data_abs_max': data_abs_max, 'data_mean': data_mean, 'data_std': data_std,
-                        'last_undiff_value': last_undiff_value, 'models_test_outputs': models_test_outputs, 'final_scaler': final_scaler, 'semaphor': semaphor
+                        'last_undiff_value': last_undiff_value, 'models_test_outputs': models_test_outputs, 'final_scaler': final_scaler, 'semaphor': semaphor,
+                        '_IS_TESTED': predictit.misc._IS_TESTED,
                     }
 
                     if Config.models_input[iterated_model_name] in ['one_step', 'one_step_constant']:
                         if multicolumn and Config.predicts > 1:
 
                             user_warning(f"""Warning in model {iterated_model_name} \n\nOne-step prediction on multivariate data (more columns).
-                                             Use batch (y lengt equals to predict) or do use some one column data input in Config models_input or predict just one value.""")
+                                             Use multi_step (y lengt equals to predict) or do use some one column data input in Config models_input or predict just one value.""")
                             continue
 
                     if Config.multiprocessing == 'process':

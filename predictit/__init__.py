@@ -201,10 +201,16 @@ plot(data_preprocessed)
 
 """
 
+from . import configuration
+import mylogging
+
+# Define whether to print warnings or not or stop on warnings as on error (mute warnings from imports)
+mylogging.set_warnings(configuration.Config.debug, configuration.Config.ignored_warnings, configuration.Config.ignored_warnings_class_type)
+
+
 from . import analyze
 from . import best_params
 from . import models
-from . import configuration
 from . import database
 from . import evaluate_predictions
 from . import misc
@@ -215,7 +221,7 @@ from . import gui_start
 
 from . import main
 
-__version__ = "1.60.9"
+__version__ = "1.60.10"
 __author__ = "Daniel Malachov"
 __license__ = "MIT"
 __email__ = "malachovd@seznam.cz"

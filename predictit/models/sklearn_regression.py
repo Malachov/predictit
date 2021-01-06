@@ -79,7 +79,7 @@ def train(sequentions, regressor='bayesianridge', predicts=7, load_trained_model
 
     else:
         model = sklearn.multioutput.MultiOutputRegressor(model)
-        model.output_shape = 'batch'
+        model.output_shape = 'multi_step'
         output = sequentions[1]
 
     model.fit(sequentions[0], output)

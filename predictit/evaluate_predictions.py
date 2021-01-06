@@ -3,6 +3,7 @@
 import numpy as np
 from mylogging import user_message
 from predictit import misc
+import warnings
 
 
 def compare_predicted_to_test(predicted, test, error_criterion='mape', plot=0, modelname="Default model", dataname="default data"):
@@ -33,6 +34,12 @@ def compare_predicted_to_test(predicted, test, error_criterion='mape', plot=0, m
             if misc._JUPYTER:
                 from IPython import get_ipython
                 get_ipython().run_line_magic('matplotlib', 'inline')
+
+            if misc._IS_TESTED:
+                with warnings.catch_warnings():
+                    warnings.simplefilter("ignore")
+                    import matplotlib
+                    matplotlib.use('agg')
 
             import matplotlib.pyplot as plt
 

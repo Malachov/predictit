@@ -204,11 +204,12 @@ class Config():
     used_models = [
 
         # ### predictit.models.statsmodels_autoregressive
-        'AR (Autoregression)', 'ARMA', 'ARIMA (Autoregression integrated moving average)', 'autoreg', 'SARIMAX (Seasonal ARIMA)',
+        'AR (Autoregression)', 'ARIMA (Autoregression integrated moving average)', 'autoreg',
+        # 'ARMA', 'SARIMAX (Seasonal ARIMA)',
 
         # ### predictit.models.autoreg_LNU
-        'Autoregressive Linear neural unit', 'Autoregressive Linear neural unit normalized',
-        # # , 'Linear neural unit with weights predict'
+        'Autoregressive Linear neural unit',
+        # 'Linear neural unit with weights predict', 'Autoregressive Linear neural unit normalized',
 
         ### predictit.models.conjugate_gradient
         'Conjugate gradient',
@@ -218,12 +219,13 @@ class Config():
         # 'tensorflow_mlp',
 
         ### predictit.models.sklearn_regression
-        'Sklearn regression', 'Bayes ridge regression', 'Passive aggressive regression', 'Gradient boosting',
+        'Sklearn regression', 'Bayes ridge regression',
         'KNeighbors regression', 'Decision tree regression', 'Hubber regression',
-        # 'Bagging regression', 'Stochastic gradient regression', 'Extreme learning machine', 'Gen Extreme learning machine',  'Extra trees regression', 'Random forest regression'
+        # 'Bagging regression', 'Stochastic gradient regression', 'Extreme learning machine', 'Gen Extreme learning machine',  'Extra trees regression', 'Random forest regression',
+        # , 'Passive aggressive regression', 'Gradient boosting',
 
-        'Sklearn regression one step', 'Bayes ridge regression one step', 'Decision tree regression one step',
-        'Hubber regression one step',
+        'Sklearn regression one step', 'Bayes ridge regression one step',
+        #  'Decision tree regression one step', 'Hubber regression one step',
 
         # predictit.models.compare_with_average
         'Compare with average'
@@ -243,11 +245,11 @@ class Config():
 
             'one_step_constant': {'n_steps_in': cls.default_n_steps_in, 'n_steps_out': 1, 'default_other_columns_length': cls.default_other_columns_length, 'constant': 1},
             'one_step': {'n_steps_in': cls.default_n_steps_in, 'n_steps_out': 1, 'default_other_columns_length': cls.default_other_columns_length, 'constant': 0},
-            'batch_constant': {'n_steps_in': cls.default_n_steps_in, 'n_steps_out': cls.predicts, 'default_other_columns_length': cls.default_other_columns_length, 'constant': 1},
-            'batch': {'n_steps_in': cls.default_n_steps_in, 'n_steps_out': cls.predicts, 'default_other_columns_length': cls.default_other_columns_length, 'constant': 0},
+            'multi_step_constant': {'n_steps_in': cls.default_n_steps_in, 'n_steps_out': cls.predicts, 'default_other_columns_length': cls.default_other_columns_length, 'constant': 1},
+            'multi_step': {'n_steps_in': cls.default_n_steps_in, 'n_steps_out': cls.predicts, 'default_other_columns_length': cls.default_other_columns_length, 'constant': 0},
             'one_in_one_out_constant': {'n_steps_in': cls.default_n_steps_in, 'n_steps_out': 1, 'constant': 1},
             'one_in_one_out': {'n_steps_in': cls.default_n_steps_in, 'n_steps_out': 1, 'constant': 0},
-            'one_in_batch_out': {'n_steps_in': cls.default_n_steps_in, 'n_steps_out': cls.predicts, 'default_other_columns_length': cls.default_other_columns_length, 'constant': 0},
+            'one_in_multi_step_out': {'n_steps_in': cls.default_n_steps_in, 'n_steps_out': cls.predicts, 'default_other_columns_length': cls.default_other_columns_length, 'constant': 0},
             'not_serialized': {'n_steps_in': cls.default_n_steps_in, 'n_steps_out': cls.predicts, 'constant': 0, 'serialize_columns': 0},
         }
 
@@ -269,13 +271,13 @@ class Config():
 
         # One step not used yet... for multivariate data for predicting just one value
 
-        **{model_name: 'batch' for model_name in [
+        **{model_name: 'multi_step' for model_name in [
             'Sklearn regression', 'Bayes ridge regression', 'Hubber regression', 'Extra trees regression',
             'Decision tree regression', 'KNeighbors regression', 'Random forest regression',
             'Bagging regression', 'Passive aggressive regression', 'Extreme learning machine',
             'Gen Extreme learning machine', 'Gradient boosting']},
 
-        'Stochastic gradient regression': 'one_in_batch_out',
+        'Stochastic gradient regression': 'one_in_multi_step_out',
         'tensorflow_lstm': 'not_serialized',
 
         'Compare with average': 'data_one_column'
@@ -389,25 +391,25 @@ class Config():
 
     ignored_warnings = [
         # Statsmodels
+        "The parameter names will change after 0.12 is released",  # To be removed one day
         "AR coefficients are not stationary.",
         "statsmodels.tsa.AR has been deprecated",
         "divide by zero encountered in true_divide",
         "pandas.util.testing is deprecated",
         "statsmodels.tsa.arima_model.ARIMA have been deprecated",
+        "Using or importing the ABCs from 'collections'",
         # Tensorflow
         "numpy.ufunc size changed",
         # Autoregressive neuron
         "overflow encountered in multiply",
         # Sklearn
         "The default value of n_estimators will change",
-        "data_one_column",
         "lbfgs failed to converge",
         "Pass neg_label=-1",
 
         "invalid value encountered in sqrt",
         "encountered in double_scalars",
         "Inverting hessian failed",
-        "can't resolve package from",
         "unclosed file <_io.TextIOWrapper name",
         "Mean of empty slice",
     ]
@@ -450,7 +452,7 @@ class Config():
         },
 
         'normal': {
-            'optimizeit': 0, 'default_n_steps_in': 15, 'repeatit': 50, 'optimization': 0, 'datalength': 3000,
+            'optimizeit': 0, 'default_n_steps_in': 12, 'repeatit': 50, 'optimization': 0, 'datalength': 3000,
             'other_columns': 1, 'remove_outliers': 0, 'analyzeit': 0, 'standardizeit': 'standardize',
 
             'used_models': [

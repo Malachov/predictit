@@ -9,7 +9,12 @@ import predictit
 def train_and_predict(
         Config, iterated_model_train, iterated_model_predict, iterated_model_name, iterated_model_index, optimization_index,
         optimization_value, model_train_input, model_predict_input, model_test_inputs,
-        data_abs_max, data_mean, data_std, models_test_outputs, last_undiff_value=None, final_scaler=None, pipe=None, semaphor=None):
+        data_abs_max, data_mean, data_std, models_test_outputs, last_undiff_value=None, final_scaler=None, pipe=None, semaphor=None,
+        _IS_TESTED=False):
+
+    # Global module variables changed in for example tests module ignored because module reload...
+    # therefore reload all necessary variables from misc
+    predictit.misc._IS_TESTED = _IS_TESTED
 
     # Config here is just dic, so cannot use Config.value syntax here
     if semaphor:
@@ -23,7 +28,7 @@ def train_and_predict(
     model_results = {}
     model_results['Name'] = iterated_model_name
 
-    result_name = f"{iterated_model_name} - {optimization_value}" if Config['optimization'] else f"{iterated_model_name}" 
+    result_name = f"{iterated_model_name} - {optimization_value}" if Config['optimization'] else f"{iterated_model_name}"
 
     if (Config['optimizeit'] and optimization_index == 0 and iterated_model_name in Config['models_parameters_limits']):
 
@@ -47,8 +52,9 @@ def train_and_predict(
             traceback_warning(f"Hyperparameters optimization of {iterated_model_name} didn't finished")
 
 
+    start = time.time()
+
     try:
-        start = time.time()
 
         # If no parameters or parameters details, add it so no index errors later
         if iterated_model_name not in Config['models_parameters']:
@@ -61,7 +67,7 @@ def train_and_predict(
         one_reality_result = iterated_model_predict(model_predict_input, trained_model, Config['predicts'])
 
         if np.isnan(np.sum(one_reality_result)) or one_reality_result is None:
-            raise
+            raise ValueError('NaN predicted from model.')
 
         # Remove wrong values out of scope to not be plotted
         one_reality_result[abs(one_reality_result) > 3 * data_abs_max] = np.nan
