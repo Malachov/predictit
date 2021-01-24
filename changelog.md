@@ -2,7 +2,7 @@
 
 ## 1.6x - 10/2020
 
-[x] Annoying warnings filtered on import not on function called
+[x] Annoying warnings filtered on import not on library call (and from multiprocessess)
 [x] String embedding - One hot or label encoding
 [x] Api change! Config renamed because class with capitalize C from config to Config. 'datetime_index' renamed to 'datetime_column' - Old scripts wont work
 [x] Data_preprocessing and logging from misc moved into own projects and imported. Projects are called mylogging and mydatapreprocessing. It'necessary to have corresponding version
@@ -10,6 +10,7 @@
 [x] Fast fourier transform as new information.
 [x] Short way of using functions with positional argument - predictit.main.predict(np.random.randn(1000). Same with predict_multiple and compare models.
 [x] Devil terminology fail fixed(used batch instead of multistep in own models)
+[x] New custom models added (ridge regresion and Levenberg-Marquardt)
 
 ## 1.5x - 09/2020
 

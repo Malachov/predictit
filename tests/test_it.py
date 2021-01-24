@@ -36,6 +36,7 @@ config_unchanged = Config.freeze()
 
 mylogging._COLORIZE = 0
 
+# ANCHOR Tests config
 Config.update({
     'return_type': 'best',
     'predicted_column': 0,
@@ -56,18 +57,15 @@ Config.update({
     ]
 })
 
-config_original = Config.freeze()
+config_for_tests = Config.freeze()
 
 np.random.seed(2)
 
 
 def test_1():
     Config.update({
-        'data': "https://blockchain.info/unconfirmed-transactions?format=json",
-        'data_orientation': "index",
-        'request_datatype_suffix': ".json",
-        'predicted_table': 'txs',
-        'predicted_column': "weight",
+        'data': [pd.DataFrame(np.random.randn(100, 3), columns=['a', 'b', 'c']), pd.DataFrame(np.random.randn(80, 3), columns=['e', 'b', 'c'])],
+        'predicted_column': "b",
         'remove_nans_threshold': 0.85,
         'remove_nans_or_replace': 'neighbor',
         'add_fft_columns': 0,
@@ -102,7 +100,7 @@ def test_readmes():
     ######
     ### Simple example of using as a python library and editing Config
     ######
-    Config.update(config_unchanged)
+    Config.update(config_for_tests)
 
     # You can edit Config in two ways
     Config.data = 'https://raw.githubusercontent.com/jbrownlee/Datasets/master/daily-min-temperatures.csv'  # You can use local path on pc as well... "/home/name/mycsv.csv" !
@@ -117,7 +115,7 @@ def test_readmes():
     Config.update({
         'datalength': 300,  # Used datalength
         'predicts': 9,  # Number of predicted values
-        'default_n_steps_in': 9  # Value of recursive inputs in model (do not use too high - slower and worse predictions)
+        'default_n_steps_in': 8  # Value of recursive inputs in model (do not use too high - slower and worse predictions)
     })
 
     predictions_2 = predictit.main.predict()
@@ -125,7 +123,7 @@ def test_readmes():
     ######
     ### Example of compare_models function
     ######
-    Config.update(config_unchanged)
+    Config.update(config_for_tests)
 
     my_data_array = np.random.randn(200, 2)  # Define your data here
 
@@ -139,7 +137,7 @@ def test_readmes():
     ######
     ### Example of predict_multiple function
     ######
-    Config.update(config_unchanged)
+    Config.update(config_for_tests)
 
     Config.data = np.random.randn(120, 3)
     Config.predicted_columns = ['*']  # Define list of columns or '*' for predicting all of the numeric columns
@@ -150,7 +148,7 @@ def test_readmes():
     ######
     ### Example of Config variable optimization ###
     ######
-    Config.update(config_unchanged)
+    Config.update(config_for_tests)
 
     Config.update({
         'data': "https://raw.githubusercontent.com/jbrownlee/Datasets/master/daily-min-temperatures.csv",
@@ -197,10 +195,26 @@ def test_readmes():
     # Plot inserted data (show false just because tests)
     plot(data_preprocessed, show=0)
 
+
+    ######
+    ### Example of using model apart main function
+    ######
+
+    data = mdp.generatedata.gen_sin(1000)
+    test = data[-7:]
+    data = data[: -7]
+    data = mdp.preprocessing.data_consolidation(data)
+    (X, y), x_input, _ = mdp.inputs.create_inputs(data.values, 'batch', input_type_params={'n_steps_in': 6})  # First tuple, because some models use raw data, e.g. [1, 2, 3...]
+
+    trained_model = predictit.models.sklearn_regression.train((X, y), regressor='bayesianridge')
+    predictions_one_model = predictit.models.sklearn_regression.predict(x_input, trained_model, predicts=7)
+
+    predictions_one_model_error = predictit.evaluate_predictions.compare_predicted_to_test(predictions_one_model, test, error_criterion='mape')  # , plot=1
+
     ######
     ### Example of using library as a pro with deeper editting Config
     ######
-    Config.update(config_unchanged)
+    Config.update(config_for_tests)
 
     Config.update({
         'data': r'https://raw.githubusercontent.com/jbrownlee/Datasets/master/daily-min-temperatures.csv',  # Full CSV path with suffix
@@ -246,14 +260,15 @@ def test_readmes():
     condition_3 = compared_models
     condition_4 = not np.isnan(np.nanmax(first_multiple_array))
     condition_5 = not predictions_optimized_config.dropna().empty
-    condition_6 = not np.isnan(np.min(predictions_configured))
+    condition_6 = 0 <= predictions_one_model_error < 1000
+    condition_7 = not np.isnan(np.min(predictions_configured))
 
-    assert (condition_1 and condition_1_a and condition_2 and condition_3 and condition_4 and condition_5 and condition_6)
+    assert (condition_1 and condition_1_a and condition_2 and condition_3 and condition_4 and condition_5 and condition_6 and condition_7)
 
 
 def test_main_from_config():
 
-    Config.update(config_original)
+    Config.update(config_for_tests)
     Config.update({
         'data': 'https://raw.githubusercontent.com/jbrownlee/Datasets/master/daily-min-temperatures.csv',
         'predicted_column': 'Temp',
@@ -300,7 +315,7 @@ def test_main_from_config():
 
 def test_main_optimize_and_args():
 
-    Config.update(config_original)
+    Config.update(config_for_tests)
     Config.update({
         'data': 'test',
         'predicted_column': '',
@@ -338,7 +353,7 @@ def test_main_optimize_and_args():
 
 def test_config_optimization():
 
-    Config.update(config_original)
+    Config.update(config_for_tests)
     df = pd.DataFrame([range(200), range(1000, 1200)]).T
     df['time'] = pd.date_range('2018-01-01', periods=len(df), freq='H')
 
@@ -373,7 +388,7 @@ def test_config_optimization():
 
 def test_most_models():
 
-    Config.update(config_original)
+    Config.update(config_for_tests)
     df = pd.DataFrame([range(100), range(1000, 1100)]).T
 
     Config.update({
@@ -388,8 +403,9 @@ def test_most_models():
             'Sklearn regression', 'Bayes ridge regression', 'Passive aggressive regression', 'Gradient boosting',
             'KNeighbors regression', 'Decision tree regression', 'Hubber regression',
             'Bagging regression', 'Stochastic gradient regression', 'Extreme learning machine', 'Gen Extreme learning machine', 'Extra trees regression', 'Random forest regression',
-            'tensorflow_lstm', 'tensorflow_mlp',
-            'Compare with average'
+            'Tensorflow LSTM', 'Tensorflow MLP',
+            'Compare with average',
+            'Regression', 'Ridge regression'
         ]
     })
 
@@ -411,7 +427,7 @@ def test_other_models_functions():
 
 
 def test_presets():
-    Config.update(config_original)
+    Config.update(config_for_tests)
     Config.update({
         'data': "https://blockchain.info/unconfirmed-transactions?format=json",
         'request_datatype_suffix': '.json',
@@ -436,7 +452,7 @@ def test_presets():
 
 def test_main_multiple():
 
-    Config.update(config_original)
+    Config.update(config_for_tests)
     Config.update({
         'data': np.random.randn(120, 3),
         'predicted_columns': [0, 1],
@@ -451,7 +467,7 @@ def test_main_multiple():
 
 def test_main_multiple_all_columns():
 
-    Config.update(config_original)
+    Config.update(config_for_tests)
     Config.update({
         'use_config_preset': 'fast',
         'datetime_column': 'Date',
@@ -470,7 +486,7 @@ def test_main_multiple_all_columns():
 
 
 def test_compare_models():
-    Config.update(config_original)
+    Config.update(config_for_tests)
     data_all = None
 
     result = predictit.main.compare_models(data_all=data_all)
@@ -479,7 +495,7 @@ def test_compare_models():
 
 
 def test_compare_models_list():
-    Config.update(config_original)
+    Config.update(config_for_tests)
     dummy_data = np.random.randn(300)
     data_all = [dummy_data[:100], dummy_data[100: 200], dummy_data[200:]]
 
@@ -489,7 +505,7 @@ def test_compare_models_list():
 
 
 def test_compare_models_with_optimization():
-    Config.update(config_original)
+    Config.update(config_for_tests)
     Config.update({
         'data_all': None,  # Means default sin, random, sign
         'optimization': 1,
@@ -512,7 +528,7 @@ def test_visual():
 
 # For deeper debug, uncomment problematic test
 if __name__ == "__main__":
-    result = test_1()
+    # result = test_1()
     # result_readmes = test_readmes()
     # result1 = test_main_from_config()
     # result_2 = test_main_optimize_and_args()
@@ -528,57 +544,4 @@ if __name__ == "__main__":
 
     ## Custom use case test...
 
-    # You can edit Config in two ways
-
-    # Or
-
-    # Config.update(config_original)
-
-    # Config.update({
-    #     'printit': 1,
-    #     'debug': 1,
-
-    #     'optimization': 1,
-    #     'optimization_variable': 'default_n_steps_in',
-    #     'optimization_values': [3, 6, 20],
-    #     "data": '/home/dan/Desktop/archive/Jan_2019_ontime.csv',
-    #     "predicted_column": 'DISTANCE',
-    #     "datalength": 100000,
-
-    #     # 'pool' or 'process' or 0
-    #     "multiprocessing": 0
-    # })
-
-    # result = predictit.main.compare_models()
-
-    # predictions = predictit.main.predict()
-
     pass
-
-
-#%%
-
-# import categorical_embedder as ce
-# from sklearn.model_selection import train_test_split
-
-# # df = pd.DataFrame([['Hodne', 20, 'efs', 3], ['stredne', 10, 'efs', 3], ['malp', 2, 'ef', 3], ['Hodne', 20, 'ef', 3], ['stredne', 10, 'ef', 3], ['malp', 2, 'ef', 3],['Hodne', 20, 'ef', 3], ['stredne', 10, 'ef', 3], ['malp', 2, 'ef', 3]])
-# # X = df.iloc[:, 0:2]
-# # y = df.iloc[:, 3:4]
-
-# import categorical_embedder as ce
-# from sklearn.model_selection import train_test_split
-# df = pd.read_csv('tests/data.csv')
-# X = df.drop(['employee_id', 'is_promoted'], axis=1)
-# y = df['is_promoted']
-# embedding_info = ce.get_embedding_info(X)
-# X_encoded, encoders = ce.get_label_encoded_data(X)
-# X_train, X_test, y_train, y_test = train_test_split(X_encoded, y)
-# embeddings = ce.get_embeddings(X_train, y_train, categorical_embedding_info=embedding_info,
-#                             is_classification=True, epochs=100,batch_size=256)
-
-# # embedding_info = ce.get_embedding_info(X)
-# # X_encoded,encoders = ce.get_label_encoded_data(X)
-
-# # embeddings = ce.get_embeddings(X, y, categorical_embedding_info=embedding_info,
-# #                             is_classification=True, epochs=100, batch_size=256)
-# # embeddings_df = ce.get_embeddings_in_dataframe(embeddings, encoders)

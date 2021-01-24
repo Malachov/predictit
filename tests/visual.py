@@ -5,6 +5,7 @@ Just run and manually check results.
 """
 ### Config ###
 
+# Change to 0 if want to hide
 print_analyze = 1
 print_preprocessing = 1
 print_data_flow = 1  # Show what are data inputing for train, for prediction, for testing etc.

@@ -20,7 +20,7 @@ There are working examples in main readme and also in test_it module. Particular
 """
 import sys
 import multiprocessing
-from pathlib import Path, PurePath
+from pathlib import Path
 import inspect
 import os
 import warnings
@@ -32,6 +32,7 @@ from tabulate import tabulate
 
 import mydatapreprocessing as mdp
 from mylogging import traceback_warning, user_message, set_warnings, user_warning
+
 
 # Get module path and insert in sys path for working even if opened from other cwd (current working directory)
 this_path = Path(os.path.abspath(inspect.getframeinfo(inspect.currentframe()).filename)).parents[1]
@@ -51,6 +52,7 @@ if __name__ == "__main__":
 
     # All the Config is in configuration.py" - rest only for people that know what are they doing
     # Add settings from command line if used
+    # ANCHOR CLI Arguments
     parser = argparse.ArgumentParser(description='Prediction framework setting via command line parser!')
     parser.add_argument("--use_config_preset", type=str, choices=[None, 'fast'], help="Edit some selected Config, other remains the same, check config_presets.py file.")
     parser.add_argument("--used_function", type=str, choices=['predict', 'predict_multiple_columns', 'compare_models', 'validate_predictions'],
@@ -151,7 +153,8 @@ def predict(positional_data=None, positional_predicted_column=None, **function_k
     Config.update(function_kwargs)
 
     # Define whether to print warnings or not or stop on warnings as on error
-    set_warnings(Config.debug, Config.ignored_warnings, Config.ignored_warnings_class_type)
+    set_warnings_params = (Config.debug, Config.ignored_warnings, Config.ignored_warnings_class_type)
+    set_warnings(set_warnings_params)
 
     if Config.use_config_preset and Config.use_config_preset != 'none':
         updated_config = Config.presets[Config.use_config_preset]
@@ -181,11 +184,10 @@ def predict(positional_data=None, positional_predicted_column=None, **function_k
     progress_phase = "Data loading and preprocessing"
     update_gui(progress_phase, 'progress_phase')
 
-    if isinstance(Config.data, (str, PurePath)):
-        Config.data = mdp.preprocessing.load_data(
-            Config.data, header=Config.header, csv_style=Config.csv_style, predicted_table=Config.predicted_table,
-            max_imported_length=Config.max_imported_length, request_datatype_suffix=Config.request_datatype_suffix,
-            data_orientation=Config.data_orientation)
+    Config.data = mdp.preprocessing.load_data(
+        Config.data, header=Config.header, csv_style=Config.csv_style, predicted_table=Config.predicted_table,
+        max_imported_length=Config.max_imported_length, request_datatype_suffix=Config.request_datatype_suffix,
+        data_orientation=Config.data_orientation)
 
     #############################################
     ############ DATA consolidation ###### ANCHOR Data consolidation
@@ -357,14 +359,21 @@ def predict(positional_data=None, positional_predicted_column=None, **function_k
                 traceback_warning(f"Error in creating input type: {input_type_name} with option optimization: {optimization_value}")
                 continue
 
-            config_multiprocessed = Config.freeze()
-            del config_multiprocessed['data']
-
             for iterated_model_index, (iterated_model_name, iterated_model) in enumerate(used_models_assigned.items()):
                 if Config.models_input[iterated_model_name] == input_type_name:
 
                     predict_parameters = {
-                        'Config': config_multiprocessed, 'iterated_model_train': iterated_model.train, 'iterated_model_predict': iterated_model.predict,
+                        # Config
+                        'trace_processes_memory': Config.trace_processes_memory, 'optimization': Config.optimization, 'optimizeit': Config.optimizeit,
+                        'optimizeit_details': Config.optimizeit_details, 'optimizeit_plot': Config.optimizeit_plot, 'optimizeit_limit': Config.optimizeit_limit,
+                        'models_parameters': Config.models_parameters, 'models_parameters_limits': Config.models_parameters_limits, 'fragments': Config.fragments,
+                        'iterations': Config.iterations, 'error_criterion': Config.error_criterion, 'predicts': Config.predicts,
+                        'power_transformed': Config.power_transformed, 'standardizeit': Config.standardizeit, 'data_transform': Config.data_transform,
+                        'repeatit': Config.repeatit, 'evaluate_type': Config.evaluate_type, 'optimization_variable': Config.optimization_variable,
+                        'multiprocessing': Config.multiprocessing,
+
+                        # Other
+                        'set_warnings_params': set_warnings_params, 'iterated_model_train': iterated_model.train, 'iterated_model_predict': iterated_model.predict,
                         'iterated_model_name': iterated_model_name, 'iterated_model_index': iterated_model_index, 'optimization_index': optimization_index,
                         'optimization_value': optimization_value, 'model_train_input': model_train_input, 'model_predict_input': model_predict_input,
                         'model_test_inputs': model_test_inputs, 'data_abs_max': data_abs_max, 'data_mean': data_mean, 'data_std': data_std,
@@ -381,9 +390,10 @@ def predict(positional_data=None, positional_predicted_column=None, **function_k
 
                     if Config.multiprocessing == 'process':
 
-                        # TODO duplex=False
-                        pipes.append(multiprocessing.Pipe())
+                        pipes.append(multiprocessing.Pipe(duplex=False))
                         p = multiprocessing.Process(target=predictit.main_loop.train_and_predict, kwargs={**predict_parameters, **{'pipe': pipes[-1][1]}})
+
+                        p.Daemon = True  # Baby process will be terminated if parent killed
                         p.start()
 
                     elif Config.multiprocessing == 'pool':
@@ -438,6 +448,10 @@ def predict(positional_data=None, positional_predicted_column=None, **function_k
 
     results_df = pd.DataFrame.from_dict(results, orient='index')
 
+    if results_df.empty:
+        raise RuntimeError(user_message("None of models finished predictions. Setup Config debug to one to see the warnings.",
+                                        caption="All models failed for some reason"))
+
     results_to_drop = [i for i in ['Index', 'Trained model', 'Test errors', 'Results'] if i in results_df.columns]
     results_df.drop(columns=results_to_drop, inplace=True)
 
@@ -468,10 +482,6 @@ def predict(positional_data=None, positional_predicted_column=None, **function_k
     else:
         best_model_name_plot = best_model_name
 
-    if best_model_predicts is None or np.isnan(np.min(best_model_predicts)):
-        raise RuntimeError(user_message("None of models finished predictions. Setup Config to one to see the warnings.",
-                                        caption="All models failed for some reason"))
-
     predictions_for_plot = predictions
     predictions_for_plot.columns = [f"{i + 1} - {j}" for i, j in enumerate(predictions_for_plot.columns)]
 
@@ -501,15 +511,16 @@ def predict(positional_data=None, positional_predicted_column=None, **function_k
             print((f"\n Best model is {best_model_name} with results \n\n\t{best_model_predicts.values} \n\n\t with model error {Config.error_criterion} = "
                    f"{results_df.loc[best_model_name, 'Model error']}"))
 
+        table_settigs = {'tablefmt': 'grid', 'floatfmt': '.3f', 'numalign': 'center', 'stralign': 'center'}
+
         if Config.print_table == 1:
-            print(f"\n {small_results_table.values} \n")
+            print(f"\n{tabulate(small_results_table.values, headers=['Model', f'Average {Config.error_criterion} error'], **table_settigs)} \n")
 
         elif Config.print_table == 2:
-            tabulate(results_df.values, headers=['Model', f'Average {Config.error_criterion} error'],
-                     tablefmt='grid', floatfmt='.3f', numalign="center", stralign="center")
+            print(f"\n{tabulate(results_df.values, headers=results_df.columns, **table_settigs)} \n")
 
         if Config.print_time_table:
-            print(f'\n {tabulate(time_df.values, headers=time_df.columns, tablefmt="grid", floatfmt=".3f", numalign="center", stralign="center")} \n')
+            print(f"\n{tabulate(time_df.values, headers=time_df.columns, **table_settigs)} \n")
 
     #######################################
     ############# Plot ############# ANCHOR Plot
@@ -772,7 +783,7 @@ def compare_models(positional_data_all=None, positional_predicted_column=None, *
 
     models_table = pd.DataFrame(models_table, columns=['Model', 'Percentual standardized error', 'Error average', f'Best optimized variable \n{Config.optimization_variable}'])
 
-    print(f"\n {tabulate(models_table.values, headers=models_table.columns, tablefmt='grid', floatfmt=('.3f'), numalign='center', stralign='center')} \n")
+    print(f"\n{tabulate(models_table.values, headers=models_table.columns, tablefmt='grid', floatfmt=('.3f'), numalign='center', stralign='center')} \n")
 
     print(f"\n\nBest model is {best_compared_model_name}")
 
@@ -803,3 +814,5 @@ if __name__ == "__main__" and Config.used_function:
 
     elif Config.used_function == 'compare_models':
         compare_models()
+
+# %%

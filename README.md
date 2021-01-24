@@ -177,7 +177,7 @@ Screenshot of such a GUI
 <img src="./img/GUI.png" width="620" alt="Table of results"/>
 </p>
 
-Better GUI with fully customizable settings will be shipped next year.
+Better GUI with fully customizable settings will be shipped next year hopefully.
 
 ### Feature derivation
 
@@ -224,6 +224,27 @@ plot(data_preprocessed)
 
 ```
 
+## Using just one model apart main function
+
+Main benefit is performance boost. You can have code inder the controll much simpler (much less code), but no features from configuration available.
+
+```Python
+
+import mydatapreprocessing as mdp
+
+data = mdp.generatedata.gen_sin(1000)
+test = data[-7:]
+data = data[: -7]
+data = mdp.preprocessing.data_consolidation(data)
+(X, y), x_input, _ = mdp.inputs.create_inputs(data.values, 'batch', input_type_params={'n_steps_in': 6})  # First tuple, because some models use raw data - one argument, e.g. [1, 2, 3...]
+
+trained_model = predictit.models.sklearn_regression.train((X, y), regressor='bayesianridge')
+predictions_one_model = predictit.models.sklearn_regression.predict(x_input, trained_model, predicts=7)
+
+predictions_one_model_error = predictit.evaluate_predictions.compare_predicted_to_test(predictions_one_model, test, error_criterion='mape')  # , plot=1
+
+```
+
 ## Example of using library as a pro with deeper editting Config
 
 ```Python
@@ -248,7 +269,7 @@ Config.update({
         "Autoregressive Linear neural unit",
         "Conjugate gradient",
         "Sklearn regression",
-        "Bayes ridge regression one step",
+        "Bayes ridge regression one column one step",
         "Decision tree regression",
     ],
 
@@ -267,5 +288,14 @@ Config.update({
 })
 
 predictions_configured = predictit.main.predict()
-
 ```
+
+## Performance - How to scale
+
+Time series prediction is very different than image recognition and more data doesn't necesarilly means better prediction. If you're issuing performance problems, try fast preset (turn off optimizations, make less recurent values, choose only few models, threshold datalength etc.) you can edit preset if you need. If you still have performance troubles and you have too much data, use resampling and select only valuable columns - for example correlation_threshold and do not derive extra columns. If you are interested mostly in predictions and not in the plot, turn the plot of.
+
+## Future work
+
+It's planned to do real GUI and possibility to serve web app as well as desktop. Scalability can be solved two ways. First is incremental learning (not every model supports today). Second is virtualisation (processes running in cluster separately).
+
+There is very big todo list on root called TODO.md.

@@ -2,7 +2,9 @@
 
 ## First to do
 
-- [ ] Conjugate gradient fix
+- [ ] Define some set of datasets (good for prediction) and evaluate results on commit with tag. save results into csv and evalueate KPI - Add data to default compare models
+
+- [ ] Write some propriate optimizations patterns to readme - E.g. optimize model input for model
 - [ ] evaluated_matrix from compare to main and in optimization new config value - use only best or keep all
 - [ ] Remove unnecessary copies (only data_for_predictions_df and using .values) and check if input data stays the same after all models computations - the same in preprocessing
 - [ ] Add transformations results as next input in parallel
@@ -27,7 +29,7 @@
 
 ## Big Deals
 
-- [ ] Rewrite own modules (autoreg LNU and Conjugate grad) core loops as C extension
+- [ ] Rewrite own modules (autoreg LNU and Conjugate grad) core loops as C extension (New edit - maybe can cause big troubles (packaging etc...))
 - [ ] Analyze output (residuals - mean, std etc. in comparison with original data)
 - [ ] Feature extraction - E.G. autoencoder to shrink input multivariate data to small vectors
 - [ ] Other feature extraction - Choose columns not on correlation, but based on error lowerage with simple model
@@ -62,11 +64,8 @@
 - [ ] Change config comments https://www.sphinx-doc.org/en/1.4.8/ext/autodoc.html#directive-autoattribute and use in argparse in for loop
 - [ ] Make copy of input data only once - remove in main
 - [ ] Remove other columns option and use default_other_columns_length to create one_column_input data
-- [ ] Define some set of datasets and evaluate results on commit with tag. save results into csv and evalueate KPI
 - [ ] Tests for GUI and unit test for define inputs
 - [ ] Test dataframe data input for statsmodels - date as index
-- [ ] Intellisense option values from list somehow to give settings options
-- [ ] Do repeate average and more from evaluate in multiprocessing loop and then use sorting as `a = {k: v for k, v in sorted(x.items(), key=lambda item: item[1]['a'])}` then use just slicing for plot and print results and Remove predicted_models_for_table and predicted_models_for_plot
 - [ ] Try recreate config as data class with type hints and comments that will be parsable
 - [ ] Full config to readthedocs documentation
 - [ ] Print failed models apart and put not in table results

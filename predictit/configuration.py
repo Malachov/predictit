@@ -47,14 +47,20 @@ class Config():
 
     data = "test"  # File path with suffix (string or pathlib Path). Or you can use numpy array, pandas dataframe or series, list or dictionary.
     # Supported path formats are .CSV. Data shape for numpy array and dataframe is (n_samples, n_feature). Rows are samples and columns are features.
-    # CSV path can be local or web url.
-    # Examples:
+
+    # Examples of data:
     #   myarray_or_dataframe  # Numpy array or Pandas.DataFrame
     #   r"/home/user/my.json"  # Local file. The same with .parquet, .h5, .json or .xlsx.  On windows it's necessary to use raw string - 'r' in front of string because of escape symbols \
     #   "https://yoururl/your.csv"  # Web url (with suffix). Same with json.
     #   "https://blockchain.info/unconfirmed-transactions?format=json"  # In this case you have to specify also  'request_datatype_suffix': "json", 'data_orientation': "index", 'predicted_table': 'txs',
     #   [{'col_1': 3, 'col_2': 'a'}, {'col_1': 0, 'col_2': 'd'}]  # List of records
     #   {'col_1': [3, 2, 1, 0], 'col_2': ['a', 'b', 'c', 'd']}  # Dict with colums or rows (index) - necessary to setup data_orientation!
+
+    # You can use more files in list and data will be concatenated. It can be list of paths or list of python objects. Example:
+
+    #   [np.random.randn(20, 3), np.random.randn(25, 3)]  # Dataframe same way
+    #   ["https://raw.githubusercontent.com/jbrownlee/Datasets/master/daily-min-temperatures.csv", "https://raw.githubusercontent.com/jbrownlee/Datasets/master/daily-min-temperatures2.csv"]  # List of URLs
+    #   ["path/to/my1.csv", "path/to/my1.csv"]
 
     data_all = None  # [np.array(range(1000)), np.array(range(500))]  # Just for compare_models function. Dictionary of data names and list of it's values and predicted columns or list of data parts or numpy array with rows as data samples.
     # Examples:
@@ -75,8 +81,8 @@ class Config():
     freqs = []  # For predict_multiple function only! List of intervals of predictions 'M' - months, 'D' - Days, 'H' - Hours. Default use [].
     resample_function = 'sum'  # 'sum' or 'mean' depends of data. For example if current in technological process - mean, if units sold, then sum.
 
-    datalength = 0  # The length of the data used for prediction (after resampling). If 0, than full length.
-    max_imported_length = 0  # Max length of imported samples (before resampling). If 0, than full length.
+    datalength = 1000  # The length of the data used for prediction (after resampling). If 0, than full length.
+    max_imported_length = 100000  # Max length of imported samples (before resampling). If 0, than full length.
 
     ##############
     ### Output ###
@@ -117,7 +123,7 @@ class Config():
     ### Prediction settings ###
     ###########################
 
-    multiprocessing = 'process'  # 'pool' or 'process' or 0
+    multiprocessing = 'pool'  # 'pool' or 'process' or 0. Never use 'process' on windows. Multiprocessing beneficial mostly on linux...
     processes_limit = None  # Max number of concurrent processes. If None, then (CPUs - 1) is used
     trace_processes_memory = False  # Add how much memory was used by each model.
     already_trained = 0  # Computationaly hard models (LSTM) load from disk.
@@ -211,12 +217,18 @@ class Config():
         'Autoregressive Linear neural unit',
         # 'Linear neural unit with weights predict', 'Autoregressive Linear neural unit normalized',
 
+        ### predictit.models.regression
+        'Regression', 'Ridge regression',
+
+        # ### predictit.models.levenberg_marquardt
+        'Levenberg-Marquardt',
+
         ### predictit.models.conjugate_gradient
         'Conjugate gradient',
 
-        ### predictit.models.tensorflow
-        # 'tensorflow_lstm',
-        # 'tensorflow_mlp',
+        ## predictit.models.tensorflow
+        # 'Tensorflow LSTM',
+        # 'Tensorflow MLP',
 
         ### predictit.models.sklearn_regression
         'Sklearn regression', 'Bayes ridge regression',
@@ -266,19 +278,21 @@ class Config():
             'Linear neural unit with weights predict', 'Conjugate gradient']},
 
         **{model_name: 'one_in_one_out' for model_name in [
-            'tensorflow_mlp', 'Sklearn regression one step', 'Bayes ridge regression one step',
+            'Sklearn regression one step', 'Bayes ridge regression one step',
             'Decision tree regression one step', 'Hubber regression one step']},
 
-        # One step not used yet... for multivariate data for predicting just one value
+
+        **{model_name: 'one_step_constant' for model_name in [
+            'Regression', 'Levenberg-Marquardt', 'Ridge regression']},
 
         **{model_name: 'multi_step' for model_name in [
             'Sklearn regression', 'Bayes ridge regression', 'Hubber regression', 'Extra trees regression',
             'Decision tree regression', 'KNeighbors regression', 'Random forest regression',
             'Bagging regression', 'Passive aggressive regression', 'Extreme learning machine',
-            'Gen Extreme learning machine', 'Gradient boosting']},
+            'Gen Extreme learning machine', 'Gradient boosting', 'Tensorflow MLP']},
 
         'Stochastic gradient regression': 'one_in_multi_step_out',
-        'tensorflow_lstm': 'not_serialized',
+        'Tensorflow LSTM': 'not_serialized',
 
         'Compare with average': 'data_one_column'
     }
@@ -297,9 +311,13 @@ class Config():
         'Autoregressive Linear neural unit normalized': {'mi_multiple': 1, 'mi_linspace': (1e-2, 1, 20), 'epochs': 40, 'w_predict': 0, 'minormit': 1},
         'Linear neural unit with weights predict': {'mi_multiple': 1, 'mi_linspace': (1e-5, 1e-4, 20), 'epochs': 40, 'w_predict': 1, 'minormit': 0},
         'Conjugate gradient': {'epochs': 100},
+        'Regression': {'model': 'linear'},
+        'Ridge regression': {'model': 'ridge', 'lmbda': 0.1},
+        'Levenberg-Marquardt': {'learning_rate': 0.1, 'epochs': 50},
 
-        'tensorflow_lstm': {'layers': 'default', 'epochs': 200, 'load_trained_model': 0, 'update_trained_model': 0, 'save_model': 1, 'saved_model_path_string': 'stored_models', 'optimizer': 'adam', 'loss': 'mse', 'verbose': 0, 'used_metrics': 'accuracy', 'timedistributed': 0},
-        'tensorflow_mlp': {'layers': [['dense', {'units': 32, 'activation': 'relu'}],
+
+        'Tensorflow LSTM': {'layers': 'default', 'epochs': 200, 'load_trained_model': 0, 'update_trained_model': 0, 'save_model': 1, 'saved_model_path_string': 'stored_models', 'optimizer': 'adam', 'loss': 'mse', 'verbose': 0, 'used_metrics': 'accuracy', 'timedistributed': 0},
+        'Tensorflow MLP': {'layers': [['dense', {'units': 32, 'activation': 'relu'}],
                                       ['dropout', {'rate': 0.1}],
                                       ['dense', {'units': 7, 'activation': 'relu'}]],
                            'epochs': 100, 'load_trained_model': 0, 'update_trained_model': 0, 'save_model': 1, 'saved_model_path_string': 'stored_models', 'optimizer': 'adam', 'loss': 'mse', 'verbose': 0, 'used_metrics': 'accuracy', 'timedistributed': 0},
@@ -371,13 +389,15 @@ class Config():
             # 'SARIMAX (Seasonal ARIMA)': {'p': [1, cls.maxorder], 'd': cls.order, 'q': cls.order, 'pp': cls.order, 'dd': cls.order, 'qq': cls.order,
             # 'season': cls.order, 'method': ['lbfgs', 'bfgs', 'newton', 'nm', 'cg', 'ncg', 'powell'], 'trend': ['n', 'c', 't', 'ct'], 'enforce_invertibility': [True, False], 'enforce_stationarity': [True, False], 'forecast_type': ['in_sample', 'out_of_sample']},
 
+            'Ridge regression': {'lmbda': [1e-8, 1e6]},
+            'Levenberg-Marquardt': {'learning_rate': [0.01, 10]},
             # 'Autoregressive Linear neural unit': {'mi': [1e-8, 10.0], 'minormit': [0, 1], 'damping': [0.0, 100.0]},
             # 'Linear neural unit with weights predict': {'mi': [1e-8, 10.0], 'minormit': [0, 1], 'damping': [0.0, 100.0]},
             # 'Conjugate gradient': {'epochs': cls.epochs},
 
-            ### 'tensorflow_lstm': {'loses':["mean_squared_error", "mean_absolute_error", "mean_absolute_percentage_error", "mean_squared_logarithmic_error", "squared_hinge", "logcosh",
+            ### 'Tensorflow LSTM': {'loses':["mean_squared_error", "mean_absolute_error", "mean_absolute_percentage_error", "mean_squared_logarithmic_error", "squared_hinge", "logcosh",
             ### "kullback_leibler_divergence"], 'activations':['softmax', 'elu', 'selu', 'softplus', 'tanh', 'sigmoid', 'exponential', 'linear']},
-            ### 'tensorflow_mlp': {'loses':["mean_squared_error", "mean_absolute_error", "mean_absolute_percentage_error", "mean_squared_logarithmic_error", "squared_hinge", "logcosh",
+            ### 'Tensorflow MLP': {'loses':["mean_squared_error", "mean_absolute_error", "mean_absolute_percentage_error", "mean_squared_logarithmic_error", "squared_hinge", "logcosh",
             ### "kullback_leibler_divergence"], 'activations':['softmax', 'elu', 'selu', 'softplus', 'tanh', 'sigmoid', 'exponential', 'linear']},
 
             # 'Sklearn regression': {'regressor': cls.regressors},  # 'alpha': cls.alpha, 'n_iter': [100, 500], 'epsilon': [1.01, 5.0], 'alphas': [[0.1, 0.1, 0.1], [0.5, 0.5, 0.5], [0.9, 0.9, 0.9]], 'gcv_mode': ['auto', 'svd', 'eigen'], 'solver': ['auto', 'svd', 'eigen']},

@@ -2,13 +2,15 @@ import numpy as np
 from pathlib import Path
 from mylogging import user_warning
 
+from .models_functions.models_functions import one_step_looper
 
-def train(sequentions, layers='default', epochs=200, load_trained_model=0, update_trained_model=1, save_model=1,
+
+def train(data, layers='default', epochs=200, load_trained_model=0, update_trained_model=1, save_model=1,
           saved_model_path_string='stored_models', optimizer='adam', loss='mse', verbose=0, used_metrics='accuracy', timedistributed=0, batch_size=64):
     """Tensorflow model. Neural nets - LSTM or MLP (dense layers). Layers are customizable with arguments.
 
     Args:
-        sequentions (tuple(np.ndarray, np.ndarray, np.ndarray)) - Tuple (X, y, x_input) of input train vectors X, train outputs y, and input for prediction x_input
+        data ((np.ndarray, np.ndarray)) - Tuple (X, y) of input train vectors X and train outputs y
         layers (tuple) - Tuple of tuples of layer name (e.g. 'lstm') and layer params dict (e.g. {'units': 7, 'activation': 'relu'}). Check default layres tuple here or config example.
         predicts (int, optional): Number of predicted values. Defaults to 7.
         epochs (int, optional): Number of epochs to evaluate. Defaults to 100.
@@ -38,8 +40,8 @@ def train(sequentions, layers='default', epochs=200, load_trained_model=0, updat
                   ('dropout', {'rate': 0.1}),
                   ('lstm', {'units': 7, 'activation': 'relu'}))
 
-    X = sequentions[0]
-    y = sequentions[1]
+    X = data[0]
+    y = data[1]
     X_ndim = X.ndim
 
     models = {'dense': tf.keras.layers.Dense, 'lstm': tf.keras.layers.LSTM, 'mlp': tf.keras.layers.Dense, 'gru': tf.keras.layers.GRU, 'conv2d': tf.keras.layers.Conv2D, 'rnn': tf.keras.layers.SimpleRNN, 'convlstm2d': tf.keras.layers.ConvLSTM2D, 'dropout': tf.keras.layers.Dropout, 'batchnormalization': tf.keras.layers.BatchNormalization}
@@ -116,18 +118,7 @@ def predict(x_input, model, predicts=7):
         x_input = x_input.reshape(1, x_input.shape[1], x_input.shape[0])
     predictions = []
 
-    ### One step univariate prediction
-    if model.y_shape_1 == 1:
-        for i in range(predicts):
-            yhat = model.predict(x_input)
-            x_input = np.insert(x_input, x_input.shape[1], yhat[0][0], axis=1)
-            x_input = np.delete(x_input, 0, axis=1)
-            predictions.append(yhat[0][0])
-        predictions = np.array(predictions)
-
-    ### Batch multivariate prediction
-    else:
-        predictions = model.predict(x_input)[0]
+    predictions = model.predict(x_input)[0]
 
     return predictions
 

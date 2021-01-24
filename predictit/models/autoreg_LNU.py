@@ -1,12 +1,13 @@
 import numpy as np
+from .models_functions.models_functions import one_step_looper
 
 
-def train(sequentions, predicts=30, mi=1, mi_multiple=1, mi_linspace=(1e-8, 10, 20), epochs=10, w_predict=0, minormit=1, damping=1, plot=0, random=0, w_rand_scope=1, w_rand_shift=0, rand_seed=0):
+def train(data, predicts=30, mi=1, mi_multiple=1, mi_linspace=(1e-8, 10, 20), epochs=10, w_predict=0, minormit=1, damping=1, plot=0, random=0, w_rand_scope=1, w_rand_shift=0, rand_seed=0):
     """Autoregressive linear neural unit. It's simple one neuron one-step neural net. It can predict not only predictions itself,
     but also use other faster method to predict weights evolution for out of sample predictions. In first iteration it will find best learning step
     and in the second iteration, it will train more epochs.
     Args:
-        sequentions (tuple(np.ndarray, np.ndarray, np.ndarray)) - Tuple (X, y, x_input) of input train vectors X, train outputs y, and input for prediction x_input
+        data ((np.ndarray, np.ndarray)) - Tuple (X, y) of input train vectors X and train outputs y
         predicts (int, optional): Number of predicted values. Defaults to 7.
         mi (float, optional): Learning rate. If not normalized must be much smaller. Defaults to 0.1.
         mi_multiple (bool): If try more weights and try to find the best. Set the possible values with mi_linspace.
@@ -25,8 +26,8 @@ def train(sequentions, predicts=30, mi=1, mi_multiple=1, mi_linspace=(1e-8, 10, 
     Returns:
         np.ndarray: Predictions of input time series.
     """
-    X = sequentions[0]
-    y_hat = sequentions[1]
+    X = data[0]
+    y_hat = data[1]
 
     if mi_multiple:
         miwide = np.linspace(mi_linspace[0], mi_linspace[1], mi_linspace[2])
@@ -158,15 +159,15 @@ def predict(x_input, model, predicts=7):
 
     x_input = x_input.ravel()
 
-    predictions = np.zeros(predicts)
-    predictions.fill(np.nan)
+    predictions = []
 
     for j in range(predicts):
+
         ww = model[j] if model.ndim == 2 else model
+        ypre = np.dot(ww, x_input)
+        predictions.append(ypre)
 
-        predictions[j] = np.dot(ww, x_input)
+        x_input[1:-1] = x_input[2:]
+        x_input[-1] = ypre
 
-        x_input = np.insert(x_input, len(x_input), predictions[j])
-        x_input = np.delete(x_input, 1)
-
-    return predictions
+    return np.array(predictions).reshape(-1)

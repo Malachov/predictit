@@ -1,6 +1,13 @@
 predictit.models package
 ========================
 
+Subpackages
+-----------
+
+.. toctree::
+
+   predictit.models.models_functions
+
 Submodules
 ----------
 
@@ -9,6 +16,8 @@ Submodules
    predictit.models.autoreg_LNU
    predictit.models.compare_with_average
    predictit.models.conjugate_gradient
+   predictit.models.levenberg_marquardt
+   predictit.models.regression
    predictit.models.sklearn_regression
    predictit.models.statsmodels_autoregressive
    predictit.models.tensorflow

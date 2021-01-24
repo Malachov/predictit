@@ -201,27 +201,7 @@ plot(data_preprocessed)
 
 """
 
-from . import configuration
-import mylogging
-
-# Define whether to print warnings or not or stop on warnings as on error (mute warnings from imports)
-mylogging.set_warnings(configuration.Config.debug, configuration.Config.ignored_warnings, configuration.Config.ignored_warnings_class_type)
-
-
-from . import analyze
-from . import best_params
-from . import models
-from . import database
-from . import evaluate_predictions
-from . import misc
-from . import plots
-from . import test_data
-from . import main_loop
-from . import gui_start
-
-from . import main
-
-__version__ = "1.60.10"
+__version__ = "1.61.0"
 __author__ = "Daniel Malachov"
 __license__ = "MIT"
 __email__ = "malachovd@seznam.cz"
@@ -229,3 +209,27 @@ __email__ = "malachovd@seznam.cz"
 __all__ = ['analyze', 'best_params', 'configuration', 'database',
            'evaluate_predictions', 'main', 'misc', 'models', 'plots', 'test_data',
            'main_loop', 'gui_start']
+
+
+from . import configuration
+import mylogging
+import warnings
+
+
+# Define whether to print warnings or not or stop on warnings as on error (mute warnings from imports)
+with warnings.catch_warnings():
+    mylogging.set_warnings(configuration.Config.debug, configuration.Config.ignored_warnings, configuration.Config.ignored_warnings_class_type)
+
+
+    from . import analyze
+    from . import best_params
+    from . import models
+    from . import database
+    from . import evaluate_predictions
+    from . import misc
+    from . import plots
+    from . import test_data
+    from . import main_loop
+    from . import gui_start
+
+    from . import main

@@ -1,24 +1,21 @@
 import numpy as np
+from .models_functions.models_functions import one_step_looper
 
 
-def train(sequentions, epochs=100):
+def train(data, epochs=100):
     """Conjugate gradient model.
 
     Args:
-        X (np.ndarray): Input vectors. If you have no X, y and x_input, create it with function make sequences in data_prep module.
-        y (np.ndarray): Output vectors.
-        x_input (np.ndarray): Input that have no output - input for prediction.
-        n_steps_in (int, optional): Number of regressive members - inputs to neural unit. Defaults to 50.
-        predicts (int, optional): Number of predicted values. Defaults to 7.
-        predicted_column_index (int, optional): If multidimensional, define what column is predicted. Defaults to 0.
+        data ((np.ndarray, np.ndarray)) - Tuple (X, y) of input train vectors X and train outputs y
+                    X should contain bias - constant 1 on first place of every sample (parameter constant in `mydatapreprocessing.inputs.make_sequences`).
         epochs (int, optional): Number of epochs to evaluate. Defaults to 100.
 
     Returns:
         np.ndarray: Predictions of input time series.
     """
 
-    X = sequentions[0]
-    y = sequentions[1].ravel()
+    X = data[0]
+    y = data[1].ravel()
 
     w = np.zeros(X.shape[1])
 
@@ -60,14 +57,4 @@ def predict(x_input, model, predicts=7):
         np.ndarray: Array of predicted results
     """
 
-    x_input = x_input.ravel()
-    predictions = []
-
-    for _ in range(predicts):
-
-        ypre = np.dot(model, x_input)
-        predictions.append(ypre)
-        x_input = np.insert(x_input, len(x_input), ypre)
-        x_input = np.delete(x_input, 1)
-
-    return np.array(predictions)
+    return one_step_looper(lambda x_input: np.dot(x_input, model), x_input.ravel(), predicts)

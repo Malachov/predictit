@@ -1,20 +1,20 @@
 
+
 def train(data, used_model='autoreg', p=5, d=1, q=0, cov_type='nonrobust', method='cmle', trend='nc', solver='lbfgs', maxlag=13,
           # SARIMAX args
-          seasonal=(1, 1, 1, 24), enforce_invertibility=False, enforce_stationarity=False):
+          seasonal=(1, 1, 1, 24)  # , enforce_invertibility=False, enforce_stationarity=False
+          ):
     """Autoregressive model from statsmodels library. Only univariate data.
     Args:
         data (np.ndarray): Time series data.
-        predicts (int, optional): Number of predicted values. Defaults to 7.
-        plot (int, optional): Whether plot results. Defaults to 0.
-        predicted_column_index (int, optional): If multidimensional, define what column is predicted. Defaults to 0.
-        method (str, optional): Parameter of statsmodels fit function. Defaults to 'cmle'.
-        ic (str, optional): Parameter of statsmodels fit function. Defaults to 'aic'.
-        trend (str, optional): Parameter of statsmodels fit function. Defaults to 'nc'.
-        solver (str, optional):ort statsmodels.api as sm
-      File "/home/dan/.local/lib/pyt Parameter of statsmodels fit function. Defaults to 'lbfgs'.
+        used_model (str, optional): One of ['ar', 'arima', 'sarimax', 'autoreg'].
+        p (int) - Order of ARIMA model (1st - proportional). Check statsmodels docs for more.
+        d (int) - Order of ARIMA model.
+        q (int) - Order of ARIMA model.
+        cov_type, method, trend, solver, maxlag, seasonal: Parameters of model call or fit function of particular model.
+            Check statsmodels docs for more.
     Returns:
-        np.ndarray: Predictions of input time series.
+        statsmodels.model: Trained model.
     """
 
     import statsmodels.tsa.api as sm
