@@ -91,7 +91,7 @@ def test_1():
 
     Config.multiprocessing = 0
     result = predictit.main.predict(predicts=3, return_type=None)
-    assert not np.isnan(np.min(list(result.values())[0]['Test errors']))
+    assert not (np.isnan(np.min(list(result.values())[0]['Test errors'])) or np.isnan(np.min(list(result.values())[1]['Test errors'])))
     return result
 
 
@@ -538,7 +538,7 @@ def test_visual():
 
 # For deeper debug, uncomment problematic test
 if __name__ == "__main__":
-    # result = test_1()
+    result = test_1()
     # result_readmes = test_readmes()
     # result1 = test_main_from_config()
     # result_2 = test_main_optimize_and_args()
