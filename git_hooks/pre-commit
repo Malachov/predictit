@@ -3,8 +3,12 @@
 
 import subprocess
 from pathlib import Path
+import inspect
+import sys
 
-# Can be run manually from here or from root dir
+
+# Can be run manually from here or from root dir - just edit build_locally to 1
+build_locally = 0
 
 root_path = Path.cwd()
 
@@ -14,11 +18,24 @@ if not (root_path / 'docs').exists():
 docs_path = root_path / 'docs'
 docs_source_path = root_path / 'docs' / 'source'
 
+if root_path.as_posix() not in sys.path:
+    sys.path.insert(0, root_path.as_posix())
+
 for p in Path(docs_source_path).iterdir():
     if p.name not in ['img', 'conf.py', 'index.rst', '_static', '_templates']:
         p.unlink()
 
-# subprocess.run(['make', 'html'], shell=True, cwd=docs_path, check=True)
-subprocess.run(['sphinx-apidoc', '-f', '-e', '-o', 'source', '../predictit'], shell=True, cwd=docs_path, check=True)
+if build_locally:
+    subprocess.run(['make', 'html'], shell=True, cwd=docs_path, check=True)
 
+subprocess.run(['sphinx-apidoc', '-f', '-e', '-o', 'source', '../predictit'], shell=True, cwd=docs_path, check=True)
 subprocess.run(['git', 'add', 'docs'], shell=True, cwd=root_path, check=True)
+
+# # Generate README.md from __init__.py
+import predictit
+predictit_docstrings = inspect.getdoc(predictit)
+
+with open(root_path / 'README.md', 'w') as file:
+    file.write(predictit_docstrings)
+
+subprocess.run(['git', 'add', 'README.md'], shell=True, cwd=root_path, check=True)

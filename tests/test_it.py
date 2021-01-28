@@ -18,16 +18,26 @@ import matplotlib
 import mydatapreprocessing as mdp
 import mylogging
 
-with warnings.catch_warnings():
-    warnings.simplefilter("ignore")
-    matplotlib.use('agg')
+# Find paths and add to sys.path to be able to import local modules
+test_dir_path = Path(os.path.abspath(inspect.getframeinfo(inspect.currentframe()).filename)).parents[0]
+root_path = test_dir_path.parent
 
-sys.path.insert(0, Path(os.path.abspath(inspect.getframeinfo(inspect.currentframe()).filename)).parents[0].as_posix())
-sys.path.insert(0, Path(os.path.abspath(inspect.getframeinfo(inspect.currentframe()).filename)).parents[1].as_posix())
+if test_dir_path.as_posix() not in sys.path:
+    sys.path.insert(0, test_dir_path.as_posix())
+
+if root_path.as_posix() not in sys.path:
+    sys.path.insert(0, root_path.as_posix())
+
 
 from visual import visual_test
 
 import predictit
+
+
+with warnings.catch_warnings():
+    warnings.simplefilter("ignore")
+    matplotlib.use('agg')
+
 predictit.misc._IS_TESTED = 1
 
 Config = predictit.configuration.Config

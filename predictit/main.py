@@ -3,10 +3,6 @@
 #%%
 """ This is main module for making predictions.
 
-
-Generated
-
-
 It contain functions - predict() - More return types - Depends on Config
                      - predict_multiple() - Predict multiple columns at once
                      - compare_models() - Test on data that was not in test set and compare models errors
@@ -42,7 +38,8 @@ from mylogging import traceback_warning, user_message, set_warnings, user_warnin
 this_path = Path(os.path.abspath(inspect.getframeinfo(inspect.currentframe()).filename)).parents[1]
 this_path_string = this_path.as_posix()
 
-sys.path.insert(0, this_path_string)
+if this_path_string not in sys.path:
+    sys.path.insert(0, this_path_string)
 
 
 import predictit

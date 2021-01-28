@@ -1,6 +1,12 @@
 # -*- coding: utf-8 -*-
 
 """
+# predictit
+
+[![PyPI pyversions](https://img.shields.io/pypi/pyversions/predictit.svg)](https://pypi.python.org/pypi/predictit/)
+[![PyPI version](https://badge.fury.io/py/predictit.svg)](https://badge.fury.io/py/predictit)
+[![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/Malachov/predictit.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/Malachov/predictit/context:python) [![Build Status](https://travis-ci.com/Malachov/predictit.svg?branch=master)](https://travis-ci.com/Malachov/predictit) [![Documentation Status](https://readthedocs.org/projects/predictit/badge/?version=master)](https://predictit.readthedocs.io/en/master/?badge=master) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) [![codecov](https://codecov.io/gh/Malachov/predictit/branch/master/graph/badge.svg)](https://codecov.io/gh/Malachov/predictit)
+
 Library/framework for making predictions. Choose best of 20 models (ARIMA, regressions, LSTM...)
 from libraries like statsmodels, scikit-learn, tensorflow and some own models. There are hundreds of
 customizable options (it's not necessary of course) as well as some config presets.
@@ -8,6 +14,7 @@ customizable options (it's not necessary of course) as well as some config prese
 Library contain model hyperparameters optimization as well as option variable optimization.
 That means, that library can find optimal preprocessing (smoothing, dropping non correlated columns,
 standardization) and on top of that it can find optimal models inner parameters such as number of neuron layers.
+
 
 ## Output
 

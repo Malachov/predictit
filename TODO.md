@@ -71,7 +71,6 @@
 - [ ] Print failed models apart and put not in table results
 - [ ] Check if can some lists replace with sets (faster)
 - [ ] In optimization, compare models on more results to reduce chance. First do create real-error-criterion - than use it.
-- [ ] Remove sys.path.insert in main and do imports better way
 - [ ] Translate and finish models **init** docstrings
 - [ ] Add residuals matrix from results_matrix and add plotly box plot for residuals of models in main.py (https://plot.ly/python/box-plots/), or box plot for error criterion (data lengths and for repetitions) on compare_models
 - [ ] Improve / edit existing models

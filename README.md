@@ -4,11 +4,14 @@
 [![PyPI version](https://badge.fury.io/py/predictit.svg)](https://badge.fury.io/py/predictit)
 [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/Malachov/predictit.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/Malachov/predictit/context:python) [![Build Status](https://travis-ci.com/Malachov/predictit.svg?branch=master)](https://travis-ci.com/Malachov/predictit) [![Documentation Status](https://readthedocs.org/projects/predictit/badge/?version=master)](https://predictit.readthedocs.io/en/master/?badge=master) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) [![codecov](https://codecov.io/gh/Malachov/predictit/branch/master/graph/badge.svg)](https://codecov.io/gh/Malachov/predictit)
 
-# Generated
+Library/framework for making predictions. Choose best of 20 models (ARIMA, regressions, LSTM...)
+from libraries like statsmodels, scikit-learn, tensorflow and some own models. There are hundreds of
+customizable options (it's not necessary of course) as well as some config presets.
 
-Library/framework for making predictions. Choose best of 20 models (ARIMA, regressions, LSTM...) from libraries like statsmodels, scikit-learn, tensorflow and some own models. There are hundreds of customizable options (it's not necessary of course) as well as some Config presets.
+Library contain model hyperparameters optimization as well as option variable optimization.
+That means, that library can find optimal preprocessing (smoothing, dropping non correlated columns,
+standardization) and on top of that it can find optimal models inner parameters such as number of neuron layers.
 
-Library contain model hyperparameters optimization as well as option variable optimization. That means, that library can find optimal preprocessing (smoothing, dropping non correlated columns, standardization) and on top of that it can find optimal models inner parameters such as number of neuron layers.
 
 ## Output
 
@@ -21,7 +24,8 @@ Most common output is plotly interactive graph, numpy array of results or deploy
 <img src="./img/table_of_results.png" width="620" alt="Table of results"/>
 </p>
 
-Return type of main predict function depends on `configation.py`. It can return best prediction as array or all predictions as dataframe. Interactive html plot is also created.
+Return type of main predict function depends on `configation.py`. It can return best prediction
+as array or all predictions as dataframe. Interactive html plot is also created.
 
 ## Oficial repo and documentation links
 
@@ -35,7 +39,10 @@ Python >=3.6. Python 2 is not supported. Install just with
 
     pip install predictit
 
-Sometime you can have issues with installing some libraries from requirements (e.g. numpy because not BLAS / LAPACK). There are also two libraries - Tensorflow and pyodbc not in requirements, because not necessary, but troublesome. If library not installed with pip, check which library don't work, install manually with stackoverflow and repeat...
+Sometime you can have issues with installing some libraries from requirements
+(e.g. numpy because not BLAS / LAPACK). There are also two libraries - Tensorflow
+and pyodbc not in requirements, because not necessary, but troublesome. If library
+not installed with pip, check which library don't work, install manually with stackoverflow and repeat...
 
 Versions troubleshooting => Software is build in way, that it should be the best using latest versions of dependencies. In most cases older versions works well as well. Only exception can be author's library mydatapreprocessing, which is new and under development (API is not stable) and some version of predictit has dependency on particular version of mydatapreprocessing. Clean install of latest versions fix issue.
 
@@ -43,11 +50,14 @@ Library was developed during 2020 and structure and even API (configuration) cha
 
 ## How to
 
-Software can be used in three ways. As a python library or with command line arguments or as normal python scripts.
+Software can be used in three ways. As a python library or with command line arguments
+or as normal python scripts.
 Main function is predict in `main.py` script.
-There is also `predict_multiple_columns` function if you want to predict more at once (columns or time frequentions) and also `compare_models` function that tell you which models are best. It evaluate error criterion on out of sample test data instead of predict (use as much as possible) so more reliable errors (for example decision trees just assign input from learning set, so error in predict is 0, in compare_models it's accurate). Then you can use only good models in predict function.
-
-You can setup prediction with Config. It' capitalize because it's class.
+There is also `predict_multiple_columns` function if you want to predict more at once
+(columns or time frequentions) and also `compare_models` function that tell you which models are best.
+It evaluate error criterion on out of sample test data instead of predict (use as much as possible)
+so more reliable errors (for example decision trees just assign input from learning set, so error
+in predict is 0, in compare_models it's accurate). Then you can use only good models in predict function.
 
 ### Simple example of using predictit as a python library and function arguments
 

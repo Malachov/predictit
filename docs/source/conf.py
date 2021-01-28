@@ -1,35 +1,20 @@
 
-# Generate rst files with
-# sphinx-apidoc -f -e -o source/ ../predictit
-# Only other important file is index.rst
-
-# Configuration file for the Sphinx documentation builder.
-#
-# This file only contains a selection of the most common options. For a full
-# list see the documentation:
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 
-# -- Path setup --------------------------------------------------------------
-
-# If extensions (or modules to document with autodoc) are in another directory,
-# add these directories to sys.path here. If the directory is relative to the
-# documentation root, use os.path.abspath to make it absolute, like shown here.
-#
 
 import sys
 import pathlib
 import datetime
 
 
+# Folders to sys path to be able to import
 script_dir = pathlib.Path(__file__).resolve()
-lib_path = script_dir.parents[2].as_posix()
-sys.path.insert(0, lib_path)
+root_path = script_dir.parents[2]
+lib_path = script_dir.parents[2] / 'predictit'
 
-# Delete one.. its foru source extension
-sys.path.insert(1, script_dir.as_posix())
-lib_path2 = script_dir.parents[2] / 'predictit'
-sys.path.insert(2, lib_path2.as_posix())
-
+for i in [script_dir, root_path, lib_path]:
+    if i.as_posix() not in sys.path:
+        sys.path.insert(0, i.as_posix())
 
 # -- Project information -----------------------------------------------------
 

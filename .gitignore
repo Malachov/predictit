@@ -1,6 +1,7 @@
 predictit/test_data/*.csv
 predictit/test_data/*.pickle
 predictit/test_data/*.txt
+predictit/test_data/*.json
 
 scratch_notepad.py
 
