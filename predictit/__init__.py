@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 
 """
-# predictit
+predictit
+=========
 
 [![PyPI pyversions](https://img.shields.io/pypi/pyversions/predictit.svg)](https://pypi.python.org/pypi/predictit/)
 [![PyPI version](https://badge.fury.io/py/predictit.svg)](https://badge.fury.io/py/predictit)
@@ -16,7 +17,8 @@ That means, that library can find optimal preprocessing (smoothing, dropping non
 standardization) and on top of that it can find optimal models inner parameters such as number of neuron layers.
 
 
-## Output
+Output
+------
 
 Most common output is plotly interactive graph, numpy array of results or deploying to database.
 
@@ -30,13 +32,15 @@ Most common output is plotly interactive graph, numpy array of results or deploy
 Return type of main predict function depends on `configation.py`. It can return best prediction
 as array or all predictions as dataframe. Interactive html plot is also created.
 
-## Oficial repo and documentation links
+Oficial repo and documentation links
+------------------------------------
 
 [Repo on github](https://github.com/Malachov/predictit)
 
 [Official readthedocs documentation](https://predictit.readthedocs.io)
 
-## Installation
+Installation
+------------
 
 Python >=3.6. Python 2 is not supported. Install just with
 
@@ -51,7 +55,8 @@ Versions troubleshooting => Software is build in way, that it should be the best
 
 Library was developed during 2020 and structure and even API (configuration) changed a lot. From version 1.60 it's considered to be stable and code made for library will work till 2.0.0.
 
-## How to
+How to
+------
 
 Software can be used in three ways. As a python library or with command line arguments
 or as normal python scripts.
@@ -62,7 +67,8 @@ It evaluate error criterion on out of sample test data instead of predict (use a
 so more reliable errors (for example decision trees just assign input from learning set, so error
 in predict is 0, in compare_models it's accurate). Then you can use only good models in predict function.
 
-### Simple example of using predictit as a python library and function arguments
+Simple example of using predictit as a python library and function arguments
+----------------------------------------------------------------------------
 
 ```Python
 import predictit
@@ -77,7 +83,8 @@ mydata = pd.DataFrame(np.random.randn(100, 2), columns=['a', 'b'])
 predictions_1_positional = predictit.main.predict(mydata, 'b')
 ```
 
-### Simple example of using as a python library and editing Config
+Simple example of using as a python library and editing Config
+--------------------------------------------------------------
 
 ```Python
 import predictit
@@ -102,11 +109,13 @@ Config.update({
 predictions_2 = predictit.main.predict()
 ```
 
-### Simple example of using `main.py` as a script
+Simple example of using `main.py` as a script
+---------------------------------------------
 
 Open `configuration.py` (only script you need to edit (very simple)), do the setup. Mainly used_function and data or data_source and path. Then just run `main.py`.
 
-### Simple example of using command line arguments
+Simple example of using command line arguments
+----------------------------------------------
 
 Run code below in terminal in predictit folder.
 Use `python main.py --help` for more parameters info.
@@ -116,7 +125,8 @@ python main.py --used_function predict --data 'https://raw.githubusercontent.com
 
 ```
 
-### Explore Config
+Explore Config
+--------------
 
 Type `Config.`, then, if not autamatically, use ctrl + spacebar to see all posible values. To see what option means, type for example `Config.return_type`, than do mouseover with pressed ctrl. It will reveal comment that describe the option (at least at VS Code)
 
@@ -126,7 +136,8 @@ To see all the possible values in `configuration.py`, use
 predictit.configuration.print_config()
 ```
 
-### Example of compare_models function
+Example of compare_models function
+----------------------------------
 
 ```Python
 import predictit
@@ -142,7 +153,8 @@ Config.update({
 compared_models = predictit.main.compare_models()
 ```
 
-### Example of predict_multiple function
+Example of predict_multiple function
+------------------------------------
 
 ```Python
 import predictit
@@ -156,7 +168,8 @@ multiple_columns_prediction = predictit.main.predict_multiple_columns()
 
 ```
 
-### Example of Config variable optimization
+Example of Config variable optimization
+---------------------------------------
 
 ```Python
 
@@ -177,11 +190,13 @@ predictions_optimized_config = predictit.main.predict()
 
 ```
 
-### Hyperparameters tuning
+Hyperparameters tuning
+----------------------
 
 To optmize hyperparameters, just set `optimizeit: 1,` and model parameters limits. It is commented in `Config.py` how to use it. It's not grid bruteforce. Heuristic method based on halving interval is used, but still it can be time consuming. It is recomend only to tune parameters worth of it. Or tune it by parts.
 
-## GUI
+GUI
+---
 
 It is possible to use basic GUI. But only with CSV data source.
 Just run `gui_start.py` if you have downloaded software or call `predictit.gui_start.run_gui()` if you are importing via PyPI.
@@ -194,19 +209,23 @@ Screenshot of such a GUI
 
 Better GUI with fully customizable settings will be shipped next year hopefully.
 
-### Feature derivation
+Feature derivation
+------------------
 
 It is possible to add new data that is derived from original. It can be running fourier transform maximum or two columns multiplication or rolling standard deviation.
 
-### Categorical embedings
+Categorical embedings
+---------------------
 
 It is also possible to use string values in predictions. You can choose Config values 'embedding' 'label' and every unique string will be assigned unique number, 'one-hot' create new column for every unique string (can be time consuming).
 
-### Feature extraction
+Feature extraction
+------------------
 
 Under development right now :[
 
-## Data preprocessing, plotting and other Functions
+Data preprocessing, plotting and other Functions
+------------------------------------------------
 
 You can use any library functions separately for your needs of course. mydatapreprocessing, mylogging and myplottling are my other projects, which are used heavily. Example is here
 
@@ -239,7 +258,8 @@ plot(data_preprocessed)
 
 ```
 
-## Using just one model apart main function
+Using just one model apart main function
+----------------------------------------
 
 Main benefit is performance boost. You can have code inder the controll much simpler (much less code), but no features from configuration available.
 
@@ -260,7 +280,8 @@ predictions_one_model_error = predictit.evaluate_predictions.compare_predicted_t
 
 ```
 
-## Example of using library as a pro with deeper editting Config
+Example of using library as a pro with deeper editting Config
+-------------------------------------------------------------
 
 ```Python
 
@@ -305,19 +326,27 @@ Config.update({
 predictions_configured = predictit.main.predict()
 ```
 
-## Performance - How to scale
+Performance - How to scale
+--------------------------
 
 Time series prediction is very different than image recognition and more data doesn't necesarilly means better prediction. If you're issuing performance problems, try fast preset (turn off optimizations, make less recurent values, choose only few models, threshold datalength etc.) you can edit preset if you need. If you still have performance troubles and you have too much data, use resampling and select only valuable columns - for example correlation_threshold and do not derive extra columns. If you are interested mostly in predictions and not in the plot, turn the plot of.
 
-## Future work
+Future work
+-----------
 
 It's planned to do real GUI and possibility to serve web app as well as desktop. Scalability can be solved two ways. First is incremental learning (not every model supports today). Second is virtualisation (processes running in cluster separately).
 
-There is very big todo list on root called TODO.md.
+There is very big todo list on root called `TODO.md.`
+
+For developers
+--------------
+
+Any help from other developers very appreciated... :D
+Dont be shy to create Issue or text on <malachovd@seznam.cz>
 
 """
 
-__version__ = "1.61.0"
+__version__ = "1.61.1"
 __author__ = "Daniel Malachov"
 __license__ = "MIT"
 __email__ = "malachovd@seznam.cz"
