@@ -1,31 +1,24 @@
-#!/bin/sh
+#!/usr/bin/env python
+# -*- coding: UTF-8 -*-
 
-cd docs/source
+import subprocess
+from pathlib import Path
 
-mv img ..
-mv conf.py ..
-mv index.rst ..
-mv _static ..
-mv _templates ..
+# Can be run manually from here or from root dir
 
-cd ..
+root_path = Path.cwd()
 
-rm -r source
-rm -r build
+if not (root_path / 'docs').exists():
+    root_path = root_path.parent
 
-mkdir source
+docs_path = root_path / 'docs'
+docs_source_path = root_path / 'docs' / 'source'
 
-mv img source
-mv conf.py source
-mv index.rst source
-mv _static source
-mv _templates source
+for p in Path(docs_source_path).iterdir():
+    if p.name not in ['img', 'conf.py', 'index.rst', '_static', '_templates']:
+        p.unlink()
 
-sphinx-apidoc -f -e -o source ../predictit
+# subprocess.run(['make', 'html'], shell=True, cwd=docs_path, check=True)
+subprocess.run(['sphinx-apidoc', '-f', '-e', '-o', 'source', '../predictit'], shell=True, cwd=docs_path, check=True)
 
-make html
-
-cd ..
-
-git add docs
-
+subprocess.run(['git', 'add', 'docs'], shell=True, cwd=root_path, check=True)

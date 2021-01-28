@@ -3,6 +3,10 @@
 #%%
 """ This is main module for making predictions.
 
+
+Generated
+
+
 It contain functions - predict() - More return types - Depends on Config
                      - predict_multiple() - Predict multiple columns at once
                      - compare_models() - Test on data that was not in test set and compare models errors
@@ -93,7 +97,6 @@ if __name__ == "__main__":
 
 
 def predict(positional_data=None, positional_predicted_column=None, **function_kwargs):
-
     """Make predictions mostly on time-series data. Data input and other Config options can be set up in configuration.py or overwritenn on the fly. Setup can be also done
     as function input arguments or as command line arguments (it will overwrite Config values).
 
@@ -101,13 +104,12 @@ def predict(positional_data=None, positional_predicted_column=None, **function_k
 
     There are working examples in main readme and also in test_it module.
 
-    Args example:
+    Args:
         data (np.ndarray, pd.DataFrame): Time series. Can be 2-D - more columns.
             !!! In Numpy array use data series as rows, but in dataframe use cols !!!. If you use CSV, leave it empty. Defaults to [].
         predicted_column (int, str, optional): Index of predicted column or it's name (dataframe).
             If list with more values only the first one will be evaluated (use predict_multiple_columns function if you need that. Defaults to None.
         predicts (int, optional): Number of predicted values. Defaults to None.
-
         **kwargs (dict): There is much more parameters of predict function. Check configuration.py or run predictit.configuration.print_config() for parameters details.
 
     Returns:
