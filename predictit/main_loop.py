@@ -1,6 +1,6 @@
 import time
 import numpy as np
-from mylogging import traceback_warning, set_warnings
+import mylogging
 from mydatapreprocessing import preprocessing
 import predictit
 
@@ -18,7 +18,7 @@ def train_and_predict(
         data_abs_max, data_mean, data_std, models_test_outputs, last_undiff_value=None, final_scaler=None, pipe=None, semaphor=None,
         _IS_TESTED=False):
 
-    set_warnings(set_warnings_params)
+    mylogging.set_warnings(set_warnings_params)
 
     # Global module variables changed in for example tests module ignored because module reload...
     # therefore reload all necessary variables from misc
@@ -57,8 +57,7 @@ def train_and_predict(
             model_results['optimization_time'] = stop_optimization - start_optimization
 
         except Exception:
-            traceback_warning(f"Hyperparameters optimization of {iterated_model_name} didn't finished")
-
+            mylogging.traceback(f"Hyperparameters optimization of {iterated_model_name} didn't finished")
 
     start = time.time()
 
@@ -125,7 +124,7 @@ def train_and_predict(
 
     except Exception:
         model_results['Model error'] = np.inf
-        traceback_warning(f"Error in '{result_name}' model" if not optimization else f"Error in {iterated_model_name} model with optimized value: {optimization_value}")
+        mylogging.traceback(f"Error in '{result_name}' model" if not optimization else f"Error in {iterated_model_name} model with optimized value: {optimization_value}")
 
     finally:
         model_results['Model time [s]'] = time.time() - start

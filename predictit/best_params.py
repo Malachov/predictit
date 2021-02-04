@@ -6,7 +6,7 @@ import numpy as np
 import itertools
 import time
 import sys
-from mylogging import traceback_warning
+import mylogging
 
 from . import evaluate_predictions
 
@@ -161,7 +161,7 @@ def optimize(model_train, model_predict, kwargs, kwargs_limits, model_train_inpu
 
             except Exception:
                 if details > 0:
-                    traceback_warning(f"Error on model {name}: with params {kombi[k]}")
+                    mylogging.traceback(f"Error on model {name}: with params {kombi[k]}")
                 res = np.nan
 
             finally:

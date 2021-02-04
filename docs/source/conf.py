@@ -6,11 +6,18 @@ import sys
 import pathlib
 import datetime
 
+# Settings
+project = "predictit"
+author = "Daniel Malachov"
+github_user = 'Malachov'
+
+# End of settings
+###################
 
 # Folders to sys path to be able to import
 script_dir = pathlib.Path(__file__).resolve()
 root_path = script_dir.parents[2]
-lib_path = script_dir.parents[2] / 'predictit'
+lib_path = script_dir.parents[2] / project
 
 for i in [script_dir, root_path, lib_path]:
     if i.as_posix() not in sys.path:
@@ -18,9 +25,7 @@ for i in [script_dir, root_path, lib_path]:
 
 # -- Project information -----------------------------------------------------
 
-project = 'predictit'
-copyright = '2020, Daniel Malachov'
-author = 'Daniel Malachov'
+copyright = f'2020, {author}'
 
 # The full version, including alpha/beta/rc tags
 release = datetime.datetime.now().strftime('%d-%m-%Y')
@@ -31,8 +36,8 @@ source_suffix = ['.rst', '.md']
 
 # -- General configuration ---------------------------------------------------
 html_theme_options = {
-    'github_user': 'Malachov',
-    'github_repo': 'predictit',
+    'github_user': github_user,
+    'github_repo': project,
     'github_banner': True,
     'logo': 'logo.png'
 }
@@ -73,4 +78,5 @@ html_theme = 'alabaster'
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
+
 html_extra_path = ['../extra']

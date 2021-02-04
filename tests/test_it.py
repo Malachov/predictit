@@ -44,7 +44,7 @@ Config = predictit.configuration.Config
 Config.plotit = 0
 config_unchanged = Config.freeze()
 
-mylogging._COLORIZE = 0
+mylogging.config.COLOR = 0
 
 # ANCHOR Tests config
 Config.update({

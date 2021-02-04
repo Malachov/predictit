@@ -1,7 +1,7 @@
 """Module with function compare_predicted_to_test that Compare tested model with reality. It return some error criterion based on Config.py"""
 
 import numpy as np
-from mylogging import user_message
+import mylogging
 from predictit import misc
 import warnings
 
@@ -77,7 +77,7 @@ def compare_predicted_to_test(predicted, test, error_criterion='mape', plot=0, m
             try:
                 from dtaidistance import dtw
             except Exception:
-                raise ImportError(user_message(
+                raise ImportError(mylogging.return_str(
                     "Library dtaidistance necessary for configured dtw (dynamic time warping) "
                     "error criterion is not installed! Instal it via \n\npip install dtaidistance"))
 
@@ -86,6 +86,6 @@ def compare_predicted_to_test(predicted, test, error_criterion='mape', plot=0, m
             criterion_value = dtw.distance_fast(predicted_double, test_double)
 
         else:
-            raise KeyError(user_message(f"bad 'error_criterion' Config - '{error_criterion}'. Use some from options from config comment..."))
+            raise KeyError(mylogging.return_str(f"bad 'error_criterion' Config - '{error_criterion}'. Use some from options from config comment..."))
 
         return criterion_value

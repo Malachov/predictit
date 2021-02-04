@@ -1,5 +1,5 @@
-mydatapreprocessing>=1.1.14
-mylogging>=1.1.2
+mydatapreprocessing>=1.1.17
+mylogging>=2.0.1
 numpy
 pandas
 eel

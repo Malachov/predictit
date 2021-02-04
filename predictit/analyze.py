@@ -40,7 +40,7 @@ def analyze_column(data, lags=5, window=5):
     data = np.array(data)
 
     if data.ndim != 1 and 1 not in data.shape:
-        raise ValueError(mylogging.user_message(
+        raise ValueError(mylogging.return_str(
             "Select column you want to analyze",
             caption="analyze_data function only for one-dimensional data!"))
 
@@ -86,7 +86,7 @@ def analyze_column(data, lags=5, window=5):
         plt.show()
 
     except Exception:
-        mylogging.traceback_warning("Error in analyze_column function - in autocorrelation function: Maybe more lags, than values")
+        mylogging.traceback("Error in analyze_column function - in autocorrelation function: Maybe more lags, than values")
 
     # Moving average
     rolling_mean = np.sum(mydatapreprocessing.preprocessing.rolling_windows(data, window), 1)
@@ -185,4 +185,4 @@ def decompose(data, period=365, model='additive'):
         plt.show()
 
     except ValueError:
-        mylogging.traceback_warning("Number of samples is probably too low to compute.")
+        mylogging.traceback("Number of samples is probably too low to compute.")

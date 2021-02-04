@@ -31,7 +31,7 @@ import pandas as pd
 from tabulate import tabulate
 
 import mydatapreprocessing as mdp
-from mylogging import traceback_warning, user_message, set_warnings, user_warning
+import mylogging
 
 
 # Get module path and insert in sys path for working even if opened from other cwd (current working directory)
@@ -117,7 +117,7 @@ def predict(positional_data=None, positional_predicted_column=None, **function_k
 
     py_version = sys.version_info
     if py_version.major < 3 or py_version.minor < 6:
-        raise RuntimeError(user_message("Python version >=3.6 necessary. Python 2 not supported."))
+        raise RuntimeError(mylogging.return_str("Python version >=3.6 necessary. Python 2 not supported."))
 
     # Some global Config variables will be updated. But after finishing function, original global Config have to be returned
     config_freezed = Config.freeze()
@@ -153,7 +153,7 @@ def predict(positional_data=None, positional_predicted_column=None, **function_k
 
     # Define whether to print warnings or not or stop on warnings as on error
     set_warnings_params = (Config.debug, Config.ignored_warnings, Config.ignored_warnings_class_type)
-    set_warnings(set_warnings_params)
+    mylogging.set_warnings(set_warnings_params)
 
     if Config.use_config_preset and Config.use_config_preset != 'none':
         updated_config = Config.presets[Config.use_config_preset]
@@ -166,7 +166,7 @@ def predict(positional_data=None, positional_predicted_column=None, **function_k
     # Find difference between original Config and set values and if there are any differences, raise error
     config_errors = configuration.all_variables_set - set(predictit.configuration.orig_config)
     if config_errors:
-        raise KeyError(user_message(f"Some Config values: {config_errors} was named incorrectly. Check configuration.py for more informations"))
+        raise KeyError(mylogging.return_str(f"Some Config values: {config_errors} was named incorrectly. Check configuration.py for more informations"))
 
     # Definition of the table for spent time on code parts
     time_df = []
@@ -231,7 +231,7 @@ def predict(positional_data=None, positional_predicted_column=None, **function_k
             predictit.analyze.analyze_data(data_for_predictions_df)
             predictit.analyze.decompose(data_for_predictions_df.values[:, 0], **Config.analyze_seasonal_decompose)
         except Exception:
-            traceback_warning("Analyze failed")
+            mylogging.traceback("Analyze failed")
 
     semaphor = None
 
@@ -325,7 +325,7 @@ def predict(positional_data=None, positional_predicted_column=None, **function_k
             try:
                 predictit.analyze.analyze_column(column_for_predictions_processed, window=30)
             except Exception:
-                traceback_warning("Analyze failed")
+                mylogging.traceback("Analyze failed")
 
         min_data_length = 3 * Config.predicts + Config.default_n_steps_in
 
@@ -333,7 +333,7 @@ def predict(positional_data=None, positional_predicted_column=None, **function_k
             Config.repeatit = 1
             min_data_length = 3 * Config.predicts + Config.default_n_steps_in
 
-        assert (min_data_length < data_length), user_message('Set up less predicted values in settings or add more data', caption="To few data")
+        assert (min_data_length < data_length), mylogging.return_str('Set up less predicted values in settings or add more data', caption="To few data")
 
         if Config.mode == 'validate':
             models_test_outputs = [test]
@@ -355,7 +355,7 @@ def predict(positional_data=None, positional_predicted_column=None, **function_k
                 )
 
             except Exception:
-                traceback_warning(f"Error in creating input type: {input_type_name} with option optimization: {optimization_value}")
+                mylogging.traceback(f"Error in creating input type: {input_type_name} with option optimization: {optimization_value}")
                 continue
 
             for iterated_model_index, (iterated_model_name, iterated_model) in enumerate(used_models_assigned.items()):
@@ -383,7 +383,7 @@ def predict(positional_data=None, positional_predicted_column=None, **function_k
                     if Config.models_input[iterated_model_name] in ['one_step', 'one_step_constant']:
                         if multicolumn and Config.predicts > 1:
 
-                            user_warning(f"""Warning in model {iterated_model_name} \n\nOne-step prediction on multivariate data (more columns).
+                            mylogging.warn(f"""Warning in model {iterated_model_name} \n\nOne-step prediction on multivariate data (more columns).
                                              Use multi_step (y lengt equals to predict) or do use some one column data input in Config models_input or predict just one value.""")
                             continue
 
@@ -423,7 +423,7 @@ def predict(positional_data=None, positional_predicted_column=None, **function_k
             bounds = True
         except Exception:
             bounds = False
-            traceback_warning("Error in compute confidence interval")
+            mylogging.traceback("Error in compute confidence interval")
 
     else:
         bounds = False
@@ -448,8 +448,8 @@ def predict(positional_data=None, positional_predicted_column=None, **function_k
     results_df = pd.DataFrame.from_dict(results, orient='index')
 
     if results_df.empty:
-        raise RuntimeError(user_message("None of models finished predictions. Setup Config debug to one to see the warnings.",
-                                        caption="All models failed for some reason"))
+        raise RuntimeError(mylogging.return_str("None of models finished predictions. Setup Config debug to one to see the warnings.",
+                           caption="All models failed for some reason"))
 
     results_to_drop = [i for i in ['Index', 'Trained model', 'Test errors', 'Results'] if i in results_df.columns]
     results_df.drop(columns=results_to_drop, inplace=True)
@@ -657,14 +657,14 @@ def predict_multiple_columns(positional_data=None, positional_predicted_columns=
                 predictions[f"Column: {c} - Freq: {f}"] = predict(predicted_column=c, freq=f)
 
             except Exception:
-                traceback_warning(f"Error in making predictions on column {c} and freq {f}")
+                mylogging.traceback(f"Error in making predictions on column {c} and freq {f}")
 
 
         # if Config.database_deploy:
         #     try:
         #         predictit.database.database_deploy(Config.server, Config.database, last_date, predictions[0], predictions[1], freq=f)
         #     except Exception:
-        #         traceback_warning(f"Error in database deploying on freq {f}")
+        #         mylogging.traceback(f"Error in database deploying on freq {f}")
 
     # Return original Config values before predict function
     Config.update(config_freezed)
@@ -704,7 +704,7 @@ def compare_models(positional_data_all=None, positional_predicted_column=None, *
         Config.data_all = {'sin': (mdp.generatedata.gen_sin(), 0),
                            'Sign': (mdp.generatedata.gen_sign(), 0),
                            'Random data': (mdp.generatedata.gen_random(), 0)}
-        user_warning("Test data was used. Setup 'data_all' in Config...")
+        mylogging.warn("Test data was used. Setup 'data_all' in Config...")
 
     results = {}
     unstardized_results = {}
@@ -745,7 +745,7 @@ def compare_models(positional_data_all=None, positional_predicted_column=None, *
             unstardized_results[i] = repeated_average
 
         except Exception:
-            traceback_warning(f"Comparison for data {i} didn't finished.")
+            mylogging.traceback(f"Comparison for data {i} didn't finished.")
             results[i] = np.nan
 
     results_array = np.stack(list(results.values()), axis=0)

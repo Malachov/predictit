@@ -1,8 +1,7 @@
-import numpy as np
 from pathlib import Path
-from mylogging import user_warning
+import mylogging
 
-from .models_functions.models_functions import one_step_looper
+# from .models_functions.models_functions import one_step_looper
 
 
 def train(data, layers='default', epochs=200, load_trained_model=0, update_trained_model=1, save_model=1,
@@ -30,10 +29,10 @@ def train(data, layers='default', epochs=200, load_trained_model=0, update_train
     try:
         import tensorflow as tf
     except Exception:
-        user_warning("Tensorflow model configured, but tensorflow library not installed. It's not "
-                     "in general requirements, because very big and not work everywhere. If you "
-                     "want to use tensorflow model, install it via \n\npip install tensorflow")
-        return
+        raise ModuleNotFoundError(mylogging.return_str(
+            "Tensorflow model configured, but tensorflow library not installed. It's not "
+            "in general requirements, because very big and not work everywhere. If you "
+            "want to use tensorflow model, install it via \n\n`pip install tensorflow`"))
 
     if layers == 'default':
         layers = (('lstm', {'units': 32, 'activation': 'relu', 'return_sequences': 1}),
