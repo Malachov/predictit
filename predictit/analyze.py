@@ -114,7 +114,7 @@ def analyze_column(data, lags=5, window=5):
     if pvalue < cutoff:
         print(f"\np-value = {pvalue} : Analyzed column is probably stationary.\n")
     else:
-        print(f"\np-value = {pvalue} : Analyzed column is probably not stationary \n")
+        print(f"\np-value = {pvalue} : Analyzed column is probably not stationary.\n")
 
 
 def analyze_data(data, pairplot=0):

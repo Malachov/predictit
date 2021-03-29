@@ -1,19 +1,9 @@
+#%%
 from mydatapreprocessing import preprocessing
+import builtins
 
-try:
-    from IPython import get_ipython
-    ipython = get_ipython()
-except Exception:
-    ipython = None
 
-if ipython is not None:
-    _JUPYTER = 1
-    ipython.magic('%load_ext autoreload')
-    ipython.magic('%autoreload 2')
-
-else:
-    _JUPYTER = 0
-
+_JUPYTER = 1 if hasattr(builtins, "__IPYTHON__") else 0
 _GUI = 0
 _IS_TESTED = 0
 
@@ -110,3 +100,5 @@ def confidence_interval(data, predicts=7, confidence=0.1, p=1, d=0, q=0):
 #                 Config['data_all'][i] = pickle.load(input_file)
 #         except Exception:
 #             traceback_warning(f"Test data not loaded - First in Config['py'] pickleit = 1, that save the data on disk, then load from pickled.")
+
+# %%

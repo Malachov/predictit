@@ -1,4 +1,4 @@
-.. mdinclude:: ../../README.md
+.. automodule:: predictit
 
 Submodules
 ==========

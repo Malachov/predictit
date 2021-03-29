@@ -1,5 +1,4 @@
 import numpy as np
-from .models_functions.models_functions import one_step_looper
 
 
 def train(data, predicts=30, mi=1, mi_multiple=1, mi_linspace=(1e-8, 10, 20), epochs=10, w_predict=0, minormit=1, damping=1, plot=0, random=0, w_rand_scope=1, w_rand_shift=0, rand_seed=0):

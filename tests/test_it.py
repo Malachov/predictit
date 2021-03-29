@@ -269,16 +269,15 @@ def test_readmes():
     predictions_configured = predictit.main.predict()
     first_multiple_array = multiple_columns_prediction[list(multiple_columns_prediction.keys())[0]]
 
-    condition_1 = not np.isnan(np.min(predictions_1))
-    condition_1_a = not np.isnan(np.min(predictions_1_positional))
-    condition_2 = not np.isnan(np.min(predictions_2['best']))
-    condition_3 = compared_models
-    condition_4 = not np.isnan(np.nanmax(first_multiple_array))
-    condition_5 = not predictions_optimized_config.dropna().empty
-    condition_6 = 0 <= predictions_one_model_error < 1000
-    condition_7 = not np.isnan(np.min(predictions_configured))
-
-    assert (condition_1 and condition_1_a and condition_2 and condition_3 and condition_4 and condition_5 and condition_6 and condition_7)
+    assert all([
+        not np.isnan(np.min(predictions_1)),
+        not np.isnan(np.min(predictions_1_positional)),
+        not np.isnan(np.min(predictions_2['best'])),
+        compared_models,
+        not np.isnan(np.nanmax(first_multiple_array)),
+        not predictions_optimized_config.dropna().empty,
+        0 <= predictions_one_model_error < 1000,
+        not np.isnan(np.min(predictions_configured))])
 
 
 def test_main_from_config():
@@ -560,5 +559,3 @@ if __name__ == "__main__":
     ## Custom use case test...
 
     pass
-
-# %%
