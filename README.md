@@ -185,7 +185,7 @@ Just run `gui_start.py` if you have downloaded software or call `predictit.gui_s
 Screenshot of such a GUI
 
 <p align="center">
-<img src="./img/GUI.png" width="620" alt="Table of results"/>
+<img src="docs/source/_static/img/GUI.png" width="620" alt="GUI"/>
 </p>
 
 Better GUI with fully customizable settings will be shipped next year hopefully.

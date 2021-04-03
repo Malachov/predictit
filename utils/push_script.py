@@ -4,7 +4,9 @@ from pathlib import Path
 import sys
 
 # Find paths and add to sys.path to be able to import local modules
-test_path = Path(os.path.abspath(inspect.getframeinfo(inspect.currentframe()).filename)).parent
+test_path = Path(
+    os.path.abspath(inspect.getframeinfo(inspect.currentframe()).filename)
+).parent
 root_path = test_path.parent
 
 if root_path not in sys.path:
@@ -13,4 +15,4 @@ if root_path not in sys.path:
 import mypythontools
 
 if __name__ == "__main__":
-    mypythontools.utils.push_pipeline(deploy=True)
+    mypythontools.utils.push_pipeline(deploy=False)

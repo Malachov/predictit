@@ -45,13 +45,37 @@ standardization) and on top of that it can find optimal hyperparameters such as 
 Output
 ------
 
-Most common output is plotly interactive graph, numpy array of results or detailed dataframe results.
 
-.. image:: img/output_example.png
+
+###
+
+1
+
+.. image:: /img/output_example.png
   :width: 620
   :alt: Output example
 
-.. image:: img/table_of_results.png
+2
+
+.. image:: /_static/img/output_example.png
+  :width: 620
+  :alt: Output example
+
+3
+
+.. image:: output_example.png
+  :width: 620
+  :alt: Output example
+
+###
+
+Most common output is plotly interactive graph, numpy array of results or detailed dataframe results.
+
+.. image:: /img/output_example.png
+  :width: 620
+  :alt: Output example
+
+.. image:: /img/table_of_results.png
   :width: 620
   :alt: Table of results
 
