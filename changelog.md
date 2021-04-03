@@ -11,7 +11,7 @@
 [x] Short way of using functions with positional argument - predictit.main.predict(np.random.randn(1000). Same with predict_multiple and compare models.
 [x] Devil terminology fail fixed(used batch instead of multistep in own models)
 [x] New custom models added (ridge regresion and Levenberg-Marquardt)
-[x] README.md derived from `__init__.py` for better consistency + Fixes for better help tooltip in IDE with JEDI (Pre-commit githook rewrote to python)
+[x] File input can contain more files in list.
 
 ## 1.5x - 09/2020
 

@@ -47,12 +47,14 @@ Output
 
 Most common output is plotly interactive graph, numpy array of results or detailed dataframe results.
 
-<p align="center">
-<img src="./img/output_example.png" width="620" alt="Plot of results"/>
-</p>
-<p align="center">
-<img src="./img/table_of_results.png" width="620" alt="Table of results"/>
-</p>
+.. image:: img/output_example.png
+  :width: 620
+  :alt: Output example
+
+.. image:: img/table_of_results.png
+  :width: 620
+  :alt: Table of results
+
 
 Return type of main predict function depends on *configuration.py*. It can return best prediction
 as array or all predictions as dataframe. Interactive html plot is also created.
@@ -76,7 +78,7 @@ Sometime you can have issues with installing some libraries from requirements
 and pyodbc not in requirements, because not necessary, but troublesome. If library
 not installed with pip, check which library don't work, install manually with stackoverflow and repeat...
 
-Versions troubleshooting => Software is build in way, that it should be the best using latest versions of dependencies. In most cases older versions works well as well. Only exception can be author's library mydatapreprocessing, which is new and under development (API is not stable) and some version of predictit has dependency on particular version of mydatapreprocessing. Clean install of latest versions fix issue.
+Versions troubleshooting => Software is build in way, that it should be the best using latest versions of dependencies. In most cases older versions works well as well. Only exception can be author's library mydatapreprocessing, which is new and under development (API is not stable) and some version of predictit has dependency on particular version of mydatapreprocessing. Clean install of latest versions fix issues.
 
 Library was developed during 2020 and structure and even API (configuration) changed a lot. From version 1.60 it's considered to be stable and code made for library will work till 2.0.0.
 
@@ -218,6 +220,11 @@ Examples
     <img src="./img/GUI.png" width="620" alt="Table of results"/>
     </p>
 
+    .. image:: img/GUI.png
+    :width: 620
+    :alt: GUI
+
+
     Better GUI with fully customizable settings will be shipped next year hopefully.
 
     Feature derivation
@@ -348,7 +355,7 @@ Dont be shy to create Issue or text on <malachovd@seznam.cz>
 
 """
 
-__version__ = "1.61.2"
+__version__ = "1.61.3"
 __author__ = "Daniel Malachov"
 __license__ = "MIT"
 __email__ = "malachovd@seznam.cz"

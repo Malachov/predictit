@@ -17,10 +17,10 @@ standardization) and on top of that it can find optimal models inner parameters 
 Most common output is plotly interactive graph, numpy array of results or detailed dataframe results.
 
 <p align="center">
-<img src=".docs/extra/img/output_example.png" width="620" alt="Plot of results"/>
+<img src="docs/source/_static/img/output_example.png" width="620" alt="Plot of results"/>
 </p>
 <p align="center">
-<img src=".docs/extra/img/table_of_results.png" width="620" alt="Table of results"/>
+<img src="docs/source/_static/img/table_of_results.png" width="620" alt="Table of results"/>
 </p>
 
 Return type of main predict function depends on `configuration.py`. It can return best prediction

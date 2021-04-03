@@ -1,11 +1,23 @@
 from pathlib import Path
 import mylogging
+import importlib
 
-# from .models_functions.models_functions import one_step_looper
 
-
-def train(data, layers='default', epochs=200, load_trained_model=0, update_trained_model=1, save_model=1,
-          saved_model_path_string='stored_models', optimizer='adam', loss='mse', verbose=0, used_metrics='accuracy', timedistributed=0, batch_size=64):
+def train(
+    data,
+    layers="default",
+    epochs=200,
+    load_trained_model=0,
+    update_trained_model=1,
+    save_model=1,
+    saved_model_path_string="stored_models",
+    optimizer="adam",
+    loss="mse",
+    verbose=0,
+    used_metrics="accuracy",
+    timedistributed=0,
+    batch_size=64,
+):
     """Tensorflow model. Neural nets - LSTM or MLP (dense layers). Layers are customizable with arguments.
 
     Args:
@@ -26,34 +38,51 @@ def train(data, layers='default', epochs=200, load_trained_model=0, update_train
         model: Trained model object.
     """
 
-    try:
-        import tensorflow as tf
-    except Exception:
-        raise ModuleNotFoundError(mylogging.return_str(
-            "Tensorflow model configured, but tensorflow library not installed. It's not "
-            "in general requirements, because very big and not work everywhere. If you "
-            "want to use tensorflow model, install it via \n\n`pip install tensorflow`"))
+    if not importlib.util.find_spec("tensorflow"):
+        raise ModuleNotFoundError(
+            mylogging.return_str(
+                "Tensorflow model configured, but tensorflow library not installed. It's not "
+                "in general requirements, because very big and not work everywhere. If you "
+                "want to use tensorflow model, install it via \n\n`pip install tensorflow`"
+            )
+        )
 
-    if layers == 'default':
-        layers = (('lstm', {'units': 32, 'activation': 'relu', 'return_sequences': 1}),
-                  ('dropout', {'rate': 0.1}),
-                  ('lstm', {'units': 7, 'activation': 'relu'}))
+    import tensorflow as tf
+
+    if layers == "default":
+        layers = (
+            ("lstm", {"units": 32, "activation": "relu", "return_sequences": 1}),
+            ("dropout", {"rate": 0.1}),
+            ("lstm", {"units": 7, "activation": "relu"}),
+        )
 
     X = data[0]
     y = data[1]
     X_ndim = X.ndim
 
-    models = {'dense': tf.keras.layers.Dense, 'lstm': tf.keras.layers.LSTM, 'mlp': tf.keras.layers.Dense, 'gru': tf.keras.layers.GRU, 'conv2d': tf.keras.layers.Conv2D, 'rnn': tf.keras.layers.SimpleRNN, 'convlstm2d': tf.keras.layers.ConvLSTM2D, 'dropout': tf.keras.layers.Dropout, 'batchnormalization': tf.keras.layers.BatchNormalization}
+    models = {
+        "dense": tf.keras.layers.Dense,
+        "lstm": tf.keras.layers.LSTM,
+        "mlp": tf.keras.layers.Dense,
+        "gru": tf.keras.layers.GRU,
+        "conv2d": tf.keras.layers.Conv2D,
+        "rnn": tf.keras.layers.SimpleRNN,
+        "convlstm2d": tf.keras.layers.ConvLSTM2D,
+        "dropout": tf.keras.layers.Dropout,
+        "batchnormalization": tf.keras.layers.BatchNormalization,
+    }
 
-    if used_metrics == 'accuracy':
+    if used_metrics == "accuracy":
         metrics = [tf.keras.metrics.Accuracy()]
-    elif used_metrics == 'mape':
+    elif used_metrics == "mape":
         metrics = [tf.keras.metrics.MeanAbsolutePercentageError()]
     else:
         raise ValueError("metrics has to be one from ['accuracy', 'mape']")
 
-    if saved_model_path_string == 'stored_models':
-        saved_model_path_string = str(Path(__file__).resolve().parent / 'stored_models' / 'tensorflow.h5')
+    if saved_model_path_string == "stored_models":
+        saved_model_path_string = str(
+            Path(__file__).resolve().parent / "stored_models" / "tensorflow.h5"
+        )
 
     if load_trained_model:
         try:
@@ -67,14 +96,16 @@ def train(data, layers='default', epochs=200, load_trained_model=0, update_train
             model.fit(X, y, epochs=epochs, batch_size=batch_size, verbose=verbose)
 
     else:
-        if layers[0][0] == 'lstm':
+        if layers[0][0] == "lstm":
             if X.ndim == 2:
                 X = X.reshape(X.shape[0], X.shape[1], 1)
-            layers[0][1]['input_shape'] = (X.shape[1], X.shape[2])
+            layers[0][1]["input_shape"] = (X.shape[1], X.shape[2])
 
-        if layers[0][0] == 'dense':
-            layers[0][1]['input_shape'] = (X.shape[1],)
-            assert (X.ndim != 3), 'For dense first layer only univariate data supported (e.g. shape = (n_samples, n_features))- if ndim > 2: serialize first.'
+        if layers[0][0] == "dense":
+            layers[0][1]["input_shape"] = (X.shape[1],)
+            assert (
+                X.ndim != 3
+            ), "For dense first layer only univariate data supported (e.g. shape = (n_samples, n_features))- if ndim > 2: serialize first."
 
         model = tf.keras.models.Sequential()
 
@@ -83,7 +114,9 @@ def train(data, layers='default', epochs=200, load_trained_model=0, update_train
             model.add(models[j[0]](**j[1] if len(j) > 1 else {}))
 
         if timedistributed == 1:
-            model.add(tf.keras.layers.TimeDistributed(tf.keras.layers.Dense(y.shape[1])))
+            model.add(
+                tf.keras.layers.TimeDistributed(tf.keras.layers.Dense(y.shape[1]))
+            )
         else:
             model.add(tf.keras.layers.Dense(y.shape[1]))
 
@@ -113,7 +146,7 @@ def predict(x_input, model, predicts=7):
         np.ndarray: Array of predicted results
     """
 
-    if model.X_ndim == 2 and model.layers_0_0 == 'lstm':
+    if model.X_ndim == 2 and model.layers_0_0 == "lstm":
         x_input = x_input.reshape(1, x_input.shape[1], x_input.shape[0])
     predictions = []
 
@@ -129,14 +162,29 @@ def get_optimizers_loses_activations():
         list: List of tensorflow optimizers.
     """
 
+    if not importlib.util.find_spec("tensorflow"):
+        raise ModuleNotFoundError(
+            mylogging.return_str(
+                "Tensorflow model configured, but tensorflow library not installed. It's not "
+                "in general requirements, because very big and not work everywhere. If you "
+                "want to use tensorflow model, install it via \n\n`pip install tensorflow`"
+            )
+        )
+
     import tensorflow as tf
 
     sgd = tf.keras.optimizers.SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
     rmsprop = tf.keras.optimizers.RMSprop(lr=0.001, rho=0.9, epsilon=None, decay=0.0)
     adagrad = tf.keras.optimizers.Adagrad(lr=0.01, epsilon=None, decay=0.0)
     adadelta = tf.keras.optimizers.Adadelta(lr=1.0, rho=0.95, epsilon=None, decay=0.0)
-    adam = tf.keras.optimizers.Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0.0, amsgrad=False)
-    adamax = tf.keras.optimizers.Adamax(lr=0.002, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0.0)
-    nadam = tf.keras.optimizers.Nadam(lr=0.002, beta_1=0.9, beta_2=0.999, epsilon=None, schedule_decay=0.004)
+    adam = tf.keras.optimizers.Adam(
+        lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0.0, amsgrad=False
+    )
+    adamax = tf.keras.optimizers.Adamax(
+        lr=0.002, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0.0
+    )
+    nadam = tf.keras.optimizers.Nadam(
+        lr=0.002, beta_1=0.9, beta_2=0.999, epsilon=None, schedule_decay=0.004
+    )
 
     return [sgd, rmsprop, adagrad, adadelta, adam, adamax, nadam]

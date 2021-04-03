@@ -78,7 +78,7 @@ html_theme = "alabaster"
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ["_static"]
 
-html_extra_path = ["../extra"]
+# html_extra_path = ["../extra"]
 
 html_css_files = [
     "https://malachov.github.io/readthedocs-sphinx-alabaster-css/custom.css",

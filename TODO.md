@@ -25,7 +25,6 @@
 - [ ] Numba optimization (probably just own models - LNU autoreg model and conjugate grad)
 - [ ] Ability to load and save config to json to folder
 - [ ] For error criterion use compare models values in normal predict to remove best decision_tree which is unfair on insample predictions - config option - real error criterion (computationly harder)
-- [ ] List of string path files, not only one file - use glob
 
 ## Big Deals
 

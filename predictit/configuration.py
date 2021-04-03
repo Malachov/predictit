@@ -70,10 +70,7 @@ class Config:
     predicted_table = None  # If using excel (xlsx) - it means what sheet to use, if json, it means what key values, if SQL, then it mean what table. Else it have no impact.
     data_orientation = None  # 'columns' or 'index'. If using json or dictionary, it describe how data are oriented. Default is 'columns' if None used. If orientation is records (in pandas terminology), it's detected automatically.
     header = 0  # Row index used as column names
-    csv_style = {
-        "separator": ",",
-        "decimal": ".",
-    }  # Define CSV separators. En locale usually use {'sep': ",", 'decimal': "."} some Europian country use {'sep': ";", 'decimal': ","}
+    csv_style = None  # Define CSV separators. En locale usually use {'sep': ",", 'decimal': "."} some Europian country use {'sep': ";", 'decimal': ","}
     request_datatype_suffix = None  # 'json' for example. If using url with no extension, define which datatype is on this url with GET request
 
     predicted_column = ""  # Name of predicted column (for dataframe data) or it's index - string or int.

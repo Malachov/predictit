@@ -1,4 +1,4 @@
-mydatapreprocessing>=1.1.17
+mydatapreprocessing>=1.1.29
 mylogging>=2.0.1
 numpy
 pandas
