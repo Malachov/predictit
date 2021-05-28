@@ -1,5 +1,5 @@
-mydatapreprocessing>=1.1.29
-mylogging>=2.0.1
+mydatapreprocessing>=1.1.32
+mylogging>=2.0.5
 numpy
 pandas
 eel
@@ -9,7 +9,6 @@ sklearn
 pygments
 tabulate
 matplotlib
-plotly
 seaborn
 requests
 IPython

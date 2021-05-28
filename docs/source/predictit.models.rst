@@ -16,7 +16,7 @@ Submodules
    :maxdepth: 4
 
    predictit.models.autoreg_LNU
-   predictit.models.compare_with_average
+   predictit.models.average
    predictit.models.conjugate_gradient
    predictit.models.levenberg_marquardt
    predictit.models.regression

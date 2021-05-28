@@ -33,7 +33,6 @@ setup(
         'Programming Language :: Python :: 3.8',
         'Natural Language :: English',
         'Environment :: Other Environment',
-        'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License',
         'Operating System :: OS Independent',
         'Topic :: Scientific/Engineering :: Artificial Intelligence',

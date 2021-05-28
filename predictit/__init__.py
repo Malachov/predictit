@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
 
 """
-predictit
-=========
-
 .. image:: https://img.shields.io/pypi/pyversions/predictit.svg
     :target: https://pypi.python.org/pypi/predictit/
     :alt: Python versions
@@ -12,7 +9,7 @@ predictit
     :target: https://badge.fury.io/py/predictit
     :alt: PyPI pyversion
 
-.. image:: https://img.shields.io/lgtm/grade/python/g/Malachov/predictit.svg?logo=lgtm&logoWidth=18
+.. image:: https://img.shields.io/lgtm/grade/python/github/Malachov/predictit.svg
     :target: https://lgtm.com/projects/g/Malachov/predictit/context:python
     :alt: Language grade: Python
 
@@ -43,7 +40,7 @@ standardization) and on top of that it can find optimal hyperparameters such as 
 
 
 Output
-------
+======
 
 Most common output is plotly interactive graph, numpy array of results or detailed dataframe results.
 
@@ -59,31 +56,41 @@ Most common output is plotly interactive graph, numpy array of results or detail
 Return type of main predict function depends on *configuration.py*. It can return best prediction
 as array or all predictions as dataframe. Interactive html plot is also created.
 
-Oficial repo and documentation links
-------------------------------------
+Links
+=====
 
 Repo on github - https://github.com/Malachov/predictit
 
 Readthedocs documentation - https://predictit.readthedocs.io
 
 Installation
-------------
+============
 
-Python >=3.6. Python 2 is not supported. Install just with::
+Python >=3.6 (Python 2 is not supported).
 
-    $ pip install predictit
+Install just with::
+
+    pip install predictit
 
 Sometime you can have issues with installing some libraries from requirements
 (e.g. numpy because not BLAS / LAPACK). There are also two libraries - Tensorflow
 and pyodbc not in requirements, because not necessary, but troublesome. If library
 not installed with pip, check which library don't work, install manually with stackoverflow and repeat...
 
-Versions troubleshooting => Software is build in way, that it should be the best using latest versions of dependencies. In most cases older versions works well as well. Only exception can be author's library mydatapreprocessing, which is new and under development (API is not stable) and some version of predictit has dependency on particular version of mydatapreprocessing. Clean install of latest versions fix issues.
+There are some libraries that not every user will be using (e.g. Tensorflow or libraries for some data inputs).
+If you want to be sure to have all libraries, you can download ``requirements_advanced.txt`` and then install
+advanced requirements with ``pip install -r requirements_advanced.txt``.
 
-Library was developed during 2020 and structure and even API (configuration) changed a lot. From version 1.60 it's considered to be stable and code made for library will work till 2.0.0.
+Versions troubleshooting => Software is build in way, that it should be the best using latest versions of dependencies.
+In most cases older versions works well as well. Only exception can be author's library mydatapreprocessing, which is new
+and under development (API is not stable) and some version of predictit has dependency on particular version of
+mydatapreprocessing. Clean install of latest versions fix issues.
 
-Examples
---------
+Library was developed during 2020 and structure and even API (configuration) changed a lot. From version 1.7x it's considered
+to be stable and code made for library will work till 2.0.0.
+
+Examples:
+=========
 
     Software can be used in three ways. As a python library or with command line arguments
     or as normal python scripts.
@@ -100,13 +107,13 @@ Examples
     >>> import predictit
     >>> import numpy as np
     ...
-    >>> predictions_1 = predictit.main.predict(data=np.random.randn(100, 2), predicted_column=1, predicts=3, return_type='best')
+    >>> predictions_1 = predictit.predict(data=np.random.randn(100, 2), predicted_column=1, predicts=3, return_type='best')
 
     There are only two positional arguments (because, there is more than hundred configurable values).
     data and predicted_column, so you can use also
 
     >>> mydata = pd.DataFrame(np.random.randn(100, 2), columns=['a', 'b'])
-    >>> predictions_1_positional = predictit.main.predict(mydata, 'b')
+    >>> predictions_1_positional = predictit.predict(mydata, 'b')
 
     Simple example of using as a python library and editing Config
     --------------------------------------------------------------
@@ -130,7 +137,7 @@ Examples
     ...     'default_n_steps_in': 12  # Value of recursive inputs in model (do not use too high - slower and worse predictions)
     ... })
     ...
-    >>> predictions_2 = predictit.main.predict()
+    >>> predictions_2 = predictit.predict()
 
 
     Simple example of using *main.py* as a script
@@ -169,7 +176,7 @@ Examples
     ...     'data_all': {'First part': (my_data_array[:100], 0), 'Second part': (my_data_array[100:], 1)}
     >>> })
     ...
-    >>> compared_models = predictit.main.compare_models()
+    >>> compared_models = predictit.compare_models()
 
     Example of predict_multiple function
     ------------------------------------
@@ -181,7 +188,7 @@ Examples
     >>> Config.predicted_columns = ['*']  # Define list of columns or '*' for predicting all of the numeric columns
     >>> Config.used_models = ['Conjugate gradient', 'Decision tree regression']  # Use just few models to be faster
     ...
-    >>> multiple_columns_prediction = predictit.main.predict_multiple_columns()
+    >>> multiple_columns_prediction = predictit.predict_multiple_columns()
 
 
     Example of Config variable optimization
@@ -197,54 +204,54 @@ Examples
     ...     'optimization_values': [4, 6, 8],
     ...     'plot_all_optimized_models': 0,
     ...     'print_table': 2,  # Print detailed table
-    ...     'used_models': ['AR (Autoregression)', 'Sklearn regression']
+    ...     'used_models': ['AR', 'Sklearn regression']
     ... })
     ...
-    >>> predictions_optimized_config = predictit.main.predict()
+    >>> predictions_optimized_config = predictit.predict()
 
 
-    Hyperparameters tuning
-    ----------------------
+Hyperparameters tuning
+======================
 
-    To optmize hyperparameters, just set *optimizeit: 1,* and model parameters limits. It is commented in *Config.py* how to use it. It's not grid bruteforce. Heuristic method based on halving interval is used, but still it can be time consuming. It is recomend only to tune parameters worth of it. Or tune it by parts.
+To optmize hyperparameters, just set *optimizeit: 1,* and model parameters limits. It is commented in *Config.py* how to use it. It's not grid bruteforce. Heuristic method based on halving interval is used, but still it can be time consuming. It is recomend only to tune parameters worth of it. Or tune it by parts.
 
-    GUI
-    ---
+GUI
+===
 
-    It is possible to use basic GUI. But only with CSV data source.
-    Just run *gui_start.py* if you have downloaded software or call *predictit.gui_start.run_gui()* if you are importing via PyPI.
+It is possible to use basic GUI. But only with CSV data source.
+Just run *gui_start.py* if you have downloaded software or call *predictit.gui_start.run_gui()* if you are importing via PyPI.
 
-    Screenshot of such a GUI
+Screenshot of such a GUI
 
-    .. image:: /_static/img/GUI.png
+.. image:: /_static/img/GUI.png
     :width: 620
     :alt: GUI
 
 
-    Better GUI with fully customizable settings will be shipped next year hopefully.
+Better GUI with fully customizable settings will be shipped next year hopefully.
 
-    Feature derivation
-    ------------------
+Feature derivation
+------------------
 
-    It is possible to add new data that is derived from original. It can be running fourier transform maximum or two columns multiplication or rolling standard deviation.
+It is possible to add new data that is derived from original. It can be running fourier transform maximum or two columns multiplication or rolling standard deviation.
 
-    Categorical embedings
-    ---------------------
+Categorical embedings
+---------------------
 
-    It is also possible to use string values in predictions. You can choose Config values 'embedding' 'label' and every unique string will be assigned unique number, 'one-hot' create new column for every unique string (can be time consuming).
+It is also possible to use string values in predictions. You can choose Config values 'embedding' 'label' and every unique string will be assigned unique number, 'one-hot' create new column for every unique string (can be time consuming).
 
-    Feature extraction
-    ------------------
+Feature extraction
+------------------
 
-    Under development right now :[
+Under development right now :[
 
-    Data preprocessing, plotting and other Functions
-    ------------------------------------------------
+Data preprocessing, plotting and other Functions
+------------------------------------------------
 
-    You can use any library functions separately for your needs of course. mydatapreprocessing, mylogging and myplottling are my other projects, which are used heavily. Example is here
+    You can use any library functions separately for your needs of course. mydatapreprocessing, mylogging and mypythontools are my other projects, which are used heavily. Example is here
 
     >>> from mydatapreprocessing import load_data, data_consolidation, preprocess_data
-    >>> from myplotting import plot
+    >>> from mypythontools.plots import plot
     >>> from predictit.analyze import analyze_column
     ...
     >>> data = "https://blockchain.info/unconfirmed-transactions?format=json"
@@ -282,7 +289,7 @@ Examples
     >>> data = mdp.preprocessing.data_consolidation(data)
     >>> (X, y), x_input, _ = mdp.inputs.create_inputs(data.values, 'batch', input_type_params={'n_steps_in': 6})  # First tuple, because some models use raw data - one argument, e.g. [1, 2, 3...]
     ...
-    >>> trained_model = predictit.models.sklearn_regression.train((X, y), regressor='bayesianridge')
+    >>> trained_model = predictit.models.sklearn_regression.train((X, y), regressor='BayesianRidge')
     >>> predictions_one_model = predictit.models.sklearn_regression.predict(x_input, trained_model, predicts=7)
     ...
     >>> predictions_one_model_error = predictit.evaluate_predictions.compare_predicted_to_test(predictions_one_model, test, error_criterion='mape')  # , plot=1
@@ -306,9 +313,9 @@ Examples
     ...
     ...     # Chose models that will be computed - remove if you want to use all the models
     ...     'used_models': [
-    ...         "AR (Autoregression)",
-    ...         "ARIMA (Autoregression integrated moving average)",
-    ...         "Autoregressive Linear neural unit",
+    ...         "AR",
+    ...         "ARIMA (Autoregression integrated\n moving average)",
+    ...         "Autoregressive Linear\nneural unit",
     ...         "Conjugate gradient",
     ...         "Sklearn regression",
     ...         "Bayes ridge regression one column one step",
@@ -319,17 +326,17 @@ Examples
     ...
     ...     'models_parameters': {
     ...
-    ...         "AR (Autoregression)": {'used_model': 'ar', 'method': 'cmle', 'ic': 'aic', 'trend': 'nc', 'solver': 'lbfgs'},
-    ...         "ARIMA (Autoregression integrated moving average)": {'used_model': 'arima', 'p': 6, 'd': 0, 'q': 0},
+    ...         "AR": {'used_model': 'ar', 'method': 'cmle', 'ic': 'aic', 'trend': 'nc', 'solver': 'lbfgs'},
+    ...         "ARIMA (Autoregression integrated\n moving average)": {'used_model': 'arima', 'p': 6, 'd': 0, 'q': 0},
     ...
-    ...         "Autoregressive Linear neural unit": {'mi_multiple': 1, 'mi_linspace': (1e-5, 1e-4, 3), 'epochs': 10, 'w_predict': 0, 'minormit': 0},
+    ...         "Autoregressive Linear\nneural unit": {'mi_multiple': 1, 'mi_linspace': (1e-5, 1e-4, 3), 'epochs': 10, 'w_predict': 0, 'minormit': 0},
     ...         "Conjugate gradient": {'epochs': 80},
     ...
-    ...         "Bayes ridge regression": {'regressor': 'bayesianridge', 'n_iter': 300, 'alpha_1': 1.e-6, 'alpha_2': 1.e-6, 'lambda_1': 1.e-6, 'lambda_2': 1.e-6},
+    ...         "Bayes ridge regression": {'regressor': 'BayesianRidge', 'n_iter': 300, 'alpha_1': 1.e-6, 'alpha_2': 1.e-6, 'lambda_1': 1.e-6, 'lambda_2': 1.e-6},
     ...     }
     ... })
     ...
-    >>> predictions_configured = predictit.main.predict()
+    >>> predictions_configured = predictit.predict()
 
 Performance - How to scale
 --------------------------
@@ -351,7 +358,7 @@ Dont be shy to create Issue or text on <malachovd@seznam.cz>
 
 """
 
-__version__ = "1.61.3"
+__version__ = "1.61.4"
 __author__ = "Daniel Malachov"
 __license__ = "MIT"
 __email__ = "malachovd@seznam.cz"
@@ -359,40 +366,40 @@ __email__ = "malachovd@seznam.cz"
 __all__ = [
     "analyze",
     "best_params",
+    "Config",
     "configuration",
     "database",
     "evaluate_predictions",
+    "gui_start",
+    "main_loop",
     "main",
     "misc",
     "models",
-    "plots",
-    "test_data",
-    "main_loop",
-    "gui_start",
+    "predict",
+    "predict_multiple_columns",
+    "compare_models",
 ]
 
-
+from . import analyze
+from . import best_params
 from . import configuration
+from . import evaluate_predictions
+from . import gui_start
+from . import main
+from . import main_loop
+from . import misc
+from . import models
+
+# Just shortcuts to avoid importing from main
+from .main import predict
+from .main import predict_multiple_columns
+from .main import compare_models
+
+from .configuration import Config
+
+import sys
 import mylogging
-import warnings
 
 
-# Define whether to print warnings or not or stop on warnings as on error (mute warnings from imports)
-with warnings.catch_warnings():
-    mylogging.set_warnings(
-        configuration.Config.debug,
-        configuration.Config.ignored_warnings,
-        configuration.Config.ignored_warnings_class_type,
-    )
-
-    from . import analyze
-    from . import best_params
-    from . import models
-    from . import evaluate_predictions
-    from . import misc
-    from . import plots
-    from . import test_data
-    from . import main_loop
-    from . import gui_start
-
-    from . import main
+if sys.version_info.major < 3 or (sys.version_info.major == 3 and sys.version_info.minor < 6):
+    raise RuntimeError(mylogging.return_str("Python version >=3.6 necessary."))

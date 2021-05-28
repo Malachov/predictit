@@ -33,26 +33,50 @@ def visual_test(print_analyze, print_preprocessing, print_data_flow, print_postp
 
     column_for_prediction = pd.DataFrame(data)
 
-    data_multi_col = np.array([[1, 22, 3, 3, 5, 8, 3, 3, 5, 8], [5, 6, 7, 6, 7, 8, 3, 9, 5, 8], [8, 9, 10, 6, 8, 8, 3, 3, 7, 8]]).T
+    data_multi_col = np.array(
+        [[1, 22, 3, 3, 5, 8, 3, 3, 5, 8], [5, 6, 7, 6, 7, 8, 3, 9, 5, 8], [8, 9, 10, 6, 8, 8, 3, 3, 7, 8]]
+    ).T
 
     # Some calculations, that are to long to do in f-strings - Just ignore...
 
-    seqs, Y, x_input, test_inputs = inputs.make_sequences(data, predicts=7, repeatit=3, n_steps_in=6, n_steps_out=1, constant=1)
-    seqs_2, Y_2, x_input2, test_inputs2 = inputs.make_sequences(data, predicts=7, repeatit=3, n_steps_in=4, n_steps_out=2, constant=0)
-    seqs_m, Y_m, x_input_m, test_inputs_m = inputs.make_sequences(data_multi_col, predicts=7, repeatit=3, n_steps_in=4, n_steps_out=1, default_other_columns_length=None, constant=1)
-    seqs_2_m, Y_2_m, x_input2_m, test_inputs2_m = inputs.make_sequences(data_multi_col, predicts=7, repeatit=3, n_steps_in=3, n_steps_out=2, default_other_columns_length=1, constant=0)
+    seqs, Y, x_input, test_inputs = inputs.make_sequences(
+        data, predicts=7, repeatit=3, n_steps_in=6, n_steps_out=1, constant=1
+    )
+    seqs_2, Y_2, x_input2, test_inputs2 = inputs.make_sequences(
+        data, predicts=7, repeatit=3, n_steps_in=4, n_steps_out=2, constant=0
+    )
+    seqs_m, Y_m, x_input_m, test_inputs_m = inputs.make_sequences(
+        data_multi_col,
+        predicts=7,
+        repeatit=3,
+        n_steps_in=4,
+        n_steps_out=1,
+        default_other_columns_length=None,
+        constant=1,
+    )
+    seqs_2_m, Y_2_m, x_input2_m, test_inputs2_m = inputs.make_sequences(
+        data_multi_col,
+        predicts=7,
+        repeatit=3,
+        n_steps_in=3,
+        n_steps_out=2,
+        default_other_columns_length=1,
+        constant=0,
+    )
 
     normalized, scaler = preprocessing.standardize(data)
     normalized_multi, scaler_multi = preprocessing.standardize(data_multi_col)
 
     if print_analyze:
 
-        print("""
+        print(
+            """
                 ###############
                 ### Analyze ###
                 ###############
 
-            ### One predicted column \n""")
+            ### One predicted column \n"""
+        )
 
         predictit.analyze.analyze_column(column_for_prediction)
 
@@ -60,11 +84,10 @@ def visual_test(print_analyze, print_preprocessing, print_data_flow, print_postp
 
         predictit.analyze.analyze_data(data_multi_col)
 
-
-
     if print_preprocessing:
 
-        print(f"""
+        print(
+            f"""
 
                 ##########################
                 ### Data_preprocessing ###
@@ -116,35 +139,42 @@ def visual_test(print_analyze, print_preprocessing, print_data_flow, print_postp
         ### Make multi_step sequences - n_steps_in=3, n_steps_out=2, default_other_columns_length=1, constant=0 ### \n
         Original: \n {data_multi_col} \n\nsequences: \n{seqs_2_m} \n\nY: \n{Y_2_m} \nx_input: \n\n{x_input2_m} \n\n Tests inputs:{test_inputs2_m} \n
 
-        """)
-
+        """
+        )
 
     if print_data_flow:
 
-        Config.update({
-            'data': np.array(range(40)),
-            'return_type': 'visual_check',
-            'predicts': 3,
-            'default_n_steps_in': 5,
-            'standardizeit': 0,
-            'remove_outliers': 0,
-            'plotit': 0,
-            'printit': 0,
-            'repeatit': 3,
-            'optimization': 0,
-            'mode': 'predict',
-            'validation_gap': 2,
-            'models_input': {'Bayes ridge regression': 'multi_step', 'AR (Autoregression)': 'data_one_column'},
-        })
+        Config.update(
+            {
+                "data": np.array(range(40)),
+                "return_type": "visual_check",
+                "predicts": 3,
+                "default_n_steps_in": 5,
+                "standardizeit": 0,
+                "remove_outliers": 0,
+                "plotit": 0,
+                "printit": 0,
+                "repeatit": 3,
+                "optimization": 0,
+                "mode": "predict",
+                "validation_gap": 2,
+                "models_input": {"Bayes ridge regression": "multi_step", "AR": "data_one_column"},
+            }
+        )
 
         results = {
-            'sklearn in predict mode': predictit.main.predict(used_models={"Bayes ridge regression"}, mode='prediction'),
-            'sklearn in validate mode': predictit.main.predict(used_models={"Bayes ridge regression"}, mode='validate'),
-            'ar in predict mode': predictit.main.predict(used_models={'AR (Autoregression)'}, mode='prediction'),
-            'ar in validate mode': predictit.main.predict(used_models={'AR (Autoregression)'}, mode='validate')
+            "sklearn in predict mode": predictit.main.predict(
+                used_models={"Bayes ridge regression"}, mode="prediction"
+            ),
+            "sklearn in validate mode": predictit.main.predict(
+                used_models={"Bayes ridge regression"}, mode="validate"
+            ),
+            "ar in predict mode": predictit.main.predict(used_models={"AR"}, mode="prediction"),
+            "ar in validate mode": predictit.main.predict(used_models={"AR"}, mode="validate"),
         }
 
-        print("""
+        print(
+            """
 
                 #######################
                 ### Defining inputs ###
@@ -155,16 +185,17 @@ def visual_test(print_analyze, print_preprocessing, print_data_flow, print_postp
             'remove_outliers': 0
 
         In function compare_models with compare_mode train_everytime, it is automatically set up 'repeatit': 1, and 'validation_gap': 0\n
-        """)
+        """
+        )
 
         for i, j in results.items():
             print(f"\n### Used data packets for model {i} ###\n")
             for k, l in j.items():
                 print(f"{k}: \n{l}\n")
 
-
     if print_postprocessing:
-        print(f"""
+        print(
+            f"""
 
                 ###########################
                 ### Data_postprocessing ###
@@ -173,8 +204,14 @@ def visual_test(print_analyze, print_preprocessing, print_data_flow, print_postp
         Original: \n {data}, original std = {data.std()}, original mean = {data.mean()} \n\ntransformed: \n{preprocessing.fitted_power_transform(data, 10, 10)} \n\ntransformed std = {preprocessing.fitted_power_transform(data, 10, 10).std()},
         transformed mean = {preprocessing.fitted_power_transform(data, 10, 10).mean()} (shoud be 10 and 10)\n
 
-        """)
+        """
+        )
 
 
 if __name__ == "__main__":
-    visual_test(print_analyze=print_analyze, print_preprocessing=print_preprocessing, print_data_flow=print_data_flow, print_postprocessing=print_postprocessing)
+    visual_test(
+        print_analyze=print_analyze,
+        print_preprocessing=print_preprocessing,
+        print_data_flow=print_data_flow,
+        print_postprocessing=print_postprocessing,
+    )

@@ -1,6 +1,10 @@
-#%%
-from mydatapreprocessing import preprocessing
+"""Miscellaneous functions used across the library that does not fit into other packages."""
+
 import builtins
+
+# Lazy imports
+# import statsmodels.tsa.api as sm
+# from mydatapreprocessing import preprocessing
 
 
 _JUPYTER = 1 if hasattr(builtins, "__IPYTHON__") else 0
@@ -43,6 +47,8 @@ def confidence_interval(data, predicts=7, confidence=0.1, p=1, d=0, q=0):
 
     except Exception:
 
+        from mydatapreprocessing import preprocessing
+
         last_value = data[-1]
         data = preprocessing.do_difference(data)
 
@@ -53,7 +59,6 @@ def confidence_interval(data, predicts=7, confidence=0.1, p=1, d=0, q=0):
         bounds = predictions[2].T
         lower_bound = preprocessing.inverse_difference(bounds[0], last_value)
         upper_bound = preprocessing.inverse_difference(bounds[1], last_value)
-
 
     return lower_bound, upper_bound
 
@@ -100,5 +105,3 @@ def confidence_interval(data, predicts=7, confidence=0.1, p=1, d=0, q=0):
 #                 Config['data_all'][i] = pickle.load(input_file)
 #         except Exception:
 #             traceback_warning(f"Test data not loaded - First in Config['py'] pickleit = 1, that save the data on disk, then load from pickled.")
-
-# %%

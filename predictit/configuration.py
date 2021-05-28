@@ -3,36 +3,40 @@ whether you want find optimal parameters etc. Some setting can be inserted as fu
 All values are commented and easy to understand.
 
 If you downloaded the script, edit, save and run function from main, if you use library, import Config and edit values...
+
+Config work for predict() function as well as for predict_multiple_columns() and compare_models
+
 Examples:
+=========
 
     >>> import predictit
     >>> from predictit.configuration import Config
-
+    ...
     >>> Config.update({
     >>>     'data': 'my/path/to.csv',
     >>>     'plot': 1,
     >>>     'debug': 1,
     >>>     'used_models': {
-    >>>            'AR (Autoregression)': predictit.models.ar,
-    >>>            'Autoregressive Linear neural unit': predictit.models.autoreg_LNU,
+    >>>            'AR': predictit.models.ar,
+    >>>            'Autoregressive Linear\nneural unit': predictit.models.autoreg_LNU,
     >>>            'Sklearn regression': predictit.models.regression,
     >>>     }
     >>> }
 
-    >>> # You can alse use this syntax
+    You can alse use this syntax
+
     >>> Config.datalength = 2000
-
-    >>> # Config work for predict() function as well as for predict_multiple_columns() and compare_models
-
+    ...
     >>> predictions = predictit.main.predict()
 
-    >>> # You can pass configuration as dict kwargs...
-    >>> predictions = predictit.main.predict({})
+    You can pass configuration values as dict kwargs...
 
-    >>> You can also apply Config
+    >>> predictions = predictit.main.predict({"predicts": 7, "header": 0})
+
 To see all the possible values, use
 
     >>> predictit.configuration.print_config()
+
 """
 
 
@@ -46,7 +50,7 @@ class Config:
     #############
 
     data = "test"  # File path with suffix (string or pathlib Path). Or you can use numpy array, pandas dataframe or series, list or dictionary.
-    # Supported path formats are .CSV. Data shape for numpy array and dataframe is (n_samples, n_feature). Rows are samples and columns are features.
+    # Supported path formats are .CSV. Data shape for numpy array and dataframe is (n_samples, n_features). Rows are samples and columns are features.
 
     # Examples of data:
     #   myarray_or_dataframe  # Numpy array or Pandas.DataFrame
@@ -85,8 +89,12 @@ class Config:
     )  # For predict_multiple function only! List of intervals of predictions 'M' - months, 'D' - Days, 'H' - Hours. Default use [].
     resample_function = "sum"  # 'sum' or 'mean' depends of data. For example if current in technological process - mean, if units sold, then sum.
 
-    datalength = 1000  # The length of the data used for prediction (after resampling). If 0, than full length.
-    max_imported_length = 100000  # Max length of imported samples (before resampling). If 0, than full length.
+    datalength = (
+        1000  # The length of the data used for prediction (after resampling). If 0, than full length.
+    )
+    max_imported_length = (
+        100000  # Max length of imported samples (before resampling). If 0, than full length.
+    )
 
     ##############
     ### Output ###
@@ -97,9 +105,7 @@ class Config:
 
     predicts = 7  # Number of predicted values - 7 by default.
 
-    return_type = (
-        "best"  # 'best', 'all_dataframe', 'detailed_dictionary', or 'results'.
-    )
+    return_type = "best"  # 'best', 'all_dataframe', 'detailed_dictionary', or 'results'.
     # 'best' return array of predictions, 'all_dataframe' return results and models names in columns. 'detailed_dictionary' is used for GUI
     # and return results as best result,dataframe for plot, string div with plot and more. If 'results', then all models data are returned including trained models etc..
 
@@ -108,12 +114,15 @@ class Config:
     plotit = 1  # If 1, plot interactive graph.
     plot_type = "plotly"  # 'plotly' (interactive) or matplotlib.
     show_plot = 1  # Whether display plot or not. If in jupyter dislplay in jupyter, else in default browser.
-    save_plot = 0  # (bool) - Html if plotly type, png if matplotlibtype.
-    save_plot_path = ""  # Path where to save the plot (String), if empty string or 0 - saved to desktop.
+    save_plot = (
+        False  # If False, do not save, if path as str, save to defined path, if "DESKTOP" save to desktop.
+    )
     plot_legend = False  # Whether to show description of lines in chart. Even if turned off, it's still displayed on mouseover.
     plot_name = "Predictions"
     plot_history_length = 200  # How many historic values will be plotted
-    plot_number_of_models = 12  # Number of plotted models. If None, than all models will be plotted. 1 if only the best one.
+    plot_number_of_models = (
+        12  # Number of plotted models. If None, than all models will be plotted. 1 if only the best one.
+    )
     # If you want to remove grey area where we suppose the values, setup confidence_area to False.
 
     printit = 1  # Turn on and off all printed details at once.
@@ -122,6 +131,12 @@ class Config:
     print_time_table = 1  # Whether print table with models errors and time to compute.
     print_best_model_result = 1  # Whether print best model results and model details.
     sort_results_by = "error"  # 'error' or 'name'
+    table_settigs = {
+        "tablefmt": "grid",
+        "floatfmt": ".3f",
+        "numalign": "center",
+        "stralign": "center",
+    }
 
     confidence_interval = 0.6  # Area of confidence in result plot (grey area where we suppose values) - Bigger value, narrower area - maximum 1. If 0 - not plotted.
 
@@ -129,10 +144,8 @@ class Config:
     ### Prediction settings ###
     ###########################
 
-    multiprocessing = "pool"  # 'pool' or 'process' or 0. Never use 'process' on windows. Multiprocessing beneficial mostly on linux...
-    processes_limit = (
-        None  # Max number of concurrent processes. If None, then (CPUs - 1) is used
-    )
+    multiprocessing = 0  # 'pool' or 'process' or 0. Never use 'process' on windows. Multiprocessing beneficial mostly on linux...
+    processes_limit = None  # Max number of concurrent processes. If None, then (CPUs - 1) is used
     trace_processes_memory = False  # Add how much memory was used by each model.
     already_trained = 0  # Computationaly hard models (LSTM) load from disk.
 
@@ -159,7 +172,7 @@ class Config:
     optimizeit_plot = 0  # Plot every optimized combinations (plot in interactive way (jupyter) and only if have few parameters, otherwise hundreds of plots!!!)
 
     ### Data anlalysis
-    analyzeit = 1  # If 1, analyze original data, if 2 analyze preprocessed data, if 3, then both. Statistical distribution, autocorrelation, seasonal decomposition etc.
+    analyzeit = 0  # If 1, analyze original data, if 2 analyze preprocessed data, if 3, then both. Statistical distribution, autocorrelation, seasonal decomposition etc.
     analyze_seasonal_decompose = {
         "period": 365,
         "model": "additive",
@@ -168,7 +181,7 @@ class Config:
     ### Data preprocessing
     unique_threshlold = 0.1  # Remove string columns, that have to many categories. E.g 0.1 define, that has to be less that 10% of unique values. It will remove ids, hashes etc.
     embedding = "label"  # Categorical encoding. Create numbers from strings. 'label' give each category (unique string) concrete number.
-    # 		Result will have same number of columns. 'one-hot' create for every category new column.
+    #       Result will have same number of columns. 'one-hot' create for every category new column.
     remove_nans_threshold = 0.2  # From 0 to 1. How much not nans (not a number) can be in column to not be deleted. For example if 0.9 means that columns has to have more than 90% values that are not nan to not be deleted.
     remove_nans_or_replace = "mean"  # 'mean', 'interpolate', 'neighbor', 'remove' or value. After removing columns over nan threshold, this will remove or replace rest nan values.
     # If 'mean', replace with mean of column where nan is, if 'interpolate', it will return guess value based on neighbors. 'neighbor' use value before nan. Remove will remove rows where nans, if value set, it will replace all nans for example with 0.
@@ -203,9 +216,7 @@ class Config:
     ### Error evaluation
     error_criterion = "mse_sklearn"  # 'mse_sklearn', 'mape' or 'rmse' or 'dtw' (dynamic time warping).
     evaluate_type = "original"  # 'original' or 'preprocessed'. Define whether error criterion (e.g. RMSE) is evaluated on preprocessed data or on original data.
-    repeatit = (
-        50  # How many times is computation repeated for error criterion evaluation.
-    )
+    repeatit = 50  # How many times is computation repeated for error criterion evaluation.
     mode = "predict"  # If 'validate', put apart last few ('predicts' + 'validation_gap') values and evaluate on test data that was not in train set. Do not setup - use compare_models function, it will use it automattically.
     validation_gap = 10  # If 'mode' == 'validate' (in compare_models funciton), then describe how many samples are between train and test set. The bigger gap is, the bigger knowledge generalization is necesssary.
 
@@ -225,13 +236,14 @@ class Config:
 
     used_models = [
         # ### predictit.models.statsmodels_autoregressive
-        "AR (Autoregression)",
-        "ARIMA (Autoregression integrated moving average)",
+        "AR",
+        "ARIMA",
         "autoreg",
         # 'ARMA', 'SARIMAX (Seasonal ARIMA)',
         # ### predictit.models.autoreg_LNU
-        "Autoregressive Linear neural unit",
-        # 'Linear neural unit with weights predict', 'Autoregressive Linear neural unit normalized',
+        "Autoregressive Linear\nneural unit",
+        # 'Linear neural unit\nwith weights predict',
+        # 'Autoregressive Linear\nneural unit normalized',
         ### predictit.models.regression
         "Regression",
         "Ridge regression",
@@ -250,11 +262,12 @@ class Config:
         "Hubber regression",
         # 'Bagging regression', 'Stochastic gradient regression', 'Extreme learning machine', 'Gen Extreme learning machine',  'Extra trees regression', 'Random forest regression',
         # , 'Passive aggressive regression', 'Gradient boosting',
-        "Sklearn regression one step",
-        "Bayes ridge regression one step",
+        "Sklearn regression\none step",
+        "Bayes ridge regression\none step",
         #  'Decision tree regression one step', 'Hubber regression one step',
-        # predictit.models.compare_with_average
-        "Compare with average",
+        # predictit.models.average
+        "Average short",
+        "Average long",
     ]
 
     input_types = None
@@ -320,27 +333,29 @@ class Config:
         **{
             model_name: "data_one_column"
             for model_name in [
-                "AR (Autoregression)",
+                "AR",
                 "ARMA",
-                "ARIMA (Autoregression integrated moving average)",
+                "ARIMA",
                 "autoreg",
                 "SARIMAX (Seasonal ARIMA)",
+                "Average short",
+                "Average long",
             ]
         },
         **{
             model_name: "one_in_one_out_constant"
             for model_name in [
-                "Autoregressive Linear neural unit",
-                "Autoregressive Linear neural unit normalized",
-                "Linear neural unit with weights predict",
+                "Autoregressive Linear\nneural unit",
+                "Autoregressive Linear\nneural unit normalized",
+                "Linear neural unit\nwith weights predict",
                 "Conjugate gradient",
             ]
         },
         **{
             model_name: "one_in_one_out"
             for model_name in [
-                "Sklearn regression one step",
-                "Bayes ridge regression one step",
+                "Sklearn regression\none step",
+                "Bayes ridge regression\none step",
                 "Decision tree regression one step",
                 "Hubber regression one step",
             ]
@@ -369,20 +384,25 @@ class Config:
         },
         "Stochastic gradient regression": "one_in_multi_step_out",
         "Tensorflow LSTM": "not_serialized",
-        "Compare with average": "data_one_column",
     }
 
     # If using presets - overwriten.
     # If commented - default parameters will be used.
     models_parameters = {
-        "AR (Autoregression)": {
+        "Average short": {
+            "length": 7,
+        },
+        "Average length": {
+            "length": 100,
+        },
+        "AR": {
             "used_model": "ar",
             "method": "cmle",
             "trend": "nc",
             "solver": "lbfgs",
         },
         "ARMA": {"used_model": "arima", "p": 4, "d": 0, "q": 1},
-        "ARIMA (Autoregression integrated moving average)": {
+        "ARIMA": {
             "used_model": "arima",
             "p": 6,
             "d": 1,
@@ -397,24 +417,22 @@ class Config:
             "seasonal": (1, 0, 0, 4),
             "method": "lbfgs",
             "trend": "nc",
-            "enforce_invertibility": False,
-            "enforce_stationarity": False,
         },
-        "Autoregressive Linear neural unit": {
+        "Autoregressive Linear\nneural unit": {
             "mi_multiple": 1,
             "mi_linspace": (1e-5, 1e-4, 20),
             "epochs": 40,
             "w_predict": 0,
             "minormit": 0,
         },
-        "Autoregressive Linear neural unit normalized": {
+        "Autoregressive Linear\nneural unit normalized": {
             "mi_multiple": 1,
             "mi_linspace": (1e-2, 1, 20),
             "epochs": 40,
             "w_predict": 0,
             "minormit": 1,
         },
-        "Linear neural unit with weights predict": {
+        "Linear neural unit\nwith weights predict": {
             "mi_multiple": 1,
             "mi_linspace": (1e-5, 1e-4, 20),
             "epochs": 40,
@@ -425,25 +443,9 @@ class Config:
         "Regression": {"model": "linear"},
         "Ridge regression": {"model": "ridge", "lmbda": 0.1},
         "Levenberg-Marquardt": {"learning_rate": 0.1, "epochs": 50},
+        # Tensorflow
         "Tensorflow LSTM": {
-            "layers": "default",
-            "epochs": 200,
-            "load_trained_model": 0,
-            "update_trained_model": 0,
-            "save_model": 1,
-            "saved_model_path_string": "stored_models",
-            "optimizer": "adam",
-            "loss": "mse",
-            "verbose": 0,
-            "used_metrics": "accuracy",
-            "timedistributed": 0,
-        },
-        "Tensorflow MLP": {
-            "layers": [
-                ["dense", {"units": 32, "activation": "relu"}],
-                ["dropout", {"rate": 0.1}],
-                ["dense", {"units": 7, "activation": "relu"}],
-            ],
+            "layers": "lstm",
             "epochs": 100,
             "load_trained_model": 0,
             "update_trained_model": 0,
@@ -455,8 +457,22 @@ class Config:
             "used_metrics": "accuracy",
             "timedistributed": 0,
         },
+        "Tensorflow MLP": {
+            "layers": "mlp",
+            "epochs": 100,
+            "load_trained_model": 0,
+            "update_trained_model": 0,
+            "save_model": 1,
+            "saved_model_path_string": "stored_models",
+            "optimizer": "adam",
+            "loss": "mse",
+            "verbose": 0,
+            "used_metrics": "accuracy",
+            "timedistributed": 0,
+        },
+        # Sklearn
         "Sklearn regression": {
-            "regressor": "linear",
+            "model": "BayesianRidge",
             "alpha": 0.0001,
             "n_iter": 100,
             "epsilon": 1.35,
@@ -472,32 +488,30 @@ class Config:
             "activation_func": "selu",
         },
         "Bayes ridge regression": {
-            "regressor": "bayesianridge",
+            "model": "BayesianRidge",
             "n_iter": 300,
             "alpha_1": 1.0e-6,
             "alpha_2": 1.0e-6,
             "lambda_1": 1.0e-6,
             "lambda_2": 1.0e-6,
         },
-        "Hubber regression": {"regressor": "huber", "epsilon": 1.35, "alpha": 0.0001},
-        "Extra trees regression": {"regressor": "Extra trees"},
-        "Decision tree regression": {"regressor": "Decision tree"},
-        "KNeighbors regression": {"regressor": "KNeighbors"},
-        "Random forest regression": {"regressor": "Random forest"},
-        "Bagging regression": {"regressor": "Bagging"},
-        "Stochastic gradient regression": {"regressor": "Stochastic gradient"},
-        "Sklearn regression one step": {"regressor": "linear"},
-        "Bayes ridge regression one step": {"regressor": "bayesianridge"},
-        "Decision tree regression one step": {"regressor": "Decision tree"},
-        "Hubber regression one step": {"regressor": "huber"},
+        "Hubber regression": {"model": "HuberRegressor", "epsilon": 1.35, "alpha": 0.0001},
+        "Extra trees regression": {"model": "ExtraTreesRegressor"},
+        "Decision tree regression": {"model": "DecisionTreeRegressor"},
+        "KNeighbors regression": {"model": "KNeighborsRegressor"},
+        "Random forest regression": {"model": "RandomForestRegressor"},
+        "Bagging regression": {"model": "BaggingRegressor"},
+        "Sklearn regression\none step": {"model": "LinearRegression"},
+        "Bayes ridge regression\none step": {"model": "BayesianRidge"},
+        "Decision tree regression one step": {"model": "DecisionTreeRegressor"},
+        "Hubber regression one step": {"model": "HuberRegressor"},
         "Extreme learning machine": {
-            "regressor": "elm",
+            "model": "ELMRegressor",
             "n_hidden": 50,
             "alpha": 0.3,
             "rbf_width": 0,
             "activation_func": "tanh",
         },
-        "Gen Extreme learning machine": {"regressor": "elm_gen", "alpha": 0.5},
     }
 
     # !! Every parameters here have to be in models_parameters, or error.
@@ -529,7 +543,7 @@ class Config:
 
     # You can use function to get all models in list and then optimization to find the best one
     # import predictit
-    regressors = "linear"  # predictit.models.sklearn_regression.get_regressors(
+    models = ["LinearRegression", "BayesianRidge"]  # predictit.models.sklearn_regression.get_all_models(
 
     models_parameters_limits = None
 
@@ -538,12 +552,12 @@ class Config:
     @classmethod
     def update_references_optimize(cls):
         cls.models_parameters_limits = {
-            "AR (Autoregression)": {
+            "AR": {
                 "ic": ["aic", "bic", "hqic", "t-stat"],
                 "trend": ["c", "nc"],
             },
             # 'ARMA': {'p': [1, cls.maxorder], 'q': cls.order, 'trend': ['c', 'nc']},
-            "ARIMA (Autoregression integrated moving average)": {
+            "ARIMA": {
                 "p": [1, 25],
                 "d": [0, 1, 2],
                 "q": [0, 1, 2],
@@ -551,17 +565,17 @@ class Config:
             },
             "autoreg": {"cov_type": ["nonrobust", "HC0", "HC1", "HC3"]},
             # 'SARIMAX (Seasonal ARIMA)': {'p': [1, cls.maxorder], 'd': cls.order, 'q': cls.order, 'pp': cls.order, 'dd': cls.order, 'qq': cls.order,
-            # 'season': cls.order, 'method': ['lbfgs', 'bfgs', 'newton', 'nm', 'cg', 'ncg', 'powell'], 'trend': ['n', 'c', 't', 'ct'], 'enforce_invertibility': [True, False], 'enforce_stationarity': [True, False], 'forecast_type': ['in_sample', 'out_of_sample']},
+            # 'season': cls.order, 'method': ['lbfgs', 'bfgs', 'newton', 'nm', 'cg', 'ncg', 'powell'], 'trend': ['n', 'c', 't', 'ct'], 'forecast_type': ['in_sample', 'out_of_sample']},
             "Ridge regression": {"lmbda": [1e-8, 1e6]},
             "Levenberg-Marquardt": {"learning_rate": [0.01, 10]},
-            # 'Autoregressive Linear neural unit': {'mi': [1e-8, 10.0], 'minormit': [0, 1], 'damping': [0.0, 100.0]},
-            # 'Linear neural unit with weights predict': {'mi': [1e-8, 10.0], 'minormit': [0, 1], 'damping': [0.0, 100.0]},
+            # 'Autoregressive Linear\nneural unit': {'mi': [1e-8, 10.0], 'minormit': [0, 1], 'damping': [0.0, 100.0]},
+            # 'Linear neural unit\nwith weights predict': {'mi': [1e-8, 10.0], 'minormit': [0, 1], 'damping': [0.0, 100.0]},
             # 'Conjugate gradient': {'epochs': cls.epochs},
             ### 'Tensorflow LSTM': {'loses':["mean_squared_error", "mean_absolute_error", "mean_absolute_percentage_error", "mean_squared_logarithmic_error", "squared_hinge", "logcosh",
             ### "kullback_leibler_divergence"], 'activations':['softmax', 'elu', 'selu', 'softplus', 'tanh', 'sigmoid', 'exponential', 'linear']},
             ### 'Tensorflow MLP': {'loses':["mean_squared_error", "mean_absolute_error", "mean_absolute_percentage_error", "mean_squared_logarithmic_error", "squared_hinge", "logcosh",
             ### "kullback_leibler_divergence"], 'activations':['softmax', 'elu', 'selu', 'softplus', 'tanh', 'sigmoid', 'exponential', 'linear']},
-            # 'Sklearn regression': {'regressor': cls.regressors},  # 'alpha': cls.alpha, 'n_iter': [100, 500], 'epsilon': [1.01, 5.0], 'alphas': [[0.1, 0.1, 0.1], [0.5, 0.5, 0.5], [0.9, 0.9, 0.9]], 'gcv_mode': ['auto', 'svd', 'eigen'], 'solver': ['auto', 'svd', 'eigen']},
+            # 'Sklearn regression': {'model': cls.models},  # 'alpha': cls.alpha, 'n_iter': [100, 500], 'epsilon': [1.01, 5.0], 'alphas': [[0.1, 0.1, 0.1], [0.5, 0.5, 0.5], [0.9, 0.9, 0.9]], 'gcv_mode': ['auto', 'svd', 'eigen'], 'solver': ['auto', 'svd', 'eigen']},
             "Extra trees": {"n_estimators": [1.0, 500.0]},
             "Bayes ridge regression": {
                 "alpha_1": [0.1e-6, 3e-6],
@@ -608,21 +622,6 @@ class Config:
     database = "FK"  # Database name
     database_deploy = 0  # Whether save the predictions to database
 
-    @classmethod
-    def freeze(cls):
-        return {
-            key: value
-            for key, value in cls.__dict__.items()
-            if not key.startswith("__")
-            and not callable(value)
-            and not (hasattr(value, "__func__") and callable(value.__func__))
-        }
-
-    @classmethod
-    def update(cls, update_dict):
-        for i, j in update_dict.items():
-            setattr(cls, i, j)
-
     ###############
     ### Presets ###
     ###############
@@ -644,10 +643,10 @@ class Config:
             "standardizeit": None,
             # If editting or adding new models, name of the models have to be the same as in models module
             "used_models": [
-                "AR (Autoregression)",
+                "AR",
                 "Conjugate gradient",
                 "Sklearn regression",
-                "Compare with average",
+                "Average short",
             ],
         },
         "normal": {
@@ -661,11 +660,11 @@ class Config:
             "analyzeit": 0,
             "standardizeit": "standardize",
             "used_models": [
-                "AR (Autoregression)",
-                "ARIMA (Autoregression integrated moving average)",
+                "AR",
+                "ARIMA",
                 "autoreg",
                 "SARIMAX (Seasonal ARIMA)",
-                "Autoregressive Linear neural unit",
+                "Autoregressive Linear\nneural unit",
                 "Conjugate gradient",
                 "Sklearn regression",
                 "Bayes ridge regression",
@@ -674,7 +673,8 @@ class Config:
                 "KNeighbors regression",
                 "Random forest regression",
                 "Bagging regression",
-                "Compare with average",
+                "Average short",
+                "Average long",
             ],
         },
     }
@@ -685,25 +685,37 @@ class Config:
     ### End of edidatble Config ###
     ###############################
 
-    # !!! Do not edit from here further !!!
-    this_path = None
+    @classmethod
+    def freeze(cls):
+        return {
+            key: value
+            for key, value in cls.__dict__.items()
+            if not key.startswith("__")
+            and not callable(value)
+            and not (hasattr(value, "__func__") and callable(value.__func__))
+        }
+
+    @classmethod
+    def update(cls, update_dict):
+        for i, j in update_dict.items():
+            setattr(cls, i, j)
+
+    @staticmethod
+    def get_dict() -> dict:
+        return {
+            key: value
+            for key, value in Config.__dict__.items()
+            if not key.startswith("__") and not callable(key)
+        }
 
 
-orig_config = {
-    key: value
-    for key, value in Config.__dict__.items()
-    if not key.startswith("__") and not callable(key)
-}
-all_variables_set = set(
-    {
-        key: value
-        for key, value in Config.__dict__.items()
-        if not key.startswith("__") and not callable(key)
-    }.keys()
-)
+orig_config = Config.get_dict()
+
+all_variables_set = set(orig_config.keys())
 
 
 def print_config():
+    """Print all config options to the console colored."""
     import pygments
 
     from pathlib import Path

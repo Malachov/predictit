@@ -1,10 +1,13 @@
 #%%
 
 from pathlib import Path
-import eel
 import sys
 import warnings
 import traceback
+
+# Lazy imports
+# import eel
+# import predictit
 
 
 # If some information from inside main(), define function here
@@ -16,12 +19,15 @@ def edit_gui_py(content, id):
         id (str): Id of changed element.
     """
 
+    import eel
+
     eel.edit_gui_js(content, id)
 
 
 def run_gui():
-    """Start web based GUI.
-    """
+    """Start web based GUI."""
+
+    import eel
 
     web_path = str(Path(__file__).resolve().parents[0] / "files_for_GUI")
 
@@ -38,14 +44,16 @@ def run_gui():
     Config = predictit.configuration.Config
 
     predictit.misc._GUI = 1
-    Config.update({
-        "show_plot": 0,
-        "save_plot": 0,
-        "return_type": 'detailed_dictionary',
-        "data": None,
-        'data_source': 'csv',
-        "csv_test_data_relative_path": "",
-    })
+    Config.update(
+        {
+            "show_plot": 0,
+            "save_plot": 0,
+            "return_type": "detailed_dictionary",
+            "data": None,
+            "data_source": "csv",
+            "csv_test_data_relative_path": "",
+        }
+    )
 
     # Functions with @eel prefix are usually called from main.js file.
 
@@ -70,7 +78,9 @@ def run_gui():
                 setattr(Config, i, val)
 
             else:
-                warnings.warn(f"\n \t Inserted option with command line --{i} not found in Config.py use --help for more information.\n")
+                warnings.warn(
+                    f"\n \t Inserted option with command line --{i} not found in Config.py use --help for more information.\n"
+                )
 
         eel.edit_gui_js("Setup finished", "progress_phase")
 
@@ -86,8 +96,14 @@ def run_gui():
             eel.add_HTML_element(div, False, "content", "ploted_results", "Interactive plot", ["plot"])
 
             if Config.print_table:
-                eel.add_HTML_element(results["models_table"], False, "content", "models_table", "Models results", "table")
-
+                eel.add_HTML_element(
+                    results["models_table"],
+                    False,
+                    "content",
+                    "models_table",
+                    "Models results",
+                    "table",
+                )
 
             eel.execute("ploted_results")
 
@@ -95,14 +111,35 @@ def run_gui():
 
             if Config.debug:
 
-                eel.add_HTML_element(results["time_table"], False, "content", "time_parts_table", "Time schema of prediction", "table")
-                eel.add_HTML_element(results['output'], True, "content", "printed_output", "Everything printed", "pre-wrapped")
+                eel.add_HTML_element(
+                    results["time_table"],
+                    False,
+                    "content",
+                    "time_parts_table",
+                    "Time schema of prediction",
+                    "table",
+                )
+                eel.add_HTML_element(
+                    results["output"],
+                    True,
+                    "content",
+                    "printed_output",
+                    "Everything printed",
+                    "pre-wrapped",
+                )
 
         except Exception:
 
-            eel.add_HTML_element(f"\n Error in making predictions - {traceback.format_exc()} \n", True, "progress_phase", "error-log", "Error log", "pre-wrapped")
+            eel.add_HTML_element(
+                f"\n Error in making predictions - {traceback.format_exc()} \n",
+                True,
+                "progress_phase",
+                "error-log",
+                "Error log",
+                "pre-wrapped",
+            )
 
-    eel.start('index.html', port=0)  # mode='chrome-app'
+    eel.start("index.html", port=0)  # mode='chrome-app'
 
 
 if __name__ == "__main__":

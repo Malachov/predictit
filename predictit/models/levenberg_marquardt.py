@@ -7,9 +7,13 @@ def train(data, epochs=50, learning_rate=1):
 
     Args:
         data ((np.ndarray, np.ndarray)) - Tuple (X, y) of input train vectors X and train outputs y.
-            X should contain bias - constant 1 on first place of every sample (parameter constant in `mydatapreprocessing.inputs.make_sequences`).
-        epochs(int) - How many times is the algorithm repeated.
-        learning_rate(str) - Similar as in neural net and similar to penalization in regression.
+            X should contain bias - constant 1 on first place of every sample
+            (parameter constant in `mydatapreprocessing.inputs.make_sequences`).
+        epochs(int, optional) - How many times is the algorithm repeated. Defaults to 50.
+        learning_rate(str, optional) - Similar as in neural net and similar to penalization in regression. Defaults to 1.
+
+    Returns:
+        np.ndarray: Array of neural weights.
     """
     X = data[0]
     y = data[1].ravel()
@@ -18,7 +22,10 @@ def train(data, epochs=50, learning_rate=1):
 
     for i in range(epochs):
         e = y - np.dot(X, w)
-        w = w + np.dot(np.dot(np.linalg.inv(np.dot(X.T, X) + np.eye(X.shape[1]) / learning_rate), X.T), e)
+        w = w + np.dot(
+            np.dot(np.linalg.inv(np.dot(X.T, X) + np.eye(X.shape[1]) / learning_rate), X.T),
+            e,
+        )
 
     return w
 
@@ -36,4 +43,3 @@ def predict(x_input, model, predicts=7):
     """
 
     return one_step_looper(lambda x_input: np.dot(x_input, model), x_input.ravel(), predicts)
-

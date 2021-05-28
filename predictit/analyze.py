@@ -3,11 +3,26 @@ Matplotlib lazyload because not using in gui.
 """
 
 import numpy as np
-import pandas as pd
+
 import mylogging
-import mydatapreprocessing
 
 from predictit import misc
+
+# Lazy imports
+
+# import mydatapreprocessing
+
+# import pandas as pd
+# import matplotlib.pyplot as plt
+# import seaborn as sns
+# from statsmodels.graphics.tsaplots import plot_acf
+# from statsmodels.graphics.tsaplots import plot_pacf
+# from statsmodels.tsa.stattools import adfuller
+# from pandas.plotting import register_matplotlib_converters
+# import matplotlib.pyplot as plt
+# import seaborn as sns
+# from pandas.plotting import register_matplotlib_converters
+# from statsmodels.tsa.seasonal import seasonal_decompose
 
 
 def analyze_column(data, lags=5, window=5):
@@ -21,6 +36,8 @@ def analyze_column(data, lags=5, window=5):
         window (int, optional): Window for rolling average and rolling std. Defaults to 5.
 
     """
+    import mydatapreprocessing
+
     import matplotlib.pyplot as plt
     import seaborn as sns
     from statsmodels.graphics.tsaplots import plot_acf
@@ -32,41 +49,47 @@ def analyze_column(data, lags=5, window=5):
 
     try:
         from IPython import get_ipython
+
         if misc._JUPYTER:
-            get_ipython().run_line_magic('matplotlib', 'inline')
+            get_ipython().run_line_magic("matplotlib", "inline")
     except Exception:
         pass
 
     data = np.array(data)
 
     if data.ndim != 1 and 1 not in data.shape:
-        raise ValueError(mylogging.return_str(
-            "Select column you want to analyze",
-            caption="analyze_data function only for one-dimensional data!"))
+        raise ValueError(
+            mylogging.return_str(
+                "Select column you want to analyze",
+                caption="analyze_data function only for one-dimensional data!",
+            )
+        )
 
     data = data.ravel()
 
-    print(f"Length:  {len(data)} \n"
-          f"Minimum:  {np.nanmin(data)} \n"
-          f"Maximun:  {np.nanmax(data)} \n"
-          f"Mean:  {np.nanmean(data)} \n"
-          f"Std:  {np.nanstd(data)} \n"
-          f"First few values:  {data[-5:]} \n"
-          f"Middle values:  {data[int(-len(data)/2): int(-len(data)/2) + 5]} \n"
-          f"Last few values:  {data[-5:]} \n"
-          f"Number of nan (not a number) values: {np.count_nonzero(np.isnan(data))} \n")
+    print(
+        f"Length:  {len(data)} \n"
+        f"Minimum:  {np.nanmin(data)} \n"
+        f"Maximun:  {np.nanmax(data)} \n"
+        f"Mean:  {np.nanmean(data)} \n"
+        f"Std:  {np.nanstd(data)} \n"
+        f"First few values:  {data[-5:]} \n"
+        f"Middle values:  {data[int(-len(data)/2): int(-len(data)/2) + 5]} \n"
+        f"Last few values:  {data[-5:]} \n"
+        f"Number of nan (not a number) values: {np.count_nonzero(np.isnan(data))} \n"
+    )
 
     # Data and it's distribution
 
     plt.figure(figsize=(10, 5))
     plt.subplot(1, 2, 1)
     plt.plot(data)
-    plt.xlabel('t')
+    plt.xlabel("t")
     plt.ylabel("f(x)")
 
     plt.subplot(1, 2, 2)
-    sns.distplot(data, bins=100, kde=True, color='skyblue')
-    plt.xlabel('f(x)')
+    sns.distplot(data, bins=100, kde=True, color="skyblue")
+    plt.xlabel("f(x)")
     plt.ylabel("Distribution")
 
     plt.tight_layout()
@@ -75,18 +98,20 @@ def analyze_column(data, lags=5, window=5):
     plt.show()
 
     fig, (ax, ax2) = plt.subplots(ncols=2, figsize=(10, 5))
-    fig.suptitle('Repeating patterns - autocorrelation')
+    fig.suptitle("Repeating patterns - autocorrelation")
 
     try:
 
         plot_acf(data, lags=lags, ax=ax)
-        ax.set_xlabel('Lag')
+        ax.set_xlabel("Lag")
         plot_pacf(data, lags=lags, ax=ax2)
-        ax2.set_xlabel('Lag')
+        ax2.set_xlabel("Lag")
         plt.show()
 
     except Exception:
-        mylogging.traceback("Error in analyze_column function - in autocorrelation function: Maybe more lags, than values")
+        mylogging.traceback(
+            "Error in analyze_column function - in autocorrelation function: Maybe more lags, than values"
+        )
 
     # Moving average
     rolling_mean = np.sum(mydatapreprocessing.preprocessing.rolling_windows(data, window), 1)
@@ -95,12 +120,12 @@ def analyze_column(data, lags=5, window=5):
     plt.figure(figsize=(10, 5))
     plt.subplot(1, 2, 1)
     plt.plot(rolling_mean)
-    plt.xlabel('t')
+    plt.xlabel("t")
     plt.ylabel("Rolling average x")
 
     plt.subplot(1, 2, 2)
     plt.plot(rolling_std)
-    plt.xlabel('f(x)')
+    plt.xlabel("f(x)")
     plt.ylabel("Rolling standard deviation x")
 
     plt.tight_layout()
@@ -110,41 +135,50 @@ def analyze_column(data, lags=5, window=5):
 
     # Dick Fuller test na stacionaritu
     pvalue = adfuller(data)[1]
-    cutoff=0.05
+    cutoff = 0.05
     if pvalue < cutoff:
         print(f"\np-value = {pvalue} : Analyzed column is probably stationary.\n")
     else:
         print(f"\np-value = {pvalue} : Analyzed column is probably not stationary.\n")
 
 
-def analyze_data(data, pairplot=0):
+def analyze_data(data, pairplot=False):
     """Analyze n-dimendional data. Describe data types, nan values, minimumns etc...
     Plot correlation graph.
 
     Args:
-        data (pd.DataFrame, np.ndarray): Time series data.
+        data ((pd.DataFrame, np.ndarray)): Time series data.
+        pairplot (bool, optional): Whether to plot correlation matrix. Computation can be very slow. Defaults to False.
     """
+    import pandas as pd
     import seaborn as sns
     import matplotlib.pyplot as plt
 
     data = pd.DataFrame(data)
 
-    print('\n Data description \n', data.describe(include='all'))
-    print('\n Data tail \n', data.tail())
-    print('\n Nan values in columns \n', data.isna().sum())
+    print("\n Data description \n", data.describe(include="all"))
+    print("\n Data tail \n", data.tail())
+    print("\n Nan values in columns \n", data.isna().sum())
 
     # Pairplot unfortunately very slow
     if pairplot:
         sns.pairplot(data, diag_kind="kde")
 
     corr = data.corr()
-    ax = sns.heatmap(corr, vmin=-1, vmax=1, center=0, cmap=sns.diverging_palette(20, 220, n=200), square=True)
-    ax.set_xticklabels(ax.get_xticklabels(), rotation=45, horizontalalignment='right')
+    ax = sns.heatmap(
+        corr,
+        vmin=-1,
+        vmax=1,
+        center=0,
+        cmap=sns.diverging_palette(20, 220, n=200),
+        square=True,
+    )
+    ax.set_xticklabels(ax.get_xticklabels(), rotation=45, horizontalalignment="right")
 
     plt.show()
 
 
-def decompose(data, period=365, model='additive'):
+def decompose(data, period=365, model="additive"):
     """Plot decomposition graph. Analze if data are seasonal.
 
     Args:
@@ -161,22 +195,22 @@ def decompose(data, period=365, model='additive'):
         plt.figure(figsize=(15, 8))
         plt.subplot(4, 1, 1)
         plt.plot(decomposition.observed)
-        plt.xlabel('Date')
+        plt.xlabel("Date")
         plt.ylabel("Real values")
 
         plt.subplot(4, 1, 2)
         plt.plot(decomposition.trend)
-        plt.xlabel('Date')
+        plt.xlabel("Date")
         plt.ylabel("Trend")
 
         plt.subplot(4, 1, 3)
         plt.plot(decomposition.seasonal)
-        plt.xlabel('Date')
+        plt.xlabel("Date")
         plt.ylabel("Seasonality")
 
         plt.subplot(4, 1, 4)
         plt.plot(decomposition.resid)
-        plt.xlabel('Date')
+        plt.xlabel("Date")
         plt.ylabel("Residuals")
 
         plt.suptitle("Seasonal decomposition", fontsize=20)

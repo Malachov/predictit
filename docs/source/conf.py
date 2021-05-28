@@ -11,7 +11,7 @@ author = "Daniel Malachov"
 github_user = "Malachov"
 
 # End of settings
-###################
+#################
 
 # Folders to sys path to be able to import
 script_dir = pathlib.Path(__file__).resolve()
@@ -38,7 +38,6 @@ html_theme_options = {
     "github_user": github_user,
     "github_repo": project,
     "github_banner": True,
-    "logo": "logo.png",
 }
 
 # Add any Sphinx extension module names here, as strings. They can be
@@ -81,5 +80,5 @@ html_static_path = ["_static"]
 # html_extra_path = ["../extra"]
 
 html_css_files = [
-    "https://malachov.github.io/readthedocs-sphinx-alabaster-css/custom.css",
+    "https://malachov.github.io/mypythontools/content/sphinx-alabaster-css/custom.css",
 ]

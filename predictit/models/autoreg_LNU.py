@@ -1,20 +1,36 @@
 import numpy as np
 
 
-def train(data, predicts=30, mi=1, mi_multiple=1, mi_linspace=(1e-8, 10, 20), epochs=10, w_predict=0, minormit=1, damping=1, plot=0, random=0, w_rand_scope=1, w_rand_shift=0, rand_seed=0):
-    """Autoregressive linear neural unit. It's simple one neuron one-step neural net. It can predict not only predictions itself,
+def train(
+    data,
+    mi=1,
+    mi_multiple=1,
+    mi_linspace=(1e-8, 10, 20),
+    epochs=10,
+    w_predict=0,
+    predicted_w=30,
+    minormit=1,
+    damping=1,
+    plot=0,
+    random=0,
+    w_rand_scope=1,
+    w_rand_shift=0,
+    rand_seed=0,
+):
+    """Autoregressive Linear\nneural unit. It's simple one neuron one-step neural net. It can predict not only predictions itself,
     but also use other faster method to predict weights evolution for out of sample predictions. In first iteration it will find best learning step
     and in the second iteration, it will train more epochs.
+
     Args:
         data ((np.ndarray, np.ndarray)) - Tuple (X, y) of input train vectors X and train outputs y
-        predicts (int, optional): Number of predicted values. Defaults to 7.
-        mi (float, optional): Learning rate. If not normalized must be much smaller. Defaults to 0.1.
-        mi_multiple (bool): If try more weights and try to find the best. Set the possible values with mi_linspace.
-        mi_linspace (np.ndarray, optional): Used learning rate numpy linspace arguments. Defaults to mi_linspace=(1e-8, 10, 20).
-            That means, that mimimum value is 1e-8, maximum 20 and there is 20 values in the interval.
-        epochs (int): Numer of trained epochs.
-        w_predict (bool): If predict weights with next predictions.
-        minormit (int, optional): Whether normalize learning rate. Defaults to 0.
+        mi (float, optional): Learning rate. If not normalized must be much smaller. Defaults to 1.
+        mi_multiple (bool, optional): If try more weights and try to find the best. Set the possible values with mi_linspace. Defaults to 1.
+        mi_linspace (np.ndarray, optional): Used learning rate numpy linspace arguments.
+            That means, that mimimum value is 1e-8, maximum 20 and there is 20 values in the interval. Defaults to (1e-8, 10, 20).
+        epochs (int, optional): Numer of trained epochs. Defaults to 10.
+        w_predict (bool): If predict weights with next predictions. Defaults to 0.
+        predicted_w (int, optional): Number of predicted values. Defaults to 30.
+        minormit (int, optional): Whether normalize learning rate. Defaults to 1.
         damping (int, optional): Whether damp learning rate or not. Defaults to 1.
         plot (int, optional): Whether plot results. Defaults to 0.
         random (int, optional): Whether initial weights are random or not. Defaults to 0.
@@ -23,7 +39,7 @@ def train(data, predicts=30, mi=1, mi_multiple=1, mi_linspace=(1e-8, 10, 20), ep
         rand_seed (int, optional): Random weights but the same everytime. Defaults to 0.
 
     Returns:
-        np.ndarray: Predictions of input time series.
+        np.ndarray: Weigths of neuron that can be used for making predictions.
     """
     X = data[0]
     y_hat = data[1]
@@ -71,7 +87,7 @@ def train(data, predicts=30, mi=1, mi_multiple=1, mi_linspace=(1e-8, 10, 20), ep
                 dw = miwide[i] * e[j] * dydw
             w = w + dw
 
-        mi_error[i] = np.sum(abs(e[-predicts * 3:]))
+        mi_error[i] = np.sum(abs(e))
         w_last[i] = w
 
     bestmiindex = np.argmin(mi_error)
@@ -101,10 +117,13 @@ def train(data, predicts=30, mi=1, mi_multiple=1, mi_linspace=(1e-8, 10, 20), ep
 
     if w_predict:
         from . import statsmodels_autoregressive
-        wwt = np.zeros((features, predicts))
+
+        wwt = np.zeros((features, predicted_w))
 
         for i in range(features):
-            wwt[i] = statsmodels_autoregressive.predict(wall[i], statsmodels_autoregressive.train(wall[i]), predicts=predicts)
+            wwt[i] = statsmodels_autoregressive.predict(
+                wall[i], statsmodels_autoregressive.train(wall[i]), predicts=predicted_w
+            )
 
         w_final = wwt.T
 
@@ -114,27 +133,36 @@ def train(data, predicts=30, mi=1, mi_multiple=1, mi_linspace=(1e-8, 10, 20), ep
     if plot == 1:
 
         from predictit.misc import _JUPYTER
+
         if _JUPYTER:
             from IPython import get_ipython
-            get_ipython().run_line_magic('matplotlib', 'inline')
+
+            get_ipython().run_line_magic("matplotlib", "inline")
 
         import matplotlib.pyplot as plt
 
         plt.figure(figsize=(12, 7))
 
         plt.subplot(3, 1, 1)
-        plt.plot(y_best_mi, label='Predictions')
-        plt.xlabel('t')
-        plt.plot(y_hat, label='Reality')
-        plt.xlabel('t'); plt.ylabel("y"); plt.legend(loc="upper right")
+        plt.plot(y_best_mi, label="Predictions")
+        plt.xlabel("t")
+        plt.plot(y_hat, label="Reality")
+        plt.xlabel("t")
+        plt.ylabel("y")
+        plt.legend(loc="upper right")
 
         plt.subplot(3, 1, 2)
-        plt.plot(e_best_mi, label='Error'); plt.grid(); plt.xlabel('t')
-        plt.legend(loc="upper right"); plt.ylabel("Chyba")
+        plt.plot(e_best_mi, label="Error")
+        plt.grid()
+        plt.xlabel("t")
+        plt.legend(loc="upper right")
+        plt.ylabel("Chyba")
 
         plt.subplot(3, 1, 3)
         plt.plot(wall)
-        plt.grid(); plt.xlabel('t'); plt.ylabel("Weights")
+        plt.grid()
+        plt.xlabel("t")
+        plt.ylabel("Weights")
 
         plt.suptitle("Predictions vs reality, error and weights", fontsize=20)
         plt.subplots_adjust(top=0.88)
@@ -149,7 +177,7 @@ def predict(x_input, model, predicts=7):
 
     Args:
         x_input (np.ndarray): Time series data.
-        model (list, class): Trained model. It can be list of neural weights .
+        model (list, class): Trained model. It can be list of neural weights.
         predicts (int, optional): Number of predicted values. Defaults to 7.
 
     Returns:

@@ -1,8 +1,6 @@
 # predictit
 
-[![Python versions](https://img.shields.io/pypi/pyversions/predictit.svg)](https://pypi.python.org/pypi/predictit/)
-[![PyPI version](https://badge.fury.io/py/predictit.svg)](https://badge.fury.io/py/predictit)
-[![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/Malachov/predictit.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/Malachov/predictit/context:python) [![Build Status](https://travis-ci.com/Malachov/predictit.svg?branch=master)](https://travis-ci.com/Malachov/predictit) [![Documentation Status](https://readthedocs.org/projects/predictit/badge/?version=master)](https://predictit.readthedocs.io/en/master/?badge=master) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) [![codecov](https://codecov.io/gh/Malachov/predictit/branch/master/graph/badge.svg)](https://codecov.io/gh/Malachov/predictit)
+[![Python versions](https://img.shields.io/pypi/pyversions/predictit.svg)](https://pypi.python.org/pypi/predictit/) [![PyPI version](https://badge.fury.io/py/predictit.svg)](https://badge.fury.io/py/predictit) [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/Malachov/predictit.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/Malachov/predictit/context:python) [![Build Status](https://travis-ci.com/Malachov/predictit.svg?branch=master)](https://travis-ci.com/Malachov/predictit) [![Documentation Status](https://readthedocs.org/projects/predictit/badge/?version=master)](https://predictit.readthedocs.io/en/master/?badge=master) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) [![codecov](https://codecov.io/gh/Malachov/predictit/branch/master/graph/badge.svg)](https://codecov.io/gh/Malachov/predictit)
 
 Library/framework for making predictions. Choose best of 20 models (ARIMA, regressions, LSTM...)
 from libraries like statsmodels, scikit-learn, tensorflow and some own models. There are hundreds of
@@ -19,6 +17,7 @@ Most common output is plotly interactive graph, numpy array of results or detail
 <p align="center">
 <img src="docs/source/_static/img/output_example.png" width="620" alt="Plot of results"/>
 </p>
+
 <p align="center">
 <img src="docs/source/_static/img/table_of_results.png" width="620" alt="Table of results"/>
 </p>
@@ -34,14 +33,22 @@ as array or all predictions as dataframe. Interactive html plot is also created.
 
 ## Installation
 
-Python >=3.6. Python 2 is not supported. Install just with
+Python >=3.6 (Python 2 is not supported).
 
-    pip install predictit
+Install just with
+
+```console
+pip install predictit
+```
 
 Sometime you can have issues with installing some libraries from requirements
 (e.g. numpy because not BLAS / LAPACK). There are also two libraries - Tensorflow
 and pyodbc not in requirements, because not necessary, but troublesome. If library
 not installed with pip, check which library don't work, install manually with stackoverflow and repeat...
+
+There are some libraries that not every user will be using (e.g. Tensorflow or libraries for some data inputs).
+If you want to be sure to have all libraries, you can download `requirements_advanced.txt` and then install
+advanced requirements with `pip install -r requirements_advanced.txt`.
 
 Versions troubleshooting => Software is build in way, that it should be the best using latest versions of dependencies. In most cases older versions works well as well. Only exception can be author's library mydatapreprocessing, which is new and under development (API is not stable) and some version of predictit has dependency on particular version of mydatapreprocessing. Clean install of latest versions fix issue.
 
@@ -64,13 +71,13 @@ in predict is 0, in compare_models it's accurate). Then you can use only good mo
 import predictit
 import numpy as np
 
-predictions_1 = predictit.main.predict(data=np.random.randn(100, 2), predicted_column=1, predicts=3, return_type='best')
+predictions_1 = predictit.predict(data=np.random.randn(100, 2), predicted_column=1, predicts=3, return_type='best')
 
 # There are only two positional arguments (because, there is more than hundred configurable values).
 # data and predicted_column, so you can use also
 
 mydata = pd.DataFrame(np.random.randn(100, 2), columns=['a', 'b'])
-predictions_1_positional = predictit.main.predict(mydata, 'b')
+predictions_1_positional = predictit.predict(mydata, 'b')
 ```
 
 ## Simple example of using as a python library and editing Config
@@ -95,7 +102,7 @@ Config.update({
     'default_n_steps_in': 12  # Value of recursive inputs in model (do not use too high - slower and worse predictions)
 })
 
-predictions_2 = predictit.main.predict()
+predictions_2 = predictit.predict()
 ```
 
 ## Simple example of using `main.py` as a script
@@ -135,7 +142,7 @@ Config.update({
     'data_all': {'First part': (my_data_array[:100], 0), 'Second part': (my_data_array[100:], 1)}
 })
 
-compared_models = predictit.main.compare_models()
+compared_models = predictit.compare_models()
 ```
 
 ## Example of predict_multiple function
@@ -148,7 +155,7 @@ Config.data = np.random.randn(120, 3)
 Config.predicted_columns = ['*']  # Define list of columns or '*' for predicting all of the numeric columns
 Config.used_models = ['Conjugate gradient', 'Decision tree regression']  # Use just few models to be faster
 
-multiple_columns_prediction = predictit.main.predict_multiple_columns()
+multiple_columns_prediction = predictit.predict_multiple_columns()
 
 ```
 
@@ -166,10 +173,10 @@ Config.update({
     'optimization_values': [4, 6, 8],
     'plot_all_optimized_models': 0,
     'print_table': 2,  # Print detailed table
-    'used_models': ['AR (Autoregression)', 'Sklearn regression']
+    'used_models': ['AR', 'Sklearn regression']
 })
 
-predictions_optimized_config = predictit.main.predict()
+predictions_optimized_config = predictit.predict()
 
 ```
 
@@ -204,12 +211,12 @@ Under development right now :[
 
 ## Data preprocessing, plotting and other Functions
 
-You can use any library functions separately for your needs of course. mydatapreprocessing, mylogging and myplottling are my other projects, which are used heavily. Example is here
+You can use any library functions separately for your needs of course. mydatapreprocessing, mylogging and mypythontools are my other projects, which are used heavily. Example is here
 
 ```Python
 
 from mydatapreprocessing import load_data, data_consolidation, preprocess_data
-from myplotting import plot
+from mypythontools.plots import plot
 from predictit.analyze import analyze_column
 
 data = "https://blockchain.info/unconfirmed-transactions?format=json"
@@ -249,7 +256,7 @@ data = data[: -7]
 data = mdp.preprocessing.data_consolidation(data)
 (X, y), x_input, _ = mdp.inputs.create_inputs(data.values, 'batch', input_type_params={'n_steps_in': 6})  # First tuple, because some models use raw data - one argument, e.g. [1, 2, 3...]
 
-trained_model = predictit.models.sklearn_regression.train((X, y), regressor='bayesianridge')
+trained_model = predictit.models.sklearn_regression.train((X, y), regressor='BayesianRidge')
 predictions_one_model = predictit.models.sklearn_regression.predict(x_input, trained_model, predicts=7)
 
 predictions_one_model_error = predictit.evaluate_predictions.compare_predicted_to_test(predictions_one_model, test, error_criterion='mape')  # , plot=1
@@ -275,9 +282,9 @@ Config.update({
 
     # Chose models that will be computed - remove if you want to use all the models
     'used_models': [
-        "AR (Autoregression)",
-        "ARIMA (Autoregression integrated moving average)",
-        "Autoregressive Linear neural unit",
+        "AR",
+        "ARIMA",
+        "Autoregressive Linear\nneural unit",
         "Conjugate gradient",
         "Sklearn regression",
         "Bayes ridge regression one column one step",
@@ -288,17 +295,17 @@ Config.update({
 
     'models_parameters': {
 
-        "AR (Autoregression)": {'used_model': 'ar', 'method': 'cmle', 'ic': 'aic', 'trend': 'nc', 'solver': 'lbfgs'},
-        "ARIMA (Autoregression integrated moving average)": {'used_model': 'arima', 'p': 6, 'd': 0, 'q': 0},
+        "AR": {'used_model': 'ar', 'method': 'cmle', 'ic': 'aic', 'trend': 'nc', 'solver': 'lbfgs'},
+        "ARIMA": {'used_model': 'arima', 'p': 6, 'd': 0, 'q': 0},
 
-        "Autoregressive Linear neural unit": {'mi_multiple': 1, 'mi_linspace': (1e-5, 1e-4, 3), 'epochs': 10, 'w_predict': 0, 'minormit': 0},
+        "Autoregressive Linear\nneural unit": {'mi_multiple': 1, 'mi_linspace': (1e-5, 1e-4, 3), 'epochs': 10, 'w_predict': 0, 'minormit': 0},
         "Conjugate gradient": {'epochs': 80},
 
-        "Bayes ridge regression": {'regressor': 'bayesianridge', 'n_iter': 300, 'alpha_1': 1.e-6, 'alpha_2': 1.e-6, 'lambda_1': 1.e-6, 'lambda_2': 1.e-6},
+        "Bayes ridge regression": {'regressor': 'BayesianRidge', 'n_iter': 300, 'alpha_1': 1.e-6, 'alpha_2': 1.e-6, 'lambda_1': 1.e-6, 'lambda_2': 1.e-6},
     }
 })
 
-predictions_configured = predictit.main.predict()
+predictions_configured = predictit.predict()
 ```
 
 ## Performance - How to scale

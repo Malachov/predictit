@@ -8,7 +8,6 @@ Subpackages
    :maxdepth: 4
 
    predictit.models
-   predictit.test_data
 
 Submodules
 ----------
@@ -25,7 +24,6 @@ Submodules
    predictit.main
    predictit.main_loop
    predictit.misc
-   predictit.plots
 
 Module contents
 ---------------

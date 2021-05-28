@@ -1,10 +1,12 @@
 # List of what could be done
 
-## First to do
+TODO - Sort by priority
 
+## Short term
+
+- [ ] Test whether plotly is slower than matplotlib and document it in plots docstrings.
+- [ ] Store tensorflow mlp and lstm separately and by default.
 - [ ] Define some set of datasets (good for prediction) and evaluate results on commit with tag. save results into csv and evalueate KPI - Add data to default compare models
-
-- [ ] Write some propriate optimizations patterns to readme - E.g. optimize model input for model
 - [ ] evaluated_matrix from compare to main and in optimization new config value - use only best or keep all
 - [ ] Remove unnecessary copies (only data_for_predictions_df and using .values) and check if input data stays the same after all models computations - the same in preprocessing
 - [ ] Add transformations results as next input in parallel
@@ -26,22 +28,19 @@
 - [ ] Ability to load and save config to json to folder
 - [ ] For error criterion use compare models values in normal predict to remove best decision_tree which is unfair on insample predictions - config option - real error criterion (computationly harder)
 
-## Big Deals
+## Long term
 
 - [ ] Rewrite own modules (autoreg LNU and Conjugate grad) core loops as C extension (New edit - maybe can cause big troubles (packaging etc...))
 - [ ] Analyze output (residuals - mean, std etc. in comparison with original data)
-- [ ] Feature extraction - E.G. autoencoder to shrink input multivariate data to small vectors
-- [ ] Other feature extraction - Choose columns not on correlation, but based on error lowerage with simple model
+- [ ] Feature extraction - E.G. autoencoder and PCA to shrink input multivariate data to small vectors
+- [ ] Feature selection - Choose columns not on correlation, but based on error lowerage with simple model (neural net (better) as well as regression (faster))
 - [ ] Results postprocessing
-- [ ] Implement nan values
-  - [ ] Vectorize - Embedding
 - [ ] New models
   - [ ] LigthGBM
   - [ ] Prophet
   - [ ] CatBoostClassifierm CatBoostRegressor
   - [ ] HONU
   - [ ] statsmodels.tsa.vector_ar.var_model import VAR
-  - [ ] Levenberg-Marquardt
   - [ ] Random walk with same std and mean and trend as very few last data
   - [ ] Add some boost method (lgboost library..., own adaboost for multivariate data)
   - [ ] ETS method
@@ -70,7 +69,7 @@
 - [ ] Print failed models apart and put not in table results
 - [ ] Check if can some lists replace with sets (faster)
 - [ ] In optimization, compare models on more results to reduce chance. First do create real-error-criterion - than use it.
-- [ ] Translate and finish models **init** docstrings
+- [ ] Translate and finish models **init** docstrings and models docstrings.
 - [ ] Add residuals matrix from results_matrix and add plotly box plot for residuals of models in main.py (https://plot.ly/python/box-plots/), or box plot for error criterion (data lengths and for repetitions) on compare_models
 - [ ] Improve / edit existing models
   - [ ] For models with significant results diversity (ELM...) use optional bagging (mean of more results) in models

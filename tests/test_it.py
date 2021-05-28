@@ -1,40 +1,35 @@
-""" Test module. Auto pytest that can be started in IDE or with
+""" Test module. Auto pytest that can be started in IDE or with terminal in tests folder.
 
     >>> python -m pytest
 
-in terminal in tests folder.
+Printing and plotling is turned OFF in tests. If you want to see ou
 """
 #%%
 
-import sys
-import numpy as np
-import pandas as pd
 from pathlib import Path
 import inspect
-import os
-import warnings
 import matplotlib
+import numpy as np
+import os
+import pandas as pd
+import sys
+import warnings
 
 import mydatapreprocessing as mdp
 import mylogging
 
 # Find paths and add to sys.path to be able to import local modules
-test_dir_path = Path(
-    os.path.abspath(inspect.getframeinfo(inspect.currentframe()).filename)
-).parents[0]
+test_dir_path = Path(os.path.abspath(inspect.getframeinfo(inspect.currentframe()).filename)).parent
 root_path = test_dir_path.parent
 
-if test_dir_path.as_posix() not in sys.path:
-    sys.path.insert(0, test_dir_path.as_posix())
-
-if root_path.as_posix() not in sys.path:
-    sys.path.insert(0, root_path.as_posix())
+for path in [test_dir_path, root_path]:
+    if path.as_posix() not in sys.path:
+        sys.path.insert(0, path.as_posix())
 
 
 from visual import visual_test
 
 import predictit
-
 
 with warnings.catch_warnings():
     warnings.simplefilter("ignore")
@@ -59,12 +54,12 @@ Config.update(
         "show_plot": 0,
         "data": None,
         "datalength": 120,
-        "default_n_řžsteps_in": 3,
+        "default_n_steps_in": 3,
         "analyzeit": 0,
         "optimization": 0,
         "optimizeit": 0,
         "used_models": [
-            "AR (Autoregression)",
+            "AR",
             "Conjugate gradient",
             "Sklearn regression",
         ],
@@ -95,11 +90,10 @@ def test_1():
     Config.plotit = 1
     Config.printit = 1
     Config.plot_type = "plotly"
-    Config.show_plot = 0
     Config.confidence_interval = 0
 
     Config.multiprocessing = 0
-    result = predictit.main.predict(predicts=3, return_type=None)
+    result = predictit.predict(predicts=3, return_type=None)
     for i in range(3):
         tested_result = list(result.values())[i].get("Test errors")
         if tested_result is not None:
@@ -116,12 +110,12 @@ def test_readmes():
     ######
     Config.update(config_unchanged)
 
-    predictions_1 = predictit.main.predict(
+    predictions_1 = predictit.predict(
         data=np.random.randn(100, 2), predicted_column=1, predicts=3, return_type="best"
     )
 
     mydata = pd.DataFrame(np.random.randn(100, 2), columns=["a", "b"])
-    predictions_1_positional = predictit.main.predict(mydata, "b")
+    predictions_1_positional = predictit.predict(mydata, "b")
 
     ######
     ### Simple example of using as a python library and editing Config
@@ -133,9 +127,7 @@ def test_readmes():
     Config.predicted_column = "Temp"  # You can use index as well
     Config.datetime_column = "Date"  # Will be used in result
     Config.freq = "D"  # One day - one value resampling
-    Config.resample_function = (
-        "mean"  # If more values in one day - use mean (more sources)
-    )
+    Config.resample_function = "mean"  # If more values in one day - use mean (more sources)
     Config.return_type = "detailed_dictionary"
     Config.debug = 0  # Ignore warnings
 
@@ -148,7 +140,7 @@ def test_readmes():
         }
     )
 
-    predictions_2 = predictit.main.predict()
+    predictions_2 = predictit.predict()
 
     ######
     ### Example of compare_models function
@@ -167,7 +159,7 @@ def test_readmes():
         }
     )
 
-    compared_models = predictit.main.compare_models()
+    compared_models = predictit.compare_models()
 
     ######
     ### Example of predict_multiple function
@@ -183,7 +175,7 @@ def test_readmes():
         "Decision tree regression",
     ]  # Use just few models to be faster
 
-    multiple_columns_prediction = predictit.main.predict_multiple_columns()
+    multiple_columns_prediction = predictit.predict_multiple_columns()
 
     ######
     ### Example of Config variable optimization ###
@@ -201,11 +193,11 @@ def test_readmes():
             "optimization_values": [4, 6, 8],
             "plot_all_optimized_models": 0,
             "print_table": 1,  # Print detailed table
-            "used_models": ["AR (Autoregression)", "Sklearn regression"],
+            "used_models": ["AR", "Sklearn regression"],
         }
     )
 
-    predictions_optimized_config = predictit.main.predict()
+    predictions_optimized_config = predictit.predict()
 
     ######
     ### Data preprocessing, plotting and other Functions
@@ -217,7 +209,7 @@ def test_readmes():
         data_consolidation,
         preprocess_data,
     )
-    from predictit.plots import plot
+    from mypythontools.plots import plot
 
     data = "https://blockchain.info/unconfirmed-transactions?format=json"
 
@@ -267,17 +259,11 @@ def test_readmes():
         data.values, "batch", input_type_params={"n_steps_in": 6}
     )  # First tuple, because some models use raw data, e.g. [1, 2, 3...]
 
-    trained_model = predictit.models.sklearn_regression.train(
-        (X, y), regressor="bayesianridge"
-    )
-    predictions_one_model = predictit.models.sklearn_regression.predict(
-        x_input, trained_model, predicts=7
-    )
+    trained_model = predictit.models.sklearn_regression.train((X, y), model="BayesianRidge")
+    predictions_one_model = predictit.models.sklearn_regression.predict(x_input, trained_model, predicts=7)
 
-    predictions_one_model_error = (
-        predictit.evaluate_predictions.compare_predicted_to_test(
-            predictions_one_model, test, error_criterion="mape"
-        )
+    predictions_one_model_error = predictit.evaluate_predictions.compare_predicted_to_test(
+        predictions_one_model, test, error_criterion="mape"
     )  # , plot=1
 
     ######
@@ -297,30 +283,30 @@ def test_readmes():
             "debug": 1,  # Whether print details and warnings
             # Chose models that will be computed - remove if you want to use all the models
             "used_models": [
-                "AR (Autoregression)",
-                "ARIMA (Autoregression integrated moving average)",
-                "Autoregressive Linear neural unit",
+                "AR",
+                "ARIMA",
+                "Autoregressive Linear\nneural unit",
                 "Conjugate gradient",
                 "Sklearn regression",
-                "Bayes ridge regression one step",
+                "Bayes ridge regression\none step",
                 "Decision tree regression",
             ],
             # Define parameters of models
             "models_parameters": {
-                "AR (Autoregression)": {
+                "AR": {
                     "used_model": "ar",
                     "method": "cmle",
                     "ic": "aic",
                     "trend": "nc",
                     "solver": "lbfgs",
                 },
-                "ARIMA (Autoregression integrated moving average)": {
+                "ARIMA": {
                     "used_model": "arima",
                     "p": 6,
                     "d": 0,
                     "q": 0,
                 },
-                "Autoregressive Linear neural unit": {
+                "Autoregressive Linear\nneural unit": {
                     "mi_multiple": 1,
                     "mi_linspace": (1e-5, 1e-4, 3),
                     "epochs": 10,
@@ -329,7 +315,7 @@ def test_readmes():
                 },
                 "Conjugate gradient": {"epochs": 200},
                 "Bayes ridge regression": {
-                    "regressor": "bayesianridge",
+                    "model": "BayesianRidge",
                     "n_iter": 300,
                     "alpha_1": 1.0e-6,
                     "alpha_2": 1.0e-6,
@@ -340,10 +326,8 @@ def test_readmes():
         }
     )
 
-    predictions_configured = predictit.main.predict()
-    first_multiple_array = multiple_columns_prediction[
-        list(multiple_columns_prediction.keys())[0]
-    ]
+    predictions_configured = predictit.predict()
+    first_multiple_array = multiple_columns_prediction[list(multiple_columns_prediction.keys())[0]]
 
     assert all(
         [
@@ -402,7 +386,7 @@ def test_main_from_config():
         }
     )
 
-    result = predictit.main.predict()
+    result = predictit.predict()
     assert not result.dropna().empty
     return result
 
@@ -437,7 +421,7 @@ def test_main_optimize_and_args():
             "used_models": ["Bayes ridge regression"],
             "models_parameters": {
                 "Bayes ridge regression": {
-                    "regressor": "bayesianridge",
+                    "model": "BayesianRidge",
                     "n_iter": 300,
                     "alpha_1": 1.0e-6,
                     "alpha_2": 1.0e-6,
@@ -450,13 +434,13 @@ def test_main_optimize_and_args():
             "models_parameters_limits": {
                 "Bayes ridge regression": {
                     "alpha_1": [0.1e-6, 3e-6],
-                    "regressor": ["bayesianridge", "lasso"],
+                    "model": ["BayesianRidge", "LassoRegression"],
                 }
             },
         }
     )
 
-    result = predictit.main.predict(data="test", predicted_column=[], repeatit=20)
+    result = predictit.predict(data="test", predicted_column=[], repeatit=20)
     assert not np.isnan(result.min())
     return result
 
@@ -493,7 +477,7 @@ def test_config_optimization():
         }
     )
 
-    result = predictit.main.predict()
+    result = predictit.predict()
     assert not np.isnan(np.min(result))
     return result
 
@@ -511,12 +495,12 @@ def test_most_models():
             "error_criterion": "mape",
             "used_models": [
                 "ARMA",
-                "ARIMA (Autoregression integrated moving average)",
+                "ARIMA",
                 "autoreg",
                 "SARIMAX (Seasonal ARIMA)",
-                "Autoregressive Linear neural unit",
-                "Autoregressive Linear neural unit normalized",
-                "Linear neural unit with weights predict",
+                "Autoregressive Linear\nneural unit",
+                "Autoregressive Linear\nneural unit normalized",
+                "Linear neural unit\nwith weights predict",
                 "Sklearn regression",
                 "Bayes ridge regression",
                 "Passive aggressive regression",
@@ -532,14 +516,15 @@ def test_most_models():
                 "Random forest regression",
                 "Tensorflow LSTM",
                 "Tensorflow MLP",
-                "Compare with average",
+                "Average short",
+                "Average long",
                 "Regression",
                 "Ridge regression",
             ],
         }
     )
 
-    result = predictit.main.predict()
+    result = predictit.predict()
 
     assert not np.isnan(np.min(result))
 
@@ -548,7 +533,7 @@ def test_most_models():
 
 def test_other_models_functions():
     tf_optimizers = predictit.models.tensorflow.get_optimizers_loses_activations()
-    sklearn_regressors = predictit.models.sklearn_regression.get_regressors()
+    sklearn_regressors = predictit.models.sklearn_regression.get_all_models()
 
     sequentions = mdp.inputs.make_sequences(np.random.randn(100, 1), 5)
     predictit.models.autoreg_LNU.train(sequentions, plot=1)
@@ -570,12 +555,12 @@ def test_presets():
         }
     )
 
-    result = predictit.main.predict()
+    result = predictit.predict()
     assert not np.isnan(np.min(result))
 
     Config.update({"use_config_preset": "normal"})
 
-    result = predictit.main.predict()
+    result = predictit.predict()
     assert not np.isnan(np.min(result))
     return result
 
@@ -591,7 +576,7 @@ def test_main_multiple():
         }
     )
 
-    result_multiple = predictit.main.predict_multiple_columns()
+    result_multiple = predictit.predict_multiple_columns()
     first_array = result_multiple[list(result_multiple.keys())[0]]
     assert not np.isnan(np.min(first_array))
     return result_multiple
@@ -615,7 +600,7 @@ def test_main_multiple_all_columns():
         }
     )
 
-    result_multiple = predictit.main.predict_multiple_columns()
+    result_multiple = predictit.predict_multiple_columns()
     first_array = result_multiple[list(result_multiple.keys())[0]]
     assert not np.isnan(np.min(first_array))
     return result_multiple
@@ -625,7 +610,7 @@ def test_compare_models():
     Config.update(config_for_tests)
     data_all = None
 
-    result = predictit.main.compare_models(data_all=data_all)
+    result = predictit.compare_models(data_all=data_all)
 
     assert result
 
@@ -635,7 +620,7 @@ def test_compare_models_list():
     dummy_data = np.random.randn(300)
     data_all = [dummy_data[:100], dummy_data[100:200], dummy_data[200:]]
 
-    result = predictit.main.compare_models(data_all=data_all)
+    result = predictit.compare_models(data_all=data_all)
 
     assert result
 
@@ -651,7 +636,7 @@ def test_compare_models_with_optimization():
         }
     )
 
-    result = predictit.main.compare_models()
+    result = predictit.compare_models()
 
     assert result
 
@@ -671,6 +656,18 @@ def test_visual():
 
 # For deeper debug, uncomment problematic test
 if __name__ == "__main__":
+
+    # If running manually, not from tests, turn on printing and plotting
+    updated_config = {
+        "printit": 1,
+        "plotit": 1,
+        "show_plot": 1,
+    }
+
+    Config.update(updated_config)
+
+    config_for_tests.update(updated_config)
+
     # result = test_1()
     # result_readmes = test_readmes()
     # result1 = test_main_from_config()
@@ -684,9 +681,17 @@ if __name__ == "__main__":
     # test_compare_models_with_optimization = test_compare_models_with_optimization()
     # test_GUI()
     # test_preprocessing()
+    # test_most_models()
 
     ## Custom use case test...
 
-    test_main_from_config()
+    data = np.array([range(100), range(100, 200), range(200, 300)])
 
-    pass
+    # # Specific config - not working for defined tests (for edit tests config edit updated_config)
+    # Config.update(
+    #     {
+    #         "error_criterion": "dtw",
+    #     }
+    # )
+
+    result = predictit.predict(data, predicts=3, return_type=None)

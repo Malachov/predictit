@@ -1,17 +1,24 @@
 # List of what have been done in new versions
 
-## 1.6x - 10/2020
+## 1.6x - 03/2021
 
-[x] Annoying warnings filtered on import not on library call (and from multiprocessess)
-[x] String embedding - One hot or label encoding
-[x] Api change! Config renamed because class with capitalize C from config to Config. 'datetime_index' renamed to 'datetime_column' - Old scripts wont work
-[x] Data_preprocessing and logging from misc moved into own projects and imported. Projects are called mylogging and mydatapreprocessing. It'necessary to have corresponding version
-[x] Various transforms added as derived columns. For example: Difference transform, Rolling window and rolling std transformation, Distance from the mean.
-[x] Fast fourier transform as new information.
-[x] Short way of using functions with positional argument - predictit.main.predict(np.random.randn(1000). Same with predict_multiple and compare models.
-[x] Devil terminology fail fixed(used batch instead of multistep in own models)
-[x] New custom models added (ridge regresion and Levenberg-Marquardt)
-[x] File input can contain more files in list.
+- [x] Annoying warnings filtered on import filtered
+- [x] String embedding - One hot or label encoding
+- [x] Api change! Config renamed because class with capitalize C from config to Config. 'datetime_index' renamed to 'datetime_column' - Old scripts wont work
+- [x] Data_preprocessing and logging from misc moved into own projects and imported. Projects are called mylogging and mydatapreprocessing. It'necessary to have corresponding version
+- [x] Various transforms added as derived columns. For example: Difference transform, Rolling window and rolling std transformation, Distance from the mean.
+- [x] Fast fourier transform as new information.
+- [x] Short way of using functions with positional argument - predictit.main.predict(np.random.randn(1000)). Same with predict_multiple and compare models.
+- [x] Devil terminology fail fixed (using correct multistep instead of batch)
+- [x] New custom models added (ridge regresion and Levenberg-Marquardt)
+- [x] File input can contain more files in list.
+- [x] Reformated with black
+- [x] Lazy imports (faster import)
+- [x] Plot module moved into mypythontools library and imported
+- [x] Import functions from main in init to be able to call predictit.predict instead of predictit.main.predict
+- [x] Classifiers add to sklearn model. Also possibility to input sklearn model as parameter and call all the models as a string
+- [x] Data discretization possibility (binning)
+- [x] CI moved from TravisCI (tests to computationally intensive) to own (mypythontools) python scripts (called from utils folder)
 
 ## 1.5x - 09/2020
 
@@ -41,9 +48,6 @@
 - [x] Option whether to evalueate error criterion on preprocessed data or on original data
 - [x] Option to sort detailed result table by error or by name
 - [x] Compare models redefined. More fair for all types of models, but repeatit = 1, so more samples necessary.
-
-## v1.3x. - 04/2020
-
 - [x] Many new models from sklearn - Decision trees, bagging, Gradient boosting...
 - [x] Multiprocessing applied. Two options - 'pool' or 'process'
 - [x] Data smoothing - Savitzky-Golay filter in data preprocessing
@@ -73,7 +77,7 @@
 - [x] Config values putted in dictionary [! other way to use it!]
 - [x] Basic data postprocessing - Power transformation - Two options 1) On train data (change error criterion) 2) Only on output
 
-## v1.0 - 03/2020 (first no in development version)
+## v1.0 - 2020 (first no in development version)
 
 - [x] Tensorflow models architecture configurable with arguments - layers and its parameters in list.
 - [x] Choose which models to optimize (comment out config models_parameters_limits dictionary)

@@ -6,12 +6,13 @@ def train(data, epochs=100):
     """Conjugate gradient model.
 
     Args:
-        data ((np.ndarray, np.ndarray)) - Tuple (X, y) of input train vectors X and train outputs y
-                    X should contain bias - constant 1 on first place of every sample (parameter constant in `mydatapreprocessing.inputs.make_sequences`).
+        data ((np.ndarray, np.ndarray)) - Tuple (X, y) of input train vectors X and train outputs y.
+            X should contain bias - constant 1 on first place of every sample
+            (parameter constant in `mydatapreprocessing.inputs.make_sequences`).
         epochs (int, optional): Number of epochs to evaluate. Defaults to 100.
 
     Returns:
-        np.ndarray: Predictions of input time series.
+        np.ndarray: Array of neural weights.
     """
 
     X = data[0]
@@ -50,7 +51,7 @@ def predict(x_input, model, predicts=7):
 
     Args:
         x_input (np.ndarray): Time series data
-        model (list, class): Trained model. It can be list of neural weights or it can be fitted model class from imported library.
+        model (np.ndarray): Trained model. Array of neural weights.
         predicts (int, optional): Number of predicted values. Defaults to 7.
 
     Returns:
