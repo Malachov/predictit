@@ -497,7 +497,7 @@ def test_most_models():
                 "ARMA",
                 "ARIMA",
                 "autoreg",
-                "SARIMAX (Seasonal ARIMA)",
+                "SARIMAX",
                 "Autoregressive Linear\nneural unit",
                 "Autoregressive Linear\nneural unit normalized",
                 "Linear neural unit\nwith weights predict",
@@ -665,7 +665,6 @@ if __name__ == "__main__":
     }
 
     Config.update(updated_config)
-
     config_for_tests.update(updated_config)
 
     # result = test_1()
@@ -685,7 +684,7 @@ if __name__ == "__main__":
 
     ## Custom use case test...
 
-    data = np.array([range(100), range(100, 200), range(200, 300)])
+    # data = np.array([range(100), range(100, 200), range(200, 300)])
 
     # # Specific config - not working for defined tests (for edit tests config edit updated_config)
     # Config.update(
@@ -694,4 +693,4 @@ if __name__ == "__main__":
     #     }
     # )
 
-    result = predictit.predict(data, predicts=3, return_type=None)
+    # result = predictit.predict(data, predicts=3, return_type=None)

@@ -72,7 +72,7 @@ models_assignment = {
             "ARMA",
             "ARIMA",
             "autoreg",
-            "SARIMAX (Seasonal ARIMA)",
+            "SARIMAX",
         ]
     },
     **{

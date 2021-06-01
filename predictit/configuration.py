@@ -239,7 +239,7 @@ class Config:
         "AR",
         "ARIMA",
         "autoreg",
-        # 'ARMA', 'SARIMAX (Seasonal ARIMA)',
+        # 'ARMA', 'SARIMAX',
         # ### predictit.models.autoreg_LNU
         "Autoregressive Linear\nneural unit",
         # 'Linear neural unit\nwith weights predict',
@@ -337,7 +337,7 @@ class Config:
                 "ARMA",
                 "ARIMA",
                 "autoreg",
-                "SARIMAX (Seasonal ARIMA)",
+                "SARIMAX",
                 "Average short",
                 "Average long",
             ]
@@ -409,7 +409,7 @@ class Config:
             "q": 1,
         },
         "autoreg": {"used_model": "autoreg", "maxlag": 13, "cov_type": "nonrobust"},
-        "SARIMAX (Seasonal ARIMA)": {
+        "SARIMAX": {
             "used_model": "sarimax",
             "p": 3,
             "d": 0,
@@ -564,7 +564,7 @@ class Config:
                 "trend": ["c", "nc"],
             },
             "autoreg": {"cov_type": ["nonrobust", "HC0", "HC1", "HC3"]},
-            # 'SARIMAX (Seasonal ARIMA)': {'p': [1, cls.maxorder], 'd': cls.order, 'q': cls.order, 'pp': cls.order, 'dd': cls.order, 'qq': cls.order,
+            # 'SARIMAX': {'p': [1, cls.maxorder], 'd': cls.order, 'q': cls.order, 'pp': cls.order, 'dd': cls.order, 'qq': cls.order,
             # 'season': cls.order, 'method': ['lbfgs', 'bfgs', 'newton', 'nm', 'cg', 'ncg', 'powell'], 'trend': ['n', 'c', 't', 'ct'], 'forecast_type': ['in_sample', 'out_of_sample']},
             "Ridge regression": {"lmbda": [1e-8, 1e6]},
             "Levenberg-Marquardt": {"learning_rate": [0.01, 10]},
@@ -663,7 +663,7 @@ class Config:
                 "AR",
                 "ARIMA",
                 "autoreg",
-                "SARIMAX (Seasonal ARIMA)",
+                "SARIMAX",
                 "Autoregressive Linear\nneural unit",
                 "Conjugate gradient",
                 "Sklearn regression",

@@ -4,6 +4,7 @@ TODO - Sort by priority
 
 ## Short term
 
+- [ ] In sklearn model - auto select model (use pipeline?)
 - [ ] Test whether plotly is slower than matplotlib and document it in plots docstrings.
 - [ ] Store tensorflow mlp and lstm separately and by default.
 - [ ] Define some set of datasets (good for prediction) and evaluate results on commit with tag. save results into csv and evalueate KPI - Add data to default compare models

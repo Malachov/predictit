@@ -73,9 +73,10 @@ Install just with::
     pip install predictit
 
 Sometime you can have issues with installing some libraries from requirements
-(e.g. numpy because not BLAS / LAPACK). There are also two libraries - Tensorflow
-and pyodbc not in requirements, because not necessary, but troublesome. If library
+(e.g. numpy because not BLAS / LAPACK). If library
 not installed with pip, check which library don't work, install manually with stackoverflow and repeat...
+There are also some libraries (Tensorflow, pyodbc...) not in requirements, because not necessary for everyone.
+If you use some function that needs, it will tell you, just install with pip install...
 
 There are some libraries that not every user will be using (e.g. Tensorflow or libraries for some data inputs).
 If you want to be sure to have all libraries, you can download ``requirements_advanced.txt`` and then install

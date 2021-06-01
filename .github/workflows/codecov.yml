@@ -1,0 +1,11 @@
+name: Codecov test coverage
+on: [push]
+jobs:
+  my-job:
+    name: Codecov
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - uses: codecov/codecov-action@v1
+        with:
+          files: .coverage.xml

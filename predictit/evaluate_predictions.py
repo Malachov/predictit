@@ -91,7 +91,7 @@ def compare_predicted_to_test(
 
         elif error_criterion == "dtw":
 
-            if not importlib.util.find_spec("xlrd"):
+            if not importlib.util.find_spec("dtaidistance"):
                 raise ImportError(
                     mylogging.return_str(
                         "Library dtaidistance necessary for configured dtw (dynamic time warping) "
