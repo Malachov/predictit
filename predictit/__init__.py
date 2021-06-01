@@ -359,7 +359,7 @@ Dont be shy to create Issue or text on <malachovd@seznam.cz>
 
 """
 
-__version__ = "1.61.4"
+__version__ = "1.61.5"
 __author__ = "Daniel Malachov"
 __license__ = "MIT"
 __email__ = "malachovd@seznam.cz"
