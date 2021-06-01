@@ -16,7 +16,7 @@ github_user = "Malachov"
 # Folders to sys path to be able to import
 script_dir = pathlib.Path(__file__).resolve()
 root_path = script_dir.parents[2]
-lib_path = script_dir.parents[2] / project
+lib_path = root_path / project
 
 for i in [script_dir, root_path, lib_path]:
     if i.as_posix() not in sys.path:
