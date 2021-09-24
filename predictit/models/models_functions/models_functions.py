@@ -1,7 +1,10 @@
 import numpy as np
+from typing import Callable
 
 
-def one_step_looper(model_function, x_input, predicts, constant=True):
+def one_step_looper(
+    model_function, x_input: np.ndarray, predicts: int, constant: bool = True
+) -> np.ndarray:
     """Predict one value, generate new input (add new to last and delete first) and predict again.
 
     Args:
@@ -12,17 +15,37 @@ def one_step_looper(model_function, x_input, predicts, constant=True):
 
     Returns:
         np.ndarray: Predicted values.
+
+    Note:
+        It's important to correct constant param.
     """
     predictions = []
 
-    for _ in range(predicts):
-        ypre = model_function(x_input)
-        predictions.append(ypre)
-        if not constant:
-            x_input[:-1] = x_input[1:]
-            x_input[-1] = ypre
-        else:
-            x_input[1:-1] = x_input[2:]
-            x_input[-1] = ypre
+    input_vector = x_input.copy()
+
+    if input_vector.ndim == 1:
+        for _ in range(predicts):
+            ypre = model_function(input_vector)
+            predictions.append(ypre)
+            if not constant:
+                input_vector[:-1] = input_vector[1:]
+                input_vector[-1] = ypre
+            else:
+                input_vector[1:-1] = input_vector[2:]
+                input_vector[-1] = ypre
+
+    elif input_vector.ndim == 2 and input_vector.shape[0] == 1:
+        for _ in range(predicts):
+            ypre = model_function(input_vector)
+            predictions.append(ypre)
+            if not constant:
+                input_vector[0, :-1] = input_vector[0, 1:]
+                input_vector[0, -1] = ypre
+            else:
+                input_vector[0, 1:-1] = input_vector[0, 2:]
+                input_vector[0, -1] = ypre
+
+    else:
+        raise TypeError("Max ndim is 2.")
 
     return np.array(predictions).reshape(-1)

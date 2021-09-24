@@ -1,4 +1,4 @@
-"""Module with function compare_predicted_to_test that Compare tested model with reality. It return some error criterion based on Config.py"""
+"""Module with function compare_predicted_to_test that Compare tested model with reality. It return some error criterion based on config"""
 
 import numpy as np
 import mylogging
@@ -45,17 +45,8 @@ def compare_predicted_to_test(
     if predicted is not None:
         if plot:
 
-            if misc._JUPYTER:
-                from IPython import get_ipython
-
-                get_ipython().run_line_magic("matplotlib", "inline")
-
-            if misc._IS_TESTED:
-                with warnings.catch_warnings():
-                    warnings.simplefilter("ignore")
-                    import matplotlib
-
-                    matplotlib.use("agg")
+            if not misc.GLOBAL_VARS._PLOTS_CONFIGURED:
+                misc.setup_plots()
 
             import matplotlib.pyplot as plt
 
@@ -76,10 +67,15 @@ def compare_predicted_to_test(
         mae = sumabserror / predicts
         """
 
-        if error_criterion == "mse_sklearn":
+        if error_criterion == "mse" or error_criterion == "mse_sklearn":
             from sklearn.metrics import mean_squared_error
 
             criterion_value = mean_squared_error(test, predicted)
+
+        elif error_criterion == "max_error":
+            from sklearn.metrics import max_error
+
+            criterion_value = max_error(test, predicted)
 
         elif error_criterion == "rmse":
             rmseerror = error ** 2
@@ -101,12 +97,14 @@ def compare_predicted_to_test(
 
             from dtaidistance import dtw
 
-            criterion_value = dtw.distance_fast(predicted.astype("double"), test.astype("double"))
+            criterion_value = dtw.distance_fast(
+                predicted.astype("double"), test.astype("double")
+            )
 
         else:
             raise KeyError(
                 mylogging.return_str(
-                    f"bad 'error_criterion' Config - '{error_criterion}'. Use some from options from config comment..."
+                    f"bad 'error_criterion' in config - '{error_criterion}'. Use some from options from config comment..."
                 )
             )
 

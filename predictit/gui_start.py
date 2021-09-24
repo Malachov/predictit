@@ -2,13 +2,13 @@
 
 from pathlib import Path
 import sys
-import warnings
 import traceback
+import mypythontools
+
+import predictit
 
 # Lazy imports
 # import eel
-# import predictit
-
 
 # If some information from inside main(), define function here
 def edit_gui_py(content, id):
@@ -39,19 +39,20 @@ def run_gui():
     # If used not as a library but as standalone framework, add path to be able to import predictit if not opened in folder
     sys.path.insert(0, this_path_string)
 
-    import predictit
+    config = predictit.config
 
-    Config = predictit.configuration.Config
-
-    predictit.misc._GUI = 1
-    Config.update(
+    predictit.misc.GLOBAL_VARS._GUI = 1
+    config.update(
         {
-            "show_plot": 0,
-            "save_plot": 0,
-            "return_type": "detailed_dictionary",
+            "show_plot": False,
+            "save_plot": False,
             "data": None,
-            "data_source": "csv",
-            "csv_test_data_relative_path": "",
+            "table_settigs": {
+                "tablefmt": "html",
+                "floatfmt": ".3f",
+                "numalign": "center",
+                "stralign": "center",
+            },
         }
     )
 
@@ -64,40 +65,28 @@ def run_gui():
         Args:
             configured (dict): Some configuration values can be configured in GUI.
         """
-        for i, j in configured.items():
-            if j != "" and i in predictit.configuration.all_variables_set:
-
-                try:
-                    val = int(j)
-                except ValueError:
-                    try:
-                        val = float(j)
-                    except ValueError:
-                        val = j
-
-                setattr(Config, i, val)
-
-            else:
-                warnings.warn(
-                    f"\n \t Inserted option with command line --{i} not found in Config.py use --help for more information.\n"
-                )
+        config.update(mypythontools.misc.json_to_py(configured))
 
         eel.edit_gui_js("Setup finished", "progress_phase")
 
         try:
             results = predictit.main.predict()
 
-            div = results["plot"]
+            div = results.plot
 
             #                            content      p_tag    id_parent    id_created    label    classes
-            if Config.print_best_model_result:
-                eel.add_HTML_element(str(results["best"]), True, "content", "best_result", "Best result")
-
-            eel.add_HTML_element(div, False, "content", "ploted_results", "Interactive plot", ["plot"])
-
-            if Config.print_table:
+            if config.print_result_details:
                 eel.add_HTML_element(
-                    results["models_table"],
+                    str(results.best), True, "content", "best_result", "Best result"
+                )
+
+            eel.add_HTML_element(
+                div, False, "content", "ploted_results", "Interactive plot", ["plot"]
+            )
+
+            if config.print_table:
+                eel.add_HTML_element(
+                    results.tables.detailed_results,
                     False,
                     "content",
                     "models_table",
@@ -109,24 +98,22 @@ def run_gui():
 
             eel.add_delete_button("content")
 
-            if Config.debug:
-
-                eel.add_HTML_element(
-                    results["time_table"],
-                    False,
-                    "content",
-                    "time_parts_table",
-                    "Time schema of prediction",
-                    "table",
-                )
-                eel.add_HTML_element(
-                    results["output"],
-                    True,
-                    "content",
-                    "printed_output",
-                    "Everything printed",
-                    "pre-wrapped",
-                )
+            eel.add_HTML_element(
+                results.tables.time,
+                False,
+                "content",
+                "time_parts_table",
+                "Time schema of prediction",
+                "table",
+            )
+            eel.add_HTML_element(
+                results.output,
+                True,
+                "content",
+                "printed_output",
+                "Everything printed",
+                "pre-wrapped",
+            )
 
         except Exception:
 

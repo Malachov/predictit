@@ -1,3 +1,24 @@
-from . import test_it
+""" Test module. Auto pytest that can be started in IDE or with::
 
-__all__ = ['test_it']
+    python -m pytest
+
+in terminal in tests folder.
+"""
+
+from . import (
+    test_compare_models,
+    test_find_optimal_input,
+    test_misc,
+    test_predict,
+    test_predict_multiple,
+    test_visual,
+)
+
+__all__ = [
+    "test_compare_models",
+    "test_find_optimal_input",
+    "test_misc",
+    "test_predict",
+    "test_predict_multiple",
+    "test_visual",
+]

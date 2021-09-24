@@ -3,8 +3,14 @@ import importlib
 
 import mylogging
 
+import os
+
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 # Lazy imports
 # import tensorflow as tf
+
+
+# TODO test stateful=True on LSTM
 
 
 def train(
@@ -17,6 +23,7 @@ def train(
     saved_model_path_string="stored_models",
     optimizer="adam",
     loss="mse",
+    summary=False,
     verbose=0,
     used_metrics="accuracy",
     timedistributed=False,
@@ -27,20 +34,22 @@ def train(
     Args:
         data ((np.ndarray, np.ndarray)) - Tuple (X, y) of input train vectors X and train outputs y
         layers (tuple, optional) - Tuple of tuples of layer name (e.g. 'lstm') and layer params dict e.g.
-            (("lstm", {"units": 7, "activation": "relu"})). Check default layres tuple here for example.
+            (("lstm", {"units": 7, "activation": "relu"})). Check default layers tuple here for example.
             There are also some predefined architectures. You can use 'lstm' or 'mlp'. Defaults to 'mlp'.
         epochs (int, optional): Number of epochs to evaluate. Defaults to 100.
-        load_trained_model (bool, optional): If True, load model from disk. Most of time is spend on training, so if loaded
-            and not updated, it's very fast. Defaults to True.
-        update_trained_model (bool, optional): Whether load_trained_model, it's updated with new input. Defaults to True.
+        load_trained_model (bool, optional): If True, load model from disk. Most of time is spend
+            on training, so if loaded and not updated, it's very fast. Defaults to True.
+        update_trained_model (bool, optional): Whether load_trained_model, it's updated with new input.
+            Defaults to True.
         save_model (str, optional): If True, save model on disk on saved_model_path_string. Defaults to True.
-        saved_model_path_string (str, optional): Full path to saved model with name. E.g. '/home/dan/mymodel.h5. If 'stored_models',
-            then it's save to library folder models/stored_models. Defaults to 'stored_models'.
+        saved_model_path_string (str, optional): Full path to saved model with name. E.g. '/home/dan/mymodel.h5.
+        If 'stored_models', then it's save to library folder models/stored_models. Defaults to 'stored_models'.
         optimizer (str, optional): Used optimizer. Defaults to 'adam'.
         loss (str, optional): Loss function. Defaults to 'mse'.
-        verbose (int, optional): Wheter display details. Defaults to 0.
+        summary (int, optional): Display model details table. Defaults to 0.
+        verbose (int, optional): Whether display progress bar. Defaults to 0.
         used_metrics (str, optional): Used metrics. 'accuracy' or 'mape' Defaults to 'accuracy'.
-        timedistributed (bool, optional): Whether add timedistributed layer. Defaults to False.
+        timedistributed (bool, optional): Whether add time distributed layer. Defaults to False.
         batch_size (int, optional): Used batch size. Defaults to 64.
 
     Returns:
@@ -97,7 +106,9 @@ def train(
         raise ValueError("metrics has to be one from ['accuracy', 'mape']")
 
     if saved_model_path_string == "stored_models":
-        saved_model_path_string = str(Path(__file__).resolve().parent / "stored_models" / "tensorflow.h5")
+        saved_model_path_string = str(
+            Path(__file__).resolve().parent / "stored_models" / "tensorflow.h5"
+        )
 
     if load_trained_model:
         try:
@@ -105,7 +116,7 @@ def train(
             model.load_weights(saved_model_path_string)
 
         except Exception:
-            raise NameError("Model is not saved, first saveit = 1 in config")
+            raise NameError("Model is not saved, first save_model = 1 in config")
 
         if update_trained_model:
             model.fit(X, y, epochs=epochs, batch_size=batch_size, verbose=verbose)
@@ -118,9 +129,10 @@ def train(
 
         if layers[0][0] == "dense":
             layers[0][1]["input_shape"] = (X.shape[1],)
-            assert (
-                X.ndim != 3
-            ), "For dense first layer only univariate data supported (e.g. shape = (n_samples, n_features))- if ndim > 2: serialize first."
+            assert X.ndim != 3, (
+                "For dense first layer only univariate data supported (e.g. shape = (n_samples, n_features))"
+                "if ndim > 2: serialize first."
+            )
 
         model = tf.keras.models.Sequential()
 
@@ -129,11 +141,17 @@ def train(
             model.add(models[j[0]](**j[1] if len(j) > 1 else {}))
 
         if timedistributed == 1:
-            model.add(tf.keras.layers.TimeDistributed(tf.keras.layers.Dense(y.shape[1])))
+            model.add(
+                tf.keras.layers.TimeDistributed(tf.keras.layers.Dense(y.shape[1]))
+            )
         else:
             model.add(tf.keras.layers.Dense(y.shape[1]))
 
         model.compile(optimizer=optimizer, loss=loss, metrics=metrics)
+
+        if summary:
+            model.summary()
+
         model.fit(X, y, epochs=epochs, batch_size=batch_size, verbose=verbose)
 
     if save_model == 1:
@@ -147,13 +165,13 @@ def train(
     return model
 
 
-def predict(x_input, model, predicts=7):
+def predict(x_input, model, predicts):
     """Function that creates predictions from trained model and input data.
 
     Args:
         x_input (np.ndarray): Time series data
         model (model): Trained model object from train function.
-        predicts (int, optional): Only for consistency with other models. Defaults to 7.
+        predicts (Any): Just for other models consistency.
 
     Returns:
         np.ndarray: Array of predicted results
@@ -183,14 +201,33 @@ def get_optimizers_loses_activations():
 
     import tensorflow as tf
 
-    sgd = tf.keras.optimizers.SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
-    rmsprop = tf.keras.optimizers.RMSprop(lr=0.001, rho=0.9, epsilon=None, decay=0.0)
-    adagrad = tf.keras.optimizers.Adagrad(lr=0.01, epsilon=None, decay=0.0)
-    adadelta = tf.keras.optimizers.Adadelta(lr=1.0, rho=0.95, epsilon=None, decay=0.0)
-    adam = tf.keras.optimizers.Adam(
-        lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0.0, amsgrad=False
+    sgd = tf.keras.optimizers.SGD(
+        learning_rate=0.01, decay=1e-6, momentum=0.9, nesterov=True
     )
-    adamax = tf.keras.optimizers.Adamax(lr=0.002, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0.0)
-    nadam = tf.keras.optimizers.Nadam(lr=0.002, beta_1=0.9, beta_2=0.999, epsilon=None, schedule_decay=0.004)
+    rmsprop = tf.keras.optimizers.RMSprop(
+        learning_rate=0.001, rho=0.9, epsilon=None, decay=0.0
+    )
+    adagrad = tf.keras.optimizers.Adagrad(learning_rate=0.01, epsilon=None, decay=0.0)
+    adadelta = tf.keras.optimizers.Adadelta(
+        learning_rate=1.0, rho=0.95, epsilon=None, decay=0.0
+    )
+    adam = tf.keras.optimizers.Adam(
+        learning_rate=0.001,
+        beta_1=0.9,
+        beta_2=0.999,
+        epsilon=None,
+        decay=0.0,
+        amsgrad=False,
+    )
+    adamax = tf.keras.optimizers.Adamax(
+        learning_rate=0.002, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0.0
+    )
+    nadam = tf.keras.optimizers.Nadam(
+        learning_rate=0.002,
+        beta_1=0.9,
+        beta_2=0.999,
+        epsilon=None,
+        schedule_decay=0.004,
+    )
 
     return [sgd, rmsprop, adagrad, adadelta, adam, adamax, nadam]

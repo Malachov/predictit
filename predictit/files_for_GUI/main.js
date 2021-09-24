@@ -62,18 +62,11 @@ function predict() {
   var configurated = {};
 
   configurated["data"] = document.getElementById("csv_path").value;
-  configurated["predicted_column"] = document.getElementById(
-    "column_name"
-  ).value;
-  configurated["debug"] = document.getElementById("debug-config").checked;
+  configurated["predicted_column"] = document.getElementById("column_name").value;
   configurated["print_table"] = document.getElementById("table-config").checked;
-  configurated["print_best_model_result"] = document.getElementById(
-    "results-config"
-  ).checked;
+  configurated["print_result_details"] = document.getElementById("results-config").checked;
 
-  configurated["use_config_preset"] = document.getElementById(
-    "config-preset"
-  ).value;
+  configurated["use_config_preset"] = document.getElementById("config-preset").value;
 
   eel.make_predictions(configurated)(function (ret) {
     console.log(ret);

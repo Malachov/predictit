@@ -1,0 +1,18 @@
+name: binder
+channels:
+  - conda-forge
+dependencies:
+  - numpy
+  - matplotlib
+  - pandas
+  - seaborn
+  - IPython
+  - scipy
+  - statsmodels
+  - sklearn
+  - tabulate
+  - pip
+  - pip:
+      - mylogging
+      - mydatapreprocessing
+      - mypythontools

@@ -4,6 +4,7 @@ predictit/test_data/*.txt
 predictit/test_data/*.json
 
 scratch_notepad.py
+venv_test/
 
 # IDE
 .vscode/
@@ -91,6 +92,8 @@ instance/
 
 # Sphinx documentation
 docs/_build/
+docs/source/_build/
+
 
 # PyBuilder
 target/

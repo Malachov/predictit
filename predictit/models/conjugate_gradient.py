@@ -1,15 +1,17 @@
 import numpy as np
 from .models_functions.models_functions import one_step_looper
+import mylogging
 
 
-def train(data, epochs=100):
+def train(data, epochs=100, early_stopping=True):
     """Conjugate gradient model.
 
     Args:
         data ((np.ndarray, np.ndarray)) - Tuple (X, y) of input train vectors X and train outputs y.
             X should contain bias - constant 1 on first place of every sample
-            (parameter constant in `mydatapreprocessing.inputs.make_sequences`).
+            (parameter constant in `mydatapreprocessing.create_model_inputs.make_sequences`).
         epochs (int, optional): Number of epochs to evaluate. Defaults to 100.
+        early_stopping (bool, optional): If mean error don't get lower, next epochs are not evaluated. Defaults to True.
 
     Returns:
         np.ndarray: Array of neural weights.
@@ -25,23 +27,42 @@ def train(data, epochs=100):
     re = b - np.dot(A, w)
     p = re.copy()
 
+    error_previous = np.inf
+    min_error = np.inf
+    best_w = np.zeros(X.shape[1])
+    worse = 0
+
     for _ in range(epochs):
 
         alpha = np.dot(re.T, re) / (np.dot(np.dot(p.T, A), p))
         w = w + alpha * p
-        re_prev = re.copy()
-        re = re_prev - alpha * np.dot(A, p)
+        re_previous = re.copy()
+        re = re_previous - alpha * np.dot(A, p)
+
+        if early_stopping:
+            error = np.abs(re_previous).sum()
+
+            if error < min_error:
+                min_error = error
+                best_w = w
+
+            if error > error_previous:
+                worse += 1
+
+            if worse > 10 or error < 10e-5:
+                return best_w
+
+            error_previous = error
+
         if np.isnan(re).any():
             np.nan_to_num(re, copy=False)
-        beta = np.dot(re.T, re) / np.dot(re_prev.T, re_prev)
+        beta = np.dot(re.T, re) / np.dot(re_previous.T, re_previous)
         if np.isnan(re).any():
             np.nan_to_num(re, copy=False)
         p = re + beta * p
-        if np.isnan(p).any():
-            if np.isnan(p).all():
-                break
-            else:
-                np.nan_to_num(p, copy=False)
+
+        if np.isnan(p.min()):
+            raise RuntimeError(mylogging.return_str("Model is unstable."))
 
     return w
 
@@ -58,4 +79,6 @@ def predict(x_input, model, predicts=7):
         np.ndarray: Array of predicted results
     """
 
-    return one_step_looper(lambda x_input: np.dot(x_input, model), x_input.ravel(), predicts)
+    return one_step_looper(
+        lambda new_x_input: np.dot(new_x_input, model), x_input.ravel(), predicts
+    )

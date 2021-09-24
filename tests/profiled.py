@@ -1,34 +1,27 @@
 #%%
-import sys
-from pathlib import Path
-import numpy as np
-import inspect
-import os
-import pandas as pd
+# import numpy as np
+# import pandas as pd
+
+# from pathlib import Path
+# import sys
+# import inspect
+# import os
 
 # oo = np.array([[1, 2, 3, 4, 5, 6], [1, 2, 3, 4, 5, 6]]).T
-oo = np.random.randn(10000, 10000)
-arr = np.array(oo)
-df = pd.DataFrame(oo)
+# oo = np.random.randn(10000, 10000)
+# arr = np.array(oo)
+# df = pd.DataFrame(oo)
 
-
-
-def profiled_function():
-
-    ee = df.values
-
-    return ee
-
-
-def profiled_function2():
-
-    ee = arr.diff(axis=0)
-
-    return ee
-
-
+# from memory_profiler import profile
 if __name__ == "__main__":
-    print(profiled_function())
-    print(profiled_function2())
 
+    import line_profiler
+    import atexit
 
+    profile = line_profiler.LineProfiler()
+    atexit.register(profile.print_stats)
+
+    # (precision=8)  # Just memory profiler
+    @profile
+    def profiled_function():
+        pass

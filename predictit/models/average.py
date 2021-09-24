@@ -12,11 +12,11 @@ def train(data, length=50):
     return data.ravel()[-length:].mean()
 
 
-def predict(data, model, predicts=7):
-    """Model that return just aritmetical average from last few datapoints.
+def predict(_, model, predicts=7):
+    """Model that return just arithmetical average from last few data points.
 
     Args:
-        data (None): Here just fo consistency with other models.
+        _ (None): Here just fo consistency of positional parameters with other models.
         model (float): Mean value.
         predicts (int, optional): Number of predicted values. Defaults to 7.
 

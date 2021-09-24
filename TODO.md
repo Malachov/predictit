@@ -1,42 +1,35 @@
 # List of what could be done
 
-TODO - Sort by priority
+Tagged with complexity and sorted by priority
 
-## Short term
-
-- [ ] In sklearn model - auto select model (use pipeline?)
-- [ ] Test whether plotly is slower than matplotlib and document it in plots docstrings.
-- [ ] Store tensorflow mlp and lstm separately and by default.
-- [ ] Define some set of datasets (good for prediction) and evaluate results on commit with tag. save results into csv and evalueate KPI - Add data to default compare models
-- [ ] evaluated_matrix from compare to main and in optimization new config value - use only best or keep all
-- [ ] Remove unnecessary copies (only data_for_predictions_df and using .values) and check if input data stays the same after all models computations - the same in preprocessing
-- [ ] Add transformations results as next input in parallel
-  - [ ] Lagged values
-  - [ ] Datetime transformations - is workday, is holiday, day, night etc...
-- [ ] Conjugate gradient, autoreg LNU but also other models both multiple and one column data
-- [ ] Test on some larger files
-- [ ] Feature selection (which columns to use) - E.g. https://towardsdatascience.com/deep-dive-into-catboost-functionalities-for-model-interpretation-7cdef669aeed, https://scikit-learn.org/stable/modules/feature_selection.html, https://towardsdatascience.com/feature-selection-with-pandas-e3690ad8504b
-- [ ] data_preprocessing
-  - [ ] In remove_outliers function do not remove it, but interpolate by neighbors option - same as in nans
-- [ ] Optionally save and load trained models .npy format for numpy.By default save to trained models folder, as parameter save or load model elsewhere
-- [ ] Ensamble learning - bagging - Best models average as one new model
-- [ ] Segmentation for input data subselection - Try TICC method or Matrix profile method or something new
-- [ ] Dask for big data (dask.np.aray and dask dataframe) - chunk datasource
-- [ ] Binnig inputs and classify- E.g. https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.Binarizer.html#sklearn.preprocessing.Binarizer
-- [ ] Fast boosted hyperparametrs optimization method option - (optimize each parameter separately - then again...)
-- [ ] Change GUI to vuetify - do tests on it.
-- [ ] Numba optimization (probably just own models - LNU autoreg model and conjugate grad)
-- [ ] Ability to load and save config to json to folder
-- [ ] For error criterion use compare models values in normal predict to remove best decision_tree which is unfair on insample predictions - config option - real error criterion (computationly harder)
-
-## Long term
-
-- [ ] Rewrite own modules (autoreg LNU and Conjugate grad) core loops as C extension (New edit - maybe can cause big troubles (packaging etc...))
-- [ ] Analyze output (residuals - mean, std etc. in comparison with original data)
-- [ ] Feature extraction - E.G. autoencoder and PCA to shrink input multivariate data to small vectors
-- [ ] Feature selection - Choose columns not on correlation, but based on error lowerage with simple model (neural net (better) as well as regression (faster))
-- [ ] Results postprocessing
-- [ ] New models
+- [ ] In predict multiple change plot name to predicted column
+- [ ] Create jupyter notebook with examples
+- [ ] EASY - Test on some larger files (Use warning if big data and hard settings)
+- [ ] COMPLEX - Define some set of datasets (good for prediction) and evaluate results on commit with tag. save results into csv and ate KPI - Add data to default compare models
+- [ ] COMPLEX - Configuration:
+    1) Create class Model - Configure models in it's own settings (be able to configure various models in various way). Use instances of models (multiple concrete settings) Add save and load model method
+    2) Full config to readthedocs documentation
+    3) Add preset for comparing models
+    4) Ability to load and save config to json to folder (mostly for GUI)
+- [ ] EASY - Describe better the predict and compare models difference. Mainly that predict should not be used for comparing models
+- [ ] EASY - Return class, no dict and remove return_type (evaluated_matrix from compare to main)
+- [ ] COMPLEX - Add exogenous parametrs where possible
+- [ ] COMPLEX - Dimensionality reduction - E.G. autoencoder and PCA to shrink input multivariate data to small vectors. Choose what to compress (not predicted column).
+- [ ] COMPLEX - Rewrite GUI with mypythontools.pyvueeel
+- [ ] COMPLEX - Feature selection - Choose columns not on correlation, but based on error lowerage with simple model (neural net (better) as well as regression (faster)) E.g. https://towardsdatascience.com/deep-dive-into-catboost-functionalities-for-model-interpretation-7cdef669aeed, https://scikit-learn.org/stable/modules/feature_selection.html, https://towardsdatascience.com/feature-selection-with-pandas-e3690ad8504b
+- [ ] COMPLEX - Segmentation for input data subselection - Try TICC method or Matrix profile method or something new
+- [ ] MEDIUM - Ensamble learning - bagging - Best models average as one new model
+- [ ] COMPLEX - Analyze output (residuals - mean, std etc. in comparison with original data)
+- [ ] MEDIUM - Add residuals matrix from results_matrix and add plotly box plot for residuals of models in main.py (https://plot.ly/python/box-plots/), or box plot for error criterion (data lengths and for repetitions) on compare_models
+- [ ] MEDIUM - Add transformations results as next input in parallel (remove replacement as in diff transformation)
+  - [ ] Add datetime transformations - is workday, is holiday, day, night etc...
+  - [ ] Hilbert huang tranformation (pyhht) - predict each part separately and then sum to have result
+- [ ] COMPLEX Incremental learning (In sklearn partial_fit). Solve how to cope with statsmodels.
+- [ ] MEDIUM - Be able to use validation mode in predict to get real error criterions for compare
+- [ ] MEDIUM - In sklearn model - auto select model (use pipeline?)
+- [ ] EASY - In optimization, compare models on more results to reduce chance.
+- [ ] MEDIUM - Fast boosted hyperparametrs optimization method option - (optimize each parameter separately - then again...)
+- [ ] COMPLEX - New models
   - [ ] LigthGBM
   - [ ] Prophet
   - [ ] CatBoostClassifierm CatBoostRegressor
@@ -46,34 +39,16 @@ TODO - Sort by priority
   - [ ] Add some boost method (lgboost library..., own adaboost for multivariate data)
   - [ ] ETS method
   - [ ] Bayes classification - sklearn
-- [ ] Transformations
-  - [ ] Hilbert huang tranformation (pyhht) - predict each part separately and then sum to have result
-- [ ] Big data
-  - [ ] PCA on higher dimension data - try to predict all the columns and inverse transformation. Second option: comprime only other than predicted colums
-  - [ ] Incremental learning
-    - [ ] In sklearn (partial_fit)
-- [ ] Create prediction type - Regression, classification (binning inputs), anomaly prediction in config
-- [ ] Add scientific documentation into docstrings (equations and diagrams)
-- [ ] Add exogenous parametrs where possible
+- [ ] COMPLEX - Improve / edit existing models
+  - [ ] - Add stochastic gradient method to autoreg (adam or adagrad)
+- [ ] MEDIUM - Add scientific documentation for own models into docstrings (equations and diagrams) for other models add links
 
-## Deals
-
-- [ ] Remove complete dataframe copy in plots.py
-- [ ] In GUI not remove ansi, but do not color
-- [ ] Change config comments https://www.sphinx-doc.org/en/1.4.8/ext/autodoc.html#directive-autoattribute and use in argparse in for loop
-- [ ] Make copy of input data only once - remove in main
-- [ ] Remove other columns option and use default_other_columns_length to create one_column_input data
-- [ ] Tests for GUI and unit test for define inputs
-- [ ] Test dataframe data input for statsmodels - date as index
-- [ ] Try recreate config as data class with type hints and comments that will be parsable
-- [ ] Full config to readthedocs documentation
-- [ ] Print failed models apart and put not in table results
-- [ ] Check if can some lists replace with sets (faster)
-- [ ] In optimization, compare models on more results to reduce chance. First do create real-error-criterion - than use it.
-- [ ] Translate and finish models **init** docstrings and models docstrings.
-- [ ] Add residuals matrix from results_matrix and add plotly box plot for residuals of models in main.py (https://plot.ly/python/box-plots/), or box plot for error criterion (data lengths and for repetitions) on compare_models
-- [ ] Improve / edit existing models
-  - [ ] For models with significant results diversity (ELM...) use optional bagging (mean of more results) in models
-  - [ ] Add auto arima models from new libraries
-  - [ ] Add stochastic gradient method to autoreg (adam or adagrad)
-- [ ] Finish config presets
+- [ ] MEDIUM - Try multiprocessing.manager
+- [ ] EASY - Try dataframe data input for statsmodels - date as index
+- [ ] EASY - Test whether plotly is slower than matplotlib and document it in plots docstrings.
+- [ ] EASY - Store tensorflow mlp and lstm separately and by default.
+- [ ] EASY - Remove unnecessary copies (only data_for_predictions_df and using .values) and check if input data stays the same after all models computations - the same in preprocessing - use new inplace param
+- [ ] EASY - Dask for big data (dask.np.aray and dask dataframe) - chunk datasource (optionally in settings)
+- [ ] EASY - Test Numba optimization (probably just own models - LNU autoreg model and conjugate grad)
+- [ ] EASY - Check if can some lists replace with sets (faster)
+- [ ] Rewrite logging settings into config method

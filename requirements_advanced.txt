@@ -1,4 +1,3 @@
 tensorflow
-dtaidistance
+dtaidistance==2.2.5
 sklearn_extensions
-pyodbc

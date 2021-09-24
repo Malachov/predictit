@@ -1,150 +1,178 @@
 import numpy as np
+from .. import misc
+from ..best_params import optimize
+from typing import Union, Annotated, Tuple
+
+import mylogging
 
 
-def train(
-    data,
-    mi=1,
-    mi_multiple=1,
-    mi_linspace=(1e-8, 10, 20),
-    epochs=10,
-    w_predict=0,
-    predicted_w=30,
-    minormit=1,
-    damping=1,
-    plot=0,
-    random=0,
-    w_rand_scope=1,
-    w_rand_shift=0,
-    rand_seed=0,
-):
-    """Autoregressive Linear\nneural unit. It's simple one neuron one-step neural net. It can predict not only predictions itself,
-    but also use other faster method to predict weights evolution for out of sample predictions. In first iteration it will find best learning step
-    and in the second iteration, it will train more epochs.
-
-    Args:
-        data ((np.ndarray, np.ndarray)) - Tuple (X, y) of input train vectors X and train outputs y
-        mi (float, optional): Learning rate. If not normalized must be much smaller. Defaults to 1.
-        mi_multiple (bool, optional): If try more weights and try to find the best. Set the possible values with mi_linspace. Defaults to 1.
-        mi_linspace (np.ndarray, optional): Used learning rate numpy linspace arguments.
-            That means, that mimimum value is 1e-8, maximum 20 and there is 20 values in the interval. Defaults to (1e-8, 10, 20).
-        epochs (int, optional): Numer of trained epochs. Defaults to 10.
-        w_predict (bool): If predict weights with next predictions. Defaults to 0.
-        predicted_w (int, optional): Number of predicted values. Defaults to 30.
-        minormit (int, optional): Whether normalize learning rate. Defaults to 1.
-        damping (int, optional): Whether damp learning rate or not. Defaults to 1.
-        plot (int, optional): Whether plot results. Defaults to 0.
-        random (int, optional): Whether initial weights are random or not. Defaults to 0.
-        w_rand_scope (int, optional): w_rand_scope of random weights. Defaults to 1.
-        w_rand_shift (int, optional): w_rand_shift of random weights. Defaults to 0.
-        rand_seed (int, optional): Random weights but the same everytime. Defaults to 0.
-
-    Returns:
-        np.ndarray: Weigths of neuron that can be used for making predictions.
-    """
+def lnu_core(
+    data: Annotated[Tuple[np.ndarray], 2],
+    learning_rate: float,
+    epochs: int,
+    normalize_learning_rate: bool,
+    early_stopping: bool = True,
+    learning_rate_decay: float = 0.8,
+    damping: Union[int, float] = 1,
+    return_all: bool = False,
+) -> Union[np.ndarray, Tuple[np.ndarray]]:
     X = data[0]
     y_hat = data[1]
 
-    if mi_multiple:
-        miwide = np.linspace(mi_linspace[0], mi_linspace[1], mi_linspace[2])
-    else:
-        miwide = np.array([mi])
+    y = np.zeros(len(y_hat))
+    error = np.zeros(len(y_hat)) if return_all else np.zeros(1)
+    w = np.zeros(X.shape[1])
+    last_running_error = np.inf
 
-    miwidelen = len(miwide)
-    length = X.shape[0]
-    features = X.shape[1]
+    w_all = np.zeros((X.shape[1], X.shape[0])) if return_all else None
 
-    y = np.zeros((miwidelen, length))
-    e = np.zeros(length)
-    w_last = np.zeros((miwidelen, features))
-    mi_error = np.zeros(miwidelen)
+    for epoch in range(epochs):
 
-    bound = 100 * np.amax(X)
+        running_error = np.zeros(1)
 
-    if rand_seed != 0:
-        random.seed(rand_seed)
+        for j in range(X.shape[0]):
 
-    if random == 1:
-        w = np.random.rand(X.shape[1]) * w_rand_scope + w_rand_shift
-    else:
-        w = np.zeros(X.shape[1])
+            current_index = j if return_all else 0
 
-    for i in range(miwidelen):
+            y[j] = np.dot(w, X[j])
+            if y[j] > y_hat.max() * 10e6:
+                raise RuntimeError(mylogging.return_str("Model is unstable"))
 
-        for j in range(length):
+            error[current_index] = y_hat[j] - y[j]
+            running_error[0] = running_error[0] + abs(error[current_index])
 
-            y[i, j] = np.dot(w, X[j])
-
-            if y[i, j] > bound:
-                mi_error[i] = np.inf
-                break
-
-            e[j] = y_hat[j] - y[i, j]
-            dydw = X[j]  # TODO i + 1
-            if minormit == 1:
-                minorm = miwide[i] / (damping + np.dot(X[j], X[j].T))
-                dw = minorm * e[j] * dydw
+            dydw = X[j]
+            if normalize_learning_rate:
+                minorm = learning_rate / (damping + np.dot(X[j], X[j].T))
+                dw = minorm * error[current_index] * dydw
             else:
-                dw = miwide[i] * e[j] * dydw
+                dw = learning_rate * error[current_index] * dydw
             w = w + dw
 
-        mi_error[i] = np.sum(abs(e))
-        w_last[i] = w
+            if return_all:
+                w_all[:, j] = w
 
-    bestmiindex = np.argmin(mi_error)
+        if (early_stopping and epoch > 1) and (
+            sum(np.abs(dw)) / len(w) < 10e-8
+            or ((running_error[0] / len(y_hat)) - last_running_error) < 10e-5
+        ):
+            break
 
-    if epochs:
+        last_running_error = running_error[0] / len(y_hat)
 
-        y_best_mi = np.zeros(length)
-        e_best_mi = np.zeros(length)
-        mi_best = miwide[bestmiindex]
-        wall = np.zeros((features, length))
-        w_best_mi = w_last[bestmiindex]
+        if learning_rate_decay:
+            learning_rate = learning_rate * learning_rate_decay
 
-        for _ in range(epochs):
-            for j in range(length):
+    if return_all:
+        return w, w_all, y, error
+    else:
+        return w
 
-                y_best_mi[j] = np.dot(w_best_mi, X[j])
-                e_best_mi[j] = y_hat[j] - y_best_mi[j]
-                dydw = X[j]
-                if minormit == 1:
-                    minorm = mi_best / (damping + np.dot(X[j], X[j].T))
-                    dw = minorm * e_best_mi[j] * dydw
-                else:
-                    dw = mi_best * e_best_mi[j] * dydw
-                w_best_mi = w_best_mi + dw
 
-                wall[:, j] = w_best_mi
+def train(
+    data: Annotated[Tuple[np.ndarray], 2],
+    learning_rate: Union[str, float] = "infer",
+    epochs: int = 10,
+    normalize_learning_rate: bool = True,
+    damping: Union[float, int] = 1,
+    early_stopping: bool = True,
+    learning_rate_decay: float = 0.9,
+    predict_w: bool = False,
+    predicted_w_number: int = 7,
+    plot: bool = False,
+    # random=0, w_rand_scope=1, w_rand_shift=0, rand_seed=0,
+):
+    """LNU. It's simple one neuron one-step neural net. It can predict not only predictions itself,
+    but also use other faster method to predict weights evolution for out of sample predictions.
+    In first iteration it will find best learning step and in the second iteration,
+    it will train more epochs.
 
-    if w_predict:
-        from . import statsmodels_autoregressive
+    Args:
+        data ((np.ndarray, np.ndarray)) - Tuple (X, y) of input train vectors X and train outputs y
+        learning_rate (float, optional): Learning rate. If not normalized must be much smaller.
+            If "infer" then it's chosen automatically. Defaults to "infer.
+        epochs (int, optional): Number of trained epochs. Defaults to 10.
+        normalize_learning_rate (int, optional): Whether normalize learning rate. Defaults to True.
+        damping (int, optional):Value of damp of standardized learning rate. Defaults to 1.
+        early_stopping (bool, optional): If mean error don't get lower, next epochs are not evaluated. Defaults to True.
+        learning_rate_decay (float, optional): With every other epoch, learning rate is a little bit lower
+            (learning_rate * learning_rate_decay). It should be between 0 and 1. Defaults to 0.9.
+        predict_w (bool): If predict weights with next predictions. Defaults to False.
+        predicted_w_number (int, optional): Number of predicted values. Defaults to 7.
+        plot (int, optional): Whether plot results. Defaults to False.
 
-        wwt = np.zeros((features, predicted_w))
 
-        for i in range(features):
-            wwt[i] = statsmodels_autoregressive.predict(
-                wall[i], statsmodels_autoregressive.train(wall[i]), predicts=predicted_w
-            )
+    Returns:
+        np.ndarray: Weights of neuron that can be used for making predictions.
+    """
+    if not isinstance(data, (tuple, list)) or len(data) < 2:
+        raise TypeError(mylogging.return_str("Data must be in defined shape."))
 
-        w_final = wwt.T
+    X = data[0]
+    y_hat = data[1]
+
+    if learning_rate == "infer":
+        infer_lightened_params = {
+            "model_train": lnu_core,
+            "model_predict": predict,
+            "kwargs": {
+                "learning_rate": 0.0001,
+                "epochs": 2,
+                "normalize_learning_rate": normalize_learning_rate,
+                "damping": damping,
+            },
+            "model_train_input": (X[-300:-5], y_hat[-300:-5]),
+            "model_test_inputs": X[-5:],
+            "models_test_outputs": y_hat[-5:],
+            "error_criterion": "mape",
+            "fragments": 5,
+            "iterations": 3,
+        }
+
+        # First find order
+        learning_rate = optimize(
+            kwargs_limits={"learning_rate": [10e-8, 10e-6, 10e-4, 10e-3, 10e-2, 1]},
+            **infer_lightened_params
+        )["learning_rate"]
+
+        # First around favorite
+        learning_rate = optimize(
+            kwargs_limits={"learning_rate": [learning_rate / 10, learning_rate * 10]},
+            **infer_lightened_params
+        )["learning_rate"]
+
+    if plot or predict_w:
+        w, w_all, y, error = lnu_core(
+            data=data,
+            learning_rate=learning_rate,
+            epochs=epochs,
+            normalize_learning_rate=normalize_learning_rate,
+            early_stopping=early_stopping,
+            learning_rate_decay=learning_rate_decay,
+            damping=damping,
+            return_all=True,
+        )
 
     else:
-        w_final = w_best_mi
-
-    if plot == 1:
-
-        from predictit.misc import _JUPYTER
-
-        if _JUPYTER:
-            from IPython import get_ipython
-
-            get_ipython().run_line_magic("matplotlib", "inline")
+        w = lnu_core(
+            data=data,
+            learning_rate=learning_rate,
+            epochs=epochs,
+            normalize_learning_rate=normalize_learning_rate,
+            early_stopping=early_stopping,
+            learning_rate_decay=learning_rate_decay,
+            damping=damping,
+        )
+    if plot:
+        if not misc.GLOBAL_VARS._PLOTS_CONFIGURED:
+            misc.setup_plots()
 
         import matplotlib.pyplot as plt
 
         plt.figure(figsize=(12, 7))
 
         plt.subplot(3, 1, 1)
-        plt.plot(y_best_mi, label="Predictions")
+        plt.plot(y, label="Predictions")
         plt.xlabel("t")
         plt.plot(y_hat, label="Reality")
         plt.xlabel("t")
@@ -152,14 +180,14 @@ def train(
         plt.legend(loc="upper right")
 
         plt.subplot(3, 1, 2)
-        plt.plot(e_best_mi, label="Error")
+        plt.plot(error, label="Error")
         plt.grid()
         plt.xlabel("t")
         plt.legend(loc="upper right")
-        plt.ylabel("Chyba")
+        plt.ylabel("Error")
 
         plt.subplot(3, 1, 3)
-        plt.plot(wall)
+        plt.plot(w_all)
         plt.grid()
         plt.xlabel("t")
         plt.ylabel("Weights")
@@ -169,10 +197,29 @@ def train(
 
         plt.show()
 
+    if predict_w:
+        from . import statsmodels_autoregressive
+
+        wwt = np.zeros((X.shape[1], predicted_w_number))
+
+        for i in range(X.shape[1]):
+            try:
+                wwt[i] = statsmodels_autoregressive.predict(
+                    w_all[i],
+                    statsmodels_autoregressive.train(w_all[i]),
+                    predicts=predicted_w_number,
+                )
+            except (Exception,):
+                wwt[i] = w_all[i][-1]
+        w_final = wwt.T
+
+    else:
+        w_final = w
+
     return w_final
 
 
-def predict(x_input, model, predicts=7):
+def predict(x_input: np.ndarray, model: np.ndarray, predicts: int = 7) -> np.ndarray:
     """Function that creates predictions from trained model and input data.
 
     Args:
@@ -184,17 +231,18 @@ def predict(x_input, model, predicts=7):
         np.ndarray: Array of predicted results
     """
 
-    x_input = x_input.ravel()
+    x_input = x_input.ravel().copy()
+    w = model
 
     predictions = []
 
-    for j in range(predicts):
+    for i in range(predicts):
 
-        ww = model[j] if model.ndim == 2 else model
-        ypre = np.dot(ww, x_input)
-        predictions.append(ypre)
+        ww = w[i] if w.ndim == 2 else w
+        y_predicted = np.dot(ww, x_input)
+        predictions.append(y_predicted)
 
         x_input[1:-1] = x_input[2:]
-        x_input[-1] = ypre
+        x_input[-1] = y_predicted
 
     return np.array(predictions).reshape(-1)

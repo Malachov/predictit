@@ -1,10 +1,17 @@
 # List of what have been done in new versions
 
-## 1.6x - 03/2021
+## 2.0x - 09/2021
 
+- [x] Config restructured - doctrings with explanation on variables visible in intellisense help. Config values options and type validations applied (much more strict).
+- [x] Analysis of optimized values in compare models 
 - [x] Annoying warnings filtered on import filtered
+- [x] Return type config change. Now always same result - class with best models resulte, all results and results with history
+- [x] Early stopping in Conjugate gradient and LNU
+- [x] Printed tables better print as long names are broken automatically.
+- [x] find_optimal_input_for_models that can compare various input forms for models.
+
+## 1.6x - 03/2021
 - [x] String embedding - One hot or label encoding
-- [x] Api change! Config renamed because class with capitalize C from config to Config. 'datetime_index' renamed to 'datetime_column' - Old scripts wont work
 - [x] Data_preprocessing and logging from misc moved into own projects and imported. Projects are called mylogging and mydatapreprocessing. It'necessary to have corresponding version
 - [x] Various transforms added as derived columns. For example: Difference transform, Rolling window and rolling std transformation, Distance from the mean.
 - [x] Fast fourier transform as new information.
@@ -19,6 +26,8 @@
 - [x] Classifiers add to sklearn model. Also possibility to input sklearn model as parameter and call all the models as a string
 - [x] Data discretization possibility (binning)
 - [x] CI moved from TravisCI (tests to computationally intensive) to own (mypythontools) python scripts (called from utils folder)
+- [x] database.py removed to mydatapreprocessing
+- [x] Internal stuff renamed with _ appendix for IDE intellisense be more readable
 
 ## 1.5x - 09/2020
 
@@ -45,7 +54,7 @@
 
 - [x] Config value optimization. Some config variable can be optimized on defined values. For each model the best option will be used
 - [x] Plot results of all models versions (optmimized)
-- [x] Option whether to evalueate error criterion on preprocessed data or on original data
+- [x] Option whether to evaluate error criterion on preprocessed data or on original data
 - [x] Option to sort detailed result table by error or by name
 - [x] Compare models redefined. More fair for all types of models, but repeatit = 1, so more samples necessary.
 - [x] Many new models from sklearn - Decision trees, bagging, Gradient boosting...

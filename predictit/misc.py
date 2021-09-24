@@ -2,14 +2,36 @@
 
 import builtins
 
+from mydatapreprocessing import preprocessing
+
 # Lazy imports
 # import statsmodels.tsa.api as sm
-# from mydatapreprocessing import preprocessing
 
 
-_JUPYTER = 1 if hasattr(builtins, "__IPYTHON__") else 0
-_GUI = 0
-_IS_TESTED = 0
+class Global_vars:
+    def __init__(self) -> None:
+        self._JUPYTER = True if hasattr(builtins, "__IPYTHON__") else 0
+        self._GUI = False
+        self._PLOTS_CONFIGURED = False
+
+
+GLOBAL_VARS = Global_vars()
+
+
+def setup_plots():
+    from pandas.plotting import register_matplotlib_converters
+
+    register_matplotlib_converters()
+
+    try:
+        from IPython import get_ipython
+
+        if GLOBAL_VARS._JUPYTER:
+            get_ipython().run_line_magic("matplotlib", "inline")
+    except Exception:
+        pass
+
+    GLOBAL_VARS._CONFIGURED = True
 
 
 def confidence_interval(data, predicts=7, confidence=0.1, p=1, d=0, q=0):
@@ -46,8 +68,6 @@ def confidence_interval(data, predicts=7, confidence=0.1, p=1, d=0, q=0):
         upper_bound = bounds[1]
 
     except Exception:
-
-        from mydatapreprocessing import preprocessing
 
         last_value = data[-1]
         data = preprocessing.do_difference(data)

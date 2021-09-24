@@ -1,3 +1,4 @@
+mypythontools>=0.0.67
 pytest
 pytest-cov
 sphinx==3.2

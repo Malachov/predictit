@@ -17,17 +17,29 @@ def train(
     solver="lbfgs",
     maxlag=13,
     # SARIMAX args
-    seasonal=(1, 1, 1, 24),
+    seasonal=(0, 0, 0, 0),
 ):
     """Autoregressive model from statsmodels library. Only univariate data.
+
     Args:
         data (np.ndarray): Time series data.
         used_model (str, optional): One of ['ar', 'arima', 'sarimax', 'autoreg']. Defaults to "autoreg".
-        p (int, optional) - Order of ARIMA model (1st - proportional). Check statsmodels docs for more. Defaults to 5.
-        d (int, optional) - Order of ARIMA model. Defaults to 1.
-        q (int, optional) - Order of ARIMA model. Defaults to 0.
-        cov_type, method, trend, solver, maxlag, seasonal: Parameters of model call or fit function of particular model.
-            Check statsmodels docs for more.
+        p (int, optional): Order of ARIMA model (1st - proportional). Check statsmodels docs for more. Defaults to 5.
+        d (int, optional): Order of ARIMA model. Defaults to 1.
+        q (int, optional): Order of ARIMA model. Defaults to 0.
+        cov_type: Parameters of model call or fit function of particular model. Check statsmodels docs for more.
+            Defaults to 'nonrobust'.
+        method: Parameters of model call or fit function of particular model. Check statsmodels docs for more.
+            Defaults to 'cmle'.
+        trend: Parameters of model call or fit function of particular model. Check statsmodels docs for more.
+            Defaults to 'nc'.
+        solver: Parameters of model call or fit function of particular model. Check statsmodels docs for more.
+            Defaults to 'lbfgs'.
+        maxlag: Parameters of model call or fit function of particular model. Check statsmodels docs for more.
+            Defaults to 13.
+        seasonal: Parameters of model call or fit function of particular model. Check statsmodels docs for more.
+            Defaults to (0, 0, 0, 0).
+
     Returns:
         statsmodels.model: Trained model.
     """
@@ -80,7 +92,8 @@ def predict(data, model, predicts=7):
 
     Args:
         data (np.ndarray): Time series data
-        model (list, class): Trained model. It can be list of neural weights or it can be fitted model class from imported library.
+        model (list, class): Trained model. It can be list of neural weights or it can
+            be fitted model class from imported library.
         predicts (int, optional): Number of predicted values. Defaults to 7.
 
     Returns:
@@ -91,7 +104,9 @@ def predict(data, model, predicts=7):
 
     # Input data must have same starting point as data in train so the starting point be correct
     if model.my_name == "arima":
-        predictions = model.predict(start=start, end=start - 1 + predicts, typ="levels")[-predicts:]
+        predictions = model.predict(
+            start=start, end=start - 1 + predicts, typ="levels"
+        )[-predicts:]
 
     else:
         predictions = model.predict(start=start, end=start - 1 + predicts)[-predicts:]

@@ -54,6 +54,26 @@ extensions = [
     "m2r2",
 ]
 
+autodoc_default_flags = [
+    "members",
+    "undoc-members",
+    "private-members",
+    "special-members",
+    "inherited-members",
+    "show-inheritance",
+]
+
+napoleon_custom_sections = [
+    ("Types", "returns_style"),
+    ("Type", "returns_style"),
+    ("Options", "returns_style"),
+    ("Default", "returns_style"),
+    ("Example", "returns_style"),
+    ("Examples", "returns_style"),
+]
+
+smartquotes = False
+
 # 'about.html',
 html_sidebars = {"**": ["navi.html", "searchbox.html"]}
 
@@ -82,3 +102,6 @@ html_static_path = ["_static"]
 html_css_files = [
     "https://malachov.github.io/mypythontools/content/sphinx-alabaster-css/custom.css",
 ]
+
+
+autodoc_typehints = "description"
