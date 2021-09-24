@@ -385,8 +385,8 @@ class Config(ConfigStructured):
             'H' - Hours. Same possible values as in freq."""
             return []
 
-        @MyProperty(options=("sum", "mean", None))
-        def resample_function() -> Union[str, bool]:
+        @MyProperty(options=("sum", "mean", "", None))
+        def resample_function() -> Union[str, None]:
             """
             Options:
                 'sum', 'mean', None
@@ -1456,9 +1456,7 @@ class Config(ConfigStructured):
                     "alpha": self.limits_constants["alpha"],
                 },
                 # 'Extreme learning machine': {'n_hidden': [2, 300], 'alpha': self.limits_constants["alpha"], 'rbf_width': [0.0, 10.0], 'activation_func': ['tanh', 'sine', 'tribas', 'inv_tribase', 'sigmoid', 'hardlim', 'softlim', 'gaussian', 'multiquadric', 'inv_multiquadric']},
-                "Gen Extreme learning machine": {
-                    "alpha": self.limits_constants["alpha"]
-                },
+                "Gen Extreme learning machine": {"alpha": self.limits_constants["alpha"]},
             }
 
     class Models(ConfigBase):
@@ -1902,12 +1900,8 @@ class Config(ConfigStructured):
                 "Random forest regression": {"model": "RandomForestRegressor"},
                 "Bagging regression": {"model": "BaggingRegressor"},
                 "Sklearn regression one column one step": {"model": "LinearRegression"},
-                "Bayes ridge regression one column one step": {
-                    "model": "BayesianRidge"
-                },
-                "Decision tree regression one column one step": {
-                    "model": "DecisionTreeRegressor"
-                },
+                "Bayes ridge regression one column one step": {"model": "BayesianRidge"},
+                "Decision tree regression one column one step": {"model": "DecisionTreeRegressor"},
                 "Hubber regression one column one step": {"model": "HuberRegressor"},
                 "Extreme learning machine": {
                     "model": "ELMRegressor",

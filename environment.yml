@@ -9,10 +9,10 @@ dependencies:
   - IPython
   - scipy
   - statsmodels
-  - sklearn
   - tabulate
   - pip
   - pip:
       - mylogging
       - mydatapreprocessing
       - mypythontools
+      - sklearn
