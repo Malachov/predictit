@@ -1,3 +1,5 @@
 #!/usr/bin/env bash
-pip install -r requirements.txt
-jupyter trust */*.ipynb
+pip install predictit
+pip install ipywidgets
+jupyter labextension install jupyterlab-plotly@5.3.1 @jupyter-widgets/jupyterlab-manager
+jupyter trust demo.ipynb
