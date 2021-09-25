@@ -410,7 +410,7 @@ Don't be shy to create Issue, merge request or text on <malachovd@seznam.cz>
 """
 
 
-__version__ = "2.0.0"
+__version__ = "2.0.1"
 __author__ = "Daniel Malachov"
 __license__ = "MIT"
 __email__ = "malachovd@seznam.cz"

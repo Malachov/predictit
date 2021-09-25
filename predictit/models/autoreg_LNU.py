@@ -1,13 +1,13 @@
 import numpy as np
 from .. import misc
 from ..best_params import optimize
-from typing import Union, Annotated, Tuple
+from typing import Union, Tuple
 
 import mylogging
 
 
 def lnu_core(
-    data: Annotated[Tuple[np.ndarray], 2],
+    data: Tuple[np.ndarray],
     learning_rate: float,
     epochs: int,
     normalize_learning_rate: bool,
@@ -70,7 +70,7 @@ def lnu_core(
 
 
 def train(
-    data: Annotated[Tuple[np.ndarray], 2],
+    data: Tuple[np.ndarray],
     learning_rate: Union[str, float] = "infer",
     epochs: int = 10,
     normalize_learning_rate: bool = True,

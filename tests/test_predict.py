@@ -252,7 +252,6 @@ def test_presets():
     assert validate_result(preset_result)
 
     config.update({"use_config_preset": "normal"})
-    preset_result = predictit.predict().predictions
     assert validate_result(preset_result)
 
 
