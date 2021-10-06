@@ -56,7 +56,7 @@ Most common output is plotly interactive graph and object with results array, re
 Links
 =====
 
-Repo on github - https://github.com/Malachov/predictit
+Repo on GitHub - https://github.com/Malachov/predictit
 
 Readthedocs documentation - https://predictit.readthedocs.io
 
@@ -70,13 +70,13 @@ Install just with::
     pip install predictit
 
 Sometimes you can have issues with installing some libraries from requirements(e.g. numpy because not BLAS /
-LAPACK). If librarynot installed with pip, check which library don't work, install manually with stackoverflow
+LAPACK). If the library is not installed with pip, check which library don't work, install manually with stackoverflow
 and repeat...There are also some libraries (Tensorflow, pyodbc...) not in requirements, because not necessary
 for everyone.If you use some function that needs, it will tell you, just install with pip install...
 
 There are some libraries that not every user will be using (e.g. Tensorflow or libraries for some data
 inputs). If you want to be sure to have all libraries, you can download ``requirements_advanced.txt`` and then
-install advanced requirements with ``pip install -r requirements_advanced.txt``. 
+install advanced requirements with ``pip install -r requirements_advanced.txt``.
 
 Versions troubleshooting => Software is build in way, that it should be the best using the latest versions of
 dependencies. In most cases older versions works well as well. Only exception can be author's other libraries
@@ -85,7 +85,7 @@ stable) and some version of predictit has dependency on particular versions. Cle
 usually fix issues.
 
 Library was developed during 2020 and structure and even API (configuration) changed a lot. From version 1.7x
-it's considered to be stable and code made for library will work till 2.0.0. 
+it's considered to be stable and code made for library will work till 2.0.0.
 
 Examples:
 =========
@@ -233,7 +233,7 @@ Hyperparameters tuning
 ======================
 
 To optimize hyperparameters, just set ``optimizeit: 1,`` and model parameters limits. It is commented in it's
-docstrings how to use it. It's not grid bruteforce. It's heuristic method based on halving interval is used,
+docstrings how to use it. It's not grid bruteforce. It's a heuristic method based on halving interval is used,
 but still it can be time-consuming. It is recommended only to tune parameters worth of it. Or tune it by parts.
 
 GUI
@@ -292,7 +292,7 @@ only numeric data and resample ifg configured.
 >>> analyze_column(data_consolidated.iloc[:, 0])  # Predicted column is on index 0 after consolidation)
 Length: ...
 
-Preprocess data. It return preprocessed data, but also last undifferenced value and scaler for inverse
+Preprocess data. It returns preprocessed data, but also last undifferenced value and scaler for inverse
 transformation, so unpack it with _
 
 >>> data_preprocessed, _, _ = mdp.preprocessing.preprocess_data(
@@ -385,7 +385,7 @@ Best model is...
 Performance - How to scale
 --------------------------
 
-Time series prediction is very different from image recognition and more data doesn't necesarily means better
+Time series prediction is very different from image recognition and more data doesn't necessarily mean better
 prediction. If you're issuing performance problems, try fast preset (turn off optimizations, make less
 recurrent values, choose only few models, threshold datalength etc.) you can edit preset if you need. If you
 still have performance troubles and you have too much data, use resampling and select only valuable columns -
@@ -406,11 +406,10 @@ For developers
 
 Any help from other developers very appreciated... :D
 Don't be shy to create Issue, merge request or text on <malachovd@seznam.cz>
-
 """
 
 
-__version__ = "2.0.1"
+__version__ = "2.0.2"
 __author__ = "Daniel Malachov"
 __license__ = "MIT"
 __email__ = "malachovd@seznam.cz"
@@ -462,7 +461,5 @@ import sys
 
 import mylogging
 
-if sys.version_info.major < 3 or (
-    sys.version_info.major == 3 and sys.version_info.minor < 6
-):
-    raise RuntimeError(mylogging.return_str("Python version >=3.6 necessary."))
+if sys.version_info.major < 3 or (sys.version_info.major == 3 and sys.version_info.minor < 7):
+    raise RuntimeError(mylogging.return_str("Python version >= 3.7 necessary."))

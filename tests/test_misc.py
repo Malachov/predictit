@@ -12,7 +12,7 @@ def test_other_models_functions():
     tf_optimizers = predictit.models.tensorflow.get_optimizers_loses_activations()
     sklearn_regressors = predictit.models.sklearn_regression.get_all_models()
 
-    sequentions = mdp.create_model_inputs.make_sequences(np.random.randn(100, 1), 5)
-    predictit.models.autoreg_LNU.train(sequentions, plot=1)
+    sequences = mdp.create_model_inputs.make_sequences(np.random.randn(100, 1), 5)
+    predictit.models.autoreg_LNU.train(sequences, plot=False)
 
     assert tf_optimizers and sklearn_regressors

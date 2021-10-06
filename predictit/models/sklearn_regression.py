@@ -7,6 +7,8 @@ If main train function is optimized in best_params module (automatic best regres
 it can use function ``get_all_models()`` that return all existing regressor.
 """
 
+from __future__ import annotations
+
 import mylogging
 
 from .models_functions.models_functions import one_step_looper
@@ -199,9 +201,7 @@ def predict(x_input, model, predicts=7):
         return model.predict(x_input)[0].reshape(-1)
 
 
-def get_all_models(
-    regressors=True, classifiers=True, other_models=True, sklearn_extensions=True
-):
+def get_all_models(regressors=True, classifiers=True, other_models=True, sklearn_extensions=True):
     """Create list of around 80 various sklearn models where regressor or classifier is in class name
     plus some extra models.
     E.g. ["sklearn.ensemble._forest.ExtraTreesRegressor()", "sklearn.ensemble._bagging.BaggingRegressor()", ...]
@@ -241,13 +241,7 @@ def get_all_models(
                 )
 
             if classifiers:
-                models.extend(
-                    [
-                        getattr(module, cls)
-                        for cls in module.__all__
-                        if "Classifier" in cls
-                    ]
-                )
+                models.extend([getattr(module, cls) for cls in module.__all__ if "Classifier" in cls])
 
         except (Exception,):
             pass
@@ -276,11 +270,7 @@ def get_all_models(
         ]
 
         models.extend(
-            [
-                getattr(linear_model, cls)
-                for cls in linear_model.__all__
-                if cls in other_linear_models
-            ]
+            [getattr(linear_model, cls) for cls in linear_model.__all__ if cls in other_linear_models]
         )
 
         models.append(sklearn.svm.SVR)
@@ -295,8 +285,6 @@ def get_all_models(
             "GenELMRegressor",
         ]
 
-        models.extend(
-            [getattr(elm, cls) for cls in elm.__all__ if cls in extensions_models]
-        )
+        models.extend([getattr(elm, cls) for cls in elm.__all__ if cls in extensions_models])
 
     return models

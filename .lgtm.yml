@@ -1,5 +1,5 @@
-  extraction:
-    python:
+extraction:
+  python:
     python_setup:
       requirements_files:
         - requirements.txt

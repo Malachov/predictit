@@ -2,23 +2,28 @@
 model, initial function arguments and arguments limits. More info is in optimize function documentation.
 """
 
+from __future__ import annotations
+from typing import Union, Any, Callable
 import itertools
-import mylogging
+import time
+
 import numpy as np
 
+import mylogging
 from mypythontools.misc import watchdog
+from mydatapreprocessing.create_model_inputs import Inputs
+
 from . import evaluate_predictions
-import time
 
 
 def optimize(
-    model_train,
-    model_predict,
-    kwargs,
-    kwargs_limits,
-    model_train_input,
-    model_test_inputs,
-    models_test_outputs,
+    model_train: Callable,
+    model_predict: Callable,
+    kwargs: dict[str, Any],
+    kwargs_limits: dict[str, Any],
+    model_train_input: Inputs,
+    model_test_inputs: Union[list, np.ndarray],
+    models_test_outputs: np.ndarray,
     error_criterion="mape",
     fragments=10,
     iterations=3,
@@ -26,35 +31,35 @@ def optimize(
     time_limit=5,
     name="Your model",
     plot=0,
-):
+) -> Union[None, dict[str, Any]]:
     """Function to find optimal parameters of function. For example if we want to find minimum of function x^2,
     we can use limits from -10 to 10. If we have 4 fragments and 3 iterations. it will separate interval on 4 parts,
-    so we have aproximately points -10, -4, 4, 10. We evaluate the best one and make new interval to closest points,
+    so we have approximately points -10, -4, 4, 10. We evaluate the best one and make new interval to closest points,
     so new interval will ber -4 and 4. We divide again into 4 points. We repeat as many times as iterations variable
     defined.
 
     Note: If limits are written as int, it will be used only as int, so if you want to use float, write -10.0,
-    10.0 etc... If you want to define concrete values to be evalueated, just use list of more than 2 values (also you
+    10.0 etc... If you want to define concrete values to be evaluated, just use list of more than 2 values (also you
     can use strings).
 
     If we have many arguments, it will create many combinations of parameters, so beware, it can be very
     computationally intensive...
 
     Args:
-        model_train (func): Model train function (eg: ridgeregression.train).
-        model_predict (func): Model predict function (eg: ridgeregression.predict).
-        kwargs (dict): Initial arguments (eg: {"alpha": 0.1, "n_steps_in": 10}).
-        kwargs_limits (dict): Bounds of arguments (eg: {"alpha": [0.1, 1], "n_steps_in":[2, 30]}).
-        model_train_input ((np.ndarray, tuple(np.ndarray, np.ndarray, np.ndarray))): Data on which function is
-            optimized. Use train data or sequentions (tuple with (X, y, x_input)) - depends on model. Defaults to None.
-        model_test_inputs ((np.ndarray, tuple(np.ndarray, np.ndarray, np.ndarray))): Error criterion is evaluated to
+        model_train (Callable): Model train function (eg: ridgeregression.train).
+        model_predict (Callable): Model predict function (eg: ridgeregression.predict).
+        kwargs (dict[str, Any]): Initial arguments (eg: {"alpha": 0.1, "n_steps_in": 10}).
+        kwargs_limits (dict[str, Any]): Bounds of arguments (eg: {"alpha": [0.1, 1], "n_steps_in":[2, 30]}).
+        model_train_input (Inputs): Data on which function is
+            optimized. Use train data or sequences (tuple with (X, y, x_input)) - depends on model. Defaults to None.
+        model_test_inputs (Union[list, np.ndarray]): Error criterion is evaluated to
             be able to compare results. It has to be out of sample data, so data from test set.
         models_test_outputs (np.ndarray): Test set outputs.
         error_criterion (str, optional): Error criterion used in evaluation. 'rmse' or 'mape'. Defaults to 'mape'.
         fragments (int, optional): Number of optimized intervals. Defaults to 10.
         iterations (int, optional): How many times will be initial interval divided into fragments. Defaults to 3.
         details (int, optional): 0 print nothing, 1 print best parameters of models, 2 print every new best parameters
-            achieved, 3 prints all results. Bigger than 0 print precents of progress. Defaults to 0.
+            achieved, 3 prints all results. Bigger than 0 print percents of progress. Defaults to 0.
         time_limit (int, optional): How many seconds can one evaluation last. Defaults to 5.
         name (str, optional): Name of model to be displayed in details. Defaults to 'your model'.
         plot (bool, optional): It's possible to plot all parameters combinations to analyze it's influence.
@@ -67,15 +72,9 @@ def optimize(
 
     kwargs_fragments = {}
     constant_kwargs = (
-        {key: value for (key, value) in kwargs.items() if key not in kwargs_limits}
-        if kwargs
-        else {}
+        {key: value for (key, value) in kwargs.items() if key not in kwargs_limits} if kwargs else {}
     )
-    kwargs = (
-        {key: value for (key, value) in kwargs.items() if key not in constant_kwargs}
-        if kwargs
-        else {}
-    )
+    kwargs = {key: value for (key, value) in kwargs.items() if key not in constant_kwargs} if kwargs else {}
 
     n_test_samples = models_test_outputs.shape[0]
     predicts = models_test_outputs.shape[1]
@@ -96,28 +95,22 @@ def optimize(
         modeleval = np.zeros(n_test_samples)
 
         try:
-            trained_model = model_train(
-                model_train_input, **constant_kwargs, **model_kwargs
-            )
+            trained_model = model_train(model_train_input, **constant_kwargs, **model_kwargs)
 
             for repeat_iteration in range(n_test_samples):
 
-                create_plot = (
-                    1 if plot and repeat_iteration == n_test_samples - 1 else 0
-                )
+                create_plot = 1 if plot and repeat_iteration == n_test_samples - 1 else 0
 
                 predictions = model_predict(
                     model_test_inputs[repeat_iteration],
                     trained_model,
                     predicts=predicts,
                 )
-                modeleval[
-                    repeat_iteration
-                ] = evaluate_predictions.compare_predicted_to_test(
+                modeleval[repeat_iteration] = evaluate_predictions.compare_predicted_to_test(
                     predictions,
                     models_test_outputs[repeat_iteration],
                     error_criterion=error_criterion,
-                    modelname=f"{name} - {model_kwargs}",
+                    model_name=f"{name} - {model_kwargs}",
                     plot=create_plot,
                 )
 
@@ -135,9 +128,7 @@ def optimize(
         best_params = []
 
     if details > 0:
-        print(
-            f"\n\nOptimization of model {name}:\n\n  Default parameters result: {best_result}\n"
-        )
+        print(f"\n\nOptimization of model {name}:\n\n  Default parameters result: {best_result}\n")
 
     # If result isn't better during iteration, return results
     memory_result = 0
@@ -163,12 +154,10 @@ def optimize(
         combi_len = len(combinations)
         percent = round(combi_len / 100, 1)
 
-        kombi = []
+        list_of_combinations = []
         for j in combinations:
-            combination_dict = {
-                key: value for (key, value) in zip(kwargs_limits.keys(), j)
-            }
-            kombi.append(combination_dict)
+            combination_dict = {key: value for (key, value) in zip(kwargs_limits.keys(), j)}
+            list_of_combinations.append(combination_dict)
 
         counter = 0
         for k, combination in enumerate(combinations):
@@ -181,43 +170,32 @@ def optimize(
 
             try:
                 if time_limit:
-                    res = watchdog(time_limit, evaluatemodel, kwargs=kombi[k])
+                    res = watchdog(time_limit, evaluatemodel, kwargs=list_of_combinations[k])
                 else:
-                    res = evaluatemodel(kombi[k])
+                    res = evaluatemodel(list_of_combinations[k])
 
                 if res is not None and res is not np.nan and res < best_result:
                     best_result = res
-                    best_params = kombi[k]
+                    best_params = list_of_combinations[k]
 
                     if details == 2:
-                        print(
-                            f"\n  New best result {best_result} with parameters: \t {best_params}\n"
-                        )
+                        print(f"\n  New best result {best_result} with parameters: \t {best_params}\n")
 
-            except Exception:
+            except (Exception,):
                 if details > 0:
-                    mylogging.traceback(
-                        f"Error on model {name}: with params {kombi[k]}"
-                    )
+                    mylogging.traceback(f"Error on model {name}: with params {list_of_combinations[k]}")
                 res = np.nan
 
             finally:
 
                 if details == 3:
-                    print(f"    {res}  with parameters:  {kombi[k]}")
+                    print(f"    {res}  with parameters:  {list_of_combinations[k]}")
 
-                if (
-                    details > 0
-                    and percent > 0
-                    and counter % 10 == 1
-                    and time.time() - last_printed_time > 3
-                ):
+                if details > 0 and percent > 0 and counter % 10 == 1 and time.time() - last_printed_time > 3:
                     print(f"\tOptimization is in {int(counter / percent)} %")
                     last_printed_time = time.time()
 
-        if last_best_params != best_params and (
-            memory_result != 0 and (memory_result - best_result) < 10e-6
-        ):
+        if last_best_params != best_params and (memory_result != 0 and (memory_result - best_result) < 10e-6):
             if details > 0:
                 print(
                     (
@@ -230,17 +208,13 @@ def optimize(
         # If last iteration, do not create intervals
         elif iteration + 1 == iterations:
             if details > 0:
-                print(
-                    f"  Optimization finished. Best result {best_result} with parameters {best_params}"
-                )
+                print(f"  Optimization finished. Best result {best_result} with parameters {best_params}")
             return best_params
 
         # None of params combinations finished
         elif not best_params:
             if details > 0:
-                print(
-                    f"  Optimization failed. None of parameters combinations finished."
-                )
+                print(f"  Optimization failed. None of parameters combinations finished.")
             return best_params
 
         memory_result = best_result
@@ -248,27 +222,16 @@ def optimize(
 
         for i, j in kwargs_limits.items():
 
-            if (
-                not isinstance(j[0], (int, float, np.ndarray, np.generic))
-                or len(j) != 2
-            ):
+            if not isinstance(j[0], (int, float, np.ndarray, np.generic)) or len(j) != 2:
                 kwargs_fragments[i] = [best_params[i]]
             else:
                 step = (max(kwargs_fragments[i]) - min(kwargs_fragments[i])) / fragments
                 if best_params[i] - step < j[0]:
-                    kwargs_fragments[i] = np.linspace(
-                        best_params[i], best_params[i] + step, fragments
-                    )
+                    kwargs_fragments[i] = np.linspace(best_params[i], best_params[i] + step, fragments)
                 elif best_params[i] + step > j[1]:
-                    kwargs_fragments[i] = np.linspace(
-                        best_params[i] - step, best_params[i], fragments
-                    )
+                    kwargs_fragments[i] = np.linspace(best_params[i] - step, best_params[i], fragments)
                 else:
-                    kwargs_fragments[i] = np.linspace(
-                        best_params[i] - step, best_params[i] + step, fragments
-                    )
+                    kwargs_fragments[i] = np.linspace(best_params[i] - step, best_params[i] + step, fragments)
                 kwargs_fragments[i] = np.unique(kwargs_fragments[i])
                 if isinstance(j[0], int):
-                    kwargs_fragments[i] = list(
-                        set([int(round(k)) for k in kwargs_fragments[i]])
-                    )
+                    kwargs_fragments[i] = list(set([int(round(k)) for k in kwargs_fragments[i]]))

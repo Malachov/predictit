@@ -1,4 +1,9 @@
+"""Simple Linear and Ridge regression."""
+
+from __future__ import annotations
+
 import numpy as np
+
 from .models_functions.models_functions import one_step_looper
 
 
@@ -22,9 +27,7 @@ def train(data, model="linear", lmbda=0.1):
         w = np.dot(np.dot(np.linalg.inv(np.dot(X.T, X)), X.T), y)
 
     elif model == "ridge":
-        w = np.dot(
-            np.dot(np.linalg.inv(np.dot(X.T, X) + lmbda * np.eye(X.shape[1])), X.T), y
-        )
+        w = np.dot(np.dot(np.linalg.inv(np.dot(X.T, X) + lmbda * np.eye(X.shape[1])), X.T), y)
 
     else:
         raise ValueError("Model must be one of ['linear', 'ridge']")
@@ -45,6 +48,4 @@ def predict(x_input, model, predicts=7):
         np.ndarray: Predictions of input time series.
     """
 
-    return one_step_looper(
-        lambda new_x_input: np.dot(new_x_input, model), x_input.ravel(), predicts
-    )
+    return one_step_looper(lambda new_x_input: np.dot(new_x_input, model), x_input.ravel(), predicts)

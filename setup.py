@@ -1,4 +1,3 @@
-#%%
 from setuptools import setup, find_packages
 import pkg_resources
 import predictit
@@ -9,7 +8,7 @@ with open("README.md") as readme_file:
     readme = readme_file.read()
 
 with open("requirements.txt") as f:
-    myreqs = [str(requirement) for requirement in pkg_resources.parse_requirements(f)]
+    used_requirements = [str(requirement) for requirement in pkg_resources.parse_requirements(f)]
 
 setup(
     name="predictit",
@@ -18,7 +17,7 @@ setup(
     license="mit",
     author="Daniel Malachov",
     author_email="malachovd@seznam.cz",
-    install_requires=myreqs,
+    install_requires=used_requirements,
     description="Library/framework for making predictions.",
     long_description_content_type="text/markdown",
     long_description=readme,
@@ -28,7 +27,6 @@ setup(
     classifiers=[
         "Programming Language :: Python",
         "Development Status :: 3 - Alpha",
-        "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",

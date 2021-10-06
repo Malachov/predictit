@@ -1,6 +1,2 @@
 mypythontools>=0.0.67
-pytest
-pytest-cov
-sphinx==3.2
-m2r2
-flake8
+line_profiler

@@ -1,5 +1,6 @@
 """Miscellaneous functions used across the library that does not fit into other packages."""
 
+from __future__ import annotations
 import builtins
 
 from mydatapreprocessing import preprocessing
@@ -10,9 +11,9 @@ from mydatapreprocessing import preprocessing
 
 class Global_vars:
     def __init__(self) -> None:
-        self._JUPYTER = True if hasattr(builtins, "__IPYTHON__") else 0
-        self._GUI = False
-        self._PLOTS_CONFIGURED = False
+        self.JUPYTER = True if hasattr(builtins, "__IPYTHON__") else 0
+        self.GUI = False
+        self.PLOTS_CONFIGURED = False
 
 
 GLOBAL_VARS = Global_vars()
@@ -26,12 +27,12 @@ def setup_plots():
     try:
         from IPython import get_ipython
 
-        if GLOBAL_VARS._JUPYTER:
+        if GLOBAL_VARS.JUPYTER:
             get_ipython().run_line_magic("matplotlib", "inline")
     except Exception:
         pass
 
-    GLOBAL_VARS._CONFIGURED = True
+    GLOBAL_VARS.PLOTS_CONFIGURED = True
 
 
 def confidence_interval(data, predicts=7, confidence=0.1, p=1, d=0, q=0):

@@ -1,10 +1,14 @@
-"""Module with function compare_predicted_to_test that Compare tested model with reality. It return some error criterion based on config"""
+"""Module with function compare_predicted_to_test that Compare tested model with reality. It return some error
+criterion based on config """
+
+from __future__ import annotations
+import importlib
 
 import numpy as np
+
 import mylogging
+
 from predictit import misc
-import warnings
-import importlib
 
 # Lazy imports
 # from IPython import get_ipython
@@ -19,8 +23,8 @@ def compare_predicted_to_test(
     test,
     error_criterion="mape",
     plot=False,
-    modelname="Model",
-    dataname="Data",
+    model_name="Model",
+    data_name="Data",
 ):
     """Compare tested model with reality.
 
@@ -29,8 +33,8 @@ def compare_predicted_to_test(
         test (np.ndarray): Correct values or output from data_pre funcs.
         error_criterion (str, optional): 'mape' or 'rmse'. Defaults to 'mape'.
         plot (bool, optional): Whether create plot. Defaults to False.
-        modelname (str, optional): Model name for plot. Defaults to "Model".
-        dataname (str, optional): Data name for plot. Defaults to "Data".
+        model_name (str, optional): Model name for plot. Defaults to "Model".
+        data_name (str, optional): Data name for plot. Defaults to "Data".
 
     Returns:
         float: Error criterion value (mape or rmse). If configured, plot of results as well.
@@ -39,13 +43,13 @@ def compare_predicted_to_test(
     predicts = len(predicted)
 
     if predicts != len(test):
-        print("Test and predicted length not equeal")
+        print("Test and predicted length not equal")
         return np.nan
 
     if predicted is not None:
         if plot:
 
-            if not misc.GLOBAL_VARS._PLOTS_CONFIGURED:
+            if not misc.GLOBAL_VARS.PLOTS_CONFIGURED:
                 misc.setup_plots()
 
             import matplotlib.pyplot as plt
@@ -56,15 +60,15 @@ def compare_predicted_to_test(
             plt.legend(loc="upper right")
             plt.xlabel("t")
             plt.ylabel("Predicted value")
-            plt.title("Prediction with \n {} with data {}".format(modelname, dataname))
+            plt.title("Prediction with \n {} with data {}".format(model_name, data_name))
             plt.show()
 
         error = np.array(predicted) - np.array(test)
 
         """
-        abserror = [abs(i) for i in error]
-        sumabserror = sum(abserror)
-        mae = sumabserror / predicts
+        abs_error = [abs(i) for i in error]
+        sum_abs_error = sum(abs_error)
+        mae = sum_abs_error / predicts
         """
 
         if error_criterion == "mse" or error_criterion == "mse_sklearn":
@@ -91,20 +95,19 @@ def compare_predicted_to_test(
                 raise ImportError(
                     mylogging.return_str(
                         "Library dtaidistance necessary for configured dtw (dynamic time warping) "
-                        "error criterion is not installed! Instal it via \n\npip install dtaidistance"
+                        "error criterion is not installed! Install it via \n\npip install dtaidistance"
                     )
                 )
 
             from dtaidistance import dtw
 
-            criterion_value = dtw.distance_fast(
-                predicted.astype("double"), test.astype("double")
-            )
+            criterion_value = dtw.distance_fast(predicted.astype("double"), test.astype("double"))
 
         else:
             raise KeyError(
                 mylogging.return_str(
-                    f"bad 'error_criterion' in config - '{error_criterion}'. Use some from options from config comment..."
+                    f"bad 'error_criterion' in config - '{error_criterion}'. Use some from options from config "
+                    "comment... "
                 )
             )
 

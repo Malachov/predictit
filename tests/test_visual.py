@@ -6,13 +6,13 @@ import pandas as pd
 import numpy as np
 
 from mydatapreprocessing import create_model_inputs, preprocessing, misc
+import mypythontools
+
+mypythontools.paths.PROJECT_PATHS.add_ROOT_PATH_to_sys_path()
 
 import predictit
 from predictit import config
 
-import mypythontools
-
-mypythontools.paths.PROJECT_PATHS.add_ROOT_PATH_to_sys_path()
 
 from conftest import config_for_tests
 
@@ -22,22 +22,16 @@ config.update(config_for_tests)
 
 print_analyze = True
 print_preprocessing = True
-print_data_flow = (
-    True  # Show what are data inputing for train, for prediction, for testing etc.
-)
+print_data_flow = True  # Show what are data inputing for train, for prediction, for testing etc.
 print_postprocessing = True
 
 
-def test_visual(
-    print_analyze=1, print_preprocessing=1, print_data_flow=1, print_postprocessing=1
-):
+def test_visual(print_analyze=1, print_preprocessing=1, print_data_flow=1, print_postprocessing=1):
 
     np.set_printoptions(suppress=True, precision=1)
 
     # Data must have 2 dimensions. If you have only one column, reshape(-1, 1)!!!
-    data = np.array(
-        [[1, 3, 5, 2, 3, 4, 5, 66, 3, 2, 4, 5, 6, 0, 0, 0, 0, 7, 3, 4, 55, 3, 2]]
-    ).T
+    data = np.array([[1, 3, 5, 2, 3, 4, 5, 66, 3, 2, 4, 5, 6, 0, 0, 0, 0, 7, 3, 4, 55, 3, 2]]).T
 
     column_for_prediction = pd.DataFrame(data)
 
@@ -166,7 +160,7 @@ def test_visual(
                 "remove_outliers": False,
                 "repeatit": 3,
                 "optimization": False,
-                "mode": "predict",
+                "mode": "in_sample",
                 "models_input": {
                     "Bayes ridge regression": "multi_step",
                     "AR": "data_one_column",

@@ -1,10 +1,11 @@
+"""Module for functions shared across models."""
+
+from __future__ import annotations
+
 import numpy as np
-from typing import Callable
 
 
-def one_step_looper(
-    model_function, x_input: np.ndarray, predicts: int, constant: bool = True
-) -> np.ndarray:
+def one_step_looper(model_function, x_input: np.ndarray, predicts: int, constant: bool = True) -> np.ndarray:
     """Predict one value, generate new input (add new to last and delete first) and predict again.
 
     Args:

@@ -1,3 +1,7 @@
+"""Some statsmodels models. Statsmodels has different data imput form. Uses no sequentions, but original series."""
+
+from __future__ import annotations
+
 # Lazy imports
 # import statsmodels.tsa.api as sm
 # from statsmodels.tsa.statespace.sarimax import SARIMAX
@@ -104,9 +108,7 @@ def predict(data, model, predicts=7):
 
     # Input data must have same starting point as data in train so the starting point be correct
     if model.my_name == "arima":
-        predictions = model.predict(
-            start=start, end=start - 1 + predicts, typ="levels"
-        )[-predicts:]
+        predictions = model.predict(start=start, end=start - 1 + predicts, typ="levels")[-predicts:]
 
     else:
         predictions = model.predict(start=start, end=start - 1 + predicts)[-predicts:]

@@ -1,4 +1,8 @@
-from typing import Union, Dict
+"""This module define classes (types) that main functions will return so it's possible to use
+static type analysis, intellisense etc."""
+
+from __future__ import annotations
+from typing import Union
 
 import pandas as pd
 import numpy as np
@@ -113,8 +117,8 @@ class Result:
 class Multiple:
     def __init__(
         self,
-        best_predictions_dataframes: Dict[str, pd.DataFrame],
-        results: Dict[str, Result],
+        best_predictions_dataframes: dict[str, pd.DataFrame],
+        results: dict[str, Result],
     ):
         self.best_predictions_dataframes = best_predictions_dataframes
         self.results = results
@@ -123,9 +127,9 @@ class Multiple:
 class BestInput:
     def __init__(
         self,
-        best_data_dict: Dict[str, str],
-        tables: Dict[str, str],
-        results: Dict[str, Result],
+        best_data_dict: dict[str, str],
+        tables: dict[str, str],
+        results: dict[str, Result],
     ):
         self.best_data_dict = best_data_dict
         self.tables = tables

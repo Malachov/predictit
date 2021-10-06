@@ -1,11 +1,19 @@
+"""Internal function that can run on multiple processes at once. It will train models, do hyperparameter optimization
+and do the predictions."""
+
+from __future__ import annotations
+from typing import Union, Any
 import time
+
 import numpy as np
 import mylogging
+
 import predictit
 
 # Lazy imports
 # import tracemalloc
 
+# TODO Type hints
 
 # This is core function... It should be sequentially in the middle of main script in predict function,
 # but it has to be 1st level function to be able to use in multiprocessing.
@@ -33,7 +41,7 @@ def train_and_predict(
     final_scaler=None,
     pipe=None,
     semaphor=None,
-):
+) -> Union[None, dict[str, Any]]:
     """Inner function, that can run in parallel with multiprocessing.
 
     Note:
@@ -51,17 +59,13 @@ def train_and_predict(
 
     if config["multiprocessing"]:
         mylogging._misc.filter_warnings()
-        mylogging.outer_warnings_filter(
-            config["ignored_warnings"], config["ignored_warnings_class_type"]
-        )
+        mylogging.outer_warnings_filter(config["ignored_warnings"], config["ignored_warnings_class_type"])
         mylogging.config.BLACKLIST = config["ignored_warnings"]
         mylogging.config.OUTPUT = config["logger_output"]
         mylogging.config.LEVEL = config["logger_level"]
         mylogging.config.FILTER = config["logger_filter"]
         mylogging.config.COLORIZE = config["logger_color"]
-        logs_redirect = mylogging.redirect_logs_and_warnings_to_lists(
-            logs_list, warnings_list
-        )
+        logs_redirect = mylogging.redirect_logs_and_warnings_to_lists(logs_list, warnings_list)
 
     if config["is_tested"]:
         import mypythontools
@@ -111,9 +115,7 @@ def train_and_predict(
             )
 
         except TimeoutError:
-            mylogging.traceback(
-                f"Hyperparameters optimization of {iterated_model_name} didn't finished"
-            )
+            mylogging.traceback(f"Hyperparameters optimization of {iterated_model_name} didn't finished")
 
         for k, l in model_results["Best optimized parameters"].items():
 
@@ -122,9 +124,7 @@ def train_and_predict(
             config["models_parameters"][iterated_model_name][k] = l
 
         stop_optimization = time.time()
-        model_results["Hyperparameter optimization time"] = (
-            stop_optimization - start_optimization
-        )
+        model_results["Hyperparameter optimization time"] = stop_optimization - start_optimization
 
     start = time.time()
 
@@ -140,9 +140,7 @@ def train_and_predict(
         )
 
         # Create predictions - out of sample
-        one_reality_result = iterated_model_predict(
-            model_predict_input, trained_model, config["predicts"]
-        )
+        one_reality_result = iterated_model_predict(model_predict_input, trained_model, config["predicts"])
 
         if np.isnan(np.sum(one_reality_result)) or one_reality_result is None:
             raise ValueError("NaN predicted from model.")
@@ -152,9 +150,7 @@ def train_and_predict(
 
         # Do inverse data preprocessing
         if config["power_transformed"]:
-            one_reality_result = fitted_power_transform(
-                one_reality_result, data_std, data_mean
-            )
+            one_reality_result = fitted_power_transform(one_reality_result, data_std, data_mean)
 
         one_reality_result = preprocess_data_inverse(
             one_reality_result,
@@ -184,9 +180,7 @@ def train_and_predict(
                     tests_results[repeat_iteration], data_std, data_mean
                 )
 
-            test_errors[
-                repeat_iteration
-            ] = predictit.evaluate_predictions.compare_predicted_to_test(
+            test_errors[repeat_iteration] = predictit.evaluate_predictions.compare_predicted_to_test(
                 tests_results[repeat_iteration],
                 models_test_outputs[repeat_iteration],
                 error_criterion=config["error_criterion"],
@@ -218,7 +212,7 @@ def train_and_predict(
         if not ["multiprocessing"]:
             model_results["Trained model"] = trained_model
 
-    except Exception:
+    except (Exception,):
         results_array = np.zeros(config["predicts"])
         results_array.fill(np.nan)
         test_errors = np.zeros((config["repeatit"], config["predicts"]))

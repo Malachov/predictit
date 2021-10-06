@@ -92,6 +92,6 @@
 - [x] Choose which models to optimize (comment out config models_parameters_limits dictionary)
 - [x] Similiar models generalized to one (E.g. AR, ARMA, ARIMA > statsmodels_autoregressive)
 - [x] Plot and data preprocessing are made in own module, not in main
-- [x] New model similarity based error criterions (not exact point to point comparison) 1) Imported time warping 2) Own sliding window error
+- [x] New model similarity based error criteria (not exact point to point comparison) 1) Imported time warping 2) Own sliding window error
 - [x] One more level of debug - stop at first warning - add warning exceptions to config to hide outer depracation etc. warnings
 - [x] More user friendly warnings (color syntax highlighted) + Error separated from error location

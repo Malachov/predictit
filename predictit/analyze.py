@@ -2,6 +2,10 @@
 it's details, autocorrelation function etc.
 """
 
+from __future__ import annotations
+from typing import Union
+from typing_extensions import Literal
+
 import numpy as np
 import pandas as pd
 
@@ -22,18 +26,18 @@ from predictit import misc
 # from statsmodels.tsa.seasonal import seasonal_decompose
 
 
-def analyze_column(data, lags=5, window=5):
+def analyze_column(data: Union[np.ndarray, pd.DataFrame], lags: int = 5, window: int = 5) -> None:
     """Function one-dimensional data (predicted column), that plot data, it's distribution, some details like minimum,
     maximum, std, mean etc. It also create autocorrelation and partial autocorrelation (good for ARIMA models) and
     plot rolling mean and rolling std. It also tell if data are probably stationary or not.
 
     Args:
-        data (np.array, pd.DataFrame): Time series data.
+        data (Union[np.array, pd.DataFrame]): Time series data.
         lags (int, optional): Lags used for autocorrelation. Defaults to 5.
         window (int, optional): Window for rolling average and rolling std. Defaults to 5.
 
     """
-    if not misc.GLOBAL_VARS._PLOTS_CONFIGURED:
+    if not misc.GLOBAL_VARS.PLOTS_CONFIGURED:
         misc.setup_plots()
 
     import matplotlib.pyplot as plt
@@ -131,15 +135,15 @@ def analyze_column(data, lags=5, window=5):
         print(f"\np-value = {pvalue} : Analyzed column is probably not stationary.\n")
 
 
-def analyze_data(data, pairplot=False):
+def analyze_data(data: Union[pd.DataFrame, np.ndarray], pairplot: bool = False):
     """Analyze n-dimensional data. Describe data types, nan values, minimums etc...
     Plot correlation graph.
 
     Args:
-        data ((pd.DataFrame, np.ndarray)): Time series data.
+        data (Union[pd.DataFrame, np.ndarray]): Time series data.
         pairplot (bool, optional): Whether to plot correlation matrix. Computation can be very slow. Defaults to False.
     """
-    if not misc.GLOBAL_VARS._PLOTS_CONFIGURED:
+    if not misc.GLOBAL_VARS.PLOTS_CONFIGURED:
         misc.setup_plots()
 
     import matplotlib.pyplot as plt
@@ -167,22 +171,20 @@ def analyze_data(data, pairplot=False):
             cmap=sns.diverging_palette(20, 220, n=200),
             square=True,
         )
-        ax.set_xticklabels(
-            ax.get_xticklabels(), rotation=45, horizontalalignment="right"
-        )
+        ax.set_xticklabels(ax.get_xticklabels(), rotation=45, horizontalalignment="right")
 
         plt.draw()
 
 
-def decompose(data, period=365, model="additive"):
+def decompose(data: np.ndarray, period: int = 365, model: Literal["additive", "multiplicative"] = "additive"):
     """Plot decomposition graph. Analyze if data are seasonal.
 
     Args:
         data (np.ndarray): Time series data
         period (int, optional): Seasonal interval. Defaults to 365.
-        model (str, optional): Additive or multiplicative. Defaults to 'additive'.
+        model (Literal["additive", "multiplicative"], optional): 'additive' or 'multiplicative'. Defaults to 'additive'.
     """
-    if not misc.GLOBAL_VARS._PLOTS_CONFIGURED:
+    if not misc.GLOBAL_VARS.PLOTS_CONFIGURED:
         misc.setup_plots()
 
     import matplotlib.pyplot as plt
@@ -221,16 +223,21 @@ def decompose(data, period=365, model="additive"):
         mylogging.traceback("Number of samples is probably too low to compute.")
 
 
-def analyze_results(results, config_values_columns, models_columns, error_criterion=""):
+def analyze_results(
+    results: np.ndarray, config_values_columns: list, models_columns: list, error_criterion: str = ""
+) -> tuple:
     """Multiple predictions for various optimized config variable values are made, then errors (difference from true
     values) are evaluated. This is input. Outputs are averaged errors through datasets, what model is the best,
     what are the best optimized values for particular model, or what is best optimized value for all models.
 
-    Args: results (np.ndarray): Results in shape (dataset, optimized, models). First index is just averaged.
-    optimized and models are analyzed. config_values_columns (list): Names of second dim in results. Usually some
-    config values is optimized, so that means values of optimized variable that is predicted in for loop.
-    models_columns (list): Names of used models. error_criterion(string, optional): If config values evaluated. Used
-    as column name. Defaults to ""
+    Args:
+        results (np.ndarray): Results in shape (dataset, optimized, models). First index is just averaged.
+            optimized and models are analyzed.
+        config_values_columns (list): Names of second dim in results. Usually some config values is optimized,
+            so that means values of optimized variable that is predicted in for loop.
+        models_columns (list): Names of used models.
+        error_criterion(string, optional): If config values evaluated.
+            Used as column name. Defaults to ""
 
     Returns:
         np.ndarray, list, str, str: Models with best optimized average results, best optimized form models,
@@ -240,17 +247,13 @@ def analyze_results(results, config_values_columns, models_columns, error_criter
     results_average = np.nanmean(results, axis=0)
 
     # Analyze models - choose just the best optimized value
-    best_optimized_indexes_errors = np.nanargmin(
-        results_average, axis=0
-    )  # Indexes of best optimized
+    best_optimized_indexes_errors = np.nanargmin(results_average, axis=0)  # Indexes of best optimized
 
     best_optimized_values = [
         config_values_columns[index] for index in best_optimized_indexes_errors
     ]  # Best optimized for models
 
-    best_results_errors = np.nanmin(
-        results_average, axis=0
-    )  # Results if only best optimized are used
+    best_results_errors = np.nanmin(results_average, axis=0)  # Results if only best optimized are used
     best_model_index = int(np.nanargmin(best_results_errors))
     best_model_name = list(models_columns)[best_model_index]
 
@@ -269,6 +272,7 @@ def analyze_results(results, config_values_columns, models_columns, error_criter
             index=config_values_columns,
         )
 
+    # TODO used named tuple
     return (
         best_results_errors,
         best_optimized_values,

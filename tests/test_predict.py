@@ -49,7 +49,12 @@ def test_config_inputs():
     config_test.output.predicts = 4
     predict_config_as_param = predictit.predict(config=config_test)
 
-    cli_args_str = "python predictit/main.py --used_function predict --data 'https://raw.githubusercontent.com/jbrownlee/Datasets/master/daily-min-temperatures.csv' --predicted_column 'Temp'"
+    cli_args_str = (
+        "python predictit/main.py --used_function predict --data "
+        "'https://raw.githubusercontent.com/jbrownlee/Datasets/master/daily-min-temperatures.csv' "
+        "--predicted_column 'Temp' "
+    )
+
     result_cli = subprocess.check_output(cli_args_str.split(" "))
 
     assert len(predict_with_params.best_prediction) == 3

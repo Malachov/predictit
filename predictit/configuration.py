@@ -42,14 +42,15 @@ Examples:
     Best model is...
 """
 
-from typing import Union, Any, Dict, List, Set, Tuple
+from __future__ import annotations
+from typing import Union, Any
 from pathlib import Path
 
 from mypythontools.config import MyProperty, ConfigBase, ConfigStructured
 
 
 class Config(ConfigStructured):
-    """Config class. You shoud not use class itself, but created instance config."""
+    """Config class. You should not use class itself, but created instance config."""
 
     def __init__(self, init_dict=None) -> None:
         self.general = self.General()
@@ -69,7 +70,7 @@ class Config(ConfigStructured):
         """Various config values that doesn't fit into any other category."""
 
         @MyProperty(options=["predict", "predict_multiple", "compare_models"])
-        def used_function() -> str:
+        def used_function(self) -> str:
             """
             Options:
                 'predict', 'predict_multiple', 'compare_models'
@@ -82,7 +83,7 @@ class Config(ConfigStructured):
             return "predict"
 
         @MyProperty(options=["fast", "normal", None])
-        def use_config_preset() -> Union[str, None]:
+        def use_config_preset(self) -> Union[str, None]:
             """
             Options:
                 'fast', 'normal', None
@@ -95,7 +96,7 @@ class Config(ConfigStructured):
             return None
 
         @MyProperty(options=["pool", "process", None])
-        def multiprocessing() -> Union[bool, str]:
+        def multiprocessing(self) -> Union[None, str]:
             """
             Options:
                 'pool', 'process', None.
@@ -107,7 +108,7 @@ class Config(ConfigStructured):
             return None
 
         @MyProperty((int, None))
-        def processes_limit() -> Union[int, None]:
+        def processes_limit(self) -> Union[int, None]:
             """
             Types:
                 str | None
@@ -119,9 +120,9 @@ class Config(ConfigStructured):
 
             return None
 
-        ### Data anlalysis
+        # Data analysis
         @MyProperty(int)
-        def analyzeit() -> int:
+        def analyzeit(self) -> int:
             """
             Options:
                 0, 1, 2, 3
@@ -129,13 +130,13 @@ class Config(ConfigStructured):
             Default:
                 0
 
-            If 0, do not analyze, if 1, analyze original data, if 2 analyze preprocessed data, if 3, then both. Statistical distribution,
-            autocorrelation, seasonal decomposition etc.
+            If 0, do not analyze, if 1, analyze original data, if 2 analyze preprocessed data, if 3, then both.
+            Statistical distribution, autocorrelation, seasonal decomposition etc.
             """
             return 0
 
         @MyProperty((dict, None))
-        def analyze_seasonal_decompose() -> Union[dict, None]:
+        def analyze_seasonal_decompose(self) -> Union[dict, None]:
             """
             Types:
                 dict | None
@@ -153,7 +154,7 @@ class Config(ConfigStructured):
             }
 
         @MyProperty(bool)
-        def return_internal_results() -> bool:
+        def return_internal_results(self) -> bool:
             """
             Type:
                 bool
@@ -165,7 +166,7 @@ class Config(ConfigStructured):
             return False
 
         @MyProperty(bool)
-        def trace_processes_memory() -> bool:
+        def trace_processes_memory(self) -> bool:
             """
             Type:
                 bool
@@ -177,14 +178,14 @@ class Config(ConfigStructured):
             return False
 
     class DataInput(ConfigStructured):
-        """Define what data you will use and how it will be preprocessed. You can use local file, url with data or database.
-        Main config variable is `data` where you can find what formats are supported with some examples."""
+        """Define what data you will use and how it will be preprocessed. You can use local file, url with data or
+        database. Main config variable is `data` where you can find what formats are supported with some examples."""
 
         def __init__(self) -> None:
             self.database_subconfig = self.DatabaseSubconfig()
 
         @MyProperty()
-        def data():
+        def data(self):
             """
             Types:
                 str | pathlib.Path | np.ndarray | pandas.DataFrame | dict | list
@@ -199,13 +200,14 @@ class Config(ConfigStructured):
                 "https://yoururl/your.csv"  # Web url (with suffix). Same with json.
                 "https://blockchain.info/unconfirmed-transactions?format=json"  # In this case you have to specify also  'request_datatype_suffix': "json", 'data_orientation': "index", 'predicted_table': 'txs',
                 [{'col_1': 3, 'col_2': 'a'}, {'col_1': 0, 'col_2': 'd'}]  # List of records
-                {'col_1': [3, 2, 1, 0], 'col_2': ['a', 'b', 'c', 'd']}  # Dict with colums or rows (index) - necessary to setup data_orientation!
+                {'col_1': [3, 2, 1, 0], 'col_2': ['a', 'b', 'c', 'd']}  # Dict with columns or rows (index) - necessary to setup data_orientation!
                 You can use more files in list and data will be concatenated. It can be list of paths or list of python objects. Example:
                 [np.random.randn(20, 3), np.random.randn(25, 3)]  # Dataframe same way
                 ["https://raw.githubusercontent.com/jbrownlee/Datasets/master/daily-min-temperatures.csv", "https://raw.githubusercontent.com/jbrownlee/Datasets/master/daily-min-temperatures2.csv"]  # List of URLs
                 ["path/to/my1.csv", "path/to/my1.csv"]
 
-            File path with suffix (string or pathlib Path). Or numpy array, pandas dataframe or series, list or dictionary.
+            File path with suffix (string or pathlib Path). Or numpy array, pandas dataframe or series,
+            list or dictionary.
 
             Supported path formats are:
 
@@ -215,15 +217,16 @@ class Config(ConfigStructured):
             - parquet
             - h5
 
-            Data shape for numpy array and dataframe is (n_samples, n_features). Rows are samples and columns are features.
+            Data shape for numpy array and dataframe is (n_samples, n_features). Rows are samples and columns are
+            features.
 
-            Note:
-                If you want try how it works, you can use some default test data. You can use 'get_ecg', 'test_sin', 'test_ramp' and 'test_random'."""
+            Note: If you want try how it works, you can use some default test data. You can use 'get_ecg',
+            'test_sin', 'test_ramp' and 'test_random'. """
 
             return "test_ecg"
 
         @MyProperty(types=(list, dict, None))
-        def data_all() -> Union[List, Dict]:
+        def data_all(self) -> Union[list, dict, None]:
             """
             Types:
                 list | dict | None
@@ -237,13 +240,14 @@ class Config(ConfigStructured):
                 (my_data[-2000:], my_data[-1000:])
                 [np.array(range(1000)), np.array(range(500))]
 
-            Just for compare_models function. Dictionary of data names and list of it's values and predicted columns or list of
-            data parts or numpy array with rows as data samples. Don't forget to setup 'predicted_column' as usually in Config.
+            Just for compare_models function. Dictionary of data names and list of it's values and predicted columns
+            or list of data parts or numpy array with rows as data samples. Don't forget to setup 'predicted_column'
+            as usually in Config.
             """
             return None
 
         @MyProperty((str, None))
-        def predicted_table() -> Union[str, None]:
+        def predicted_table(self) -> Union[str, None]:
             """
             Types:
                 str | None
@@ -256,7 +260,7 @@ class Config(ConfigStructured):
             return None
 
         @MyProperty(options=["columns", "index", None])
-        def data_orientation() -> str:
+        def data_orientation(self) -> Union[str, None]:
             """
             Options:
                 'columns', 'index', None.
@@ -270,7 +274,7 @@ class Config(ConfigStructured):
             return None
 
         @MyProperty((int, None))
-        def header() -> Union[str, bool]:
+        def header(self) -> Union[str, bool]:
             """
             Types:
                 int | None
@@ -282,7 +286,7 @@ class Config(ConfigStructured):
             return "infer"
 
         @MyProperty(dict)
-        def csv_style() -> Dict:
+        def csv_style(self) -> dict:
             """
             Type:
                 dict
@@ -294,7 +298,7 @@ class Config(ConfigStructured):
             Examples:
                 En locale usually use
                 `{'sep': ',', 'decimal': '.'}`
-                Some Europian country use
+                Some European country use
                 `{'sep': ';', 'decimal': ','}`
 
             Define CSV separators."""
@@ -302,7 +306,7 @@ class Config(ConfigStructured):
             return {"sep": ",", "decimal": "."}
 
         @MyProperty((str, None))
-        def request_datatype_suffix() -> Union[str, None]:
+        def request_datatype_suffix(self) -> Union[str, None]:
             """
             Options:
                 'csv', 'json', 'xlsx', 'xls', 'parquet', 'h5', None
@@ -315,7 +319,7 @@ class Config(ConfigStructured):
             return None
 
         @MyProperty((str, int))
-        def predicted_column():
+        def predicted_column(self):
             """
             Types:
                 str | int
@@ -327,7 +331,7 @@ class Config(ConfigStructured):
             return 0
 
         @MyProperty()
-        def predicted_columns():
+        def predicted_columns(self):
             """
             Types:
                 list, None
@@ -342,7 +346,7 @@ class Config(ConfigStructured):
             return ["*"]
 
         @MyProperty((int, str, None))
-        def datetime_column() -> Union[str, int, None]:
+        def datetime_column(self) -> Union[str, int, None]:
             """
             Types:
                 int | str | None
@@ -355,7 +359,7 @@ class Config(ConfigStructured):
             return None
 
         @MyProperty((str, None))
-        def freq() -> Union[str, None]:
+        def freq(self) -> Union[str, None]:
             """
             Types:
                 str | None
@@ -372,8 +376,8 @@ class Config(ConfigStructured):
             """
             return None
 
-        @MyProperty((list, None))
-        def freqs() -> List[None]:
+        @MyProperty((list, tuple, None))
+        def freqs(self) -> list[None]:
             """
             Types:
                 list | None
@@ -386,7 +390,7 @@ class Config(ConfigStructured):
             return []
 
         @MyProperty(options=("sum", "mean", "", None))
-        def resample_function() -> Union[str, None]:
+        def resample_function(self) -> Union[str, None]:
             """
             Options:
                 'sum', 'mean', None
@@ -398,7 +402,7 @@ class Config(ConfigStructured):
             return "sum"
 
         @MyProperty(int)
-        def datalength() -> int:
+        def datalength(self) -> int:
             """
             Type:
                 int
@@ -410,7 +414,7 @@ class Config(ConfigStructured):
             return 1000
 
         @MyProperty(int)
-        def max_imported_length() -> int:
+        def max_imported_length(self) -> int:
             """
             Type:
                 int
@@ -421,9 +425,9 @@ class Config(ConfigStructured):
             Max length of imported samples (before resampling). If 0, than full length."""
             return 100000
 
-        ### Data inputs definition
+        # Data inputs definition
         @MyProperty(int)
-        def default_n_steps_in() -> int:
+        def default_n_steps_in(self) -> int:
             """
             Type:
                 int
@@ -435,7 +439,7 @@ class Config(ConfigStructured):
             return 7
 
         @MyProperty(bool)
-        def other_columns() -> bool:
+        def other_columns(self) -> bool:
             """
             Type:
                 Bool
@@ -444,11 +448,11 @@ class Config(ConfigStructured):
                 True
 
             If use other columns. Some models has data input settings, that already use just one column,
-            but this force it on allmodels..."""
+            but this force it on all models..."""
             return True
 
         @MyProperty(int)
-        def default_other_columns_length() -> int:
+        def default_other_columns_length(self) -> int:
             """
             Type:
                 int
@@ -456,12 +460,12 @@ class Config(ConfigStructured):
             Default:
                 2
 
-            Other columns vector length used for predictions. If None, lengths same as predicted columnd.
+            Other columns vector length used for predictions. If None, lengths same as predicted column.
             If 0, other columns are not used for prediction."""
             return 2
 
         @MyProperty(options=["float32", "float64"])
-        def dtype() -> str:
+        def dtype(self) -> str:
             """
             Type:
                 str
@@ -473,7 +477,7 @@ class Config(ConfigStructured):
             return "float32"
 
         @MyProperty(float)
-        def unique_threshlold() -> float:
+        def unique_threshold(self) -> float:
             """
             Type:
                 float
@@ -481,12 +485,12 @@ class Config(ConfigStructured):
             Default:
                 0.1
 
-            Remove string columns, that have to many categories. E.g 0.1 define, that has to be less that 10% of unique values.
-            It will remove ids, hashes etc."""
+            Remove string columns, that have to many categories. E.g 0.1 define, that has to be less that 10% of
+            unique values. It will remove ids, hashes etc."""
             return 0.1  #
 
         @MyProperty(options=["label", "one-hot"])
-        def embedding() -> str:
+        def embedding(self) -> str:
             """
             Options:
                 'label', 'one-hot'
@@ -494,13 +498,13 @@ class Config(ConfigStructured):
             Default:
                 'label'
 
-            Categorical encoding. Create numbers from strings. 'label' give each category (unique string) concrete number.
-            Result will have same number of columns. 'one-hot' create for every category new column.
+            Categorical encoding. Create numbers from strings. 'label' give each category (unique string) concrete
+            number. Result will have same number of columns. 'one-hot' create for every category new column.
             """
             return "label"
 
         @MyProperty(float)
-        def remove_nans_threshold() -> float:
+        def remove_nans_threshold(self) -> float:
             """
             Type:
                 Float
@@ -508,12 +512,12 @@ class Config(ConfigStructured):
             Default:
                 0.2
 
-            From 0 to 1. How much not nans (not a number) can be in column to not be deleted.
-            For example if 0.9 means that columns has to have more than 90% values that are not nan to not be deleted."""
+            From 0 to 1. How much not nans (not a number) can be in column to not be deleted. For example if 0.9
+            means that columns has to have more than 90% values that are not nan to not be deleted."""
             return 0.2
 
         @MyProperty()
-        def remove_nans_or_replace() -> Any:
+        def remove_nans_or_replace(self) -> Any:
             """
             Options:
                 'mean', 'interpolate', 'neighbor', 'remove' | float | int
@@ -529,7 +533,7 @@ class Config(ConfigStructured):
             return "mean"
 
         @MyProperty((None, str))
-        def data_transform() -> Union[None, str]:
+        def data_transform(self) -> Union[None, str]:
             """
             Options:
                 'difference', None
@@ -541,7 +545,7 @@ class Config(ConfigStructured):
             return None
 
         @MyProperty(options=[None, "standardize", "-11", "01", "robust"])
-        def standardizeit() -> Union[str, bool]:
+        def standardizeit(self) -> Union[str, bool]:
             """
             Options:
                 'standardize', '-11', '01', 'robust', None
@@ -549,12 +553,12 @@ class Config(ConfigStructured):
             Default:
                 'standardize'
 
-            How to standardize data to have similiar scopes."""
+            How to standardize data to have similar scopes."""
 
             return "standardize"
 
         @MyProperty((tuple, None))
-        def smoothit() -> Union[Tuple[int], None]:
+        def smoothit(self) -> Union[tuple[int], None]:
             """
             Type:
                 tuple[int, int]
@@ -570,7 +574,7 @@ class Config(ConfigStructured):
             return None
 
         @MyProperty(bool)
-        def power_transformed() -> bool:
+        def power_transformed(self) -> bool:
             """
             Type:
                 bool
@@ -582,7 +586,7 @@ class Config(ConfigStructured):
             return False
 
         @MyProperty((int, float, None))
-        def remove_outliers() -> Union[int, float, None]:
+        def remove_outliers(self) -> Union[int, float, None]:
             """
             Types:
                 int | float | None
@@ -608,7 +612,7 @@ class Config(ConfigStructured):
         #     return False
 
         @MyProperty((None, int))
-        def bins() -> Union[int, None]:
+        def bins(self) -> Union[int, None]:
             """
             Types:
                 int | None
@@ -627,7 +631,7 @@ class Config(ConfigStructured):
             return None
 
         @MyProperty(options=["cut", "qcut"])
-        def binning_type() -> str:
+        def binning_type(self) -> str:
             """
             Options:
                 'cut', 'qcut'
@@ -650,7 +654,7 @@ class Config(ConfigStructured):
             - mssql (Microsoft SQL server)"""
 
             @MyProperty(str)
-            def server():
+            def server(self):
                 """
                 Type:
                     str
@@ -662,7 +666,7 @@ class Config(ConfigStructured):
                 return "."
 
             @MyProperty(str)
-            def database():
+            def database(self):
                 """
                 Type:
                     str
@@ -674,7 +678,7 @@ class Config(ConfigStructured):
                 return ""
 
             @MyProperty(str)
-            def username():
+            def username(self):
                 """
                 Type:
                     str
@@ -686,7 +690,7 @@ class Config(ConfigStructured):
                 return ""
 
             @MyProperty(str)
-            def password():
+            def password(self):
                 """
                 Type:
                     str
@@ -698,7 +702,7 @@ class Config(ConfigStructured):
                 return ""
 
             @MyProperty(bool)
-            def trusted_connection():
+            def trusted_connection(self):
                 """
                 Type:
                     bool
@@ -710,12 +714,12 @@ class Config(ConfigStructured):
                 return False
 
     class FeatureEngineering(ConfigBase):
-        """This confis is for extension of original data with new derived values that can help to better
+        """This config is for extension of original data with new derived values that can help to better
         prediction. It's able to add rolling mean and std, fast fourier results on running window, first and
         second derivation or multiplications of columns."""
 
         @MyProperty((float, int, None))
-        def correlation_threshold():
+        def correlation_threshold(self):
             """
             Types:
                 float | int | None
@@ -727,7 +731,7 @@ class Config(ConfigStructured):
             to 1 (only column itself)"""
             return None
 
-        ### Data extension = add derived columns
+        # Data extension = add derived columns
         @MyProperty((int, None))
         def add_fft_columns(self):
             """
@@ -740,12 +744,13 @@ class Config(ConfigStructured):
             Example:
                 64
 
-            Whether add fast fourier results on rolling window - maximum and maximum of shift. If None, no columns will be added.
-            If int value, it means used rolling window. It will add collumns with maximum value and maximum shift on used window."""
+            Whether add fast fourier results on rolling window - maximum and maximum of shift. If None, no columns
+            will be added. If int value, it means used rolling window. It will add collumns with maximum value and
+            maximum shift on used window."""
             return None
 
         @MyProperty((dict, None))
-        def data_extension() -> Union[dict, None]:
+        def data_extension(self) -> Union[dict, None]:
             """
             Types:
                 dict | None
@@ -757,14 +762,15 @@ class Config(ConfigStructured):
 
                 {
                     "differences": True,  # Eg. from [1, 2, 3] create [1, 1]
-                    "second_differences": True,  # Add second ddifferences
+                    "second_differences": True,  # Add second differences
                     "multiplications": True,  # Add all combinations of multiplicated columns
                     "rolling_means": 10,  # int define used window length or None
                     "rolling_stds": 10,  # int define used window length or None
                     "mean_distances": True  # Distance from average
                 }
 
-            Add new derived column to data that can help to better predictions. Check examples for what columns you can derive."""
+            Add new derived column to data that can help to better predictions. Check examples for what columns you
+            can derive."""
             return None
 
     class Output(ConfigStructured):
@@ -780,7 +786,7 @@ class Config(ConfigStructured):
             """Predictit uses mylogging library on background. Check it's documentation for more info."""
 
             @MyProperty(options=["DEBUG", "INFO", "WARNING", "ERROR", "FATAL"])
-            def logger_level() -> str:
+            def logger_level(self) -> str:
                 """
                 Options:
                     'DEBUG', 'INFO', 'WARNING', 'ERROR', 'FATAL'
@@ -794,7 +800,7 @@ class Config(ConfigStructured):
                 return "WARNING"
 
             @MyProperty(str, options=["once", "ignore", "always", "error"])
-            def logger_filter():
+            def logger_filter(self):
                 """
                 Options:
                     'once', 'ignore', 'always', 'error'
@@ -807,7 +813,7 @@ class Config(ConfigStructured):
                 return "once"
 
             @MyProperty([str, Path])
-            def logger_output() -> Union[str, Path]:
+            def logger_output(self) -> Union[str, Path]:
                 """
                 Types:
                     str | pathlib.Path
@@ -820,7 +826,7 @@ class Config(ConfigStructured):
                 return "console"
 
             @MyProperty(bool)
-            def logger_color() -> bool:
+            def logger_color(self) -> bool:
                 """
                 Type:
                     bool
@@ -828,13 +834,13 @@ class Config(ConfigStructured):
                 Default:
                     True
 
-                Whether log output should be colored or not. Some terminals (eg. pytest log or CI/CD log) cannot displays
-                colors and long symbols are displayed that are bad for readability."""
+                Whether log output should be colored or not. Some terminals (eg. pytest log or CI/CD log) cannot
+                displays colors and long symbols are displayed that are bad for readability."""
 
                 return True
 
             @MyProperty(list)
-            def ignored_warnings():
+            def ignored_warnings(self):
                 """
                 Type:
                     list
@@ -905,7 +911,7 @@ class Config(ConfigStructured):
                 ]
 
             @MyProperty(list)
-            def ignored_warnings_class_type():
+            def ignored_warnings_class_type(self):
                 """
                 Type:
                     list
@@ -920,7 +926,7 @@ class Config(ConfigStructured):
                 return [("statsmodels.tsa.arima_model", FutureWarning)]
 
         @MyProperty(int)
-        def predicts() -> int:
+        def predicts(self) -> int:
             """
             Type:
                 int
@@ -937,7 +943,7 @@ class Config(ConfigStructured):
             Whenever you use more plots, jupyter notebook mode can be optimal for displaying plots."""
 
             @MyProperty(bool)
-            def show_plot() -> bool:
+            def show_plot(self) -> bool:
                 """
                 Type:
                     bool
@@ -945,11 +951,11 @@ class Config(ConfigStructured):
                 Default:
                     True
 
-                Whether display plot or not. If in jupyter dislplay in jupyter, else in default browser."""
+                Whether display plot or not. If in jupyter display in jupyter, else in default browser."""
                 return True
 
             @MyProperty((None, str, Path))
-            def save_plot() -> Union[None, str, Path]:
+            def save_plot(self) -> Union[None, str, Path]:
                 """
                 Types:
                     None | str | pathlib.Path
@@ -961,7 +967,7 @@ class Config(ConfigStructured):
                 return None
 
             @MyProperty(options=["plotly", "matplotlib"])
-            def plot_library() -> str:
+            def plot_library(self) -> str:
                 """
                 Options:
                     'plotly', 'matplotlib'
@@ -973,7 +979,7 @@ class Config(ConfigStructured):
                 return "plotly"
 
             @MyProperty(options=["with_history", "just_results"])
-            def plot_type() -> str:
+            def plot_type(self) -> str:
                 """
                 Options:
                     'with_history', 'just_results'
@@ -981,11 +987,12 @@ class Config(ConfigStructured):
                 Default:
                     'with_history'
 
-                'with_history' also plot history as a context for predicitions. 'just_results' plot only predicted data."""
+                'with_history' also plot history as a context for predicitions. 'just_results' plot only predicted
+                data."""
                 return "with_history"
 
             @MyProperty(bool)
-            def plot_legend() -> bool:
+            def plot_legend(self) -> bool:
                 """
                 Type:
                     bool
@@ -997,7 +1004,7 @@ class Config(ConfigStructured):
                 return False
 
             @MyProperty(str)
-            def plot_name() -> str:
+            def plot_name(self) -> str:
                 """
                 Type:
                     str
@@ -1009,7 +1016,7 @@ class Config(ConfigStructured):
                 return "Predictions"
 
             @MyProperty(int)
-            def plot_history_length() -> int:
+            def plot_history_length(self) -> int:
                 """
                 Type:
                     int
@@ -1021,7 +1028,7 @@ class Config(ConfigStructured):
                 return 200
 
             @MyProperty((None, int))
-            def plot_number_of_models() -> Union[None, int]:
+            def plot_number_of_models(self) -> Union[None, int]:
                 """
                 Types:
                     int, None
@@ -1033,10 +1040,11 @@ class Config(ConfigStructured):
                 return 12
 
         class PrintSubconfig(ConfigBase):
-            """What should be printed in `predict` function. Usually table with results is printed. it can be configured."""
+            """What should be printed in `predict` function. Usually table with results is printed. it can be
+            configured."""
 
             @MyProperty(options=(None, "simple", "detailed"))
-            def print_table() -> Union[None, str]:
+            def print_table(self) -> Union[None, str]:
                 """
                 Options:
                     None, 'simple', 'detailed'
@@ -1049,7 +1057,7 @@ class Config(ConfigStructured):
                 return "detailed"
 
             @MyProperty((int, None))
-            def print_number_of_models() -> Union[None, int]:
+            def print_number_of_models(self) -> Union[None, int]:
                 """
                 Types:
                     int | None
@@ -1062,7 +1070,7 @@ class Config(ConfigStructured):
                 return 12
 
             @MyProperty(bool)
-            def print_time_table() -> bool:
+            def print_time_table(self) -> bool:
                 """
                 Type:
                     bool
@@ -1070,11 +1078,12 @@ class Config(ConfigStructured):
                 Default:
                     True
 
-                Whether print table with models errors and time to compute. In function `compare_models` it's turned off automatically."""
+                Whether print table with models errors and time to compute. In function `compare_models` it's turned
+                off automatically."""
                 return True
 
             @MyProperty(bool)
-            def print_result_details() -> bool:
+            def print_result_details(self) -> bool:
                 """
                 Type:
                     bool
@@ -1082,14 +1091,16 @@ class Config(ConfigStructured):
                 Default:
                     True
 
-                Whether print best model results and model details. In function `compare_models` it's turned off automatically."""
+                Whether print best model results and model details. In function `compare_models` it's turned off
+                automatically."""
                 return True
 
         class PrintSubconfigCompareModels(ConfigBase):
-            """What should be printed in `predict` function. Usually table with results is printed. it can be configured."""
+            """What should be printed in `predict` function. Usually table with results is printed. it can be
+            configured."""
 
             @MyProperty(options=(None, "simple", "detailed"))
-            def print_comparison_table() -> Union[None, str]:
+            def print_comparison_table(self) -> Union[None, str]:
                 """
                 Options:
                     None, 'simple', 'detailed'
@@ -1102,7 +1113,7 @@ class Config(ConfigStructured):
                 return "simple"
 
             @MyProperty((int, None))
-            def print_number_of_comparison_models() -> Union[None, int]:
+            def print_number_of_comparison_models(self) -> Union[None, int]:
                 """
                 Types:
                     int | None
@@ -1115,7 +1126,7 @@ class Config(ConfigStructured):
                 return 12
 
             @MyProperty(bool)
-            def print_comparison_result_details() -> bool:
+            def print_comparison_result_details(self) -> bool:
                 """
                 Type:
                     bool
@@ -1123,11 +1134,12 @@ class Config(ConfigStructured):
                 Default:
                     True
 
-                Whether print best model results and model details. In function `compare_models` it's turned off automatically."""
+                Whether print best model results and model details. In function `compare_models` it's turned off
+                automatically."""
                 return True
 
         @MyProperty(options=["error", "name"])
-        def sort_results_by() -> str:
+        def sort_results_by(self) -> str:
             """
             Options:
                 'error', 'name'
@@ -1139,7 +1151,7 @@ class Config(ConfigStructured):
             return "error"
 
         @MyProperty(dict)
-        def table_settigs() -> Dict:
+        def table_settings(self) -> dict:
             """
             Type:
                 dict
@@ -1153,8 +1165,9 @@ class Config(ConfigStructured):
                     "stralign": "center",
                 }
 
-            Configure table outputs. Check Default value for what keys are possible. Check tabulate for what values can be.
-            Options for `tablefmt` are for example `'grid', 'simple', 'pretty', 'psql'` or any other from tabulate library."""
+            Configure table outputs. Check Default value for what keys are possible. Check tabulate for what values
+            can be. Options for `tablefmt` are for example `'grid', 'simple', 'pretty', 'psql'` or any other from
+            tabulate library."""
             return {
                 "tablefmt": "grid",
                 "floatfmt": ".3f",
@@ -1166,7 +1179,7 @@ class Config(ConfigStructured):
         """Various configs for prediction like number of predicted values, used error criterion etc."""
 
         @MyProperty((None, float))
-        def confidence_interval() -> Union[None, float]:
+        def confidence_interval(self) -> Union[None, float]:
             """
             Types:
                 None | float
@@ -1174,12 +1187,12 @@ class Config(ConfigStructured):
             Default:
                 0.6
 
-            Area of confidence in result plot (grey area where we suppose values) 0 - 100 % probability area with 0.0 - 1.0 option value.
-            Bigger value, narrower area. If None - not plotted."""
+            Area of confidence in result plot (grey area where we suppose values) 0 - 100 % probability area with 0.0
+            - 1.0 option value. Bigger value, narrower area. If None - not plotted."""
             return 0.6
 
         @MyProperty(options=["mse", "max_error", "mape", "rmse", "dtw"])
-        def error_criterion() -> str:
+        def error_criterion(self) -> str:
             """
             Options:
                 'mse', 'max_error', 'mape', 'rmse', 'dtw'
@@ -1192,7 +1205,7 @@ class Config(ConfigStructured):
             return "mse"
 
         @MyProperty(options=["original", "preprocessed"])
-        def evaluate_type() -> str:
+        def evaluate_type(self) -> str:
             """
             Options:
                 'original', 'preprocessed'
@@ -1204,7 +1217,7 @@ class Config(ConfigStructured):
             return "original"
 
         @MyProperty(int)
-        def repeatit() -> int:
+        def repeatit(self) -> int:
             """
             Type:
                 int
@@ -1216,28 +1229,28 @@ class Config(ConfigStructured):
 
             return 5
 
-        @MyProperty(options=["validate", "predict"])
-        def mode() -> str:
+        @MyProperty(options=["validate", "in_sample"])
+        def mode(self) -> str:
             """
             Options:
-                'validate', 'predict'
+                'validate', 'in_sample'
 
             Default:
-                'predict'
+                'in_sample'
 
-            If 'validate', put apart last few 'predicts' values and evaluate on test data
-            that was not in train set. Do not setup - use compare_models function, it will use it automattically."""
+            If 'validate', put apart last few 'in_sample' values and evaluate on test data
+            that was not in train set. Do not setup - use compare_models function, it will use it automatically."""
 
-            return "predict"
+            return "in_sample"
 
     class VariableOptimization(ConfigBase):
         """Any variable from this configuration can be evaluated for more values in loop and best can be
-        automatically choosed.
+        automatically chosen.
 
         Note: Can be time-consuming."""
 
         @MyProperty(bool)
-        def optimization() -> bool:
+        def optimization(self) -> bool:
             """
             Type:
                 bool
@@ -1252,7 +1265,7 @@ class Config(ConfigStructured):
             return False
 
         @MyProperty((str, None))
-        def optimization_variable() -> str:
+        def optimization_variable(self) -> str:
             """
             Type:
                 str
@@ -1260,12 +1273,13 @@ class Config(ConfigStructured):
             Default:
                 'default_n_steps_in'
 
-            Some value from config that will be optimized. Unlike hyperparameters only defined values will be computed."""
+            Some value from config that will be optimized. Unlike hyperparameters only defined values will be
+            computed."""
 
             return "default_n_steps_in"
 
         @MyProperty()
-        def optimization_values() -> Any:
+        def optimization_values(self) -> Any:
             """
             Default:
                 [4, 8, 12]
@@ -1276,7 +1290,7 @@ class Config(ConfigStructured):
             return [4, 8, 12]
 
         @MyProperty(bool)
-        def plot_all_optimized_models() -> bool:
+        def plot_all_optimized_models(self) -> bool:
             """
             Type:
                 bool
@@ -1294,7 +1308,7 @@ class Config(ConfigStructured):
         If you want to know how it works, check `optimize` function docstrings from `best_params` module."""
 
         @MyProperty(bool)
-        def optimizeit() -> bool:
+        def optimizeit(self) -> bool:
             """
             Type:
                 bool
@@ -1309,7 +1323,7 @@ class Config(ConfigStructured):
             return False
 
         @MyProperty(options=[1, 2, 3])
-        def optimizeit_details() -> int:
+        def optimizeit_details(self) -> int:
             """
             Options:
                 1, 2, 3
@@ -1322,7 +1336,7 @@ class Config(ConfigStructured):
             return 1
 
         @MyProperty(bool)
-        def optimizeit_plot() -> bool:
+        def optimizeit_plot(self) -> bool:
             """
             Type:
                 bool
@@ -1335,7 +1349,7 @@ class Config(ConfigStructured):
             return False
 
         @MyProperty((float, int, None))
-        def optimizeit_limit() -> Union[float, int]:
+        def optimizeit_limit(self) -> Union[float, int]:
             """
             Types:
                 float | int | None
@@ -1347,7 +1361,7 @@ class Config(ConfigStructured):
             return 10
 
         @MyProperty(int)
-        def fragments() -> int:
+        def fragments(self) -> int:
             """
             Type:
                 int
@@ -1359,7 +1373,7 @@ class Config(ConfigStructured):
             return 4
 
         @MyProperty(int)
-        def iterations() -> int:
+        def iterations(self) -> int:
             """
             Type:
                 int
@@ -1371,7 +1385,7 @@ class Config(ConfigStructured):
             return 2
 
         @MyProperty(dict)
-        def limits_constants(self) -> Dict:
+        def limits_constants(self) -> dict:
             """
             Type:
                 dict
@@ -1387,7 +1401,8 @@ class Config(ConfigStructured):
                     "maxorder": 20,
                 }
 
-            This boundaries repeat across models. Define once here and then use in models_parameters_limits again and again."""
+            This boundaries repeat across models. Define once here and then use in models_parameters_limits again and
+            again."""
             return {
                 "models": ["LinearRegression", "BayesianRidge"],
                 "alpha": [0.0, 1.0],
@@ -1398,7 +1413,7 @@ class Config(ConfigStructured):
             }
 
         @MyProperty(dict)
-        def models_parameters_limits(self) -> Dict:
+        def models_parameters_limits(self) -> dict:
             """
             Type:
                 dict
@@ -1411,12 +1426,11 @@ class Config(ConfigStructured):
             Then it finds best value and make new interval that is again divided in 5 parts...
             This is done as many times as iteration value is.
 
-            Note:
-                If you need integers, type just number, if you need float, type dot, e.g. [2.0, 6.0].
-                If you use list of strings or more than 2 values (e.g. [5, 4, 7]), then only this defined values will be executed
-                and no new generated
+            Note: If you need integers, type just number, if you need float, type dot, e.g. [2.0, 6.0]. If you use
+            list of strings or more than 2 values (e.g. [5, 4, 7]), then only this defined values will be executed
+            and no new generated
 
-            Some models can be very computationaly hard - use optimizeit_limit or already_trained!
+            Some models can be very computationally hard - use optimizeit_limit or already_trained!
             If models here are commented, they are not optimized !
             You can optmimize as much parameters as you want - for example just one (much faster).
             """
@@ -1456,9 +1470,7 @@ class Config(ConfigStructured):
                     "alpha": self.limits_constants["alpha"],
                 },
                 # 'Extreme learning machine': {'n_hidden': [2, 300], 'alpha': self.limits_constants["alpha"], 'rbf_width': [0.0, 10.0], 'activation_func': ['tanh', 'sine', 'tribas', 'inv_tribase', 'sigmoid', 'hardlim', 'softlim', 'gaussian', 'multiquadric', 'inv_multiquadric']},
-                "Gen Extreme learning machine": {
-                    "alpha": self.limits_constants["alpha"]
-                },
+                "Gen Extreme learning machine": {"alpha": self.limits_constants["alpha"]},
             }
 
     class Models(ConfigBase):
@@ -1469,7 +1481,7 @@ class Config(ConfigStructured):
             interesting variable for common users that should be changed is `used_columns`"""
 
         @MyProperty(bool)
-        def already_trained() -> bool:
+        def already_trained(self) -> bool:
             """
             Type:
                 bool
@@ -1477,12 +1489,12 @@ class Config(ConfigStructured):
             Default:
                 False
 
-            Computationaly hard models (LSTM) load from disk."""
+            Computationally hard models (LSTM) load from disk."""
 
             return False
 
         @MyProperty((list, set))
-        def used_models() -> Union[List, Set]:
+        def used_models(self) -> Union[list, set]:
             """
             Types:
                 list | tuple
@@ -1508,12 +1520,12 @@ class Config(ConfigStructured):
                     # predictit.models.tensorflow
                     "Tensorflow LSTM", "Tensorflow MLP",
 
-                    ### predictit.models.sklearn_regression
-                    "Sklearn regression", "Bayes ridge regression", "KNeighbors regression", "Decision tree regression", "Hubber regression",
-                    "Bagging regression", "Stochastic gradient regression", "Extreme learning machine", "Gen Extreme learning machine",
-                    "Extra trees regression", "Random forest regression", "Passive aggressive regression", "Gradient boosting",
-                    "Sklearn regression one column one step", "Bayes ridge regression one column one step", "Decision tree regression one column one step",
-                    "Hubber regression one column one step",
+                    ### predictit.models.sklearn_regression "Sklearn regression", "Bayes ridge regression",
+                    "KNeighbors regression", "Decision tree regression", "Hubber regression", "Bagging regression",
+                    "Stochastic gradient regression", "Extreme learning machine", "Gen Extreme learning machine",
+                    "Extra trees regression", "Random forest regression", "Passive aggressive regression",
+                    "Gradient boosting", "Sklearn regression one column one step", "Bayes ridge regression one column
+                    one step", "Decision tree regression one column one step", "Hubber regression one column one step",
 
                     # predictit.models.average
                     "Average short",
@@ -1585,8 +1597,9 @@ class Config(ConfigStructured):
                 "KNeighbors regression",
                 "Decision tree regression",
                 "Hubber regression",
-                # 'Bagging regression', 'Stochastic gradient regression', 'Extreme learning machine', 'Gen Extreme learning machine',  'Extra trees regression', 'Random forest regression',
-                # , 'Passive aggressive regression', 'Gradient boosting',
+                # 'Bagging regression', 'Stochastic gradient regression', 'Extreme learning machine', 'Gen Extreme
+                # learning machine',  'Extra trees regression', 'Random forest regression', , 'Passive aggressive
+                # regression', 'Gradient boosting',
                 "Sklearn regression one column one step",
                 "Bayes ridge regression one column one step",
                 #  'Decision tree regression one column one step', 'Hubber regression one column one step',
@@ -1596,7 +1609,7 @@ class Config(ConfigStructured):
             ]
 
         @MyProperty(dict)
-        def data_inputs(self) -> Dict:
+        def data_inputs(self) -> dict:
             """
             Type:
                 dict
@@ -1677,7 +1690,7 @@ class Config(ConfigStructured):
             }
 
         @MyProperty(dict)
-        def models_input(self) -> Dict:
+        def models_input(self) -> dict:
             """
             Type:
                 dict
@@ -1689,7 +1702,8 @@ class Config(ConfigStructured):
                     "Tensorflow LSTM": "not_serialized",
                 }
 
-            There are more types of data input. Define what models use what data. For default value, go to source and check return.
+            There are more types of data input. Define what models use what data. For default value, go to source and
+            check return.
 
             Note:
                 There are not only data inputs from data_inputs but also `data` and `data_one_column` which
@@ -1757,7 +1771,7 @@ class Config(ConfigStructured):
             }
 
         @MyProperty(dict)
-        def models_parameters(self) -> Dict:
+        def models_parameters(self) -> dict:
             """
             Type:
                 dict
@@ -1773,7 +1787,7 @@ class Config(ConfigStructured):
                     },
                 }
 
-            If using presets - overwriten. If no value for model, then default values are used
+            If using presets - overwritten. If no value for model, then default values are used
             For default value, go to source and check return."""
 
             models_parameters = {
@@ -1902,12 +1916,8 @@ class Config(ConfigStructured):
                 "Random forest regression": {"model": "RandomForestRegressor"},
                 "Bagging regression": {"model": "BaggingRegressor"},
                 "Sklearn regression one column one step": {"model": "LinearRegression"},
-                "Bayes ridge regression one column one step": {
-                    "model": "BayesianRidge"
-                },
-                "Decision tree regression one column one step": {
-                    "model": "DecisionTreeRegressor"
-                },
+                "Bayes ridge regression one column one step": {"model": "BayesianRidge"},
+                "Decision tree regression one column one step": {"model": "DecisionTreeRegressor"},
                 "Hubber regression one column one step": {"model": "HuberRegressor"},
                 "Extreme learning machine": {
                     "model": "ELMRegressor",
@@ -1924,7 +1934,7 @@ class Config(ConfigStructured):
         """Internal settings"""
 
         @MyProperty(bool)
-        def is_tested() -> bool:
+        def is_tested(self) -> bool:
             """
             Type:
                 'bool'

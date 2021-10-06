@@ -1,13 +1,17 @@
+"""LNU. It's abbreviation of Linear Neural Unit - simplest building block of neural nets."""
+from __future__ import annotations
+from typing import Union
+
 import numpy as np
-from .. import misc
-from ..best_params import optimize
-from typing import Union, Tuple
 
 import mylogging
 
+from .. import misc
+from ..best_params import optimize
+
 
 def lnu_core(
-    data: Tuple[np.ndarray],
+    data: tuple[np.ndarray],
     learning_rate: float,
     epochs: int,
     normalize_learning_rate: bool,
@@ -15,7 +19,7 @@ def lnu_core(
     learning_rate_decay: float = 0.8,
     damping: Union[int, float] = 1,
     return_all: bool = False,
-) -> Union[np.ndarray, Tuple[np.ndarray]]:
+) -> Union[np.ndarray, tuple[np.ndarray]]:
     X = data[0]
     y_hat = data[1]
 
@@ -53,8 +57,7 @@ def lnu_core(
                 w_all[:, j] = w
 
         if (early_stopping and epoch > 1) and (
-            sum(np.abs(dw)) / len(w) < 10e-8
-            or ((running_error[0] / len(y_hat)) - last_running_error) < 10e-5
+            sum(np.abs(dw)) / len(w) < 10e-8 or ((running_error[0] / len(y_hat)) - last_running_error) < 10e-5
         ):
             break
 
@@ -70,7 +73,7 @@ def lnu_core(
 
 
 def train(
-    data: Tuple[np.ndarray],
+    data: tuple[np.ndarray],
     learning_rate: Union[str, float] = "infer",
     epochs: int = 10,
     normalize_learning_rate: bool = True,
@@ -82,10 +85,9 @@ def train(
     plot: bool = False,
     # random=0, w_rand_scope=1, w_rand_shift=0, rand_seed=0,
 ):
-    """LNU. It's simple one neuron one-step neural net. It can predict not only predictions itself,
-    but also use other faster method to predict weights evolution for out of sample predictions.
-    In first iteration it will find best learning step and in the second iteration,
-    it will train more epochs.
+    """It can predict not only predictions itself, but also use other faster method to predict weights
+    evolution for out of sample predictions. In first iteration it will find best learning step and in the
+    second iteration, it will train more epochs.
 
     Args:
         data ((np.ndarray, np.ndarray)) - Tuple (X, y) of input train vectors X and train outputs y
@@ -131,8 +133,7 @@ def train(
 
         # First find order
         learning_rate = optimize(
-            kwargs_limits={"learning_rate": [10e-8, 10e-6, 10e-4, 10e-3, 10e-2, 1]},
-            **infer_lightened_params
+            kwargs_limits={"learning_rate": [10e-8, 10e-6, 10e-4, 10e-3, 10e-2, 1]}, **infer_lightened_params
         )["learning_rate"]
 
         # First around favorite
@@ -164,7 +165,7 @@ def train(
             damping=damping,
         )
     if plot:
-        if not misc.GLOBAL_VARS._PLOTS_CONFIGURED:
+        if not misc.GLOBAL_VARS.PLOTS_CONFIGURED:
             misc.setup_plots()
 
         import matplotlib.pyplot as plt

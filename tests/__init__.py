@@ -1,6 +1,6 @@
 """ Test module. Auto pytest that can be started in IDE or with::
 
-    python -m pytest
+    python -m pytest . --cov predictit --cov-report xml:.coverage.xml
 
 in terminal in tests folder.
 """

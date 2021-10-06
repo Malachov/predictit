@@ -53,6 +53,6 @@ def validate_result(data):
     """Return true if result is valid. It means no np.nan in results.
 
     Args:
-        data ((np.array, pd.DataFrame)): Tested data.
+        data (np.array, pd.DataFrame): Tested data.
     """
     return not np.isnan(np.array(data).min())

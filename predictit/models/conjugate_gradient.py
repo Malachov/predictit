@@ -1,6 +1,10 @@
+from __future__ import annotations
+
 import numpy as np
-from .models_functions.models_functions import one_step_looper
+
 import mylogging
+
+from .models_functions.models_functions import one_step_looper
 
 
 def train(data, epochs=100, early_stopping=True):
@@ -79,6 +83,4 @@ def predict(x_input, model, predicts=7):
         np.ndarray: Array of predicted results
     """
 
-    return one_step_looper(
-        lambda new_x_input: np.dot(new_x_input, model), x_input.ravel(), predicts
-    )
+    return one_step_looper(lambda new_x_input: np.dot(new_x_input, model), x_input.ravel(), predicts)

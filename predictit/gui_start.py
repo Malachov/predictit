@@ -1,8 +1,11 @@
 #%%
+"""Module that start predictit GUI."""
 
+from __future__ import annotations
 from pathlib import Path
 import sys
 import traceback
+
 import mypythontools
 
 import predictit
@@ -11,17 +14,17 @@ import predictit
 # import eel
 
 # If some information from inside main(), define function here
-def edit_gui_py(content, id):
+def edit_gui_py(content, html_id):
     """Function that will change some element in html GUI and is callable from other py scripts.
 
     Args:
         content (str): New content.
-        id (str): Id of changed element.
+        html_id (str): Id of changed element.
     """
 
     import eel
 
-    eel.edit_gui_js(content, id)
+    eel.edit_gui_js(content, html_id)
 
 
 def run_gui():
@@ -41,13 +44,13 @@ def run_gui():
 
     config = predictit.config
 
-    predictit.misc.GLOBAL_VARS._GUI = 1
+    predictit.misc.GLOBAL_VARS.GUI = 1
     config.update(
         {
             "show_plot": False,
             "save_plot": False,
             "data": None,
-            "table_settigs": {
+            "table_settings": {
                 "tablefmt": "html",
                 "floatfmt": ".3f",
                 "numalign": "center",
@@ -76,13 +79,9 @@ def run_gui():
 
             #                            content      p_tag    id_parent    id_created    label    classes
             if config.print_result_details:
-                eel.add_HTML_element(
-                    str(results.best), True, "content", "best_result", "Best result"
-                )
+                eel.add_HTML_element(str(results.best), True, "content", "best_result", "Best result")
 
-            eel.add_HTML_element(
-                div, False, "content", "ploted_results", "Interactive plot", ["plot"]
-            )
+            eel.add_HTML_element(div, False, "content", "ploted_results", "Interactive plot", ["plot"])
 
             if config.print_table:
                 eel.add_HTML_element(

@@ -1,4 +1,4 @@
-"""pytest file built from C:\\Users\\Malac\\ownCloud\\Github\\predictit_library\\README.md"""
+"""pytest file built from C:/Users/Malac/ownCloud/Github/predictit_library/README.md"""
 import pytest
 
 from phmdoctest.fixture import managenamespace
@@ -24,15 +24,15 @@ pytestmark = pytest.mark.usefixtures("_phm_setup_teardown")
 
 
 def test_code_78():
-    config.data_input.data = "https://raw.githubusercontent.com/jbrownlee/Datasets/master/daily-min-temperatures.csv"
+    config.data_input.data = (
+        "https://raw.githubusercontent.com/jbrownlee/Datasets/master/daily-min-temperatures.csv"
+    )
 
     # Caution- no assertions.
 
 
 def test_code_84():
-    config.datetime_column = (
-        "Date"  # Will be used for resampling and result plot description
-    )
+    config.datetime_column = "Date"  # Will be used for resampling and result plot description
     config.freq = "D"  # One day - one value resampling
 
     # Caution- no assertions.
@@ -63,9 +63,7 @@ def test_code_105():
 
 
 def test_code_115():
-    predictions_1 = predictit.predict(
-        data=np.random.randn(100, 2), predicted_column=1, predicts=3
-    )
+    predictions_1 = predictit.predict(data=np.random.randn(100, 2), predicted_column=1, predicts=3)
 
     # Caution- no assertions.
 
@@ -82,10 +80,7 @@ def test_code_143():
 
     config.update(
         {
-            "data_all": {
-                "First part": (my_data_array[:100], 0),
-                "Second part": (my_data_array[100:], 1),
-            },
+            "data_all": {"First part": (my_data_array[:100], 0), "Second part": (my_data_array[100:], 1)},
             "predicted_column": 0,
         }
     )
@@ -140,10 +135,7 @@ def test_code_210():
 
     # Load data from file or URL
     data_loaded = mdp.load_data.load_data(
-        data,
-        request_datatype_suffix=".json",
-        predicted_table="txs",
-        data_orientation="index",
+        data, request_datatype_suffix=".json", predicted_table="txs", data_orientation="index"
     )
 
     # Transform various data into defined format - pandas dataframe - convert to numeric if possible, keep
@@ -188,17 +180,11 @@ def test_code_243():
         data.values, "batch", input_type_params={"n_steps_in": 6}
     )
 
-    trained_model = predictit.models.sklearn_regression.train(
-        (X, y), model="BayesianRidge"
-    )
-    predictions_one_model = predictit.models.sklearn_regression.predict(
-        x_input, trained_model, predicts=7
-    )
+    trained_model = predictit.models.sklearn_regression.train((X, y), model="BayesianRidge")
+    predictions_one_model = predictit.models.sklearn_regression.predict(x_input, trained_model, predicts=7)
 
-    predictions_one_model_error = (
-        predictit.evaluate_predictions.compare_predicted_to_test(
-            predictions_one_model, test, error_criterion="mape"
-        )
+    predictions_one_model_error = predictit.evaluate_predictions.compare_predicted_to_test(
+        predictions_one_model, test, error_criterion="mape"
     )  # , plot=1
 
     # Caution- no assertions.

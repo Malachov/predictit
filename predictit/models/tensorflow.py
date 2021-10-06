@@ -1,3 +1,5 @@
+"""Tensorflow model, where you can define structure of neural net with function parameters that you can optimize afterwards."""
+from __future__ import annotations
 from pathlib import Path
 import importlib
 
@@ -106,9 +108,7 @@ def train(
         raise ValueError("metrics has to be one from ['accuracy', 'mape']")
 
     if saved_model_path_string == "stored_models":
-        saved_model_path_string = str(
-            Path(__file__).resolve().parent / "stored_models" / "tensorflow.h5"
-        )
+        saved_model_path_string = str(Path(__file__).resolve().parent / "stored_models" / "tensorflow.h5")
 
     if load_trained_model:
         try:
@@ -141,9 +141,7 @@ def train(
             model.add(models[j[0]](**j[1] if len(j) > 1 else {}))
 
         if timedistributed == 1:
-            model.add(
-                tf.keras.layers.TimeDistributed(tf.keras.layers.Dense(y.shape[1]))
-            )
+            model.add(tf.keras.layers.TimeDistributed(tf.keras.layers.Dense(y.shape[1])))
         else:
             model.add(tf.keras.layers.Dense(y.shape[1]))
 
@@ -201,16 +199,10 @@ def get_optimizers_loses_activations():
 
     import tensorflow as tf
 
-    sgd = tf.keras.optimizers.SGD(
-        learning_rate=0.01, decay=1e-6, momentum=0.9, nesterov=True
-    )
-    rmsprop = tf.keras.optimizers.RMSprop(
-        learning_rate=0.001, rho=0.9, epsilon=None, decay=0.0
-    )
+    sgd = tf.keras.optimizers.SGD(learning_rate=0.01, decay=1e-6, momentum=0.9, nesterov=True)
+    rmsprop = tf.keras.optimizers.RMSprop(learning_rate=0.001, rho=0.9, epsilon=None, decay=0.0)
     adagrad = tf.keras.optimizers.Adagrad(learning_rate=0.01, epsilon=None, decay=0.0)
-    adadelta = tf.keras.optimizers.Adadelta(
-        learning_rate=1.0, rho=0.95, epsilon=None, decay=0.0
-    )
+    adadelta = tf.keras.optimizers.Adadelta(learning_rate=1.0, rho=0.95, epsilon=None, decay=0.0)
     adam = tf.keras.optimizers.Adam(
         learning_rate=0.001,
         beta_1=0.9,

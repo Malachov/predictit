@@ -7,13 +7,13 @@ Tagged with complexity and sorted by priority
 - [ ] EASY - Test on some larger files (Use warning if big data and hard settings)
 - [ ] COMPLEX - Define some set of datasets (good for prediction) and evaluate results on commit with tag. save results into csv and ate KPI - Add data to default compare models
 - [ ] COMPLEX - Configuration:
-    1) Create class Model - Configure models in it's own settings (be able to configure various models in various way). Use instances of models (multiple concrete settings) Add save and load model method
+    1) Create class Model - Configure models in its own settings (be able to configure various models in various way). Use instances of models (multiple concrete settings) Add save and load model method
     2) Full config to readthedocs documentation
     3) Add preset for comparing models
     4) Ability to load and save config to json to folder (mostly for GUI)
-- [ ] EASY - Describe better the predict and compare models difference. Mainly that predict should not be used for comparing models
+- [ ] EASY - Describe better predict and compare models difference. Mainly that predict should not be used for comparing models
 - [ ] EASY - Return class, no dict and remove return_type (evaluated_matrix from compare to main)
-- [ ] COMPLEX - Add exogenous parametrs where possible
+- [ ] COMPLEX - Add exogenous parameters where possible
 - [ ] COMPLEX - Dimensionality reduction - E.G. autoencoder and PCA to shrink input multivariate data to small vectors. Choose what to compress (not predicted column).
 - [ ] COMPLEX - Rewrite GUI with mypythontools.pyvueeel
 - [ ] COMPLEX - Feature selection - Choose columns not on correlation, but based on error lowerage with simple model (neural net (better) as well as regression (faster)) E.g. https://towardsdatascience.com/deep-dive-into-catboost-functionalities-for-model-interpretation-7cdef669aeed, https://scikit-learn.org/stable/modules/feature_selection.html, https://towardsdatascience.com/feature-selection-with-pandas-e3690ad8504b
@@ -23,9 +23,9 @@ Tagged with complexity and sorted by priority
 - [ ] MEDIUM - Add residuals matrix from results_matrix and add plotly box plot for residuals of models in main.py (https://plot.ly/python/box-plots/), or box plot for error criterion (data lengths and for repetitions) on compare_models
 - [ ] MEDIUM - Add transformations results as next input in parallel (remove replacement as in diff transformation)
   - [ ] Add datetime transformations - is workday, is holiday, day, night etc...
-  - [ ] Hilbert huang tranformation (pyhht) - predict each part separately and then sum to have result
+  - [ ] Hilbert huang transformation (pyhht) - predict each part separately and then sum to have result
 - [ ] COMPLEX Incremental learning (In sklearn partial_fit). Solve how to cope with statsmodels.
-- [ ] MEDIUM - Be able to use validation mode in predict to get real error criterions for compare
+- [ ] MEDIUM - Be able to use validation mode in predict to get real error criteria for compare
 - [ ] MEDIUM - In sklearn model - auto select model (use pipeline?)
 - [ ] EASY - In optimization, compare models on more results to reduce chance.
 - [ ] MEDIUM - Fast boosted hyperparametrs optimization method option - (optimize each parameter separately - then again...)

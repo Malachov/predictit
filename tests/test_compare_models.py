@@ -1,5 +1,9 @@
 import numpy as np
 
+import mypythontools
+
+mypythontools.paths.PROJECT_PATHS.add_ROOT_PATH_to_sys_path()
+
 import predictit
 from predictit import config
 
