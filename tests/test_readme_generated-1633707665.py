@@ -6,7 +6,7 @@ from phmdoctest.fixture import managenamespace
 
 @pytest.fixture(scope="module")
 def _phm_setup_teardown(managenamespace):
-    # setup code line 58.
+    # setup code line 55.
     import predictit
     import numpy as np
     import pandas as pd
@@ -23,7 +23,7 @@ def _phm_setup_teardown(managenamespace):
 pytestmark = pytest.mark.usefixtures("_phm_setup_teardown")
 
 
-def test_code_78():
+def test_code_75():
     config.data_input.data = (
         "https://raw.githubusercontent.com/jbrownlee/Datasets/master/daily-min-temperatures.csv"
     )
@@ -31,14 +31,14 @@ def test_code_78():
     # Caution- no assertions.
 
 
-def test_code_84():
+def test_code_81():
     config.datetime_column = "Date"  # Will be used for resampling and result plot description
     config.freq = "D"  # One day - one value resampling
 
     # Caution- no assertions.
 
 
-def test_code_91():
+def test_code_88():
     config.update(
         {
             "datalength": 300,  # Used datalength
@@ -54,7 +54,7 @@ def test_code_91():
     # Caution- no assertions.
 
 
-def test_code_105():
+def test_code_102():
     other_config = config.copy()  # or predictit.configuration.Config()
     other_config.predicts = 30  # This will not affect config for other examples
     predictions_3 = predictit.predict(config=other_config)
@@ -62,20 +62,20 @@ def test_code_105():
     # Caution- no assertions.
 
 
-def test_code_115():
+def test_code_112():
     predictions_1 = predictit.predict(data=np.random.randn(100, 2), predicted_column=1, predicts=3)
 
     # Caution- no assertions.
 
 
-def test_code_121():
+def test_code_118():
     my_data = pd.DataFrame(np.random.randn(100, 2), columns=["a", "b"])
     predictions_1_positional = predictit.predict(my_data, "b")
 
     # Caution- no assertions.
 
 
-def test_code_143():
+def test_code_140():
     my_data_array = np.random.randn(200, 2)  # Define your data here
 
     config.update(
@@ -89,7 +89,7 @@ def test_code_143():
     # Caution- no assertions.
 
 
-def test_code_155():
+def test_code_152():
     config.data = np.random.randn(120, 3)
     config.predicted_columns = [
         "*"
@@ -104,7 +104,7 @@ def test_code_155():
     # Caution- no assertions.
 
 
-def test_code_165():
+def test_code_162():
     config.update(
         {
             "data": "https://raw.githubusercontent.com/jbrownlee/Datasets/master/daily-min-temperatures.csv",
@@ -125,7 +125,7 @@ def test_code_165():
     # Caution- no assertions.
 
 
-def test_code_210():
+def test_code_207():
 
     import mydatapreprocessing as mdp
     from mypythontools.plots import plot
@@ -167,7 +167,7 @@ def test_code_210():
     # Caution- no assertions.
 
 
-def test_code_243():
+def test_code_240():
 
     import mydatapreprocessing as mdp
 
@@ -190,7 +190,7 @@ def test_code_243():
     # Caution- no assertions.
 
 
-def test_code_262():
+def test_code_259():
     config.update(
         {
             "data": r"https://raw.githubusercontent.com/jbrownlee/Datasets/master/daily-min-temperatures.csv",  # Full CSV path with suffix

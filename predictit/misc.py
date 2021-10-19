@@ -3,6 +3,8 @@
 from __future__ import annotations
 import builtins
 
+import numpy as np
+
 from mydatapreprocessing import preprocessing
 
 # Lazy imports
@@ -11,15 +13,15 @@ from mydatapreprocessing import preprocessing
 
 class Global_vars:
     def __init__(self) -> None:
-        self.JUPYTER = True if hasattr(builtins, "__IPYTHON__") else 0
-        self.GUI = False
-        self.PLOTS_CONFIGURED = False
+        self.JUPYTER: bool = True if hasattr(builtins, "__IPYTHON__") else False
+        self.GUI: bool = False
+        self.PLOTS_CONFIGURED: bool = False
 
 
 GLOBAL_VARS = Global_vars()
 
 
-def setup_plots():
+def setup_plots() -> None:
     from pandas.plotting import register_matplotlib_converters
 
     register_matplotlib_converters()
@@ -35,7 +37,9 @@ def setup_plots():
     GLOBAL_VARS.PLOTS_CONFIGURED = True
 
 
-def confidence_interval(data, predicts=7, confidence=0.1, p=1, d=0, q=0):
+def confidence_interval(
+    data: np.ndarray, predicts: int = 7, confidence: float = 0.1, p: int = 1, d: int = 0, q: int = 0
+):
     """Function to find confidence interval of prediction for graph.
 
     Args:

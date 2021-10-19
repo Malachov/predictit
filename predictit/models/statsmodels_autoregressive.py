@@ -1,6 +1,10 @@
 """Some statsmodels models. Statsmodels has different data imput form. Uses no sequentions, but original series."""
 
 from __future__ import annotations
+from typing import Any
+
+from typing_extensions import Literal
+import numpy as np
 
 # Lazy imports
 # import statsmodels.tsa.api as sm
@@ -10,11 +14,11 @@ from __future__ import annotations
 
 
 def train(
-    data,
-    used_model="autoreg",
-    p=5,
-    d=1,
-    q=0,
+    data: np.ndarray,
+    used_model: str = "autoreg",
+    p: int = 5,
+    d: int = 1,
+    q: int = 0,
     cov_type="nonrobust",
     method="cmle",
     trend="nc",
@@ -22,12 +26,12 @@ def train(
     maxlag=13,
     # SARIMAX args
     seasonal=(0, 0, 0, 0),
-):
+) -> Any:
     """Autoregressive model from statsmodels library. Only univariate data.
 
     Args:
         data (np.ndarray): Time series data.
-        used_model (str, optional): One of ['ar', 'arima', 'sarimax', 'autoreg']. Defaults to "autoreg".
+        used_model (str, optional): Used model. Defaults to "autoreg".
         p (int, optional): Order of ARIMA model (1st - proportional). Check statsmodels docs for more. Defaults to 5.
         d (int, optional): Order of ARIMA model. Defaults to 1.
         q (int, optional): Order of ARIMA model. Defaults to 0.
@@ -85,18 +89,18 @@ def train(
             f"Used model has to be one of ['ar', 'arima', 'sarimax', 'autoreg']. You configured: {used_model}"
         )
 
-    fitted_model.my_name = used_model
-    fitted_model.data_len = len(data)
+    setattr(fitted_model, "my_name", used_model)
+    setattr(fitted_model, "data_length", len(data))
 
     return fitted_model
 
 
-def predict(data, model, predicts=7):
+def predict(data: np.ndarray, model: Any, predicts: int = 7) -> np.ndarray:
     """Function that creates predictions from trained model and input data.
 
     Args:
         data (np.ndarray): Time series data
-        model (list, class): Trained model. It can be list of neural weights or it can
+        model (Any, class): Trained model. It can be list of neural weights or it can
             be fitted model class from imported library.
         predicts (int, optional): Number of predicted values. Defaults to 7.
 
@@ -104,13 +108,13 @@ def predict(data, model, predicts=7):
         np.ndarray: Array of predicted results
     """
 
-    start = model.data_len if len(data) > model.data_len else len(data)
+    start = len(data) if len(data) > model.data_length else model.data_length
 
     # Input data must have same starting point as data in train so the starting point be correct
     if model.my_name == "arima":
-        predictions = model.predict(start=start, end=start - 1 + predicts, typ="levels")[-predicts:]
+        predictions = model.predict(start=start, end=start - 1 + predicts, typ="levels")
 
     else:
-        predictions = model.predict(start=start, end=start - 1 + predicts)[-predicts:]
+        predictions = model.predict(start=start, end=start - 1 + predicts)
 
     return predictions

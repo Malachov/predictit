@@ -1,31 +1,35 @@
 """Tensorflow model, where you can define structure of neural net with function parameters that you can optimize afterwards."""
 from __future__ import annotations
+from typing import cast, Any
 from pathlib import Path
-import importlib
+import importlib.util
+import os
+
+from typing_extensions import Literal
+
+import numpy as np
 
 import mylogging
 
-import os
+from .models_functions.models_functions import get_inputs
+
 
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
-# Lazy imports
-# import tensorflow as tf
-
 
 # TODO test stateful=True on LSTM
 
 
 def train(
-    data,
-    layers="mlp",
-    epochs=100,
-    load_trained_model=True,
-    update_trained_model=True,
-    save_model=True,
-    saved_model_path_string="stored_models",
-    optimizer="adam",
-    loss="mse",
-    summary=False,
+    data: tuple[np.ndarray, np.ndarray],
+    layers: Literal["lstm", "mlp"] | list[tuple[str, dict]] = "mlp",
+    epochs: int = 100,
+    load_trained_model: bool = True,
+    update_trained_model: bool = True,
+    save_model: bool = True,
+    saved_model_path_string: str = "stored_models",
+    optimizer: str = "adam",
+    loss: str = "mse",
+    summary: bool = False,
     verbose=0,
     used_metrics="accuracy",
     timedistributed=False,
@@ -34,9 +38,9 @@ def train(
     """Tensorflow model. Neural nets - LSTM or MLP (dense layers). Layers are customizable with arguments.
 
     Args:
-        data ((np.ndarray, np.ndarray)) - Tuple (X, y) of input train vectors X and train outputs y
-        layers (tuple, optional) - Tuple of tuples of layer name (e.g. 'lstm') and layer params dict e.g.
-            (("lstm", {"units": 7, "activation": "relu"})). Check default layers tuple here for example.
+        data (tuple[np.ndarray, np.ndarray]) - Tuple (X, y) of input train vectors X and train outputs y
+        layers (Literal["lstm", "mlp"] | list[tuple[str, dict]], optional) - List of tuples of layer name (e.g. 'lstm') and layer params dict e.g.
+            (("lstm", {"units": 7, "activation": "relu"})). Check default layers list here for example.
             There are also some predefined architectures. You can use 'lstm' or 'mlp'. Defaults to 'mlp'.
         epochs (int, optional): Number of epochs to evaluate. Defaults to 100.
         load_trained_model (bool, optional): If True, load model from disk. Most of time is spend
@@ -68,42 +72,32 @@ def train(
         )
 
     import tensorflow as tf
+    from tensorflow.keras import Sequential
+    from tensorflow.keras import layers as tf_layers
+    from tensorflow.keras import metrics as tf_metrics
+    from tensorflow.keras import models as tf_models
+    from tensorflow.keras import Model as tf_model_type
 
-    if isinstance(layers, str):
-        if layers == "lstm":
-            layers = (
-                ("lstm", {"units": 32, "activation": "relu", "return_sequences": 1}),
-                ("dropout", {"rate": 0.1}),
-                ("lstm", {"units": 7, "activation": "relu"}),
-            )
+    X, y = get_inputs(data)
 
-        elif layers.lower() == "mlp":
-            layers = (
-                ("dense", {"units": 32, "activation": "relu"}),
-                ("dropout", {"rate": 0.1}),
-                ("dense", {"units": 7, "activation": "relu"}),
-            )
-
-    X = data[0]
-    y = data[1]
     X_ndim = X.ndim
 
     models = {
-        "dense": tf.keras.layers.Dense,
-        "lstm": tf.keras.layers.LSTM,
-        "mlp": tf.keras.layers.Dense,
-        "gru": tf.keras.layers.GRU,
-        "conv2d": tf.keras.layers.Conv2D,
-        "rnn": tf.keras.layers.SimpleRNN,
-        "convlstm2d": tf.keras.layers.ConvLSTM2D,
-        "dropout": tf.keras.layers.Dropout,
-        "batchnormalization": tf.keras.layers.BatchNormalization,
+        "dense": tf_layers.Dense,
+        "lstm": tf_layers.LSTM,
+        "mlp": tf_layers.Dense,
+        "gru": tf_layers.GRU,
+        "conv2d": tf_layers.Conv2D,
+        "rnn": tf_layers.SimpleRNN,
+        "convlstm2d": tf_layers.ConvLSTM2D,
+        "dropout": tf_layers.Dropout,
+        "batchnormalization": tf_layers.BatchNormalization,
     }
 
     if used_metrics == "accuracy":
-        metrics = [tf.keras.metrics.Accuracy()]
+        metrics = [tf_metrics.Accuracy()]
     elif used_metrics == "mape":
-        metrics = [tf.keras.metrics.MeanAbsolutePercentageError()]
+        metrics = [tf_metrics.MeanAbsolutePercentageError()]
     else:
         raise ValueError("metrics has to be one from ['accuracy', 'mape']")
 
@@ -112,7 +106,8 @@ def train(
 
     if load_trained_model:
         try:
-            model = tf.keras.models.load_model(saved_model_path_string)
+            model = tf_models.load_model(saved_model_path_string)
+            model = cast(tf_model_type, model)
             model.load_weights(saved_model_path_string)
 
         except Exception:
@@ -122,28 +117,53 @@ def train(
             model.fit(X, y, epochs=epochs, batch_size=batch_size, verbose=verbose)
 
     else:
+
+        if isinstance(layers, str):
+            if layers == "lstm":
+                layers = [
+                    ("lstm", {"units": 32, "activation": "relu", "return_sequences": 1}),
+                    ("dropout", {"rate": 0.1}),
+                    ("lstm", {"units": 7, "activation": "relu"}),
+                ]
+
+            elif layers == "mlp":
+                layers = [
+                    ("dense", {"units": 32, "activation": "relu"}),
+                    ("dropout", {"rate": 0.1}),
+                    ("dense", {"units": 7, "activation": "relu"}),
+                ]
+
+            else:
+                raise ValueError(
+                    mylogging.return_str("Only possible predefined layers are 'lstm' and 'mlp'.")
+                )
+
+            layers = cast(list[tuple[str, dict[str, Any]]], layers)
+
         if layers[0][0] == "lstm":
             if X.ndim == 2:
                 X = X.reshape(X.shape[0], X.shape[1], 1)
             layers[0][1]["input_shape"] = (X.shape[1], X.shape[2])
 
-        if layers[0][0] == "dense":
+        elif layers[0][0] == "dense":
             layers[0][1]["input_shape"] = (X.shape[1],)
-            assert X.ndim != 3, (
-                "For dense first layer only univariate data supported (e.g. shape = (n_samples, n_features))"
-                "if ndim > 2: serialize first."
-            )
+            if X.ndim > 2:
+                raise ValueError(
+                    mylogging.return_str(
+                        "For dense first layer only univariate data supported (e.g. shape = (n_samples, n_features))"
+                        "if ndim > 2: serialize first."
+                    )
+                )
 
-        model = tf.keras.models.Sequential()
+        model = Sequential()
 
-        for i, j in enumerate(layers):
-
-            model.add(models[j[0]](**j[1] if len(j) > 1 else {}))
+        for i in layers:
+            model.add(models[i[0]](**i[1]))
 
         if timedistributed == 1:
-            model.add(tf.keras.layers.TimeDistributed(tf.keras.layers.Dense(y.shape[1])))
+            model.add(tf_layers.TimeDistributed(tf_layers.Dense(y.shape[1])))
         else:
-            model.add(tf.keras.layers.Dense(y.shape[1]))
+            model.add(tf_layers.Dense(y.shape[1]))
 
         model.compile(optimizer=optimizer, loss=loss, metrics=metrics)
 

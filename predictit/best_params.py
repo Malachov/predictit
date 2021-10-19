@@ -3,7 +3,7 @@ model, initial function arguments and arguments limits. More info is in optimize
 """
 
 from __future__ import annotations
-from typing import Union, Any, Callable
+from typing import Any, Callable
 import itertools
 import time
 
@@ -22,16 +22,16 @@ def optimize(
     kwargs: dict[str, Any],
     kwargs_limits: dict[str, Any],
     model_train_input: Inputs,
-    model_test_inputs: Union[list, np.ndarray],
+    model_test_inputs: list | np.ndarray,
     models_test_outputs: np.ndarray,
-    error_criterion="mape",
-    fragments=10,
-    iterations=3,
-    details=0,
-    time_limit=5,
-    name="Your model",
-    plot=0,
-) -> Union[None, dict[str, Any]]:
+    error_criterion: str = "mape",
+    fragments: int = 10,
+    iterations: int = 3,
+    details: int = 0,
+    time_limit: int | float = 5,
+    name: str = "Your model",
+    plot: bool = False,
+) -> None | dict[str, Any]:
     """Function to find optimal parameters of function. For example if we want to find minimum of function x^2,
     we can use limits from -10 to 10. If we have 4 fragments and 3 iterations. it will separate interval on 4 parts,
     so we have approximately points -10, -4, 4, 10. We evaluate the best one and make new interval to closest points,
@@ -52,7 +52,7 @@ def optimize(
         kwargs_limits (dict[str, Any]): Bounds of arguments (eg: {"alpha": [0.1, 1], "n_steps_in":[2, 30]}).
         model_train_input (Inputs): Data on which function is
             optimized. Use train data or sequences (tuple with (X, y, x_input)) - depends on model. Defaults to None.
-        model_test_inputs (Union[list, np.ndarray]): Error criterion is evaluated to
+        model_test_inputs (list | np.ndarray): Error criterion is evaluated to
             be able to compare results. It has to be out of sample data, so data from test set.
         models_test_outputs (np.ndarray): Test set outputs.
         error_criterion (str, optional): Error criterion used in evaluation. 'rmse' or 'mape'. Defaults to 'mape'.
@@ -60,7 +60,7 @@ def optimize(
         iterations (int, optional): How many times will be initial interval divided into fragments. Defaults to 3.
         details (int, optional): 0 print nothing, 1 print best parameters of models, 2 print every new best parameters
             achieved, 3 prints all results. Bigger than 0 print percents of progress. Defaults to 0.
-        time_limit (int, optional): How many seconds can one evaluation last. Defaults to 5.
+        time_limit (int | float, optional): How many seconds can one evaluation last. Defaults to 5.
         name (str, optional): Name of model to be displayed in details. Defaults to 'your model'.
         plot (bool, optional): It's possible to plot all parameters combinations to analyze it's influence.
             Defaults to False.
@@ -99,7 +99,7 @@ def optimize(
 
             for repeat_iteration in range(n_test_samples):
 
-                create_plot = 1 if plot and repeat_iteration == n_test_samples - 1 else 0
+                create_plot = True if plot and repeat_iteration == n_test_samples - 1 else False
 
                 predictions = model_predict(
                     model_test_inputs[repeat_iteration],
@@ -125,7 +125,7 @@ def optimize(
     if best_result != np.inf:
         best_params = kwargs
     else:
-        best_params = []
+        best_params = {}
 
     if details > 0:
         print(f"\n\nOptimization of model {name}:\n\n  Default parameters result: {best_result}\n")
@@ -137,7 +137,7 @@ def optimize(
 
     for i, j in kwargs_limits.items():
 
-        if not isinstance(j[0], (int, float, np.ndarray, np.generic)) or len(j) != 2:
+        if not isinstance(j[0], (int, float, np.ndarray)) or len(j) != 2:
             kwargs_fragments[i] = j
         elif isinstance(j[0], int):
             help_var = np.linspace(j[0], j[1], fragments, dtype=int)
@@ -170,7 +170,7 @@ def optimize(
 
             try:
                 if time_limit:
-                    res = watchdog(time_limit, evaluatemodel, kwargs=list_of_combinations[k])
+                    res = watchdog(time_limit, evaluatemodel, list_of_combinations[k])
                 else:
                     res = evaluatemodel(list_of_combinations[k])
 
@@ -222,7 +222,7 @@ def optimize(
 
         for i, j in kwargs_limits.items():
 
-            if not isinstance(j[0], (int, float, np.ndarray, np.generic)) or len(j) != 2:
+            if not isinstance(j[0], (int, float, np.ndarray)) or len(j) != 2:
                 kwargs_fragments[i] = [best_params[i]]
             else:
                 step = (max(kwargs_fragments[i]) - min(kwargs_fragments[i])) / fragments

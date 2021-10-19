@@ -1,11 +1,35 @@
 """Module for functions shared across models."""
 
 from __future__ import annotations
+from typing import Callable
 
 import numpy as np
 
+import mylogging
+from mydatapreprocessing.create_model_inputs import Sequences
 
-def one_step_looper(model_function, x_input: np.ndarray, predicts: int, constant: bool = True) -> np.ndarray:
+
+def get_inputs(input: tuple[np.ndarray, np.ndarray] | Sequences) -> tuple[np.ndarray, np.ndarray]:
+
+    if isinstance(input, Sequences):
+        return input[0], input[1]
+
+    if not isinstance(input, tuple):
+        raise TypeError(
+            mylogging.return_str("Data must be tuple of length 2 - input vector and output vector.")
+        )
+
+    if len(input) != 2:
+        raise ValueError(
+            mylogging.return_str("Data must be tuple of length 2 - input vector and output vector.")
+        )
+
+    return input[0], input[1]
+
+
+def one_step_looper(
+    model_function: Callable, x_input: np.ndarray, predicts: int, constant: bool = True
+) -> np.ndarray:
     """Predict one value, generate new input (add new to last and delete first) and predict again.
 
     Args:

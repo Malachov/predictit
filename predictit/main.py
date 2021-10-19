@@ -21,7 +21,7 @@ There are working examples in main readme and also in test_it module. Particular
 visual.py in tests. """
 
 from __future__ import annotations
-from typing import Union
+from typing import cast
 import sys
 from pathlib import Path
 import os
@@ -63,8 +63,8 @@ from predictit.misc import GLOBAL_VARS
 
 def predict(
     data=None,
-    predicted_column: Union[None, str, int] = None,
-    config: Union[predictit.configuration.Config] = None,
+    predicted_column: None | str | int = None,
+    config: predictit.configuration.Config | dict | None = None,
     **kwargs,
 ) -> predictit._result_classes.Result:
     """Make predictions mostly on time-series data. Data input and other config options can be set up in
@@ -82,10 +82,10 @@ def predict(
         data (np.ndarray, pd.DataFrame, str): Time series. Can be 2-D - more columns. Can be numpy array, DataFrame,
             path to file or url.
             Examples: "/home/user/my.json", or "https://yoururl/your.csv" or np.random.randn(100, 2).
-        predicted_column (int, str, optional): Index of predicted column or it's name (dataframe).
+        predicted_column (None | str | int, optional): Index of predicted column or it's name (dataframe).
             If list with more values only the first one will be evaluated (use predict_multiple_columns function
             if you need that. Default to None.
-        config ((predictit.configuration.Config, dict), optional): Settings as Config instance or dictionary.
+        config (predictit.configuration.Config | dict | None, optional): Settings as Config instance or dictionary.
             Check class for what you can use. If None, then default config will be used. Defaults to None.
         **kwargs (dict, optional): There is much more parameters' of predict function. Check configuration.py
             for parameters details.
@@ -313,7 +313,7 @@ def predict(
                 repeatit=config.repeatit,
             )
 
-        (data_for_predictions, last_undiff_value, final_scaler,) = mdp.preprocessing.preprocess_data(
+        data_for_predictions, last_undiff_value, final_scaler = mdp.preprocessing.preprocess_data(
             data_for_predictions_df.values,
             remove_outliers=config.remove_outliers,
             smoothit=config.smoothit,
@@ -323,6 +323,8 @@ def predict(
             bins=config.bins,
             binning_type=config.binning_type,
         )
+
+        data_for_predictions = cast(np.ndarray, data_for_predictions)
 
         if config.mode == "validate":
             data_for_predictions, test = mdp.misc.split(data_for_predictions, predicts=config.predicts)
@@ -825,9 +827,9 @@ def predict(
 
 def predict_multiple_columns(
     data=None,
-    predicted_columns: Union[list, tuple, str, None] = None,
-    freqs: Union[list, tuple, str, None] = None,
-    config: Union[predictit.configuration.Config] = None,
+    predicted_columns: list | tuple | str | None = None,
+    freqs: list | tuple | str | None = None,
+    config: predictit.configuration.Config | dict | None = None,
     **kwargs,
 ) -> predictit._result_classes.Multiple:
     """Predict multiple columns and multiple frequencies at once. Use predict function.
@@ -839,11 +841,11 @@ def predict_multiple_columns(
     Args:
         data (np.ndarray, pd.DataFrame): Time series. Can be 2-D - more columns.
             !!! In Numpy array use data series as rows, but in dataframe use cols !!!. Defaults to [].
-        predicted_columns (list, optional): List of indexes of predicted columns or it's names (dataframe).
+        predicted_columns (list | tuple | str | None, optional): List of indexes of predicted columns or it's names (dataframe).
             Defaults to None.
-        freqs (str. 'H' or 'D' or 'M', optional): If date index available, resample data and predict in defined
+        freqs (list | tuple | str | None, optional): If date index available, resample data and predict in defined
             time frequency. If None, then value from config will be used. Defaults to [].
-        config ((predictit.configuration.Config, dict), optional): Settings as Config instance or dictionary.
+        config (predictit.configuration.Config | dict | None, optional): Settings as Config instance or dictionary.
             Check class for what you can use. If None, then default config will be used. Defaults to None.
         **kwargs (dict, optional): There is much more parameters' in this function. Check configuration.py
             for parameters details.
@@ -935,8 +937,8 @@ def predict_multiple_columns(
 
 def compare_models(
     data_all=None,
-    predicted_column: Union[list, tuple, str, None] = None,
-    config: Union[predictit.configuration.Config] = None,
+    predicted_column: list | tuple | str | None = None,
+    config: predictit.configuration.Config | dict | None = None,
     **kwargs,
 ) -> predictit._result_classes.Comparison:
     """Function that helps to choose appropriate models. It evaluates it on test data and then return results.
@@ -951,10 +953,10 @@ def compare_models(
         data_all ((dict, None)): Dictionary of data name as key and config data field and used column as value
             `{data_1: (my_dataframe, 'column_name_or_index')}` or tuple of data with same predicted
             column configured in config `(my_data[-2000:], my_data[-1000:])`
-        predicted_column (int, str, optional): Index of predicted column or it's name (dataframe).
+        predicted_column (list | tuple | str | None, optional): Index of predicted column or it's name (dataframe).
             If list with more values only the first one will be evaluated (use predict_multiple_columns function
             if you need that. Default to None.
-        config ((predictit.configuration.Config, dict), optional): Settings as Config instance or dictionary.
+        config (predictit.configuration.Config | dict | None, optional): Settings as Config instance or dictionary.
             Check class for what you can use. If None, then default config will be used. Defaults to None.
         **kwargs (dict, optional): There is much more parameters' in this function. Check configuration.py for parameters details.
     """

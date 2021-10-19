@@ -43,7 +43,7 @@ Examples:
 """
 
 from __future__ import annotations
-from typing import Union, Any
+from typing import Any
 from pathlib import Path
 
 from mypythontools.config import MyProperty, ConfigBase, ConfigStructured
@@ -83,7 +83,7 @@ class Config(ConfigStructured):
             return "predict"
 
         @MyProperty(options=["fast", "normal", None])
-        def use_config_preset(self) -> Union[str, None]:
+        def use_config_preset(self) -> str | None:
             """
             Options:
                 'fast', 'normal', None
@@ -96,7 +96,7 @@ class Config(ConfigStructured):
             return None
 
         @MyProperty(options=["pool", "process", None])
-        def multiprocessing(self) -> Union[None, str]:
+        def multiprocessing(self) -> None | str:
             """
             Options:
                 'pool', 'process', None.
@@ -108,7 +108,7 @@ class Config(ConfigStructured):
             return None
 
         @MyProperty((int, None))
-        def processes_limit(self) -> Union[int, None]:
+        def processes_limit(self) -> int | None:
             """
             Types:
                 str | None
@@ -136,7 +136,7 @@ class Config(ConfigStructured):
             return 0
 
         @MyProperty((dict, None))
-        def analyze_seasonal_decompose(self) -> Union[dict, None]:
+        def analyze_seasonal_decompose(self) -> dict | None:
             """
             Types:
                 dict | None
@@ -226,7 +226,7 @@ class Config(ConfigStructured):
             return "test_ecg"
 
         @MyProperty(types=(list, dict, None))
-        def data_all(self) -> Union[list, dict, None]:
+        def data_all(self) -> list | dict | None:
             """
             Types:
                 list | dict | None
@@ -247,7 +247,7 @@ class Config(ConfigStructured):
             return None
 
         @MyProperty((str, None))
-        def predicted_table(self) -> Union[str, None]:
+        def predicted_table(self) -> str | None:
             """
             Types:
                 str | None
@@ -260,7 +260,7 @@ class Config(ConfigStructured):
             return None
 
         @MyProperty(options=["columns", "index", None])
-        def data_orientation(self) -> Union[str, None]:
+        def data_orientation(self) -> str | None:
             """
             Options:
                 'columns', 'index', None.
@@ -274,7 +274,7 @@ class Config(ConfigStructured):
             return None
 
         @MyProperty((int, None))
-        def header(self) -> Union[str, bool]:
+        def header(self) -> str | bool:
             """
             Types:
                 int | None
@@ -306,7 +306,7 @@ class Config(ConfigStructured):
             return {"sep": ",", "decimal": "."}
 
         @MyProperty((str, None))
-        def request_datatype_suffix(self) -> Union[str, None]:
+        def request_datatype_suffix(self) -> str | None:
             """
             Options:
                 'csv', 'json', 'xlsx', 'xls', 'parquet', 'h5', None
@@ -346,7 +346,7 @@ class Config(ConfigStructured):
             return ["*"]
 
         @MyProperty((int, str, None))
-        def datetime_column(self) -> Union[str, int, None]:
+        def datetime_column(self) -> str | int | None:
             """
             Types:
                 int | str | None
@@ -359,7 +359,7 @@ class Config(ConfigStructured):
             return None
 
         @MyProperty((str, None))
-        def freq(self) -> Union[str, None]:
+        def freq(self) -> str | None:
             """
             Types:
                 str | None
@@ -390,7 +390,7 @@ class Config(ConfigStructured):
             return []
 
         @MyProperty(options=("sum", "mean", "", None))
-        def resample_function(self) -> Union[str, None]:
+        def resample_function(self) -> str | None:
             """
             Options:
                 'sum', 'mean', None
@@ -533,7 +533,7 @@ class Config(ConfigStructured):
             return "mean"
 
         @MyProperty((None, str))
-        def data_transform(self) -> Union[None, str]:
+        def data_transform(self) -> None | str:
             """
             Options:
                 'difference', None
@@ -545,7 +545,7 @@ class Config(ConfigStructured):
             return None
 
         @MyProperty(options=[None, "standardize", "-11", "01", "robust"])
-        def standardizeit(self) -> Union[str, bool]:
+        def standardizeit(self) -> str | bool:
             """
             Options:
                 'standardize', '-11', '01', 'robust', None
@@ -558,7 +558,7 @@ class Config(ConfigStructured):
             return "standardize"
 
         @MyProperty((tuple, None))
-        def smoothit(self) -> Union[tuple[int], None]:
+        def smoothit(self) -> tuple[int] | None:
             """
             Type:
                 tuple[int, int]
@@ -586,7 +586,7 @@ class Config(ConfigStructured):
             return False
 
         @MyProperty((int, float, None))
-        def remove_outliers(self) -> Union[int, float, None]:
+        def remove_outliers(self) -> int | float | None:
             """
             Types:
                 int | float | None
@@ -612,7 +612,7 @@ class Config(ConfigStructured):
         #     return False
 
         @MyProperty((None, int))
-        def bins(self) -> Union[int, None]:
+        def bins(self) -> int | None:
             """
             Types:
                 int | None
@@ -750,7 +750,7 @@ class Config(ConfigStructured):
             return None
 
         @MyProperty((dict, None))
-        def data_extension(self) -> Union[dict, None]:
+        def data_extension(self) -> dict | None:
             """
             Types:
                 dict | None
@@ -813,7 +813,7 @@ class Config(ConfigStructured):
                 return "once"
 
             @MyProperty([str, Path])
-            def logger_output(self) -> Union[str, Path]:
+            def logger_output(self) -> str | Path:
                 """
                 Types:
                     str | pathlib.Path
@@ -955,7 +955,7 @@ class Config(ConfigStructured):
                 return True
 
             @MyProperty((None, str, Path))
-            def save_plot(self) -> Union[None, str, Path]:
+            def save_plot(self) -> None | str | Path:
                 """
                 Types:
                     None | str | pathlib.Path
@@ -1028,7 +1028,7 @@ class Config(ConfigStructured):
                 return 200
 
             @MyProperty((None, int))
-            def plot_number_of_models(self) -> Union[None, int]:
+            def plot_number_of_models(self) -> None | int:
                 """
                 Types:
                     int, None
@@ -1044,7 +1044,7 @@ class Config(ConfigStructured):
             configured."""
 
             @MyProperty(options=(None, "simple", "detailed"))
-            def print_table(self) -> Union[None, str]:
+            def print_table(self) -> None | str:
                 """
                 Options:
                     None, 'simple', 'detailed'
@@ -1057,7 +1057,7 @@ class Config(ConfigStructured):
                 return "detailed"
 
             @MyProperty((int, None))
-            def print_number_of_models(self) -> Union[None, int]:
+            def print_number_of_models(self) -> None | int:
                 """
                 Types:
                     int | None
@@ -1067,7 +1067,7 @@ class Config(ConfigStructured):
 
                 How many models will be printed in results table. If None, than all models will be plotted.
                 1 if only the best one."""
-                return 12
+                return None
 
             @MyProperty(bool)
             def print_time_table(self) -> bool:
@@ -1100,7 +1100,7 @@ class Config(ConfigStructured):
             configured."""
 
             @MyProperty(options=(None, "simple", "detailed"))
-            def print_comparison_table(self) -> Union[None, str]:
+            def print_comparison_table(self) -> None | str:
                 """
                 Options:
                     None, 'simple', 'detailed'
@@ -1113,7 +1113,7 @@ class Config(ConfigStructured):
                 return "simple"
 
             @MyProperty((int, None))
-            def print_number_of_comparison_models(self) -> Union[None, int]:
+            def print_number_of_comparison_models(self) -> None | int:
                 """
                 Types:
                     int | None
@@ -1179,7 +1179,7 @@ class Config(ConfigStructured):
         """Various configs for prediction like number of predicted values, used error criterion etc."""
 
         @MyProperty((None, float))
-        def confidence_interval(self) -> Union[None, float]:
+        def confidence_interval(self) -> None | float:
             """
             Types:
                 None | float
@@ -1349,7 +1349,7 @@ class Config(ConfigStructured):
             return False
 
         @MyProperty((float, int, None))
-        def optimizeit_limit(self) -> Union[float, int]:
+        def optimizeit_limit(self) -> float | int:
             """
             Types:
                 float | int | None
@@ -1494,7 +1494,7 @@ class Config(ConfigStructured):
             return False
 
         @MyProperty((list, set))
-        def used_models(self) -> Union[list, set]:
+        def used_models(self) -> list | set:
             """
             Types:
                 list | tuple

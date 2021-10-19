@@ -2,15 +2,18 @@
 
 ## 2.0x - 09/2021
 
+- [x] Interactive jupyter demo with binder 
 - [x] Config restructured - doctrings with explanation on variables visible in intellisense help. Config values options and type validations applied (much more strict).
-- [x] Analysis of optimized values in compare models 
-- [x] Annoying warnings filtered on import filtered
 - [x] Return type config change. Now always same result - class with best models resulte, all results and results with history
 - [x] Early stopping in Conjugate gradient and LNU
+- [x] Analysis of optimized values in compare models 
 - [x] Printed tables better print as long names are broken automatically.
 - [x] find_optimal_input_for_models that can compare various input forms for models.
+- [x] Annoying warnings filtered on import filtered
+- [x] Type hints
 
 ## 1.6x - 03/2021
+
 - [x] String embedding - One hot or label encoding
 - [x] Data_preprocessing and logging from misc moved into own projects and imported. Projects are called mylogging and mydatapreprocessing. It'necessary to have corresponding version
 - [x] Various transforms added as derived columns. For example: Difference transform, Rolling window and rolling std transformation, Distance from the mean.

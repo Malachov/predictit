@@ -2,7 +2,7 @@
 and do the predictions."""
 
 from __future__ import annotations
-from typing import Union, Any
+from typing import Any
 import time
 
 import numpy as np
@@ -41,7 +41,7 @@ def train_and_predict(
     final_scaler=None,
     pipe=None,
     semaphor=None,
-) -> Union[None, dict[str, Any]]:
+) -> None | dict[str, Any]:
     """Inner function, that can run in parallel with multiprocessing.
 
     Note:
@@ -51,7 +51,7 @@ def train_and_predict(
         Some values from predictit configuration.
 
     Returns:
-        dict: Return dict of results.
+        None | dict[str, Any]: Return dict of results or send data via multiprocessing.
     """
 
     logs_list = []
@@ -115,6 +115,7 @@ def train_and_predict(
             )
 
         except TimeoutError:
+            model_results["Best optimized parameters"] = {}
             mylogging.traceback(f"Hyperparameters optimization of {iterated_model_name} didn't finished")
 
         for k, l in model_results["Best optimized parameters"].items():
@@ -220,7 +221,6 @@ def train_and_predict(
 
         model_results["Model error"] = np.inf
         model_results["Unstandardized model error"] = np.inf
-        model_results["Best optimized parameters"] = None
         model_results["Results"] = results_array
         model_results["Test errors"] = test_errors
         error_message = (

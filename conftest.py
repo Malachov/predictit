@@ -14,7 +14,7 @@ from predictit.configuration import config
 config_for_tests = {
     "is_tested": True,
     "predicted_column": 0,
-    "logger_level": "ERROR",
+    "logger_level": "WARNING",
     "logger_color": False,
     "show_plot": False,
     "data": "test_sin",

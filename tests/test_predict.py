@@ -3,6 +3,7 @@ import subprocess
 import numpy as np
 import pandas as pd
 
+import mydatapreprocessing
 import mypythontools
 
 mypythontools.paths.PROJECT_PATHS.add_ROOT_PATH_to_sys_path()
@@ -160,7 +161,7 @@ def test_config_variations_2():
 
 def test_config_variations_3():
 
-    df = pd.DataFrame([range(200), range(1000, 1200)]).T
+    df = pd.DataFrame([range(300), range(1000, 1300)]).T
     df["time"] = pd.date_range("2018-01-01", periods=len(df), freq="H")
 
     config.update(
@@ -196,7 +197,9 @@ def test_config_variations_3():
 
 def test_most_models():
 
-    df = pd.DataFrame([range(200), range(1000, 1200)]).T
+    a = np.array(range(200)) + np.random.rand(200)
+    b = np.array(range(200)) + mydatapreprocessing.generate_data.sin(200)
+    df = pd.DataFrame([a, b]).T
 
     config.update(
         {
@@ -279,5 +282,5 @@ if __name__ == "__main__":
     pass
 
 if __name__ == "__main__":
-
     test_most_models()
+    pass

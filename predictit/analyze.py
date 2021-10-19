@@ -3,7 +3,6 @@ it's details, autocorrelation function etc.
 """
 
 from __future__ import annotations
-from typing import Union
 from typing_extensions import Literal
 
 import numpy as np
@@ -26,13 +25,13 @@ from predictit import misc
 # from statsmodels.tsa.seasonal import seasonal_decompose
 
 
-def analyze_column(data: Union[np.ndarray, pd.DataFrame], lags: int = 5, window: int = 5) -> None:
+def analyze_column(data: np.ndarray | pd.DataFrame, lags: int = 5, window: int = 5) -> None:
     """Function one-dimensional data (predicted column), that plot data, it's distribution, some details like minimum,
     maximum, std, mean etc. It also create autocorrelation and partial autocorrelation (good for ARIMA models) and
     plot rolling mean and rolling std. It also tell if data are probably stationary or not.
 
     Args:
-        data (Union[np.array, pd.DataFrame]): Time series data.
+        data (np.ndarray | pd.DataFrame): Time series data.
         lags (int, optional): Lags used for autocorrelation. Defaults to 5.
         window (int, optional): Window for rolling average and rolling std. Defaults to 5.
 
@@ -135,12 +134,12 @@ def analyze_column(data: Union[np.ndarray, pd.DataFrame], lags: int = 5, window:
         print(f"\np-value = {pvalue} : Analyzed column is probably not stationary.\n")
 
 
-def analyze_data(data: Union[pd.DataFrame, np.ndarray], pairplot: bool = False):
+def analyze_data(data: pd.DataFrame | np.ndarray, pairplot: bool = False):
     """Analyze n-dimensional data. Describe data types, nan values, minimums etc...
     Plot correlation graph.
 
     Args:
-        data (Union[pd.DataFrame, np.ndarray]): Time series data.
+        data (pd.DataFrame | np.ndarray): Time series data.
         pairplot (bool, optional): Whether to plot correlation matrix. Computation can be very slow. Defaults to False.
     """
     if not misc.GLOBAL_VARS.PLOTS_CONFIGURED:

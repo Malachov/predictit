@@ -2,7 +2,7 @@
 criterion based on config """
 
 from __future__ import annotations
-import importlib
+import importlib.util
 
 import numpy as np
 
@@ -19,12 +19,12 @@ from predictit import misc
 
 
 def compare_predicted_to_test(
-    predicted,
-    test,
-    error_criterion="mape",
-    plot=False,
-    model_name="Model",
-    data_name="Data",
+    predicted: np.ndarray,
+    test: np.ndarray,
+    error_criterion: str = "mape",
+    plot: bool = False,
+    model_name: str = "Model",
+    data_name: str = "Data",
 ):
     """Compare tested model with reality.
 

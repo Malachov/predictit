@@ -2,7 +2,7 @@
 
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/Malachov/predictit/HEAD?filepath=demo.ipynb) [![Python versions](https://img.shields.io/pypi/pyversions/predictit.svg)](https://pypi.python.org/pypi/predictit/) [![PyPI version](https://badge.fury.io/py/predictit.svg)](https://badge.fury.io/py/predictit) [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/Malachov/predictit.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/Malachov/predictit/context:python) [![Documentation Status](https://readthedocs.org/projects/predictit/badge/?version=master)](https://predictit.readthedocs.io/en/master/?badge=master) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) [![codecov](https://codecov.io/gh/Malachov/predictit/branch/master/graph/badge.svg)](https://codecov.io/gh/Malachov/predictit)
 
-Library/framework for making time series predictions. Choose the data, choose the models (ARIMA, regressions, LSTM...) from libraries like statsmodels, scikit-learn, tensorflow. Do the setup (it's not necessary of course - you can use some preset) and predict.
+Library/framework for making time series predictions. Choose the data, choose the models (ARIMA, regressions, LSTM...) from libraries like statsmodels, scikit-learn, tensorflow. Do the setup (it's not necessary of course, you can use some preset) and predict.
 
 Library contain model Hyperparameter optimization as well as option variable optimization. That means, that library can find optimal preprocessing (smoothing, dropping non correlated columns, standardization) and on top of that it can find optimal hyperparameters such as number of neuron layers.
 
@@ -38,10 +38,7 @@ Sometimes you can have issues with installing some libraries from requirements (
 
 There are some libraries that not every user will be using (e.g. Tensorflow or libraries for some data inputs). If you want to be sure to have all libraries, you can download `requirements_advanced.txt` and then install advanced requirements with `pip install -r requirements_advanced.txt`.
 
-Versions troubleshooting => Software is build in way, that it should be the best using the latest versions of dependencies. In most cases older versions works well as well. Only exception can be author's library mydatapreprocessing, which is new and under development (API is not stable) and some version of predictit has dependency on particular version of mydatapreprocessing. Clean installation of the latest versions fix issue.
-
-Library was developed during 2020 and structure and even API (configuration) changed a lot. From version 1.60 it's considered to be stable and code made for library will work till 2.0.0.
-
+Library was developed during 2020 and structure and even API (configuration) changed a lot. From version 2.0 it's considered to be stable and following semantic versioning.
 
 ## How to
 
@@ -85,7 +82,7 @@ config.datetime_column = 'Date'  # Will be used for resampling and result plot d
 config.freq = "D"  # One day - one value resampling
 ```
 
-2) You can update multiple parameters at once with dictionary and update function
+2) Multiple parameters at once with dictionary and update function
 
 ```python
 config.update({

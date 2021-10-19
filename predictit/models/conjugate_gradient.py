@@ -4,14 +4,14 @@ import numpy as np
 
 import mylogging
 
-from .models_functions.models_functions import one_step_looper
+from .models_functions.models_functions import one_step_looper, get_inputs
 
 
-def train(data, epochs=100, early_stopping=True):
+def train(data: tuple[np.ndarray, np.ndarray], epochs: int = 100, early_stopping: bool = True):
     """Conjugate gradient model.
 
     Args:
-        data ((np.ndarray, np.ndarray)) - Tuple (X, y) of input train vectors X and train outputs y.
+        data (tuple[np.ndarray, np.ndarray]) - Tuple (X, y) of input train vectors X and train outputs y.
             X should contain bias - constant 1 on first place of every sample
             (parameter constant in `mydatapreprocessing.create_model_inputs.make_sequences`).
         epochs (int, optional): Number of epochs to evaluate. Defaults to 100.
@@ -21,8 +21,8 @@ def train(data, epochs=100, early_stopping=True):
         np.ndarray: Array of neural weights.
     """
 
-    X = data[0]
-    y = data[1].ravel()
+    X, y = get_inputs(data)
+    y = y.ravel()
 
     w = np.zeros(X.shape[1])
 
@@ -71,7 +71,7 @@ def train(data, epochs=100, early_stopping=True):
     return w
 
 
-def predict(x_input, model, predicts=7):
+def predict(x_input: np.ndarray, model: np.ndarray, predicts: int = 7):
     """Function that creates predictions from trained model and input data.
 
     Args:

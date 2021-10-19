@@ -2,17 +2,12 @@
 
 Tagged with complexity and sorted by priority
 
-- [ ] In predict multiple change plot name to predicted column
-- [ ] Create jupyter notebook with examples
+- [ ] EASY - Define type for data input in mydatapreprocessing, import and use
+- [ ] EASY - In predict multiple change plot name to predicted column
 - [ ] EASY - Test on some larger files (Use warning if big data and hard settings)
 - [ ] COMPLEX - Define some set of datasets (good for prediction) and evaluate results on commit with tag. save results into csv and ate KPI - Add data to default compare models
-- [ ] COMPLEX - Configuration:
-    1) Create class Model - Configure models in its own settings (be able to configure various models in various way). Use instances of models (multiple concrete settings) Add save and load model method
-    2) Full config to readthedocs documentation
-    3) Add preset for comparing models
-    4) Ability to load and save config to json to folder (mostly for GUI)
-- [ ] EASY - Describe better predict and compare models difference. Mainly that predict should not be used for comparing models
-- [ ] EASY - Return class, no dict and remove return_type (evaluated_matrix from compare to main)
+- [ ] COMPLEX - Create class Model. Configure models in its own settings (be able to configure various models in various way). Use instances of models (multiple concrete settings) Add save and load model method
+- [ ] EASY - Ability to load and save config to json to folder (mostly for GUI)
 - [ ] COMPLEX - Add exogenous parameters where possible
 - [ ] COMPLEX - Dimensionality reduction - E.G. autoencoder and PCA to shrink input multivariate data to small vectors. Choose what to compress (not predicted column).
 - [ ] COMPLEX - Rewrite GUI with mypythontools.pyvueeel

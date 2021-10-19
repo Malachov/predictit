@@ -2,14 +2,14 @@ from __future__ import annotations
 
 import numpy as np
 
-from .models_functions.models_functions import one_step_looper
+from .models_functions.models_functions import one_step_looper, get_inputs
 
 
-def train(data, epochs=50, learning_rate=1):
+def train(data: tuple[np.ndarray, np.ndarray], epochs: int = 50, learning_rate: float = 1.0):
     """No need for train in this model - just for consistency with other models.
 
     Args:
-        data ((np.ndarray, np.ndarray)) - Tuple (X, y) of input train vectors X and train outputs y.
+        data (tuple[np.ndarray, np.ndarray]) - Tuple (X, y) of input train vectors X and train outputs y.
             X should contain bias - constant 1 on first place of every sample
             (parameter constant in `mydatapreprocessing.create_model_inputs.make_sequences`).
         epochs(int, optional) - How many times is the algorithm repeated. Defaults to 50.
@@ -19,8 +19,9 @@ def train(data, epochs=50, learning_rate=1):
     Returns:
         np.ndarray: Array of neural weights.
     """
-    X = data[0]
-    y = data[1].ravel()
+
+    X, y = get_inputs(data)
+    y = y.ravel()
 
     w = np.zeros(X.shape[1])
 
@@ -34,7 +35,7 @@ def train(data, epochs=50, learning_rate=1):
     return w
 
 
-def predict(x_input, model, predicts=7):
+def predict(x_input: np.ndarray, model: np.ndarray, predicts: int = 7):
     """Model that return just arithmetical average from last few data points.
 
     Args:

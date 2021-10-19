@@ -1,25 +1,26 @@
 """LNU. It's abbreviation of Linear Neural Unit - simplest building block of neural nets."""
 from __future__ import annotations
-from typing import Union
+from typing import cast
 
 import numpy as np
 
 import mylogging
 
+from .models_functions.models_functions import get_inputs
 from .. import misc
 from ..best_params import optimize
 
 
 def lnu_core(
-    data: tuple[np.ndarray],
+    data: tuple[np.ndarray, np.ndarray],
     learning_rate: float,
     epochs: int,
     normalize_learning_rate: bool,
     early_stopping: bool = True,
     learning_rate_decay: float = 0.8,
-    damping: Union[int, float] = 1,
+    damping: int | float = 1,
     return_all: bool = False,
-) -> Union[np.ndarray, tuple[np.ndarray]]:
+) -> np.ndarray | tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     X = data[0]
     y_hat = data[1]
 
@@ -73,11 +74,11 @@ def lnu_core(
 
 
 def train(
-    data: tuple[np.ndarray],
-    learning_rate: Union[str, float] = "infer",
+    data: tuple[np.ndarray, np.ndarray],
+    learning_rate: str | float = "infer",
     epochs: int = 10,
     normalize_learning_rate: bool = True,
-    damping: Union[float, int] = 1,
+    damping: float | int = 1,
     early_stopping: bool = True,
     learning_rate_decay: float = 0.9,
     predict_w: bool = False,
@@ -90,12 +91,12 @@ def train(
     second iteration, it will train more epochs.
 
     Args:
-        data ((np.ndarray, np.ndarray)) - Tuple (X, y) of input train vectors X and train outputs y
-        learning_rate (float, optional): Learning rate. If not normalized must be much smaller.
+        data (tuple[np.ndarray, np.ndarray]) - Tuple (X, y) of input train vectors X and train outputs y
+        learning_rate (str | float, optional): Learning rate. If not normalized must be much smaller.
             If "infer" then it's chosen automatically. Defaults to "infer.
         epochs (int, optional): Number of trained epochs. Defaults to 10.
         normalize_learning_rate (int, optional): Whether normalize learning rate. Defaults to True.
-        damping (int, optional):Value of damp of standardized learning rate. Defaults to 1.
+        damping (float | int, optional):Value of damp of standardized learning rate. Defaults to 1.
         early_stopping (bool, optional): If mean error don't get lower, next epochs are not evaluated. Defaults to True.
         learning_rate_decay (float, optional): With every other epoch, learning rate is a little bit lower
             (learning_rate * learning_rate_decay). It should be between 0 and 1. Defaults to 0.9.
@@ -107,11 +108,8 @@ def train(
     Returns:
         np.ndarray: Weights of neuron that can be used for making predictions.
     """
-    if not isinstance(data, (tuple, list)) or len(data) < 2:
-        raise TypeError(mylogging.return_str("Data must be in defined shape."))
 
-    X = data[0]
-    y_hat = data[1]
+    X, y_hat = get_inputs(data)
 
     if learning_rate == "infer":
         infer_lightened_params = {
@@ -132,15 +130,25 @@ def train(
         }
 
         # First find order
-        learning_rate = optimize(
+        best_kwargs = optimize(
             kwargs_limits={"learning_rate": [10e-8, 10e-6, 10e-4, 10e-3, 10e-2, 1]}, **infer_lightened_params
-        )["learning_rate"]
+        )
+
+        best_kwargs = cast(dict, best_kwargs)
 
         # First around favorite
-        learning_rate = optimize(
-            kwargs_limits={"learning_rate": [learning_rate / 10, learning_rate * 10]},
+        best_kwargs = optimize(
+            kwargs_limits={
+                "learning_rate": [best_kwargs["learning_rate"] / 10, best_kwargs["learning_rate"] * 10]
+            },
             **infer_lightened_params
-        )["learning_rate"]
+        )
+
+        best_kwargs = cast(dict, best_kwargs)
+
+        learning_rate = best_kwargs["learning_rate"]
+
+    learning_rate = cast(float, learning_rate)
 
     if plot or predict_w:
         w, w_all, y, error = lnu_core(

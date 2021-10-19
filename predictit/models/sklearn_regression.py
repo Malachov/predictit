@@ -8,19 +8,23 @@ it can use function ``get_all_models()`` that return all existing regressor.
 """
 
 from __future__ import annotations
+from typing import Any
+
+import numpy as np
 
 import mylogging
 
-from .models_functions.models_functions import one_step_looper
+from .models_functions.models_functions import one_step_looper, get_inputs
 
 # Lazy imports
 # from importlib import import_module
 # import sklearn
 # from sklearn import multioutput, linear_model, ensemble, tree, neighbors, gaussian_process
+# import sklearn.svm
 
 
 def train(
-    data,
+    data: tuple[np.ndarray, np.ndarray],
     model="BayesianRidge",
     n_estimators=100,
     alpha=0.0001,
@@ -37,7 +41,7 @@ def train(
     rbf_width=0,
     activation_func="selu"
     #  load_trained_model=0, update_trained_model=1, save_model=1, saved_model_path_string='stored_models',
-):
+) -> Any:
     """Sklearn model. Models as input parameter. Can be linear, ridge, Huber or much more.
     It also contain extreme learning machine model from sklearn extensions.
 
@@ -49,7 +53,7 @@ def train(
         to have data sorted in limited number of bins.
 
     Args:
-        data ((np.ndarray, np.ndarray)) - Tuple (X, y) of input train vectors X and train outputs y.
+        data (tuple[np.ndarray, np.ndarray]) - Tuple (X, y) of input train vectors X and train outputs y.
             Insert input with no constant column - added by default in sklearn.
             Check `mydatapreprocessing` how to generate output.
         model ((str, object), optional): Model that will be used. You can insert model itself or
@@ -101,6 +105,8 @@ def train(
         neighbors,
         gaussian_process,
     )
+
+    X, y = get_inputs(data)
 
     # If string like 'LinearRegression', find class with such a name
     if isinstance(model, str):
@@ -155,9 +161,11 @@ def train(
 
     model.set_params(**used_params)
 
-    if data[1].shape[1] == 1:
+    if y.shape[1] == 1:
         model.output_shape = "one_step"
-        output = data[1].ravel()
+        setattr(model, "output_shape", "one_step")
+
+        y = y.ravel()
 
     else:
         if model._estimator_type == "regressor":
@@ -165,22 +173,21 @@ def train(
         elif model._estimator_type == "classifier":
             model = multioutput.MultiOutputClassifier(model)
 
-        model.output_shape = "multi_step"
-        output = data[1]
+        setattr(model, "output_shape", "multi_step")
 
-    model.fit(data[0], output)
+    model.fit(X, y)
 
     return model
 
 
-def predict(x_input, model, predicts=7):
+def predict(x_input: np.ndarray, model: Any, predicts: int = 7) -> np.ndarray:
     """Function that creates predictions from trained model and input data.
 
     Args:
         x_input (np.ndarray): Time series data inputting the models. Shape = (n_samples, n_features).
             Usually last few data points. Structure depends on X in train function
             (usually defined in mydatapreprocessing library).
-        model (list, class): Fitted model object from imported library.
+        model (Any, class): Fitted model sklearn object.
         predicts (int, optional): Number of predicted values. Defaults to 7.
 
     Returns:
@@ -201,7 +208,12 @@ def predict(x_input, model, predicts=7):
         return model.predict(x_input)[0].reshape(-1)
 
 
-def get_all_models(regressors=True, classifiers=True, other_models=True, sklearn_extensions=True):
+def get_all_models(
+    regressors: bool = True,
+    classifiers: bool = True,
+    other_models: bool = True,
+    sklearn_extensions: bool = True,
+) -> list[Any]:
     """Create list of around 80 various sklearn models where regressor or classifier is in class name
     plus some extra models.
     E.g. ["sklearn.ensemble._forest.ExtraTreesRegressor()", "sklearn.ensemble._bagging.BaggingRegressor()", ...]
@@ -272,6 +284,7 @@ def get_all_models(regressors=True, classifiers=True, other_models=True, sklearn
         models.extend(
             [getattr(linear_model, cls) for cls in linear_model.__all__ if cls in other_linear_models]
         )
+        import sklearn.svm
 
         models.append(sklearn.svm.SVR)
 

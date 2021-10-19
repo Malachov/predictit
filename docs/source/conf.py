@@ -51,7 +51,7 @@ extensions = [
     "sphinx.ext.githubpages",
     "sphinx.ext.imgmath",
     "sphinx.ext.autosectionlabel",
-    "m2r2",
+    # "m2r2",
 ]
 
 autodoc_default_flags = [

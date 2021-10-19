@@ -2,7 +2,6 @@
 static type analysis, intellisense etc."""
 
 from __future__ import annotations
-from typing import Union
 
 import pandas as pd
 import numpy as np
@@ -59,7 +58,7 @@ class ComparisonStandardized:
         self,
         best_model_name_standardized: str,
         best_optimized_value_standardized: str,
-        optimization_standardized: Union[Optimization, None] = None,
+        optimization_standardized: Optimization | None = None,
     ):
         self.best_model_name_standardized = best_model_name_standardized
         self.best_optimized_value_standardized = best_optimized_value_standardized
@@ -75,7 +74,7 @@ class Comparison:
         tables: Tables,
         all_models_results: dict,
         standardized_results: ComparisonStandardized,
-        optimization: Union[Optimization, None] = None,
+        optimization: Optimization | None = None,
     ):
         self.results_df = results_df
         self.best_model_name = best_model_name
@@ -98,8 +97,8 @@ class Result:
         tables: Tables,
         config: Config,
         misc: Misc,
-        optimization: Union[Optimization, None] = None,
-        hyperparameter_optimization_kwargs: Union[dict, None] = None,
+        optimization: Optimization | None = None,
+        hyperparameter_optimization_kwargs: dict | None = None,
     ):
         self.best_prediction = best_prediction
         self.predictions = predictions
