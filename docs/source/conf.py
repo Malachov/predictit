@@ -54,14 +54,14 @@ extensions = [
     # "m2r2",
 ]
 
-autodoc_default_flags = [
-    "members",
-    "undoc-members",
-    "private-members",
-    "special-members",
-    "inherited-members",
-    "show-inheritance",
-]
+# autodoc_default_flags = [
+#     "members",
+#     "undoc-members",
+#     "private-members",
+#     "special-members",
+#     "inherited-members",
+#     "show-inheritance",
+# ]
 
 napoleon_custom_sections = [
     ("Types", "returns_style"),
