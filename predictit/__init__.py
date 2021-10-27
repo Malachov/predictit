@@ -13,6 +13,10 @@
     :target: https://badge.fury.io/py/predictit
     :alt: PyPI pyversion
 
+.. image:: https://pepy.tech/badge/predictit
+    :target: https://pepy.tech/project/predictit
+    :alt: Downloads
+
 .. image:: https://img.shields.io/lgtm/grade/python/github/Malachov/predictit.svg
     :target: https://lgtm.com/projects/g/Malachov/predictit/context:python
     :alt: Language grade: Python

@@ -18,7 +18,7 @@ setup(
     author="Daniel Malachov",
     author_email="malachovd@seznam.cz",
     install_requires=used_requirements,
-    description="Library/framework for making predictions.",
+    description="Library/framework for making time series predictions with help of AutoML tools.",
     long_description_content_type="text/markdown",
     long_description=readme,
     packages=find_packages(exclude=("tests",)),
