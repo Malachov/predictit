@@ -7,7 +7,6 @@ in terminal in tests folder.
 
 from . import (
     test_compare_models,
-    test_find_optimal_input,
     test_misc,
     test_predict,
     test_predict_multiple,
@@ -16,7 +15,6 @@ from . import (
 
 __all__ = [
     "test_compare_models",
-    "test_find_optimal_input",
     "test_misc",
     "test_predict",
     "test_predict_multiple",

@@ -2,11 +2,15 @@
 
 Tagged with complexity and sorted by priority
 
+- [x] COMPLEX - Unify train test split with other libraries and have X_train, y_train, X_test, y_test. Solve problem with statsmodels. Change mode config to cross_validation_mode.
+- [ ] COMPLEX - Create class Model. Use instances of models (multiple concrete settings) Add save and load model method. Generate data for every model separately based on model config.
+- [ ] MEDIUM - Unify data input and use it as parameter in all the models
 - [ ] EASY - Define type for data input in mydatapreprocessing, import and use
 - [ ] EASY - In predict multiple change plot name to predicted column
+- [ ] EASY - Remove config.keepinternal_results and add these data to return
 - [ ] EASY - Test on some larger files (Use warning if big data and hard settings)
-- [ ] COMPLEX - Define some set of datasets (good for prediction) and evaluate results on commit with tag. save results into csv and ate KPI - Add data to default compare models
-- [ ] COMPLEX - Create class Model. Configure models in its own settings (be able to configure various models in various way). Use instances of models (multiple concrete settings) Add save and load model method
+- [ ] COMPLEX - Define some set of datasets (good for prediction) and evaluate results on commit with tag. Save results into csv and ate KPI - Add data to default compare models
+- [ ] COMPLEX - Feature importance - Analysis of used features, config parameters and hyperparameters - learning curves, SHAP. Use maybe ELI5, TPOT or SHAP
 - [ ] EASY - Ability to load and save config to json to folder (mostly for GUI)
 - [ ] COMPLEX - Add exogenous parameters where possible
 - [ ] COMPLEX - Dimensionality reduction - E.G. autoencoder and PCA to shrink input multivariate data to small vectors. Choose what to compress (not predicted column).
@@ -45,5 +49,5 @@ Tagged with complexity and sorted by priority
 - [ ] EASY - Remove unnecessary copies (only data_for_predictions_df and using .values) and check if input data stays the same after all models computations - the same in preprocessing - use new inplace param
 - [ ] EASY - Dask for big data (dask.np.aray and dask dataframe) - chunk datasource (optionally in settings)
 - [ ] EASY - Test Numba optimization (probably just own models - LNU autoreg model and conjugate grad)
-- [ ] EASY - Check if can some lists replace with sets (faster)
-- [ ] Rewrite logging settings into config method
+- [ ] EASY - Check if some lists should be replaced with sets
+- [ ] MEDIUM - Move analysis to new repo (including compare_predicted_to_test).

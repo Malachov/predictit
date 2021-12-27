@@ -96,7 +96,7 @@ config.update({
 predictions = predictit.predict()
 ```
 
-If you need create more configurations and don't want to override its values, you can create multiple instances, but you need to insert this new config as function parameter
+If you need create more configurations and don't want to override default values, you can create multiple instances, but you need to insert this new config as function parameter
 
 ```python
 other_config = config.copy()  # or predictit.configuration.Config()
@@ -156,6 +156,7 @@ config.used_models = ['Conjugate gradient', 'Decision tree regression']  # Use j
 multiple_columns_prediction = predictit.predict_multiple_columns()
 ```
 
+# TODO edit
 ### Example of config variable optimization
 
 ```python
@@ -164,12 +165,12 @@ config.update({
     'predicted_column': 'Temp',
     'datalength': 120,
     'optimization': True,
-    'optimization_variable': 'default_n_steps_in',
+    'optimization_variables': 'default_n_steps_in',
     'optimization_values': [4, 6, 8],
-    'plot_all_optimized_models': False,
+    'plot_all': False,
     'print_table': 'detailed',  # Print detailed table
     'print_result_details': True,
-    'used_models': ['AR', 'Sklearn regression']
+    'used_models': ['Sklearn regression']
 })
 
 predictions_optimized_config = predictit.predict()
@@ -266,7 +267,6 @@ config.update(
         "other_columns": False,  # Whether use other columns or not
         # Chose models that will be computed - remove if you want to use all the models
         "used_models": [
-            "AR",
             "ARIMA",
             "LNU",
             "Conjugate gradient",
@@ -276,12 +276,6 @@ config.update(
         ],
         # Define parameters of models
         "models_parameters": {
-            "AR": {
-                "used_model": "ar",
-                "method": "cmle",
-                "trend": "nc",
-                "solver": "lbfgs",
-            },
             "ARIMA": {
                 "used_model": "arima",
                 "p": 6,

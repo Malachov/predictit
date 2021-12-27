@@ -36,8 +36,11 @@ Examples:
     ...     predictions_one_model, test, error_criterion="mape"
     ... )  # , plot=1
 """
+from __future__ import annotations
 
-from . import models_functions
+from typing_extensions import Literal
+
+from . import model
 
 # Custom models
 from . import autoreg_LNU
@@ -58,7 +61,7 @@ from . import average
 from . import tensorflow
 
 __all__ = [
-    "models_functions",
+    "model",
     "autoreg_LNU",
     "conjugate_gradient",
     "regression",
@@ -69,12 +72,51 @@ __all__ = [
     "tensorflow",
 ]
 
+models_keys = Literal[
+    "ARIMA",
+    "ARMA",
+    "autoreg",
+    "Average long",
+    "Average short",
+    "Bagging regression",
+    "Bayes ridge regression one column one step",
+    "Bayes ridge regression",
+    "Conjugate gradient",
+    "Decision tree regression one column one step",
+    "Decision tree regression",
+    "Extra trees regression",
+    "Extreme learning machine",
+    "Gen Extreme learning machine",
+    "Gradient boosting",
+    "Hubber regression one column one step",
+    "Hubber regression",
+    "KNeighbors regression",
+    "Levenberg-Marquardt",
+    "LNU normalized",
+    "LNU with weights predicts",
+    "LNU",
+    "Passive aggressive regression",
+    "Random forest regression",
+    "Regression",
+    "Ridge regression",
+    "SARIMAX",
+    "Sklearn regression one column one step",
+    "Sklearn regression",
+    "Stochastic gradient regression",
+    "Tensorflow LSTM",
+    "Tensorflow MLP",
+]
 
 models_assignment = {
+    "Average long": average,
+    "Average short": average,
+    "Conjugate gradient": conjugate_gradient,
+    "Levenberg-Marquardt": levenberg_marquardt,
+    "Tensorflow LSTM": tensorflow,
+    "Tensorflow MLP": tensorflow,
     **{
         model_name: statsmodels_autoregressive
         for model_name in [
-            "AR",
             "ARMA",
             "ARIMA",
             "autoreg",
@@ -90,10 +132,6 @@ models_assignment = {
         ]
     },
     **{model_name: regression for model_name in ["Regression", "Ridge regression"]},
-    "Levenberg-Marquardt": levenberg_marquardt,
-    "Conjugate gradient": conjugate_gradient,
-    "Tensorflow LSTM": tensorflow,
-    "Tensorflow MLP": tensorflow,
     **{
         model_name: sklearn_regression
         for model_name in [
@@ -116,6 +154,4 @@ models_assignment = {
             "Hubber regression one column one step",
         ]
     },
-    "Average short": average,
-    "Average long": average,
 }

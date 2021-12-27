@@ -5,10 +5,10 @@ import matplotlib
 import mylogging
 import mypythontools
 
-mypythontools.tests.setup_tests(matplotlib_test_backend=True)
+mypythontools.tests.setup_tests()
 
 import predictit
-from predictit.configuration import config
+from predictit import config
 
 
 config_for_tests = {
@@ -21,10 +21,10 @@ config_for_tests = {
     "datalength": 120,
     "default_n_steps_in": 3,
     "analyzeit": 0,
-    "optimization": False,
+    "optimization": {},
     "optimizeit": False,
     "used_models": [
-        "AR",
+        "autoreg",
         "Conjugate gradient",
         "Sklearn regression",
     ],

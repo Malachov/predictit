@@ -6,9 +6,8 @@ import numpy as np
 
 import mylogging
 
-from .models_functions.models_functions import get_inputs
+from .model import get_inputs
 from .. import misc
-from ..best_params import optimize
 
 
 def lnu_core(
@@ -108,6 +107,8 @@ def train(
     Returns:
         np.ndarray: Weights of neuron that can be used for making predictions.
     """
+    # Just to avoid circular import
+    from ..optimization import hyperparameter_optimization
 
     X, y_hat = get_inputs(data)
 
@@ -130,19 +131,22 @@ def train(
         }
 
         # First find order
-        best_kwargs = optimize(
-            kwargs_limits={"learning_rate": [10e-8, 10e-6, 10e-4, 10e-3, 10e-2, 1]}, **infer_lightened_params
-        )
+        best_kwargs = hyperparameter_optimization(
+            kwargs_limits={"learning_rate": [10e-8, 10e-6, 10e-4, 10e-3, 10e-2, 1]},
+            **infer_lightened_params,
+            plot=False
+        ).best_params
 
         best_kwargs = cast(dict, best_kwargs)
 
         # First around favorite
-        best_kwargs = optimize(
+        best_kwargs = hyperparameter_optimization(
             kwargs_limits={
                 "learning_rate": [best_kwargs["learning_rate"] / 10, best_kwargs["learning_rate"] * 10]
             },
-            **infer_lightened_params
-        )
+            **infer_lightened_params,
+            plot=False
+        ).best_params
 
         best_kwargs = cast(dict, best_kwargs)
 

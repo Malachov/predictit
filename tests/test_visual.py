@@ -2,19 +2,20 @@
 """ Visual test on various components. Mostly for data preparation and input creating functions.
 Just run and manually check results.
 """
-import pandas as pd
 import numpy as np
+import pandas as pd
+
 
 from mydatapreprocessing import create_model_inputs, preprocessing, misc
 import mypythontools
 
-mypythontools.paths.PROJECT_PATHS.add_ROOT_PATH_to_sys_path()
+mypythontools.tests.setup_tests()
+
+from conftest import config_for_tests
 
 import predictit
 from predictit import config
 
-
-from conftest import config_for_tests
 
 config.update(config_for_tests)
 
@@ -133,8 +134,10 @@ def test_visual(print_analyze=1, print_preprocessing=1, print_data_flow=1, print
         With outliers: \n {data_multi_col} \n\nWith no outliers: \n{preprocessing.remove_the_outliers(data_multi_col, threshold = 1)} \n
 
         ### Standardize ### \n
+        As predicted just one column, other type of scaler is returned. It use inverse transform only on one predicted column.
+
         Original: \n {data_multi_col} \n\nStandardized: \n{normalized_multi} \n
-        Inverse standardization: \n {scaler_multi.inverse_transform(normalized_multi[:, 0])} \n
+        Inverse standardization: \n {scaler_multi.inverse_transform(normalized_multi)[:, 0]} \n
 
         ### Split ### \n
         Original: \n {data_multi_col} \n\nsplited train: \n{misc.split(data_multi_col, predicts=2)[0]} \n \n\nsplited test: \n{misc.split(data_multi_col, predicts=2)[1]} \n
@@ -153,34 +156,34 @@ def test_visual(print_analyze=1, print_preprocessing=1, print_data_flow=1, print
         config.update(
             {
                 "data": np.array(range(20)),
-                "return_internal_results": True,
+                "keepinternal_results": True,
                 "predicts": 3,
                 "default_n_steps_in": 5,
                 "standardizeit": None,
                 "remove_outliers": False,
                 "repeatit": 3,
-                "optimization": False,
+                "optimization": None,
                 "mode": "in_sample",
                 "models_input": {
                     "Bayes ridge regression": "multi_step",
-                    "AR": "data_one_column",
+                    "autoreg": "data_one_column",
                     "Levenberg-Marquardt": "one_step_constant",
                 },
             }
         )
 
-        results = {
-            # "sklearn in predict mode": predictit.main.predict(
-            #     used_models={"Bayes ridge regression"}, mode="predict"
-            # ),
-            # "sklearn in validate mode": predictit.main.predict(
-            #     used_models={"Bayes ridge regression"}, mode="validate"
-            # ),
-            # "ar in predict mode": predictit.main.predict(used_models={"AR"}, mode="predict"),
-            # "ar in validate mode": predictit.main.predict(used_models={"AR"}, mode="validate"),
-            # "Levenberg-Marquardt in predict mode": predictit.main.predict(
-            #     used_models={"Levenberg-Marquardt"}, mode="predict"
-            # ),
+        results: dict[str, predictit.result_classes.Result] = {
+            "sklearn in predict mode": predictit.main.predict(
+                used_models={"Bayes ridge regression"}, mode="in_sample"
+            ),
+            "sklearn in validate mode": predictit.main.predict(
+                used_models={"Bayes ridge regression"}, mode="validate"
+            ),
+            "ar in predict mode": predictit.main.predict(used_models={"autoreg"}, mode="in_sample"),
+            "ar in validate mode": predictit.main.predict(used_models={"autoreg"}, mode="validate"),
+            "Levenberg-Marquardt in predict mode": predictit.main.predict(
+                used_models={"Levenberg-Marquardt"}, mode="in_sample"
+            ),
             "Levenberg-Marquardt in validate mode": predictit.main.predict(
                 used_models={"Levenberg-Marquardt"}, mode="validate"
             ),
@@ -203,7 +206,7 @@ def test_visual(print_analyze=1, print_preprocessing=1, print_data_flow=1, print
 
         for i, j in results.items():
             print(f"\n### Used data packets for model {i} ###\n")
-            for k, l in j.items():
+            for k, l in j.internal_result.items():
                 print(f"{k}: \n{l}\n")
 
     if print_postprocessing:
@@ -213,9 +216,9 @@ def test_visual(print_analyze=1, print_preprocessing=1, print_data_flow=1, print
                 ###########################
                 ### Data_postprocessing ###
                 ###########################\n
-        ### Fitt power transform ### \n
+        ### Fit power transform ### \n
         Original: \n {data}, original std = {data.std()}, original mean = {data.mean()} \n\ntransformed: \n{preprocessing.fitted_power_transform(data, 10, 10)} \n\ntransformed std = {preprocessing.fitted_power_transform(data, 10, 10).std()},
-        transformed mean = {preprocessing.fitted_power_transform(data, 10, 10).mean()} (shoud be 10 and 10)\n
+        transformed mean = {preprocessing.fitted_power_transform(data, 10, 10).mean()} (should be 10 and 10)\n
 
         """
         )

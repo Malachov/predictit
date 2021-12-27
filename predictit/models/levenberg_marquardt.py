@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import numpy as np
 
-from .models_functions.models_functions import one_step_looper, get_inputs
+from .model import one_step_looper, get_inputs
 
 
 def train(data: tuple[np.ndarray, np.ndarray], epochs: int = 50, learning_rate: float = 1.0):

@@ -11,7 +11,7 @@ import numpy as np
 
 import mylogging
 
-from .models_functions.models_functions import get_inputs
+from .model import get_inputs
 
 
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"

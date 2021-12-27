@@ -1,18 +1,13 @@
 #%%
-# import numpy as np
-# import pandas as pd
 
-# from pathlib import Path
-# import sys
-# import inspect
-# import os
+# This file is for profiling some arbitrary code. If profile some functions from package,
+# use profiled.ipynb
 
-# oo = np.array([[1, 2, 3, 4, 5, 6], [1, 2, 3, 4, 5, 6]]).T
-# oo = np.random.randn(10000, 10000)
-# arr = np.array(oo)
-# df = pd.DataFrame(oo)
+import numpy as np
+import pandas as pd
 
-# from memory_profiler import profile
+from memory_profiler import profile
+
 if __name__ == "__main__":
 
     import line_profiler
@@ -24,4 +19,7 @@ if __name__ == "__main__":
     # (precision=8)  # Just memory profiler
     @profile
     def profiled_function():
+
         pass
+
+    profiled_function()

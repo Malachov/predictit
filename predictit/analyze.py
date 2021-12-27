@@ -3,6 +3,7 @@ it's details, autocorrelation function etc.
 """
 
 from __future__ import annotations
+from typing import NamedTuple, Any
 from typing_extensions import Literal
 
 import numpy as np
@@ -10,7 +11,8 @@ import pandas as pd
 
 import mylogging
 
-from predictit import misc
+from . import misc
+from .models import models_keys
 
 # Lazy imports
 
@@ -222,46 +224,104 @@ def decompose(data: np.ndarray, period: int = 365, model: Literal["additive", "m
         mylogging.traceback("Number of samples is probably too low to compute.")
 
 
+class _analyze_results_result(NamedTuple):
+    """Models with best optimized average results, best optimized form models,
+    best model name and best optimized for all models together.
+
+    Attributes:
+        best_results_errors(np.ndarray): Results if using just best optimized values.
+        best_models_optimized_values_dict (dict): List of best optimized value for each model.
+        optimized_values_results_df (pd.DataFrame): Average results based on optimization variable.
+        best_model_name (str): Best model when used best optimized value.
+        best_optimized_value: (Any): Optimazed value of used config parameter that has lowest
+            total error in all models together."""
+
+    best_results_errors: np.ndarray
+    best_models_optimized_values_dict: dict[models_keys, Any]
+    optimized_values_results_df: pd.DataFrame
+    best_model_name: str
+    best_optimized_value: Any
+
+
 def analyze_results(
-    results: np.ndarray, config_values_columns: list, models_columns: list, error_criterion: str = ""
-) -> tuple:
+    results: np.ndarray,
+    config_values_columns: list[str],
+    models_columns: list[str] | tuple[str, ...] | set[str],
+    error_criterion: str = "",
+) -> _analyze_results_result:
     """Multiple predictions for various optimized config variable values are made, then errors (difference from true
-    values) are evaluated. This is input. Outputs are averaged errors through datasets, what model is the best,
+    values) are evaluated. Outputs are averaged errors through datasets, what model is the best,
     what are the best optimized values for particular model, or what is best optimized value for all models.
 
     Args:
         results (np.ndarray): Results in shape (dataset, optimized, models). First index is just averaged.
             optimized and models are analyzed.
-        config_values_columns (list): Names of second dim in results. Usually some config values is optimized,
-            so that means values of optimized variable that is predicted in for loop.
+        config_values_columns (list[str]): List of model names and its best configured values (dim 2).
         models_columns (list): Names of used models.
         error_criterion(string, optional): If config values evaluated.
             Used as column name. Defaults to ""
 
     Returns:
-        np.ndarray, list, str, str: Models with best optimized average results, best optimized form models,
-        best model name and best optimized for all models together.
+        analyze_results_result: Result of analysis.
+
+    Example:
+        >>> arr = np.array(range(27)).reshape(3, 3, 3)
+        ...
+        >>> arr
+        array([[[ 0,  1,  2],
+                [ 3,  4,  5],
+                [ 6,  7,  8]],
+        <BLANKLINE>
+               [[ 9, 10, 11],
+                [12, 13, 14],
+                [15, 16, 17]],
+        <BLANKLINE>
+               [[18, 19, 20],
+                [21, 22, 23],
+                [24, 25, 26]]])
+        >>> analysis = analyze_results(
+        ...     arr,
+        ...     config_values_columns=["Config 1", "Config 2", "Config 3"],
+        ...     models_columns=["Model 1", "Model 2", "Model 3"],
+        ... )
+
+        One dimension is reduced just by averaging, because average performance across datasets is evaluated.
+        Than for optimized value, just the best value is used.
+
+        >>> analysis.best_results_errors
+        array([ 9., 10., 11.])
+        >>> analysis.best_models_optimized_values_dict
+        {'Model 1': 'Config 1', 'Model 2': 'Config 1', 'Model 3': 'Config 1'}
+        >>> analysis.optimized_values_results_df
+                   error
+        Config 1   10.0
+        Config 2   13.0
+        Config 3   16.0
+        >>> analysis.best_model_name
+        'Model 1'
+        >>> analysis.best_optimized_value
+        'Config 1'
     """
-    results[np.isnan(results)] = np.inf
-    results_average = np.nanmean(results, axis=0)
-
     # Analyze models - choose just the best optimized value
-    best_optimized_indexes_errors = np.nanargmin(results_average, axis=0)  # Indexes of best optimized
+    best_results_errors = np.nanmin(results, axis=0)  # Results if only best optimized are used
+    best_optimized_indexes_errors = np.nanargmin(results, axis=0)  # Indexes of best optimized
 
-    best_optimized_values = [
-        config_values_columns[index] for index in best_optimized_indexes_errors
-    ]  # Best optimized for models
+    best_models_optimized_values_dict = {
+        model: config_values_columns[best_index]
+        for model, best_index in zip(models_columns, best_optimized_indexes_errors)
+    }
 
-    best_results_errors = np.nanmin(results_average, axis=0)  # Results if only best optimized are used
+    # Find best models if using just best optimized values
+
     best_model_index = int(np.nanargmin(best_results_errors))
     best_model_name = list(models_columns)[best_model_index]
 
     # Analyze optimized variables - keep all results for defined optimized values
-    if results_average.shape[0] == 1:
+    if results.shape[0] == 1:
         best_optimized_value = "Not optimized"
-        optimized_values_results_df = None
+        optimized_values_results_df = pd.DataFrame()
     else:
-        all_models_errors_average = np.nanmean(results_average, axis=1)
+        all_models_errors_average = np.nanmean(results, axis=1)
         best_optimized_index = np.nanargmin(all_models_errors_average)
         best_optimized_value = config_values_columns[best_optimized_index]
 
@@ -271,10 +331,9 @@ def analyze_results(
             index=config_values_columns,
         )
 
-    # TODO used named tuple
-    return (
+    return _analyze_results_result(
         best_results_errors,
-        best_optimized_values,
+        best_models_optimized_values_dict,
         optimized_values_results_df,
         best_model_name,
         best_optimized_value,

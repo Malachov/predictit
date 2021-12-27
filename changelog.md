@@ -1,5 +1,8 @@
 # List of what have been done in new versions
 
+## 3.0x - 01/2022
+- [x] Config optimization and hyperparameter optimization outside main loop.
+
 ## 2.0x - 09/2021
 
 - [x] Interactive jupyter demo with binder 
@@ -8,7 +11,7 @@
 - [x] Early stopping in Conjugate gradient and LNU
 - [x] Analysis of optimized values in compare models 
 - [x] Printed tables better print as long names are broken automatically.
-- [x] find_optimal_input_for_models that can compare various input forms for models.
+- [x] input_optimization that can compare various input forms for models.
 - [x] Annoying warnings filtered on import filtered
 - [x] Type hints
 
@@ -89,7 +92,7 @@
 - [x] Config values putted in dictionary [! other way to use it!]
 - [x] Basic data postprocessing - Power transformation - Two options 1) On train data (change error criterion) 2) Only on output
 
-## v1.0 - 2020 (first no in development version)
+## v1.0 - 2020
 
 - [x] Tensorflow models architecture configurable with arguments - layers and its parameters in list.
 - [x] Choose which models to optimize (comment out config models_parameters_limits dictionary)

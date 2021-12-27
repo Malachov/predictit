@@ -149,7 +149,7 @@ Examples:
 
     >>> config.datetime_column = None  # Resetting value from example before (because used shared default config)
 
-    If you need create more configurations and don't want to override its values, you can create multiple instances,
+    If you need create more configurations and don't want to override default values, you can create multiple instances,
     but you need to insert this new config as function parameter
 
     >>> other_config = config.copy()  # or predictit.configuration.Config()
@@ -221,12 +221,12 @@ Examples:
     ...     'predicted_column': 'Temp',
     ...     'datalength': 120,
     ...     'optimization': True,
-    ...     'optimization_variable': 'default_n_steps_in',
+    ...     'optimization_variables': 'default_n_steps_in',
     ...     'optimization_values': [4, 6, 8],
-    ...     'plot_all_optimized_models': False,
+    ...     'plot_all': False,
     ...     'print_table': 'detailed',  # Print detailed table
     ...     'print_result_details': True,
-    ...     'used_models': ['AR', 'Sklearn regression']
+    ...     'used_models': ['autoreg', 'Sklearn regression']
     ... })
     ...
     >>> predictions_optimized_config = predictit.predict()
@@ -341,7 +341,6 @@ Example of using library as a pro with deeper editing config
 ...         "other_columns": False,  # Whether use other columns or not
 ...         # Chose models that will be computed - remove if you want to use all the models
 ...         "used_models": [
-...             "AR",
 ...             "ARIMA",
 ...             "LNU",
 ...             "Conjugate gradient",
@@ -351,12 +350,6 @@ Example of using library as a pro with deeper editing config
 ...         ],
 ...         # Define parameters of models
 ...         "models_parameters": {
-...             "AR": {
-...                 "used_model": "ar",
-...                 "method": "cmle",
-...                 "trend": "nc",
-...                 "solver": "lbfgs",
-...             },
 ...             "ARIMA": {
 ...                 "used_model": "arima",
 ...                 "p": 6,
@@ -419,9 +412,8 @@ __license__ = "MIT"
 __email__ = "malachovd@seznam.cz"
 
 __all__ = [
-    "_result_classes",
     "analyze",
-    "best_params",
+    "optimization",
     "config",
     "_configuration",
     "evaluate_predictions",
@@ -433,14 +425,13 @@ __all__ = [
     "models",
     "predict",
     "predict_multiple_columns",
-    "compare_models",
-    "find_optimal_input_for_models",
+    # "compare_models",
+    "result_classes",
 ]
 
 from . import (
-    _result_classes,
+    optimization,
     analyze,
-    best_params,
     configuration as _configuration,
     evaluate_predictions,
     gui_start,
@@ -449,14 +440,14 @@ from . import (
     _main_loop,
     misc,
     models,
+    result_classes,
 )
 
 # Just shortcuts to avoid importing from main
 from .main import (
     predict,
     predict_multiple_columns,
-    compare_models,
-    find_optimal_input_for_models,
+    # compare_models,
 )
 
 from .configuration import config

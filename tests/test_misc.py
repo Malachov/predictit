@@ -3,7 +3,7 @@ import numpy as np
 import mydatapreprocessing as mdp
 import mypythontools
 
-mypythontools.paths.PROJECT_PATHS.add_ROOT_PATH_to_sys_path()
+mypythontools.tests.setup_tests()
 
 import predictit
 

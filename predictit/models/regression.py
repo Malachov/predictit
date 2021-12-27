@@ -6,7 +6,7 @@ from typing_extensions import Literal
 
 import numpy as np
 
-from .models_functions.models_functions import one_step_looper, get_inputs
+from .model import one_step_looper, get_inputs
 
 
 def train(

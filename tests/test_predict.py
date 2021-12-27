@@ -6,7 +6,7 @@ import pandas as pd
 import mydatapreprocessing
 import mypythontools
 
-mypythontools.paths.PROJECT_PATHS.add_ROOT_PATH_to_sys_path()
+mypythontools.tests.setup_tests()
 
 from conftest import validate_result
 import predictit
@@ -81,6 +81,7 @@ def test_config_variations_1():
             "trace_processes_memory": False,
             "print_number_of_models": 10,
             "add_fft_columns": 16,
+            "sort_results_by": "model",
             "data_extension": {
                 "differences": True,
                 "second_differences": True,
@@ -91,7 +92,6 @@ def test_config_variations_1():
             },
             "analyzeit": 3,
             "correlation_threshold": 0.2,
-            "optimizeit": False,
             "standardizeit": "01",
             "multiprocessing": "process",
             "smoothit": (19, 2),
@@ -126,14 +126,11 @@ def test_config_variations_2():
             "print_time_table": True,
             "correlation_threshold": 0.2,
             "data_extension": None,
-            "optimizeit": True,
-            "optimizeit_limit": 0.1,
-            "optimizeit_details": 2,
-            "optimizeit_plot": True,
             "standardizeit": None,
             "multiprocessing": "pool",
             "confidence_interval": None,
             "trace_processes_memory": True,
+            "sort_results_by": "error",
             "used_models": ["Bayes ridge regression"],
             "models_parameters": {
                 "Bayes ridge regression": {
@@ -155,7 +152,6 @@ def test_config_variations_2():
             },
         }
     )
-    config.hyperparameter_optimization.optimizeit_limit = 10
     assert validate_result(predictit.predict().predictions)
 
 
@@ -181,10 +177,6 @@ def test_config_variations_3():
             "remove_outliers": None,
             "remove_nans_threshold": 0.8,
             "remove_nans_or_replace": "mean",
-            "optimization": True,
-            "optimization_variable": "default_n_steps_in",
-            "optimization_values": [3, 6, 9],
-            "plot_all_optimized_models": True,
             "correlation_threshold": 0.4,
             "standardizeit": "standardize",
             "predicts": 7,
@@ -279,8 +271,4 @@ if __name__ == "__main__":
     # test_other_models_functions()
     # test_presets()
 
-    pass
-
-if __name__ == "__main__":
-    test_most_models()
     pass

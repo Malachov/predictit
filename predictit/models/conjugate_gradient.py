@@ -4,7 +4,7 @@ import numpy as np
 
 import mylogging
 
-from .models_functions.models_functions import one_step_looper, get_inputs
+from .model import one_step_looper, get_inputs
 
 
 def train(data: tuple[np.ndarray, np.ndarray], epochs: int = 100, early_stopping: bool = True):

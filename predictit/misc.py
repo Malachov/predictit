@@ -6,6 +6,7 @@ import builtins
 import numpy as np
 
 from mydatapreprocessing import preprocessing
+import mylogging
 
 # Lazy imports
 # import statsmodels.tsa.api as sm
@@ -39,7 +40,7 @@ def setup_plots() -> None:
 
 def confidence_interval(
     data: np.ndarray, predicts: int = 7, confidence: float = 0.1, p: int = 1, d: int = 0, q: int = 0
-):
+) -> tuple[np.ndarray, np.ndarray]:
     """Function to find confidence interval of prediction for graph.
 
     Args:
@@ -58,17 +59,16 @@ def confidence_interval(
     import statsmodels.tsa.api as sm
 
     if len(data) <= 10:
-        return
+        raise RuntimeError(mylogging.return_str("To few data to predict."))
 
     order = (p, d, q)
 
     try:
 
         model = sm.ARIMA(data, order=order)
-        model_fit = model.fit(disp=0)
-        predictions = model_fit.forecast(steps=predicts, alpha=confidence)
+        model_fit = model.fit()
+        bounds = model_fit.get_forecast(steps=predicts, alpha=confidence).conf_int().T
 
-        bounds = predictions[2].T
         lower_bound = bounds[0]
         upper_bound = bounds[1]
 
@@ -78,10 +78,9 @@ def confidence_interval(
         data = preprocessing.do_difference(data)
 
         model = sm.ARIMA(data, order=order)
-        model_fit = model.fit(disp=0)
-        predictions = model_fit.forecast(steps=predicts, alpha=confidence)
+        model_fit = model.fit()
+        bounds = model_fit.get_forecast(steps=predicts).conf_int(alpha=confidence)
 
-        bounds = predictions[2].T
         lower_bound = preprocessing.inverse_difference(bounds[0], last_value)
         upper_bound = preprocessing.inverse_difference(bounds[1], last_value)
 

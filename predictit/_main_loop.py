@@ -8,15 +8,14 @@ import time
 import numpy as np
 import mylogging
 
-import predictit
+from . import optimization, result_classes, evaluate_predictions
 
 # Lazy imports
 # import tracemalloc
 
 # TODO Type hints
 
-# This is core function... It should be sequentially in the middle of main script in predict function,
-# but it has to be 1st level function to be able to use in multiprocessing.
+# It has to be 1st level function to be able to use in multiprocessing.
 def train_and_predict(
     config,
     # Functions to not import all modules
@@ -26,9 +25,6 @@ def train_and_predict(
     iterated_model_train,
     iterated_model_predict,
     iterated_model_name,
-    iterated_model_index,
-    optimization_index,
-    optimization_value,
     model_train_input,
     model_predict_input,
     model_test_inputs,
@@ -53,6 +49,8 @@ def train_and_predict(
     Returns:
         None | dict[str, Any]: Return dict of results or send data via multiprocessing.
     """
+
+    start_time = time.time()
 
     logs_list = []
     warnings_list = []
@@ -80,24 +78,12 @@ def train_and_predict(
 
         tracemalloc.start()
 
-    model_results = {"Name": iterated_model_name}
+    model_result = result_classes.Model()
 
-    result_name = (
-        f"{iterated_model_name} - {optimization_value}"
-        if config["optimization"]
-        else f"{iterated_model_name}"
-    )
-
-    if (
-        config["optimizeit"]
-        and optimization_index == 0
-        and iterated_model_name in config["models_parameters_limits"]
-    ):
-
-        start_optimization = time.time()
+    if config["optimizeit"]:
 
         try:
-            model_results["Best optimized parameters"] = predictit.best_params.optimize(
+            model_result.hyperparameter_optimization = optimization.hyperparameter_optimization(
                 iterated_model_train,
                 iterated_model_predict,
                 config["models_parameters"].get(iterated_model_name),
@@ -114,20 +100,14 @@ def train_and_predict(
                 plot=config["optimizeit_plot"],
             )
 
-        except TimeoutError:
-            model_results["Best optimized parameters"] = {}
+            for k, l in model_result.hyperparameter_optimization.best_params.items():
+
+                if iterated_model_name not in config["models_parameters"]:
+                    config["models_parameters"][iterated_model_name] = {}
+                config["models_parameters"][iterated_model_name][k] = l
+
+        except Exception:
             mylogging.traceback(f"Hyperparameters optimization of {iterated_model_name} didn't finished")
-
-        for k, l in model_results["Best optimized parameters"].items():
-
-            if iterated_model_name not in config["models_parameters"]:
-                config["models_parameters"][iterated_model_name] = {}
-            config["models_parameters"][iterated_model_name][k] = l
-
-        stop_optimization = time.time()
-        model_results["Hyperparameter optimization time"] = stop_optimization - start_optimization
-
-    start = time.time()
 
     try:
 
@@ -181,7 +161,7 @@ def train_and_predict(
                     tests_results[repeat_iteration], data_std, data_mean
                 )
 
-            test_errors[repeat_iteration] = predictit.evaluate_predictions.compare_predicted_to_test(
+            test_errors[repeat_iteration] = evaluate_predictions.compare_predicted_to_test(
                 tests_results[repeat_iteration],
                 models_test_outputs[repeat_iteration],
                 error_criterion=config["error_criterion"],
@@ -195,23 +175,24 @@ def train_and_predict(
                 data_transform=config["data_transform"],
             )
 
-            test_errors_unstandardized[
-                repeat_iteration
-            ] = predictit.evaluate_predictions.compare_predicted_to_test(
+            test_errors_unstandardized[repeat_iteration] = evaluate_predictions.compare_predicted_to_test(
                 tests_results[repeat_iteration],
                 models_test_outputs_unstandardized[repeat_iteration],
                 error_criterion=config["error_criterion"],
             )
 
-        model_results["Model error"] = test_errors.mean()
-        model_results["Unstandardized model error"] = test_errors.mean()
-        model_results["Results"] = one_reality_result
-        model_results["Test errors"] = test_errors
+        # If NaN in results it means infinite error
+        test_errors[np.isnan(test_errors)] = np.inf
+
+        model_result.model_error = test_errors.mean()
+        model_result.unstandardized_model_error = test_errors_unstandardized.mean()
+        model_result.prediction = one_reality_result
+        model_result.test_errors = test_errors
 
         # For example tensorflow is not pickleable, so sending model from process would fail.
         # Trained models only if not multiprocessing
         if not ["multiprocessing"]:
-            model_results["Trained model"] = trained_model
+            model_result.trained_model = trained_model
 
     except (Exception,):
         results_array = np.zeros(config["predicts"])
@@ -219,41 +200,31 @@ def train_and_predict(
         test_errors = np.zeros((config["repeatit"], config["predicts"]))
         test_errors.fill(np.nan)
 
-        model_results["Model error"] = np.inf
-        model_results["Unstandardized model error"] = np.inf
-        model_results["Results"] = results_array
-        model_results["Test errors"] = test_errors
-        error_message = (
-            f"Error in '{result_name}' model"
-            if not config["optimization"]
-            else f"Error in {iterated_model_name} model with optimized value: {optimization_value}"
-        )
+        trained_model = None
 
-        mylogging.traceback(caption=error_message)
+        model_result.prediction = results_array
+        model_result.test_errors = test_errors
 
-    finally:
-        model_results["Index"] = (optimization_index, iterated_model_index)
-        model_results["warnings_list"] = warnings_list
-        model_results["logs_list"] = logs_list
-        model_results["Model time [s]"] = time.time() - start
+        mylogging.traceback(caption=f"Error in '{iterated_model_name}' model")
 
-        if config["optimization_variable"]:
-            model_results["Optimization value"] = optimization_value
+    model_result.warnings_list = warnings_list
+    model_result.logs_list = logs_list
+    model_result.model_time = time.time() - start_time
 
-        if config["trace_processes_memory"]:
-            _, memory_peak_MB = tracemalloc.get_traced_memory()
-            model_results["Memory Peak\n[MB]"] = memory_peak_MB / 10 ** 6
-            tracemalloc.stop()
+    if config["trace_processes_memory"]:
+        _, memory_peak_MB = tracemalloc.get_traced_memory()
+        model_result.memory_peak_MB = memory_peak_MB / 10 ** 6
+        tracemalloc.stop()
 
-        if config["multiprocessing"]:
-            logs_redirect.close_redirect()
+    if config["multiprocessing"]:
+        logs_redirect.close_redirect()
 
-        if semaphor:
-            semaphor.release()
+    if semaphor:
+        semaphor.release()
 
-        if config["multiprocessing"] == "process":
-            pipe.send({f"{result_name}": model_results})
-            pipe.close()
+    if config["multiprocessing"] == "process":
+        pipe.send({iterated_model_name: model_result})
+        pipe.close()
 
-        else:
-            return {f"{result_name}": model_results}
+    else:
+        return {f"{iterated_model_name}": model_result}

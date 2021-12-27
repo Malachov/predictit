@@ -25,7 +25,7 @@ def compare_predicted_to_test(
     plot: bool = False,
     model_name: str = "Model",
     data_name: str = "Data",
-):
+) -> np.float64:
     """Compare tested model with reality.
 
     Args:
@@ -38,13 +38,21 @@ def compare_predicted_to_test(
 
     Returns:
         float: Error criterion value (mape or rmse). If configured, plot of results as well.
+
+    Example:
+        >>> predicted = np.array([1.0, 1.1, 1.2])
+        >>> test = np.array([1.0, 1.2, 1.3])
+        >>> compare_predicted_to_test(predicted, test)
+        5.34...
+        >>> compare_predicted_to_test(predicted, test, error_criterion="max_error")
+        0.1...
+
     """
 
     predicts = len(predicted)
 
     if predicts != len(test):
-        print("Test and predicted length not equal")
-        return np.nan
+        raise ValueError("Test and predicted length not equal.")
 
     if predicted is not None:
         if plot:

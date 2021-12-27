@@ -1,6 +1,6 @@
-mydatapreprocessing>=2.0.10
-mylogging>=3.0.12
-mypythontools>=0.0.78
+mydatapreprocessing==2.0.11
+mylogging==3.0.14
+mypythontools==0.0.84
 numpy
 pandas
 eel

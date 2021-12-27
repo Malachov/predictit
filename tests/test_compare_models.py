@@ -2,7 +2,7 @@ import numpy as np
 
 import mypythontools
 
-mypythontools.paths.PROJECT_PATHS.add_ROOT_PATH_to_sys_path()
+mypythontools.tests.setup_tests()
 
 import predictit
 from predictit import config
@@ -29,7 +29,7 @@ def test_compare_models_with_optimization():
         {
             "data_all": None,
             "optimization": True,
-            "optimization_variable": "data_transform",
+            "optimization_variables": "data_transform",
             "optimization_values": [None, "difference"],
         }
     )

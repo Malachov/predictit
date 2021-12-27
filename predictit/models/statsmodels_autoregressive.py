@@ -1,16 +1,17 @@
-"""Some statsmodels models. Statsmodels has different data imput form. Uses no sequentions, but original series."""
+"""Some statsmodels models. Statsmodels has different data input form. Uses no sequentions, but original series."""
 
 from __future__ import annotations
 from typing import Any
 
-from typing_extensions import Literal
 import numpy as np
 
 # Lazy imports
-# import statsmodels.tsa.api as sm
 # from statsmodels.tsa.statespace.sarimax import SARIMAX
 # from statsmodels.tsa.arima.model import ARIMA
 # from statsmodels.tsa import ar_model
+
+# TODO change parameters for autoreg - seasonal is bool
+# TODO use other columns in endog parameter
 
 
 def train(
@@ -52,28 +53,25 @@ def train(
         statsmodels.model: Trained model.
     """
 
-    import statsmodels.tsa.api as sm
-    from statsmodels.tsa.statespace.sarimax import SARIMAX
-    from statsmodels.tsa.arima.model import ARIMA
-    from statsmodels.tsa import ar_model
-
     used_model = used_model.lower()
 
-    if used_model == "ar":
-        model = sm.AR(data)
-        fitted_model = model.fit(method=method, trend=trend, solver=solver, disp=0)
+    if used_model == "arima":
+        from statsmodels.tsa.arima.model import ARIMA
 
-    elif used_model == "arima":
         order = (p, d, q)
         model = ARIMA(data, order=order)
         fitted_model = model.fit()
 
     elif used_model == "sarimax":
+        from statsmodels.tsa.statespace.sarimax import SARIMAX
+
         order = (p, d, q)
         model = SARIMAX(data, order=order, seasonal_order=seasonal)
         fitted_model = model.fit(method=method, trend=trend, solver=solver, disp=0)
 
     elif used_model == "autoreg":
+        from statsmodels.tsa import ar_model
+
         auto = ar_model.ar_select_order(data, maxlag=maxlag)
         model = ar_model.AutoReg(
             data,
@@ -89,8 +87,7 @@ def train(
             f"Used model has to be one of ['ar', 'arima', 'sarimax', 'autoreg']. You configured: {used_model}"
         )
 
-    setattr(fitted_model, "my_name", used_model)
-    setattr(fitted_model, "data_length", len(data))
+    # setattr(fitted_model, "my_name", used_model)
 
     return fitted_model
 
@@ -107,14 +104,9 @@ def predict(data: np.ndarray, model: Any, predicts: int = 7) -> np.ndarray:
     Returns:
         np.ndarray: Array of predicted results
     """
+    # if model.my_name in ["arima", sarimax]:
+    #     model = model.apply(new_data)
 
-    start = len(data) if len(data) > model.data_length else model.data_length
-
-    # Input data must have same starting point as data in train so the starting point be correct
-    if model.my_name == "arima":
-        predictions = model.predict(start=start, end=start - 1 + predicts, typ="levels")
-
-    else:
-        predictions = model.predict(start=start, end=start - 1 + predicts)
+    predictions = model.forecast(predicts)
 
     return predictions

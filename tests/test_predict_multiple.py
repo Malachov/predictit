@@ -2,7 +2,7 @@ import pandas as pd
 
 import mypythontools
 
-mypythontools.paths.PROJECT_PATHS.add_ROOT_PATH_to_sys_path()
+mypythontools.tests.setup_tests()
 
 from conftest import validate_result
 import predictit

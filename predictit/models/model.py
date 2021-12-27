@@ -1,12 +1,71 @@
 """Module for functions shared across models."""
 
 from __future__ import annotations
-from typing import Callable
+from typing import Callable, Any
+from abc import ABC, abstractmethod
 
+from typing_extensions import Literal
 import numpy as np
 
 import mylogging
+import mydatapreprocessing as mdp
 from mydatapreprocessing.create_model_inputs import Sequences
+
+
+# class Model(ABC):
+#     def __init__(
+#         self, data, sequences_type, predicts, cross_validation: Literal["validate", "predict"] = "validate"
+#     ) -> None:
+#         self.cross_validation = cross_validation
+#         self.predicts = predicts
+#         self.data: np.ndarray = data
+
+#         ###############
+#         ### inputs outputs
+#         ###############
+
+#         if cross_validation == "validate":
+#             test_unstandardized = mdp.misc.split(data, predicts=predicts)[1].values
+#             models_test_outputs_unstandardized = [test_unstandardized]
+
+#         else:
+#             models_test_outputs_unstandardized = mdp.create_model_inputs.create_tests_outputs(
+#                 data_for_predictions_df.values[:, 0],
+#                 predicts=config.output.predicts,
+#                 repeatit=config.prediction.repeatit,
+#             )
+
+#     if config.prediction.cross_validation == "validate":
+#         data_for_predictions, test = mdp.misc.split(data_for_predictions, predicts=config.predicts)
+#         models_test_outputs = [test]
+
+#     else:
+#         models_test_outputs = mdp.create_model_inputs.create_tests_outputs(
+#             data_for_predictions[:, 0],
+#             predicts=config.output.predicts,
+#             repeatit=config.prediction.repeatit,
+#         )
+#         ###############
+#         ### ANCHOR ### Feature selection
+#         #############
+
+#         # data_for_predictions_df TODO
+
+#     @abstractmethod
+#     def fit():
+#         pass
+
+#     @abstractmethod
+#     def predict():
+#         pass
+
+#     @abstractmethod
+#     def save():
+#         pass
+
+#     @abstractmethod
+#     def load():
+#         pass
 
 
 def get_inputs(input: tuple[np.ndarray, np.ndarray] | Sequences) -> tuple[np.ndarray, np.ndarray]:

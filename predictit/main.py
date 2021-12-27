@@ -21,16 +21,24 @@ There are working examples in main readme and also in test_it module. Particular
 visual.py in tests. """
 
 from __future__ import annotations
-from typing import cast
+from typing import cast, Any
 import sys
 from pathlib import Path
 import os
 import warnings
-import time
 import argparse
 import multiprocessing
 import inspect
 import io
+
+
+# TODO delete me
+import sys
+from pathlib import Path
+
+sys.path.insert(0, (Path.cwd().parent / "mypythontools").as_posix())
+import mypythontools
+
 
 import numpy as np
 import pandas as pd
@@ -66,7 +74,7 @@ def predict(
     predicted_column: None | str | int = None,
     config: predictit.configuration.Config | dict | None = None,
     **kwargs,
-) -> predictit._result_classes.Result:
+) -> predictit.result_classes.Result:
     """Make predictions mostly on time-series data. Data input and other config options can be set up in
     configuration.py or overwritten on the fly. Setup can be also done as function input arguments or as command line
     arguments (it will overwrite config values).
@@ -91,41 +99,27 @@ def predict(
             for parameters details.
 
     Returns:
-        Depend on 'return_type' config value - return best prediction {np.ndarray}, all models results {np.ndarray},
-        detailed results{dict} or interactive plot or print tables of results
+        predictit.result_classes.Result: Return best prediction {np.ndarray}, all models results {np.ndarray},
+        detailed results{dict}, interactive plot, print tables of results and other results.
 
     """
-
-    from mypythontools.plots import plot
-
-    if config is None or isinstance(config, dict):
-        update_config = config
-        config = config_default
-        config = config.copy()
-        if update_config:
-            config.update(update_config)
-
-    elif isinstance(config, predictit.configuration.Config):
-        config = config.copy()
-
-    if config.use_config_preset and config.use_config_preset != "none":
-        updated_config = config.presets[config.use_config_preset]
-        config.update(updated_config)
+    config = predictit._helpers.parse_config(config, config_default, kwargs)
 
     # Edit configuration.py default values with arguments values if exist
     if data is not None:
-        config.data = data
+        config.data_input.data = data
 
     if predicted_column is not None:
-        config.predicted_column = predicted_column
-
-    config.update(kwargs)
+        config.data_input.predicted_column = predicted_column
 
     predictit._helpers.logger_init_from_config(config.output.logger_subconfig)
 
+    if not config.config_optimization.optimization:
+        config.config_optimization.optimization = {"Not optimized": [True]}
+
     # Do not repeat actually mean evaluate once
-    if not config.repeatit:
-        config.repeatit = 1
+    if not config.prediction.repeatit:
+        config.prediction.repeatit = 1
 
     _GUI = GLOBAL_VARS.GUI
 
@@ -148,52 +142,45 @@ def predict(
         def update_gui(content, html_id):
             pass
 
-    # Definition of the table for spent time on code parts
-    time_df = []
-
-    def update_time_table(time_last):
-        time_df.append([progress_phase, round((time.time() - time_last), 3)])
-        return time.time()
-
-    time_point = time_begin = time.time()
-
     ###############
     ### ANCHOR ### Data
     #############
 
-    progress_phase = "Data loading and preprocessing"
-    update_gui(progress_phase, "progress_phase")
+    # Definition of the table for spent time on code parts
+    time_table = mypythontools.misc.TimeTable()
+
+    update_gui("Data loading and preprocessing", "progress_phase")
 
     data = mdp.load_data.load_data(
-        config.data,
-        header=config.header,
-        csv_style=config.csv_style,
-        predicted_table=config.predicted_table,
-        max_imported_length=config.max_imported_length,
-        request_datatype_suffix=config.request_datatype_suffix,
-        data_orientation=config.data_orientation,
+        config.data_input.data,
+        header=config.data_input.header,
+        csv_style=config.data_input.csv_style,
+        predicted_table=config.data_input.predicted_table,
+        max_imported_length=config.data_input.max_imported_length,
+        request_datatype_suffix=config.data_input.request_datatype_suffix,
+        data_orientation=config.data_input.data_orientation,
     )
 
     ###############
     ### ANCHOR ### Data consolidation
     #############
 
-    if not config.predicted_column:
-        config.predicted_column = 0
+    if not config.data_input.predicted_column:
+        config.data_input.predicted_column = 0
 
     data_for_predictions_df = mdp.preprocessing.data_consolidation(
         data,
-        predicted_column=config.predicted_column,
-        other_columns=config.other_columns,
-        datalength=config.datalength,
-        datetime_column=config.datetime_column,
-        unique_threshold=config.unique_threshold,
-        embedding=config.embedding,
-        freq=config.freq,
-        resample_function=config.resample_function,
-        remove_nans_threshold=config.remove_nans_threshold,
-        remove_nans_or_replace=config.remove_nans_or_replace,
-        dtype=config.dtype,
+        predicted_column=config.data_input.predicted_column,
+        other_columns=config.data_input.other_columns,
+        datalength=config.data_input.datalength,
+        datetime_column=config.data_input.datetime_column,
+        unique_threshold=config.data_input.unique_threshold,
+        embedding=config.data_input.embedding,
+        resample_freq=config.data_input.freq,
+        resample_function=config.data_input.resample_function,
+        remove_nans_threshold=config.data_input.remove_nans_threshold,
+        remove_nans_or_replace=config.data_input.remove_nans_or_replace,
+        dtype=config.data_input.dtype,
     )
 
     # In data consolidation predicted column was replaced on index 0 as first column
@@ -208,292 +195,268 @@ def predict(
     results = {}
     data_inputs = []
 
-    if config.mode == "validate":
+    if config.prediction.mode == "validate":
         column_for_predictions_series = column_for_predictions_series.iloc[: -config.output.predicts, :]
-        config.repeatit = 1
+        config.prediction.repeatit = 1
 
-    for i in config.used_models:
-        data_inputs.append(config.models_input[i])
+    for i in config.models.used_models:
+        data_inputs.append(config.models.models_input[i])
     data_inputs = set(data_inputs)
 
-    if config.analyzeit == 1 or config.analyzeit == 3:
+    if config.general.analyzeit == 1 or config.general.analyzeit == 3:
         print("Analyze of unprocessed data")
         try:
             predictit.analyze.analyze_column(data_for_predictions_df.values[:, 0], window=30)
             predictit.analyze.analyze_data(data_for_predictions_df)
-            predictit.analyze.decompose(
-                data_for_predictions_df.values[:, 0],
-                **config.analyze_seasonal_decompose,
-            )
+            if config.general.analyze_seasonal_decompose:
+                predictit.analyze.decompose(
+                    data_for_predictions_df.values[:, 0],
+                    **config.general.analyze_seasonal_decompose,
+                )
         except Exception:
             mylogging.traceback("Analyze failed", level="ERROR")
 
     semaphor = None
 
-    if config.multiprocessing:
+    if config.general.multiprocessing:
 
         multiprocessing.freeze_support()
 
-        if not config.processes_limit:
-            config.processes_limit = multiprocessing.cpu_count() - 1
+        if not config.general.processes_limit:
+            config.general.processes_limit = multiprocessing.cpu_count() - 1
 
         if config.multiprocessing == "process":
             pipes = []
-            semaphor = multiprocessing.Semaphore(config.processes_limit)
+            semaphor = multiprocessing.Semaphore(config.general.processes_limit)
 
         elif config.multiprocessing == "pool":
-            pool = multiprocessing.Pool(config.processes_limit)
+            pool = multiprocessing.Pool(config.general.processes_limit)
 
             # It is not possible easy share data in multiprocessing, so results are resulted via callback function
             def return_result(result):
                 for i, j in result.items():
                     results[i] = j
 
-    ### Optimization loop
-
-    if (
-        not config.optimization
-        or not config.optimization_variable
-        or not config.optimization_values
-        or len(config.optimization_values) == 1
-    ):
-        config.variable_optimization.optimization = False
-        config.optimization_values = ["Not optimized"]
-        config.optimization_variable = None
-
-    time_point = update_time_table(time_point)
-    progress_phase = "Predict"
-    update_gui(progress_phase, "progress_phase")
-
-    models_indexed = {i: j for i, j in enumerate(config.used_models)}
+    time_table.add_entry("Data loading and preprocessing")
+    update_gui("Predict", "progress_phase")
 
     ###############
-    ### ANCHOR ### Main loop
+    ### ANCHOR ### Feature extraction
     #############
 
-    for optimization_index, optimization_value in enumerate(config.optimization_values):
+    if config.feature_engineering.add_fft_columns:
+        data_for_predictions_df = mdp.feature_engineering.add_frequency_columns(
+            data_for_predictions_df,
+            window=config.feature_engineering.add_fft_columns,
+        )
 
-        # TODO check why setattr - may be wrong after config change
-        if config.optimization_variable:
-            setattr(config, config.optimization_variable, optimization_value)
+    if config.feature_engineering.data_extension:
+        data_for_predictions_df = mdp.feature_engineering.add_derived_columns(
+            data_for_predictions_df, **config.feature_engineering.data_extension
+        )
 
         ###############
-        ### ANCHOR ### Feature extraction
+        ### ANCHOR ### Feature selection
         #############
 
-        if config.add_fft_columns:
-            data_for_predictions_df = mdp.feature_engineering.add_frequency_columns(
-                data_for_predictions_df,
-                window=config.feature_engineering.add_fft_columns,
-            )
+        # data_for_predictions_df TODO
 
-        if config.data_extension:
-            data_for_predictions_df = mdp.feature_engineering.add_derived_columns(
-                data_for_predictions_df, **config.feature_engineering.data_extension
-            )
+        ###############
+        ### ANCHOR ### Data preprocessing
+        #############
 
-            ###############
-            ### ANCHOR ### Feature selection
-            #############
+    if config.prediction.mode == "validate":
+        test_unstandardized = mdp.misc.split(data_for_predictions_df, predicts=config.output.predicts)[
+            1
+        ].values
+        models_test_outputs_unstandardized = [test_unstandardized]
 
-            # data_for_predictions_df TODO
-
-            ###############
-            ### ANCHOR ### Data preprocessing
-            #############
-
-        if config.mode == "validate":
-            test_unstandardized = mdp.misc.split(data_for_predictions_df, predicts=config.predicts)[1].values
-            models_test_outputs_unstandardized = [test_unstandardized]
-
-        else:
-            models_test_outputs_unstandardized = mdp.create_model_inputs.create_tests_outputs(
-                data_for_predictions_df.values[:, 0],
-                predicts=config.predicts,
-                repeatit=config.repeatit,
-            )
-
-        data_for_predictions, last_undiff_value, final_scaler = mdp.preprocessing.preprocess_data(
-            data_for_predictions_df.values,
-            remove_outliers=config.remove_outliers,
-            smoothit=config.smoothit,
-            correlation_threshold=config.correlation_threshold,
-            data_transform=config.data_transform,
-            standardizeit=config.standardizeit,
-            bins=config.bins,
-            binning_type=config.binning_type,
+    else:
+        test_unstandardized = None
+        models_test_outputs_unstandardized = mdp.create_model_inputs.create_tests_outputs(
+            data_for_predictions_df.values[:, 0],
+            predicts=config.output.predicts,
+            repeatit=config.prediction.repeatit,
         )
 
-        data_for_predictions = cast(np.ndarray, data_for_predictions)
+    data_for_predictions, last_undiff_value, final_scaler = mdp.preprocessing.preprocess_data(
+        data_for_predictions_df.values,
+        remove_outliers=config.data_input.remove_outliers,
+        smoothit=config.data_input.smoothit,
+        correlation_threshold=config.feature_engineering.correlation_threshold,
+        data_transform=config.data_input.data_transform,
+        standardizeit=config.data_input.standardizeit,
+        bins=config.data_input.bins,
+        binning_type=config.data_input.binning_type,
+    )
 
-        if config.mode == "validate":
-            data_for_predictions, test = mdp.misc.split(data_for_predictions, predicts=config.predicts)
-            models_test_outputs = [test]
+    data_for_predictions = cast(np.ndarray, data_for_predictions)
 
-        else:
-            models_test_outputs = mdp.create_model_inputs.create_tests_outputs(
-                data_for_predictions[:, 0],
-                predicts=config.predicts,
-                repeatit=config.repeatit,
-            )
+    if config.prediction.mode == "validate":
+        data_for_predictions, test = mdp.misc.split(data_for_predictions, predicts=config.predicts)
+        models_test_outputs = [test]
 
-        column_for_predictions_processed = data_for_predictions[:, predicted_column_index]
-
-        data_shape = np.shape(data_for_predictions)
-        data_length = len(column_for_predictions_processed)
-
-        data_std = np.std(column_for_predictions_processed[-30:])
-        data_mean = np.mean(column_for_predictions_processed[-30:])
-        data_abs_max = max(
-            abs(column_for_predictions_processed.min()),
-            abs(column_for_predictions_processed.max()),
+    else:
+        models_test_outputs = mdp.create_model_inputs.create_tests_outputs(
+            data_for_predictions[:, 0],
+            predicts=config.output.predicts,
+            repeatit=config.prediction.repeatit,
         )
 
-        multicolumn = 0 if data_shape[1] == 1 else 1
+    column_for_predictions_processed = data_for_predictions[:, predicted_column_index]
 
-        if (config.analyzeit == 2 or config.analyzeit == 3) and optimization_index == len(
-            config.optimization_values
-        ) - 1:
+    data_shape = np.shape(data_for_predictions)
+    data_length = len(column_for_predictions_processed)
 
-            print("\n\nAnalyze of preprocessed data\n")
-            try:
-                predictit.analyze.analyze_column(column_for_predictions_processed, window=30)
-                predictit.analyze.analyze_data(data_for_predictions)
+    data_std = np.std(column_for_predictions_processed[-30:])
+    data_mean = np.mean(column_for_predictions_processed[-30:])
+    data_abs_max = max(
+        abs(column_for_predictions_processed.min()),
+        abs(column_for_predictions_processed.max()),
+    )
+
+    multicolumn = 0 if data_shape[1] == 1 else 1
+
+    if config.general.analyzeit in [2, 3]:
+
+        print("\n\nAnalyze of preprocessed data\n")
+        try:
+            predictit.analyze.analyze_column(column_for_predictions_processed, window=30)
+            predictit.analyze.analyze_data(data_for_predictions)
+            if config.general.analyze_seasonal_decompose:
                 predictit.analyze.decompose(
                     column_for_predictions_processed,
-                    **config.analyze_seasonal_decompose,
+                    **config.general.analyze_seasonal_decompose,
                 )
 
-            except Exception:
-                mylogging.traceback("Analyze failed", level="ERROR")
+        except Exception:
+            mylogging.traceback("Analyze failed", level="ERROR")
 
-        min_data_length = 3 * config.predicts + config.default_n_steps_in
+    min_data_length = 3 * config.output.predicts + config.data_input.default_n_steps_in
 
-        if (
-            data_length < min_data_length
-            or data_length < config.repeatit + config.default_n_steps_in + config.predicts
-        ):
-            config.repeatit = 1
-            min_data_length = 3 * config.predicts + config.default_n_steps_in
+    if (
+        data_length < min_data_length
+        or data_length
+        < config.prediction.repeatit + config.data_input.default_n_steps_in + config.output.predicts
+    ):
+        config.repeatit = 1
+        min_data_length = 3 * config.output.predicts + config.data_input.default_n_steps_in
 
-        assert min_data_length < data_length, mylogging.return_str(
-            "Set up less predicted values in settings or add more data",
-            caption="To few data",
-        )
+    assert min_data_length < data_length, mylogging.return_str(
+        "Set up less predicted values in settings or add more data",
+        caption="To few data",
+    )
 
-        for data_inputs_name in data_inputs:
-            try:
-                (
-                    model_train_input,
-                    model_predict_input,
-                    model_test_inputs,
-                ) = mdp.create_model_inputs.create_inputs(
-                    data_for_predictions,
-                    input_type_name=data_inputs_name,
-                    input_type_params=config.data_inputs[data_inputs_name],
-                    mode=config.mode,
-                    predicts=config.predicts,
-                    repeatit=config.repeatit,
-                    predicted_column_index=predicted_column_index,
-                )
+    for data_inputs_name in data_inputs:
+        try:
+            (
+                model_train_input,
+                model_predict_input,
+                model_test_inputs,
+            ) = mdp.create_model_inputs.create_inputs(
+                data_for_predictions,
+                input_type_name=data_inputs_name,
+                input_type_params=config.models.data_inputs[data_inputs_name],
+                mode=config.prediction.mode,
+                predicts=config.output.predicts,
+                repeatit=config.prediction.repeatit,
+                predicted_column_index=predicted_column_index,
+            )
 
-            except Exception:
-                mylogging.traceback(
-                    f"Error in creating input type: {data_inputs_name} with option optimization: {optimization_value}",
-                    level="WARNING",
-                )
-                continue
+        except Exception:
+            mylogging.traceback(
+                f"Error in creating input type: {data_inputs_name} with option optimization: {config_optimization_value}",
+                level="WARNING",
+            )
+            continue
 
-            for (iterated_model_index, iterated_model_name) in models_indexed.items():
-                iterated_model = predictit.models.models_assignment[iterated_model_name]
+        for iterated_model_name in config.models.used_models:
+            iterated_model = predictit.models.models_assignment[iterated_model_name]
 
-                if config.models_input[iterated_model_name] == data_inputs_name:
+            if config.models.models_input[iterated_model_name] == data_inputs_name:
 
-                    predict_parameters = {
-                        "config": config.get_dict(),
-                        # Functions to not import all modules
-                        "preprocess_data_inverse": mdp.preprocessing.preprocess_data_inverse,
-                        "fitted_power_transform": mdp.preprocessing.fitted_power_transform,
-                        # Other
-                        "iterated_model_train": iterated_model.train,
-                        "iterated_model_predict": iterated_model.predict,
-                        "iterated_model_name": iterated_model_name,
-                        "iterated_model_index": iterated_model_index,
-                        "optimization_index": optimization_index,
-                        "optimization_value": optimization_value,
-                        "model_train_input": model_train_input,
-                        "model_predict_input": model_predict_input,
-                        "model_test_inputs": model_test_inputs,
-                        "models_test_outputs": models_test_outputs,
-                        "models_test_outputs_unstandardized": models_test_outputs_unstandardized,
-                        "data_abs_max": data_abs_max,
-                        "data_mean": data_mean,
-                        "data_std": data_std,
-                        "last_undiff_value": last_undiff_value,
-                        "final_scaler": final_scaler,
-                        "semaphor": semaphor,
+                predict_parameters = {
+                    "config": config.get_dict(),
+                    # Functions to not import all modules
+                    "preprocess_data_inverse": mdp.preprocessing.preprocess_data_inverse,
+                    "fitted_power_transform": mdp.preprocessing.fitted_power_transform,
+                    # Other
+                    "iterated_model_train": iterated_model.train,
+                    "iterated_model_predict": iterated_model.predict,
+                    "iterated_model_name": iterated_model_name,
+                    "model_train_input": model_train_input,
+                    "model_predict_input": model_predict_input,
+                    "model_test_inputs": model_test_inputs,
+                    "models_test_outputs": models_test_outputs,
+                    "models_test_outputs_unstandardized": models_test_outputs_unstandardized,
+                    "data_abs_max": data_abs_max,
+                    "data_mean": data_mean,
+                    "data_std": data_std,
+                    "last_undiff_value": last_undiff_value,
+                    "final_scaler": final_scaler,
+                    "semaphor": semaphor,
+                }
+
+                if config.models.models_input[iterated_model_name] in [
+                    "one_step",
+                    "one_step_constant",
+                ]:
+                    if multicolumn and config.output.predicts > 1:
+                        mylogging.warn(
+                            f"Warning in model {iterated_model_name} \n\nOne-step prediction on "
+                            "multivariate data (more columns). Use multi_step (y length equals to predict) "
+                            "or do use some one column data input in config models_input or predict just one value."
+                        )
+                        continue
+
+                if config.general.multiprocessing == "process":
+
+                    pipes.append(multiprocessing.Pipe(duplex=False))
+                    p = multiprocessing.Process(
+                        target=predictit._main_loop.train_and_predict,
+                        kwargs={**predict_parameters, **{"pipe": pipes[-1][1]}},
+                    )
+
+                    p.Daemon = True  # Baby process will be terminated if parent killed
+                    p.start()
+
+                elif config.general.multiprocessing == "pool":
+
+                    pool.apply_async(
+                        predictit._main_loop.train_and_predict,
+                        (),
+                        predict_parameters,
+                        callback=return_result,
+                    )
+
+                else:
+                    results = {
+                        **results,
+                        **predictit._main_loop.train_and_predict(**predict_parameters),
                     }
 
-                    if config.models_input[iterated_model_name] in [
-                        "one_step",
-                        "one_step_constant",
-                    ]:
-                        if multicolumn and config.predicts > 1:
-                            mylogging.warn(
-                                f"Warning in model {iterated_model_name} \n\nOne-step prediction on "
-                                "multivariate data (more columns). Use multi_step (y lengt equals to predict) "
-                                "or do use some one column data input in config models_input or predict just one value."
-                            )
-                            continue
-
-                    if config.multiprocessing == "process":
-
-                        pipes.append(multiprocessing.Pipe(duplex=False))
-                        p = multiprocessing.Process(
-                            target=predictit._main_loop.train_and_predict,
-                            kwargs={**predict_parameters, **{"pipe": pipes[-1][1]}},
-                        )
-
-                        p.Daemon = True  # Baby process will be terminated if parent killed
-                        p.start()
-
-                    elif config.multiprocessing == "pool":
-
-                        pool.apply_async(
-                            predictit._main_loop.train_and_predict,
-                            (),
-                            predict_parameters,
-                            callback=return_result,
-                        )
-
-                    else:
-                        results = {
-                            **results,
-                            **predictit._main_loop.train_and_predict(**predict_parameters),
-                        }
-
-    if config.multiprocessing:
-        if config.multiprocessing == "process":
+    if config.general.multiprocessing:
+        if config.general.multiprocessing == "process":
             for i in pipes:
                 try:
                     results = {**results, **i[0].recv()}
                 except Exception:
                     pass
 
-        if config.multiprocessing == "pool":
+        if config.general.multiprocessing == "pool":
             pool.close()
             pool.join()
 
         for i in results.values():
-            mylogging.my_logger.log_and_warn_from_lists(i["logs_list"], i["warnings_list"])
+            mylogging.my_logger.log_and_warn_from_lists(i.logs_list, i.warnings_list)
 
     # Create confidence intervals
     if config.confidence_interval:
         try:
             lower_bound, upper_bound = predictit.misc.confidence_interval(
                 column_for_predictions_series.values,
-                predicts=config.predicts,
-                confidence=config.confidence_interval,
+                predicts=config.output.predicts,
+                confidence=config.prediction.confidence_interval,
             )
 
             grey_area = ["Lower bound", "Upper bound"]
@@ -512,46 +475,27 @@ def predict(
     #############
 
     # Criterion is the best of average from repetitions
-    time_point = update_time_table(time_point)
-    progress_phase = "Evaluation"
-    update_gui(progress_phase, "progress_phase")
+    time_table.add_entry("Predict")
+    update_gui("Evaluation", "progress_phase")
 
-    # Two kind of results we will create. Both as dataframe
-    #   - First are all the details around prediction. Model errors, time, memory peak etc.
-    #   - Second we have predicted values
-
-    # Results such as trained model etc. that cannot be displayed in dataframe are in original results dict.
-
-    # Convert results from dictionary to dataframe - exclude objects like trained model
-
+    # results_df contain info around prediction. Model errors, time, memory peak etc.
     results_df = pd.DataFrame.from_dict(results, orient="index")
 
     if results_df.empty:
         raise RuntimeError(
             mylogging.return_str(
-                "None of models finished predictions. Set config.logger_level = 'DEBUG' for more info.",
+                "None of models finished predictions. Set config.output.logger_subconfig.logger_level = 'DEBUG' for more info.",
                 caption="All models failed for some reason",
             )
         )
 
-    evaluated_matrix = np.zeros((1, len(config.optimization_values), len(config.used_models)))
-    evaluated_matrix.fill(np.nan)
+    if config.output.sort_results_by == "model":
+        results_df.sort_index(key=lambda x: x.str.lower(), inplace=True)
 
-    for k in results.values():
-        evaluated_matrix[0, k["Index"][0], k["Index"][1]] = k["Model error"]
+    elif config.output.sort_results_by == "error":
+        results_df.sort_values("model_error", inplace=True)
 
-    (
-        _,
-        best_models_optimized_values,
-        optimized_values_results_df,
-        best_model_name,
-        best_optimized_value,
-    ) = predictit.analyze.analyze_results(
-        evaluated_matrix,
-        config.optimization_values,
-        config.models.used_models,
-        config.prediction.error_criterion,
-    )
+    best_model_name = results_df["model_error"].idxmin()
 
     # Generate date indexes for result predictions
     last_date = column_for_predictions_series.index[-1]
@@ -562,99 +506,74 @@ def predict(
     ):
         date_index = pd.date_range(
             start=last_date,
-            periods=config.predicts + 1,
+            periods=config.output.predicts + 1,
             freq=column_for_predictions_series.index.freq,
         )[1:]
         date_index = pd.to_datetime(date_index)
 
     else:
-        date_index = list(range(last_date + 1, last_date + config.predicts + 1))
+        date_index = pd.Index(list(range(last_date + 1, last_date + config.output.predicts + 1)))
 
-    predictions_df = pd.DataFrame(index=date_index)
+    predictions_df = pd.DataFrame(
+        results_df["prediction"].values.tolist(), columns=date_index, index=results_df.index
+    ).T
 
-    results_df.sort_values("Model error", inplace=True)
-
-    for i, row in results_df.iterrows():
-        predictions_df[i] = row["Results"]
+    best_model_predictions = predictions_df[best_model_name]
 
     if predictions_df.empty:
         raise RuntimeError(
             mylogging.return_str(
-                "Neither of models finished prediction. Set config.logger_level = 'DEBUG' for more info."
+                "Neither of models finished prediction. Set config.output.logger_subconfig.logger_level = 'DEBUG' for more info."
             )
         )
 
-    if config.variable_optimization.optimization:
-        best_optimized_values_dict = {
-            j: best_models_optimized_values[i] for i, j in enumerate(config.used_models)
-        }
-
-        best_indexes = []
-
-        for i, row in results_df.iterrows():
-            if row["Optimization value"] == best_optimized_values_dict[row["Name"]]:
-                best_indexes.append(i)
-
-        optimization_result = predictit._result_classes.Optimization(
-            optimized_variable=config.variable_optimization.optimization_variable,
-            optimized_options=config.variable_optimization.optimization_values,
-            best_value=best_optimized_value,
-            values_results_df=optimized_values_results_df,
-            best_values_for_models=best_optimized_values_dict,
-            all_models_results_df=results_df,
-            all_models_predictions_df=predictions_df,
-        )
-
-        predictions_df = predictions_df[best_indexes]
-        predictions_df.columns = [results_df.loc[i]["Name"] for i in predictions_df.columns]
-        results_df = results_df.loc[best_indexes]
-
-        results_df.rename(columns={"A": "Col_1"}, inplace=True)
-
-    else:
-        optimization_result = None
-
     if config.hyperparameter_optimization.optimizeit:
-        hyperparameter_optimization_kwargs = results_df["Best optimized parameters"].to_dict()
+        hyperparameter_optimization = results_df["Hyperparameter optimization"].to_dict()
     else:
-        hyperparameter_optimization_kwargs = None
+        hyperparameter_optimization = None
 
-    results_df.set_index("Name", inplace=True)
-
-    results_to_drop = [
+    not_flat_columns = [
         i
         for i in [
-            "Index",
-            "Trained model",
-            "Test errors",
-            "Results",
+            "hyperparameter_optimization",
             "logs_list",
+            "model",
+            "test_errors",
+            "trained_model",
             "warnings_list",
         ]
         if i in results_df.columns
     ]
-    results_df.drop(columns=results_to_drop, inplace=True)
 
-    best_model_predicts = predictions_df[best_model_name]
+    details_df = results_df[not_flat_columns]
+    results_df.drop(columns=not_flat_columns, inplace=True)
+
+    results_df.rename(
+        columns={
+            "memory_peak_MB": "Memory peak MB",
+            "model_error": "Model error",
+            "model_time": "Model time",
+            "model": "Model",
+            "prediction": "Prediction",
+            "unstandardized_model_error": "Unstandardized model error",
+        },
+        inplace=True,
+    )
+
+    # If validating, bold black line is test 'real' values.
+    # If predict mode, black line is the best prediction
+    if config.prediction.mode == "validate":
+        predictions_df.insert(0, "Test", test_unstandardized)
 
     ###############
     ### ANCHOR ### Plot
     #############
 
-    if config.variable_optimization.optimization and config.variable_optimization.plot_all_optimized_models:
-        predictions_for_plot = optimization_result.all_models_predictions_df.copy()
-    else:
-        predictions_for_plot = predictions_df.copy()
+    predictions_for_plot = predictions_df.copy()
 
     predictions_for_plot.columns = [f"{i + 1} - {j}" for i, j in enumerate(predictions_for_plot.columns)]
 
-    if config.mode == "validate":
-        best_model_name_plot = "Test"
-        predictions_df.insert(0, "Test", test_unstandardized)
-        predictions_for_plot.insert(0, "Test", test_unstandardized)
-
-    else:
-        best_model_name_plot = predictions_for_plot.columns[0]
+    best_model_name_plot = "Test" if config.prediction.mode == "validate" else predictions_for_plot.columns[0]
 
     bounds_df = pd.DataFrame(index=date_index)
 
@@ -665,31 +584,28 @@ def predict(
     last_value = float(column_for_predictions_series.iloc[-1, 0])
 
     predictions_for_plot_limited = pd.concat(
-        [predictions_for_plot.iloc[:, : config.plot_number_of_models], bounds_df],
+        [predictions_for_plot.iloc[:, : config.output.plot_subconfig.plot_number_of_models], bounds_df],
         axis=1,
     )
 
+    history = column_for_predictions_series[-config.output.plot_subconfig.plot_history_length :]
+
     predictions_with_history = pd.concat(
         [
-            column_for_predictions_series[-config.plot_history_length :],
+            history,
             predictions_for_plot_limited,
         ],
         sort=False,
     )
-    predictions_with_history.iloc[-config.predicts - 1, :] = last_value
-
-    if config.sort_results_by == "name":
-        results_df.sort_index(key=lambda x: x.str.lower(), inplace=True)
-        predictions_df.sort_index(key=lambda x: x.str.lower(), inplace=True)
+    predictions_with_history.iloc[-config.output.predicts - 1, :] = last_value
 
     if config.general.analyzeit:
         import matplotlib.pyplot as plt
 
         plt.show()
 
-    time_point = update_time_table(time_point)
-    progress_phase = "plot"
-    update_gui(progress_phase, "progress_phase")
+    time_table.add_entry("Evaluation")
+    update_gui("plot", "progress_phase")
 
     if config.output.plot_subconfig.show_plot or config.output.plot_subconfig.save_plot:
 
@@ -698,104 +614,99 @@ def predict(
 
             return_div = True if _GUI else False
 
-            if config.plot_type == "with_history":
-                div = plot(
-                    predictions_with_history,
-                    plot_library=config.plot_library,
-                    plot_name=config.plot_name,
-                    legend=config.plot_legend,
-                    highlighted_column=predicted_column_name,
-                    surrounded_column=best_model_name_plot,
-                    grey_area=grey_area,
-                    save=config.save_plot,
-                    return_div=return_div,
-                    show=config.output.plot_subconfig.show_plot,
-                )
+            div = mypythontools.plots.plot(
+                predictions_with_history,
+                plot_library=config.output.plot_subconfig.plot_library,
+                title=config.output.plot_subconfig.plot_title,
+                legend=config.output.plot_subconfig.plot_legend,
+                highlighted_column=predicted_column_name,
+                surrounded_column=best_model_name_plot,
+                grey_area=grey_area,
+                save=config.output.plot_subconfig.save_plot,
+                return_div=return_div,
+                show=config.output.plot_subconfig.show_plot,
+            )
 
-            elif config.plot_type == "just_results":
-                div = plot(
-                    predictions_for_plot,
-                    plot_library=config.plot_library,
-                    legend=config.plot_legend,
-                    highlighted_column=best_model_name_plot,
-                    save=config.save_plot,
-                    show=config.output.plot_subconfig.show_plot,
-                )
-
-    update_time_table(time_point)
-    progress_phase = "Completed"
-    update_gui(progress_phase, "progress_phase")
+    time_table.add_entry("plot")
+    time_table.finish_table(table_format=config.output.table_settings)
+    update_gui("Completed", "progress_phase")
 
     ###############
     ### ANCHOR ### Table
     #############
 
-    time_df.append(["Complete time", round((time.time() - time_begin), 3)])
-    time_df = pd.DataFrame(time_df, columns=["Part", "Time"])
-
     simple_table_df = mdp.misc.edit_table_to_printable(
-        results_df[["Model error"]].iloc[: config.print_number_of_models, :].reset_index()
+        results_df[["Model error"]]
+        .iloc[: config.output.print_subconfig.print_number_of_models, :]
+        .reset_index()
     )
 
-    detailed_table_df = results_df.iloc[: config.print_number_of_models, :].reset_index()
+    detailed_table_df = results_df.iloc[
+        : config.output.print_subconfig.print_number_of_models, :
+    ].reset_index()
     detailed_table_df.drop(["Unstandardized model error"], axis=1, inplace=True)
     detailed_table_df = mdp.misc.edit_table_to_printable(detailed_table_df)
 
-    tables = predictit._result_classes.Tables(
+    tables = predictit.result_classes.Tables(
         simple=tabulate(
             simple_table_df.values,
-            headers=["Model", f"Average {config.error_criterion} error"],
-            **config.table_settings,
+            headers=["Model", f"Average {config.prediction.error_criterion} error"],
+            **config.output.table_settings,
         ),
         detailed=tabulate(
             detailed_table_df.values,
-            headers=detailed_table_df.columns,
-            **config.table_settings,
+            headers=list(detailed_table_df.columns),
+            **config.output.table_settings,
         ),
-        time=tabulate(time_df.values, headers=time_df.columns, **config.table_settings),
+        time=time_table.time_table,
         simple_table_df=simple_table_df,
         detailed_table_df=detailed_table_df,
+        time_df=time_table.time_df,
     )
 
     ###############
     ### ANCHOR ### Results
     #############
 
-    misc_result = predictit._result_classes.Misc(evaluated_matrix=evaluated_matrix)
-    result = predictit._result_classes.Result(
-        best_prediction=best_model_predicts,
+    result_details = predictit.result_classes.ResultDetails(
+        prediction_index=date_index, history=history, last_value=last_value, test=test_unstandardized
+    )
+
+    result = predictit.result_classes.Result(
+        best_prediction=best_model_predictions,
         best_model_name=best_model_name,
         predictions=predictions_df,
         results_df=results_df,
+        details_df=details_df,
         results=results,
         with_history=predictions_with_history,
         tables=tables,
         config=config,
-        misc=misc_result,
-        optimization=optimization_result,
-        hyperparameter_optimization_kwargs=hyperparameter_optimization_kwargs,
+        details=result_details,
+        hyperparameter_optimization=hyperparameter_optimization,
     )
 
     ###############
     ### ANCHOR ### Print
     #############
 
-    if config.print_result_details:
-        print(
-            (
-                f"\nBest model is {best_model_name} with results \n\n{best_model_predicts}\n\nWith model error {config.error_criterion} = "
-                f"{results_df.loc[best_model_name, 'Model error']}"
+    if config.output.print_subconfig.print:
+        if config.output.print_subconfig.print_result_details:
+            print(
+                (
+                    f"\nBest model is {best_model_name} with results \n\n{best_model_predictions}\n\nWith model error {config.error_criterion} = "
+                    f"{results_df.loc[best_model_name, 'Model error']}"
+                )
             )
-        )
 
-    if config.print_table == "simple":
-        print(f"\n{tables.simple}\n")
+        if config.output.print_subconfig.print_table == "simple":
+            print(f"\n{tables.simple}\n")
 
-    elif config.print_table == "detailed":
-        print(f"\n{tables.detailed}\n")
+        elif config.output.print_subconfig.print_table == "detailed":
+            print(f"\n{tables.detailed}\n")
 
-    if config.print_time_table:
-        print(f"\n{tables.time}\n")
+        if config.output.print_subconfig.print_time_table:
+            print(f"\n{tables.time}\n")
 
     ###############
     ### ANCHOR ### Return
@@ -809,12 +720,10 @@ def predict(
         sys.stdout = stdout
         result.output = output
         print(output)
-
-    if _GUI:
         result.plot = div
 
-    if config.return_internal_results:
-        return {
+    if config.general.keepinternal_results:
+        result.internal_result = {
             "data_for_predictions (X, y)": data_for_predictions,
             "model_train_input": model_train_input,
             "model_predict_input": model_predict_input,
@@ -831,7 +740,7 @@ def predict_multiple_columns(
     freqs: list | tuple | str | None = None,
     config: predictit.configuration.Config | dict | None = None,
     **kwargs,
-) -> predictit._result_classes.Multiple:
+) -> predictit.result_classes.Multiple:
     """Predict multiple columns and multiple frequencies at once. Use predict function.
 
     Only data and predicted_columns can be positional.
@@ -853,33 +762,22 @@ def predict_multiple_columns(
     Returns:
         np.ndarray: All the predicted results.
     """
-
-    if config is None or isinstance(config, dict):
-        update_config = config
-        config = config_default
-        config = config.copy()
-        if update_config:
-            config.update(update_config)
-
-    elif isinstance(config, predictit.configuration.Config):
-        config = config.copy()
+    config = predictit._helpers.parse_config(config, config_default, kwargs)
 
     # Edit configuration.py default values with arguments values if exist
     if data is not None:
-        config.data = data
+        config.data_input.data = data
 
     if predicted_columns is not None:
-        config.predicted_columns = predicted_columns
+        config.data_input.predicted_columns = predicted_columns
 
     if freqs is not None:
-        config.freqs = freqs
+        config.data_input.freqs = freqs
 
-    if not config.predicted_columns or not isinstance(config.predicted_columns, list):
+    if not config.data_input.predicted_columns or not isinstance(config.data_input.predicted_columns, list):
         raise TypeError(
             mylogging.return_str("predict_multiple function need predicted_columns config value to be list.")
         )
-
-    config.update(kwargs)
 
     predictit._helpers.logger_init_from_config(config.output.logger_subconfig)
 
@@ -888,32 +786,33 @@ def predict_multiple_columns(
     else:
         freqs = config.data_input.freqs
 
-    if config.predicted_columns in ["*", ["*"]]:
+    if config.data_input.predicted_columns in ["*", ["*"]]:
 
-        if isinstance(config.data, str):
-            config.data = mdp.load_data.load_data(
-                config.data,
-                header=config.header,
-                csv_style=config.csv_style,
-                predicted_table=config.predicted_table,
-                max_imported_length=config.max_imported_length,
-                request_datatype_suffix=config.request_datatype_suffix,
-                data_orientation=config.data_orientation,
+        if isinstance(config.data_input.data, str):
+            data = mdp.load_data.load_data(
+                config.data_input.data,
+                header=config.data_input.header,
+                csv_style=config.data_input.csv_style,
+                predicted_table=config.data_input.predicted_table,
+                max_imported_length=config.data_input.max_imported_length,
+                request_datatype_suffix=config.data_input.request_datatype_suffix,
+                data_orientation=config.data_input.data_orientation,
             )
 
-        config.predicted_columns = mdp.preprocessing.data_consolidation(config.data).columns
+        config.data_input.predicted_columns = mdp.preprocessing.data_consolidation(data).columns
 
     results = {}
     best_predictions_dataframes = {}
 
+    # TODO check indexes
     for fi, f in enumerate(freqs):
 
         result_dataframe = pd.DataFrame()
 
-        for ci, c in enumerate(config.predicted_columns):
+        for ci, c in enumerate(config.data_input.predicted_columns):
 
-            config.predicted_column = c
-            config.freq = f
+            config.data_input.predicted_column = c
+            config.data_input.freq = f
 
             result_name = f"Column: {c}" if len(freqs) == 1 else f"Column: {c} - Freq: {f}"
 
@@ -930,323 +829,266 @@ def predict_multiple_columns(
 
         best_predictions_dataframes[f"Freq: {f}"] = result_dataframe
 
-    return predictit._result_classes.Multiple(
+    return predictit.result_classes.Multiple(
         best_predictions_dataframes=best_predictions_dataframes, results=results
     )
 
 
-def compare_models(
-    data_all=None,
-    predicted_column: list | tuple | str | None = None,
-    config: predictit.configuration.Config | dict | None = None,
-    **kwargs,
-) -> predictit._result_classes.Comparison:
-    """Function that helps to choose appropriate models. It evaluates it on test data and then return results.
-    After you know what models are the best, you can use only them in functions predict() or predict_multiple_columns.
-    You can define your own test data and find best modules for your process.
+# def compare_models(
+#     data_all=None,
+#     predicted_column: list | tuple | str | None = None,
+#     config: predictit.configuration.Config | dict | None = None,
+#     **kwargs,
+# ) -> predictit.result_classes.Comparison:
+#     """Function that helps to choose appropriate models. It evaluates it on test data and then return results.
+#     After you know what models are the best, you can use only them in functions predict() or predict_multiple_columns.
+#     You can define your own test data and find best modules for your process.
 
-    Only data_all and predicted column can be positional.
+#     Only data_all and predicted column can be positional.
 
-    Check README or tests for working examples.
+#     Check README or tests for working examples.
 
-    Args:
-        data_all ((dict, None)): Dictionary of data name as key and config data field and used column as value
-            `{data_1: (my_dataframe, 'column_name_or_index')}` or tuple of data with same predicted
-            column configured in config `(my_data[-2000:], my_data[-1000:])`
-        predicted_column (list | tuple | str | None, optional): Index of predicted column or it's name (dataframe).
-            If list with more values only the first one will be evaluated (use predict_multiple_columns function
-            if you need that. Default to None.
-        config (predictit.configuration.Config | dict | None, optional): Settings as Config instance or dictionary.
-            Check class for what you can use. If None, then default config will be used. Defaults to None.
-        **kwargs (dict, optional): There is much more parameters' in this function. Check configuration.py for parameters details.
-    """
+#     Args:
+#         data_all ((dict, None)): Dictionary of data name as key and config data field and used column as value
+#             `{data_1: (my_dataframe, 'column_name_or_index')}` or tuple of data with same predicted
+#             column configured in config `(my_data[-2000:], my_data[-1000:])`
+#         predicted_column (list | tuple | str | None, optional): Index of predicted column or it's name (dataframe).
+#             If list with more values only the first one will be evaluated (use predict_multiple_columns function
+#             if you need that. Default to None.
+#         config (predictit.configuration.Config | dict | None, optional): Settings as Config instance or dictionary.
+#             Check class for what you can use. If None, then default config will be used. Defaults to None.
+#         **kwargs (dict, optional): There is much more parameters' in this function. Check configuration.py for parameters details.
+#     """
 
-    from tabulate import tabulate
+#     from tabulate import tabulate
 
-    if config is None or isinstance(config, dict):
-        update_config = config
-        config = config_default
-        config = config.copy()
-        if update_config:
-            config.update(update_config)
+#     config = predictit._helpers.parse_config(config, config_default, kwargs)
 
-    elif isinstance(config, predictit.configuration.Config):
-        config = config.copy()
+#     # Edit configuration.py default values with arguments values if exist
+#     if data_all is not None:
+#         config.data_input.data_all = data_all
 
-    # Edit configuration.py default values with arguments values if exist
-    if data_all is not None:
-        config.data_all = data_all
+#     if predicted_column is not None:
+#         config.data_input.predicted_column = predicted_column
 
-    if predicted_column is not None:
-        config.predicted_column = predicted_column
+#     predictit._helpers.logger_init_from_config(config.output.logger_subconfig)
 
-    # Edit config.py default values with arguments values if exist
-    config.update(kwargs)
+#     # Edit config.py default values with arguments values if exist
+#     config.update(
+#         {
+#             "mode": "validate",
+#             "confidence_interval": None,
+#             "optimizeit": False,
+#             "evaluate_type": "preprocessed",
+#             "print_result_details": False,
+#             "print_time_table": False,
+#         }
+#     )
 
-    predictit._helpers.logger_init_from_config(config.output.logger_subconfig)
+#     # If no data_all inserted, default will be used
+#     if not config.data_input.data_all:
+#         config.data_input.data_all = {
+#             "sin": (mdp.generate_data.sin(), 0),
+#             "Sign": (mdp.generate_data.sign(), 0),
+#             "Random data": (mdp.generate_data.random(), 0),
+#         }
+#         mylogging.warn("Test data was used. Setup 'data_all' in config...")
 
-    # Edit config.py default values with arguments values if exist
-    config.update(
-        {
-            "mode": "validate",
-            "confidence_interval": None,
-            "optimizeit": False,
-            "evaluate_type": "preprocessed",
-            "print_result_details": False,
-            "print_time_table": False,
-        }
-    )
+#     data_dict = config.data_input.data_all
+#     same_data = False
 
-    # If no data_all inserted, default will be used
-    if not config.data_all:
-        config.data_all = {
-            "sin": (mdp.generate_data.sin(), 0),
-            "Sign": (mdp.generate_data.sign(), 0),
-            "Random data": (mdp.generate_data.random(), 0),
-        }
-        mylogging.warn("Test data was used. Setup 'data_all' in config...")
+#     if isinstance(data_dict, (list, tuple, np.ndarray)):
+#         same_data = True
+#         data_dict = {f"Data {i}": (j, config.data_input.predicted_column) for i, j in enumerate(data_dict)}
 
-    data_dict = config.data_all
-    same_data = False
+#     # TODO FIX compare models where optimizing more models...
+#     optimization_number = (
+#         len(config.config_optimization.optimization) if config.config_optimization.optimization else 1
+#     )
 
-    if isinstance(data_dict, (list, tuple, np.ndarray)):
-        same_data = True
-        data_dict = {f"Data {i}": (j, config.predicted_column) for i, j in enumerate(data_dict)}
+#     results_errors_absolute_array = np.zeros(
+#         (len(data_dict), optimization_number, len(config.models.used_models))
+#     )
+#     results_errors_absolute_array.fill(np.nan)
+#     results_errors_standardized_array = results_errors_absolute_array.copy()
 
-    optimization_number = len(config.optimization_values) if config.variable_optimization.optimization else 1
+#     all_models_results = {}
 
-    results_errors_absolute_array = np.zeros((len(data_dict), optimization_number, len(config.used_models)))
-    results_errors_absolute_array.fill(np.nan)
-    results_errors_standardized_array = results_errors_absolute_array.copy()
+#     for g, (i, j) in enumerate(data_dict.items()):
 
-    all_models_results = {}
+#         config.data_input.data = j[0]
+#         if not same_data:
+#             config.data_input.predicted_column = j[1]
 
-    for g, (i, j) in enumerate(data_dict.items()):
+#         config.output.plot_subconfig.plot_title = i
 
-        config.data = j[0]
-        if not same_data:
-            config.predicted_column = j[1]
+#         try:
 
-        config.plot_name = i
+#             prediction_result = predict(config=config)
+#             all_models_results[i] = j
+#             evaluated_matrix = prediction_result.misc.evaluated_matrix
+#             results_errors_absolute_array[g] = evaluated_matrix
 
-        try:
+#             # Standardize results to be able to have average error through different data
+#             if np.nanmax(evaluated_matrix) - np.nanmin(evaluated_matrix) > 0:
+#                 results_errors_standardized_array[g] = (evaluated_matrix - np.nanmin(evaluated_matrix)) / (
+#                     np.nanmax(evaluated_matrix) - np.nanmin(evaluated_matrix)
+#                 )
+#             else:
+#                 results_errors_standardized_array[g] = evaluated_matrix
 
-            prediction_result = predict(config=config)
-            all_models_results[i] = j
-            evaluated_matrix = prediction_result.misc.evaluated_matrix
-            results_errors_absolute_array[g] = evaluated_matrix
+#         except Exception:
+#             mylogging.traceback(f"Comparison for data {i} didn't finished.", level="ERROR")
 
-            # Standardize results to be able to have average error through different data
-            if np.nanmax(evaluated_matrix) - np.nanmin(evaluated_matrix) > 0:
-                results_errors_standardized_array[g] = (evaluated_matrix - np.nanmin(evaluated_matrix)) / (
-                    np.nanmax(evaluated_matrix) - np.nanmin(evaluated_matrix)
-                )
-            else:
-                results_errors_standardized_array[g] = evaluated_matrix
+#     (
+#         best_results_errors,
+#         best_values_dict,
+#         values_results,
+#         best_model_name,
+#         best_value,
+#     ) = predictit.analyze.analyze_results(
+#         results_errors_absolute_array,
+#         config.config_optimization.optimization_values,
+#         config.models.used_models,
+#         config.prediction.error_criterion,
+#     )
 
-        except Exception:
-            mylogging.traceback(f"Comparison for data {i} didn't finished.", level="ERROR")
+#     (
+#         best_results_errors_on_standardized_data,
+#         best_models_optimization_values_on_standardized_data_dict,
+#         optimization_values_results_on_standardized_data_df,
+#         best_model_name_on_standardized_data,
+#         best_value_on_standardized_data,
+#     ) = predictit.analyze.analyze_results(
+#         results_errors_standardized_array,
+#         config.config_optimization.optimization_values,
+#         config.models.used_models,
+#         config.prediction.error_criterion,
+#     )
 
-    (
-        best_results_errors,
-        best_models_optimized_values,
-        optimized_values_results_df,
-        best_model_name,
-        best_optimized_value,
-    ) = predictit.analyze.analyze_results(
-        results_errors_absolute_array,
-        config.variable_optimization.optimization_values,
-        config.models.used_models,
-        config.prediction.error_criterion,
-    )
+#     evaluated_results_df = pd.DataFrame(index=config.models.used_models)
+#     evaluated_results_df["Errors average"] = best_results_errors
+#     evaluated_results_df["Standardized\nerror average"] = best_results_errors_on_standardized_data
 
-    (
-        best_results_errors_on_standardized_data,
-        best_models_optimized_values_on_standardized_data,
-        optimized_values_results_on_standardized_data_df,
-        best_model_name_on_standardized_data,
-        best_optimized_value_on_standardized_data,
-    ) = predictit.analyze.analyze_results(
-        results_errors_standardized_array,
-        config.variable_optimization.optimization_values,
-        config.models.used_models,
-        config.prediction.error_criterion,
-    )
+#     if config.config_optimization.optimization:
+#         evaluated_results_df["Best optimized\nvalues"] = best_values_dict.values()
+#         evaluated_results_df[
+#             "Standardized best\noptimized values"
+#         ] = best_models_optimization_values_on_standardized_data_dict.values()
 
-    evaluated_results_df = pd.DataFrame(index=config.used_models)
-    evaluated_results_df["Errors average"] = best_results_errors
-    evaluated_results_df["Standardized\nerror average"] = best_results_errors_on_standardized_data
+#     if config.output.sort_results_by == "error":
+#         evaluated_results_df.sort_values("Errors average", inplace=True)
 
-    if config.variable_optimization.optimization:
-        evaluated_results_df["Best optimized\nvalues"] = best_models_optimized_values
-        evaluated_results_df[
-            "Standardized best\noptimized values"
-        ] = best_models_optimized_values_on_standardized_data
+#     if config.output.print_subconfig_compare_models.print_table:
+#         print(
+#             "\n\nComplete results for comparison"
+#             "\nTable of complete results. Percentual standardized error is between 0 and 1. If 0, model was the "
+#             "best on all defined data, 1 means it was the worst."
+#         )
 
-    if config.sort_results_by == "error":
-        evaluated_results_df.sort_values("Errors average", inplace=True)
+#     simple_table_df = mdp.misc.edit_table_to_printable(
+#         evaluated_results_df.drop(
+#             [
+#                 i
+#                 for i in [
+#                     "Standardized\nerror average",
+#                     "Standardized best\noptimized values",
+#                 ]
+#                 if i in evaluated_results_df.columns
+#             ],
+#             axis=1,
+#         )
+#         .iloc[: config.output.print_subconfig.print_number_of_comparison_models, :]
+#         .reset_index()
+#     )
+#     detailed_table_df = (
+#         mdp.misc.edit_table_to_printable(evaluated_results_df)
+#         .iloc[: config.output.print_subconfig.print_number_of_comparison_models, :]
+#         .reset_index()
+#     )
+#     tables = predictit.result_classes.Tables(
+#         simple=tabulate(
+#             simple_table_df.values,
+#             headers=simple_table_df.columns,
+#             **config.output.table_settings,
+#         ),
+#         detailed=tabulate(
+#             detailed_table_df.values,
+#             headers=detailed_table_df.columns,
+#             **config.output.table_settings,
+#         ),
+#         time="TODO To be implemented",
+#         simple_table_df=simple_table_df,
+#         detailed_table_df=detailed_table_df,
+#         time_df="TODO To be implemented",
+#     )
 
-    if config.output.print_subconfig_compare_models.print_table:
-        print(
-            "\n\nComplete results for comparison"
-            "\nTable of complete results. Percentual standardized error is between 0 and 1. If 0, model was the "
-            "best on all defined data, 1 means it was the worst."
-        )
+#     if config.output.print_subconfig_compare_models.print_comparison_result_details:
 
-    simple_table_df = mdp.misc.edit_table_to_printable(
-        evaluated_results_df.drop(
-            [
-                i
-                for i in [
-                    "Standardized\nerror average",
-                    "Standardized best\noptimized values",
-                ]
-                if i in evaluated_results_df.columns
-            ],
-            axis=1,
-        )
-        .iloc[: config.print_number_of_comparison_models, :]
-        .reset_index()
-    )
-    detailed_table_df = (
-        mdp.misc.edit_table_to_printable(evaluated_results_df)
-        .iloc[: config.print_number_of_comparison_models, :]
-        .reset_index()
-    )
-    tables = predictit._result_classes.Tables(
-        simple=tabulate(
-            simple_table_df.values,
-            headers=simple_table_df.columns,
-            **config.table_settings,
-        ),
-        detailed=tabulate(
-            detailed_table_df.values,
-            headers=detailed_table_df.columns,
-            **config.table_settings,
-        ),
-        time="To be implemented",
-        simple_table_df=simple_table_df,
-        detailed_table_df=detailed_table_df,
-    )
+#         if best_model_name == best_model_name_on_standardized_data:
+#             print(f"Best model is {best_model_name}\n")
+#         else:
+#             print(
+#                 f"Best model on average error is {best_model_name} and best of standardized errors is {best_model_name_on_standardized_data}\n"
+#             )
 
-    if config.output.print_subconfig_compare_models.print_comparison_result_details:
+#         if config.config_optimization.optimization:
+#             if best_value == best_value_on_standardized_data:
+#                 print(
+#                     f"Best optimized value for {config.config_optimization.optimization_variables} is {best_value}\n"
+#                 )
+#             else:
+#                 print(f"Best optimized value on absolute error is {best_value}")
+#                 print(f"Best optimized value on standardized error is {best_value_on_standardized_data}\n")
 
-        if best_model_name == best_model_name_on_standardized_data:
-            print(f"Best model is {best_model_name}\n")
-        else:
-            print(
-                f"Best model on average error is {best_model_name} and best of standardized errors is {best_model_name_on_standardized_data}\n"
-            )
+#     if config.output.print_subconfig_compare_models.print_comparison_table == "simple":
+#         print(f"\n{tables.simple}\n")
 
-        if config.variable_optimization.optimization:
-            if best_optimized_value == best_optimized_value_on_standardized_data:
-                print(
-                    f"Best optimized value for {config.variable_optimization.optimization_variable} is {best_optimized_value}\n"
-                )
-            else:
-                print(f"Best optimized value on absolute error is {best_optimized_value}")
-                print(
-                    f"Best optimized value on standardized error is {best_optimized_value_on_standardized_data}\n"
-                )
+#     elif config.output.print_subconfig_compare_models.print_comparison_table == "detailed":
+#         print(f"\n{tables.detailed}\n")
 
-    if config.output.print_subconfig_compare_models.print_comparison_table == "simple":
-        print(f"\n{tables.simple}\n")
+#     # if config.output.print_subconfig.print_time_table:
+#     # TODO
+#     # print(f"\n{tables.time}\n")
 
-    elif config.output.print_subconfig_compare_models.print_comparison_table == "detailed":
-        print(f"\n{tables.detailed}\n")
+#     if config.config_optimization.optimization:
 
-    # if config.print_time_table:
-    # TODO
-    # print(f"\n{tables.time}\n")
+#         # TODO change optimization result for all variables
+#         config_optimization_result = predictit.result_classes.ConfigOptimization(
+#             optimization_variable=config.config_optimization.optimization_variables,
+#             optimization_values=config.config_optimization.optimization_values,
+#             best_value=best_model_name,
+#             values_results=values_results,
+#             best_values_dict=best_values_dict,
+#         )
 
-    if config.variable_optimization.optimization:
+#         optimization_standardized_result = predictit.result_classes.hyperparameter_optimization(
+#             optimization_variable=config.config_optimization.optimization_variables,
+#             optimization_values=config.config_optimization.optimization_values,
+#             best_value=best_model_name_on_standardized_data,
+#             values_results=optimization_values_results_on_standardized_data_df,
+#             best_values_dict=best_models_optimization_values_on_standardized_data_dict,
+#         )
+#     else:
+#         config_optimization_result = None
+#         optimization_standardized_result = None
 
-        best_optimized_values_dict = {
-            j: best_models_optimized_values[i] for i, j in enumerate(config.used_models)
-        }
+#     standardized_result = predictit.result_classes.ComparisonStandardized(
+#         best_model_name_standardized=best_model_name_on_standardized_data,
+#         best_value_standardized=best_value_on_standardized_data,
+#         optimization_standardized=optimization_standardized_result,
+#     )
+#     comparison_result = predictit.result_classes.Comparison(
+#         results_df=evaluated_results_df,
+#         best_model_name=best_model_name,
+#         best_value=best_value,
+#         tables=tables,
+#         all_models_results=all_models_results,
+#         standardized_results=standardized_result,
+#         optimization=config_optimization_result,
+#     )
 
-        optimization_result = predictit._result_classes.Optimization(
-            optimized_variable=config.variable_optimization.optimization_variable,
-            optimized_options=config.variable_optimization.optimization_values,
-            best_value=best_model_name,
-            values_results_df=optimized_values_results_df,
-            best_values_for_models=best_optimized_values_dict,
-        )
-
-        best_optimized_values_dict_on_standardized_data = {
-            j: best_models_optimized_values_on_standardized_data[i] for i, j in enumerate(config.used_models)
-        }
-
-        optimization_standardized_result = predictit._result_classes.Optimization(
-            optimized_variable=config.variable_optimization.optimization_variable,
-            optimized_options=config.variable_optimization.optimization_values,
-            best_value=best_model_name_on_standardized_data,
-            values_results_df=optimized_values_results_on_standardized_data_df,
-            best_values_for_models=best_optimized_values_dict_on_standardized_data,
-        )
-    else:
-        optimization_result = None
-        optimization_standardized_result = None
-
-    standardized_result = predictit._result_classes.ComparisonStandardized(
-        best_model_name_standardized=best_model_name_on_standardized_data,
-        best_optimized_value_standardized=best_optimized_value_on_standardized_data,
-        optimization_standardized=optimization_standardized_result,
-    )
-    comparison_result = predictit._result_classes.Comparison(
-        results_df=evaluated_results_df,
-        best_model_name=best_model_name,
-        best_optimized_value=best_optimized_value,
-        tables=tables,
-        all_models_results=all_models_results,
-        standardized_results=standardized_result,
-        optimization=optimization_result,
-    )
-
-    return comparison_result
-
-
-def find_optimal_input_for_models(config=None) -> predictit._result_classes.BestInput:
-    if config is None or isinstance(config, dict):
-        update_config = config
-        config = config_default
-        config = config.copy()
-        if update_config:
-            config.update(update_config)
-
-    elif isinstance(config, predictit.configuration.Config):
-        config = config.copy()
-
-    all_models = config.models.used_models
-    all_parameters = config.models.models_parameters
-
-    results = {}
-    tables = {}
-    best_data_dict = {}
-
-    for i in all_models:
-        config.models.models_parameters = {}
-        config.models.used_models = []
-        config.models.models_input = {}
-        for j in config.models.data_inputs.keys():
-
-            model_name_variations = f"{i} - {j}"
-            config.models.used_models.append(model_name_variations)
-            if i in all_parameters:
-                config.models.models_parameters[model_name_variations] = all_parameters[i]
-            config.models.models_input[model_name_variations] = j
-            predictit.models.models_assignment[model_name_variations] = predictit.models.models_assignment[i]
-
-        try:
-            result = predict(config=config)
-            results[i] = result
-            tables[i] = result.tables.simple
-            best_data_dict[i] = result.best_model_name[len(i) + 3 :]
-
-        except Exception:
-            pass
-
-    return predictit._result_classes.BestInput(best_data_dict, tables, results)
+#     return comparison_result
 
 
 if __name__ == "__main__":
@@ -1262,7 +1104,7 @@ if __name__ == "__main__":
                 "There is many configurable variables that you can use. For possible "
                 "options check configuration.py where all the variables are described.\n\n"
                 "Use as usual. Open terminal in predictit folder and run for example: \n\n"
-                'python predictit/main.py --predicts 30 --plot_name "My fancy plot"'
+                'python predictit/main.py --predicts 30 --plot_title "My fancy plot"'
             ),
         )
 
@@ -1286,6 +1128,3 @@ if __name__ == "__main__":
 
     elif config_default.general.used_function == "predict_multiple":
         prediction_results = predict_multiple_columns(config=parser_args_dict)
-
-    elif config_default.general.used_function == "compare_models":
-        compare_models(config=parser_args_dict)

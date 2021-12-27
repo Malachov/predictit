@@ -3,7 +3,7 @@ Module that use sklearn library to compute mostly time series predictions.
 
 For model structure info, check models module docstrings - share structure with other models.
 
-If main train function is optimized in best_params module (automatic best regressor choose),
+If main train function is optimized in hyperparameter_optimization module (automatic best regressor choose),
 it can use function ``get_all_models()`` that return all existing regressor.
 """
 
@@ -14,7 +14,7 @@ import numpy as np
 
 import mylogging
 
-from .models_functions.models_functions import one_step_looper, get_inputs
+from .model import one_step_looper, get_inputs
 
 # Lazy imports
 # from importlib import import_module
